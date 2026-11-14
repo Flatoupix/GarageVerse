@@ -71,6 +71,7 @@ Chaque booster contient cinq cartes tirées emplacement par emplacement (rareté
 - **Motifs.** Soleil rayé, grille en perspective animée, chrome dégradé sur les titres, halos néon.
 - **Cadres de rareté.** Chrome cyan, magenta, coucher de soleil, puis holographique animé pour les légendaires, avec un flash lumineux à la révélation.
 - **Illustrations.** Une scène par famille de voitures : ville néon pour les citadines et le tuning, désert pour les muscle cars et les hypercars, col pour le rallye, circuit de nuit pour la compétition, rétro-futur pour la science-fiction. Aucun texte ni logo dans les images.
+- **Retours de jeu.** Chaque action répond : son synthétisé et vibration au toucher, particules et secousse à la déchirure, révélation graduée selon la rareté (halo sur la carte encore cachée, explosion, rayons et confettis pour une légendaire), duel de secteur mis en scène (scores qui défilent, verdict, étincelles), compteur de crédits animé. Le moteur vit dans `src/game/fx.ts`.
 - **Mouvement réduit.** Il coupe la grille animée, l’holographique et les révélations, sans perte d’information.
 
 ## 8. Production automatisée

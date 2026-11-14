@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
 import { art, edition } from '../game/art'
 import {
   conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statShort, vehicleById, vehicles,
 } from '../game/data'
+import { confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween } from '../game/fx'
 import { evaluate, lineupCost, overheated, playRound, rivalLineup, statsOf, type Round } from '../game/rules'
 import { lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
-import { act, buzz, persist, save, sound } from '../game/store'
+import { act, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import CarCard from '../components/CarCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string]; go: [screen: 'garage' | 'shop'] }>()
@@ -24,9 +25,13 @@ function toggle(id: string) {
     else if (s.lineup.length >= 3) return 'Retire d’abord une voiture'
     else s.lineup = [...s.lineup, id]
   })
+  void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, save.lineup.indexOf(id) + 1)})`, 1.1))
 }
 function start() {
-  if (rival.value && act(s => startDuel(s, rival.value!.id, Math.random))) { picked.value = 0; nitro.value = false }
+  if (rival.value && act(s => startDuel(s, rival.value!.id, Math.random))) {
+    picked.value = 0; nitro.value = false
+    sound('rev'); streaks(palettes.cyan, 30); flash('#2de2ff', 0.2); buzz([20, 40, 60])
+  }
 }
 
 // ——— Course en cours ———
@@ -36,7 +41,52 @@ const nitro = ref(false)
 const shown = ref<Round | null>(null)
 const reward = ref<Reward | null>(null)
 const index = computed(() => duel.value?.rounds.length ?? 0)
-const known = (i: number) => i <= index.value + 1
+
+// Mise en scène d'un secteur : les scores défilent, puis le verdict tombe. Tant qu'il n'est pas tombé,
+// la piste et le tableau de score n'affichent pas encore ce secteur.
+const settled = ref(true)
+const counts = reactive({ player: 0, rival: 0 })
+const rewardShown = ref(0)
+let timers: ReturnType<typeof setTimeout>[] = []
+let stops: (() => void)[] = []
+function clear() { timers.forEach(clearTimeout); stops.forEach(stop => stop()); timers = []; stops = [] }
+onUnmounted(clear)
+const unsettled = computed(() => shown.value && !settled.value ? shown.value : null)
+const trackIndex = computed(() => index.value - (unsettled.value ? 1 : 0))
+const points = computed(() => ({
+  player: (duel.value?.player.points ?? 0) - (unsettled.value?.winner === 'player' ? 1 : 0),
+  rival: (duel.value?.rival.points ?? 0) - (unsettled.value?.winner === 'rival' ? 1 : 0),
+}))
+const known = (i: number) => i <= trackIndex.value + 1
+const carArt = (who: 'player' | 'rival', car: number) => {
+  const id = duel.value![who].lineup[car].id
+  return edition(id, who === 'player' ? save.cars[id]?.shown : undefined).art
+}
+
+function settle(round: Round) {
+  settled.value = true
+  counts.player = round.player.score
+  counts.rival = round.rival.score
+  sound('slam')
+  buzz(round.winner === 'player' ? [20, 30, 20] : 15)
+  shake(round.winner === 'player' ? 2 : 1)
+  timers.push(setTimeout(() => sound(round.winner === 'player' ? 'collect' : round.winner === 'rival' ? 'lose' : 'flip'), 160))
+  void nextTick(() => {
+    const score = `.duel-col.${round.winner} .duel-score`
+    if (round.winner === 'player') { sparks(score, palettes.cyan, 42, 1.1); ring(score, '#2de2ff'); flash('#2de2ff', 0.18); pop(score, 1.4) }
+    else if (round.winner === 'rival') { sparks(score, palettes.pink, 22, 0.9); flash('#ff2a8a', 0.16); pop(score, 1.25) }
+    pop('.scoreboard', 1.25)
+  })
+}
+
+function pick(car: number, event: Event) {
+  picked.value = car
+  pop(event.currentTarget as Element, 1.06, 220)
+}
+function armNitro() {
+  if (!nitro.value) return
+  sound('nitro'); buzz([10, 20, 30]); streaks(palettes.fire, 14)
+}
 const projections = computed(() => duel.value && index.value < duel.value.sectors.length
   ? duel.value.player.lineup.map((_, car) => evaluate(duel.value!, 'player', car, nitro.value).score) : [])
 
@@ -44,12 +94,26 @@ function engage() {
   const d = duel.value
   if (!d || d.winner) return
   const round = playRound(d, { car: picked.value, nitro: nitro.value }, Math.random)
-  if (nitro.value) sound('nitro')
   shown.value = round
   nitro.value = false
   persist()
-  sound(round.winner === 'player' ? 'collect' : round.winner === 'rival' ? 'lose' : 'flip')
-  buzz(round.winner === 'player' ? [20, 30, 20] : 15)
+  clear()
+  if (reducedMotion.value) settle(round)
+  else {
+    settled.value = false
+    counts.player = counts.rival = 0
+    sound('whoosh')
+    if (round.player.nitro || round.rival.nitro) {
+      sound('nitro'); flash('#ffb347', 0.22)
+      streaks(palettes.fire, 40, round.player.nitro ? 1 : -1)
+    }
+    let ticked = 0
+    for (const who of ['player', 'rival'] as const) stops.push(tween(0, round[who].score, 750, value => {
+      if (value !== counts[who] && performance.now() - ticked > 55) { ticked = performance.now(); sound('tick') }
+      counts[who] = value
+    }))
+    timers.push(setTimeout(() => settle(round), 920))
+  }
   const free = d.player.lineup.findIndex((_, car) => !overheated(d.player, car))
   if (overheated(d.player, picked.value) && free >= 0) picked.value = free
 }
@@ -62,6 +126,16 @@ function proceed() {
     persist()
     sound(won ? 'win' : 'lose')
     lastWinner.value = won ? 'player' : 'other'
+    clear()
+    if (won) {
+      confetti(); flash('#ffd27a', 0.32); buzz([40, 60, 40, 60, 80])
+      timers.push(setTimeout(() => confetti(palettes.gold, 60), 650))
+    } else shake(1)
+    let ticked = 0
+    stops.push(tween(0, reward.value?.credits ?? 0, 900, value => {
+      if (performance.now() - ticked > 70) { ticked = performance.now(); sound('tick') }
+      rewardShown.value = value
+    }))
   }
 }
 const lastWinner = ref<'player' | 'other'>('other')
@@ -77,7 +151,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     <section v-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
       <span class="eyebrow">{{ rival?.circuit.name }}</span>
       <h1 tabindex="-1">{{ lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
-      <p>+{{ reward.credits }} crédits<template v-if="reward.ticket"> · 1 ticket booster</template></p>
+      <p :aria-label="`+${reward.credits} crédits`">+{{ rewardShown }} crédits<template v-if="reward.ticket"> · 1 ticket booster</template></p>
       <div class="recap-actions">
         <button type="button" class="button primary" @click="reward = null; chosen = null">Rivaux <span aria-hidden="true">⟶</span></button>
         <button type="button" class="button quiet" @click="emit('go', reward?.ticket ? 'shop' : 'garage')">{{ reward.ticket ? 'Ouvrir le ticket' : 'Préparer au garage' }}</button>
@@ -90,28 +164,34 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <img v-if="art.rival(rival.id)" :src="art.rival(rival.id)" alt="" class="rival-face" />
         <span v-else class="rival-face" aria-hidden="true">{{ rival.name[0] }}</span>
         <div><span class="eyebrow">{{ rival.circuit.name }}</span><h1 tabindex="-1">{{ rival.name }}</h1></div>
-        <div class="scoreboard" aria-label="Score"><b>{{ duel.player.points }}</b><span>—</span><b>{{ duel.rival.points }}</b></div>
+        <div class="scoreboard" aria-label="Score"><b :key="`p${points.player}`">{{ points.player }}</b><span>—</span><b :key="`r${points.rival}`">{{ points.rival }}</b></div>
       </div>
       <ol class="track">
-        <li v-for="(sector, i) in duel.sectors" :key="i" :class="{ current: i === index, done: i < index,
-          win: duel.rounds[i]?.winner === 'player', loss: duel.rounds[i]?.winner === 'rival' }">
+        <li v-for="(sector, i) in duel.sectors" :key="i" :style="{ '--i': i }" :class="{ current: i === trackIndex, done: i < trackIndex,
+          win: i < trackIndex && duel.rounds[i]?.winner === 'player', loss: i < trackIndex && duel.rounds[i]?.winner === 'rival' }">
           <span class="track-icon" aria-hidden="true">{{ sectorIcons[sector] }}</span>
           <span class="track-name">{{ sectorLabels[sector] }}</span>
           <span class="track-cond">{{ known(i) ? `${conditionIcons[duel.conditions[i]]} ${conditionLabels[duel.conditions[i]]}` : '? Inconnu' }}</span>
         </li>
       </ol>
 
-      <section v-if="shown" class="round-result" :class="shown.winner">
-        <h2>{{ shown.winner === 'player' ? 'Secteur gagné' : shown.winner === 'rival' ? 'Secteur perdu' : 'Égalité parfaite' }}</h2>
+      <section v-if="shown" class="round-result" :class="settled ? shown.winner : 'pending'">
+        <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? 'Secteur gagné' : shown.winner === 'rival' ? 'Secteur perdu' : 'Égalité parfaite' }}</h2>
+        <h2 v-else>{{ sectorLabels[shown.sector] }} · {{ conditionLabels[shown.condition] }}</h2>
         <div class="duel-columns">
-          <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col">
+          <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col"
+            :class="[who, { winner: settled && shown.winner === who, loser: settled && shown.winner !== who && shown.winner !== 'tie', boosted: shown[who].nitro }]">
+            <div class="clash-car">
+              <img v-if="carArt(who, shown[who].car)" :src="carArt(who, shown[who].car)" alt="" />
+              <span v-if="shown[who].nitro" class="clash-nitro">Nitro</span>
+            </div>
             <span class="duel-who">{{ who === 'player' ? 'Toi' : rival.name }}</span>
             <strong>{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
-            <span class="duel-score">{{ shown[who].score }}</span>
-            <ul><li v-for="(l, i) in shown[who].lines" :key="i"><span>{{ l.label }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
+            <span class="duel-score" :aria-label="`${shown[who].score} points`">{{ counts[who] }}</span>
+            <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span>{{ l.label }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
           </div>
         </div>
-        <button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? 'Voir le résultat' : 'Secteur suivant' }} <span aria-hidden="true">⟶</span></button>
+        <button v-if="settled" type="button" class="button primary wide" @click="proceed">{{ duel.winner ? 'Voir le résultat' : 'Secteur suivant' }} <span aria-hidden="true">⟶</span></button>
       </section>
 
       <section v-else-if="duel.winner" class="round-result">
@@ -124,10 +204,10 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           · {{ conditionIcons[duel.conditions[index]] }} {{ conditionLabels[duel.conditions[index]] }}</p>
         <div class="engage-cars" role="radiogroup" aria-label="Voiture engagée">
           <button v-for="(r, car) in duel.player.lineup" :key="car" type="button" role="radio" :aria-checked="picked === car"
-            class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="picked = car">
+            class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="pick(car, $event)">
             <img v-if="edition(r.id, save.cars[r.id]?.shown).art" :src="edition(r.id, save.cars[r.id]?.shown).art" alt="" />
             <span class="engage-name">{{ r.vehicle.name }}</span>
-            <span class="engage-score">{{ projections[car] }}</span>
+            <span :key="projections[car]" class="engage-score">{{ projections[car] }}</span>
             <span class="engage-uses">{{ overheated(duel.player, car) ? 'Surchauffe −3' : `${r.uses - duel.player.used[car]} secteur${r.uses - duel.player.used[car] > 1 ? 's' : ''}` }}</span>
           </button>
         </div>
@@ -137,11 +217,11 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           </span>
           <span class="rival-car nitro-left">Nitro ×{{ duel.rival.nitro }}</span>
         </div>
-        <label class="nitro-toggle" :class="{ off: !duel.player.nitro }">
-          <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" />
+        <label class="nitro-toggle" :class="{ off: !duel.player.nitro, armed: nitro }">
+          <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" @change="armNitro" />
           <span>Nitro <small>{{ duel.player.nitro }} charge{{ duel.player.nitro > 1 ? 's' : '' }} · +2 sur ce secteur</small></span>
         </label>
-        <button type="button" class="button primary wide" @click="engage">Engager {{ duel.player.lineup[picked].vehicle.name }} <span aria-hidden="true">⟶</span></button>
+        <button type="button" class="button primary wide" :class="{ 'nitro-armed': nitro }" @click="engage">Engager {{ duel.player.lineup[picked].vehicle.name }} <span aria-hidden="true">⟶</span></button>
         <button type="button" class="button quiet wide" @click="abandon">Abandonner</button>
       </section>
     </template>
@@ -186,7 +266,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p>Engage une voiture par secteur, en secret. Chaque voiture court un nombre limité de secteurs selon son Endurance.</p>
       </div>
       <ul class="rival-list">
-        <li v-for="r in rivals" :key="r.id">
+        <li v-for="(r, i) in rivals" :key="r.id" class="deal" :style="{ '--i': i }">
           <button type="button" class="rival-row" :disabled="!unlocked.includes(r.id)" @click="chosen = r.id">
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>

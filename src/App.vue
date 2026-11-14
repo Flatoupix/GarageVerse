@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { nextTick, ref } from 'vue'
-import { persist, reducedMotion, save, storageWarning, systemReduced, toast } from './game/store'
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { floatText, mountFx, pop, tween } from './game/fx'
+import { buzz, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import BoosterView from './views/BoosterView.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
@@ -20,6 +21,32 @@ const tabs: { id: Screen; label: string; icon: string }[] = [
   { id: 'home', label: 'Accueil', icon: '◐' }, { id: 'shop', label: 'Boosters', icon: '▱' },
   { id: 'garage', label: 'Garage', icon: '▦' }, { id: 'race', label: 'Course', icon: '⟶' },
 ]
+
+// Crédits : le compteur défile et un montant flottant signale chaque gain ou dépense.
+const fx = ref<HTMLCanvasElement>()
+const wallet = ref<HTMLElement>()
+const shownCredits = ref(save.credits)
+const creditMove = ref<'gain' | 'spend' | null>(null)
+let stopCredits = () => {}
+watch(() => save.credits, (now, before) => {
+  stopCredits()
+  const delta = now - before
+  creditMove.value = delta > 0 ? 'gain' : 'spend'
+  floatText({ x: (wallet.value?.getBoundingClientRect().left ?? 0) + 30, y: (wallet.value?.getBoundingClientRect().bottom ?? 40) + 22 },
+    `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`, delta > 0 ? '#ffb347' : '#ff5fd2', 18)
+  if (delta > 0) sound('coin')
+  pop(wallet.value, 1.18)
+  stopCredits = tween(shownCredits.value, now, 600, v => { shownCredits.value = v }, () => { creditMove.value = null })
+})
+
+onMounted(() => {
+  if (fx.value) mountFx(fx.value)
+  // Retour tactile et sonore discret sur chaque commande.
+  document.addEventListener('click', event => {
+    const control = (event.target as Element).closest?.('button, [role="radio"], label.setting, label.nitro-toggle, label.missing-toggle')
+    if (control && !(control as HTMLButtonElement).disabled) { sound('tap'); buzz(6) }
+  }, true)
+})
 
 function go(destination: Screen) {
   screen.value = destination
@@ -64,7 +91,7 @@ function toggleSetting(key: Setting) {
         <span class="brand-mark" aria-hidden="true">GV</span><span>GARAGE<span class="brand-accent">VERSE</span></span>
       </button>
       <div class="wallet">
-        <span class="credits" aria-label="Crédits"><span aria-hidden="true">₡</span> {{ save.credits }}</span>
+        <span ref="wallet" class="credits" :class="creditMove" :aria-label="`${save.credits} crédits`"><span aria-hidden="true">₡ {{ shownCredits }}</span></span>
         <button v-if="!installed" type="button" class="settings-button" :aria-label="fullscreen ? 'Quitter le plein écran' : 'Plein écran'"
           :aria-pressed="fullscreen" @click="toggleFullscreen">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
@@ -93,7 +120,8 @@ function toggleSetting(key: Setting) {
       </button>
     </nav>
 
-    <div v-if="toast" class="toast" :class="toast.tone" role="status">{{ toast.text }}</div>
+    <canvas ref="fx" class="fx-canvas" aria-hidden="true"></canvas>
+    <div v-if="toast" :key="toast.text" class="toast" :class="toast.tone" role="status">{{ toast.text }}</div>
 
     <dialog ref="settings" class="modal settings-modal">
       <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>

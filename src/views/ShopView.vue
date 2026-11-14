@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { boosters } from '../game/data'
 import { buyBooster } from '../game/save'
-import { act, save } from '../game/store'
+import { act, save, sound } from '../game/store'
 import PackArt from '../components/PackArt.vue'
 
 const emit = defineEmits<{ open: [] }>()
@@ -11,7 +11,7 @@ const odds = (id: string) => {
 }
 
 function buy(id: string) {
-  if (act(s => buyBooster(s, id))) emit('open')
+  if (act(s => buyBooster(s, id))) { sound('whoosh'); emit('open') }
 }
 </script>
 
@@ -26,7 +26,7 @@ function buy(id: string) {
       Un booster est en cours. <button type="button" class="link" @click="emit('open')">Le reprendre</button>
     </p>
     <div class="shop-grid">
-      <article v-for="booster in boosters" :key="booster.id" class="shop-item" :class="`shop-${booster.id}`">
+      <article v-for="(booster, i) in boosters" :key="booster.id" class="shop-item deal" :style="{ '--i': i }" :class="`shop-${booster.id}`">
         <div class="shop-pack"><PackArt :booster="booster.id" /></div>
         <div class="shop-info">
           <h2>{{ booster.name }}</h2>

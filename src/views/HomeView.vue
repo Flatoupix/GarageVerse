@@ -34,17 +34,17 @@ const nextRival = computed(() => {
     </section>
 
     <section class="home-tiles">
-      <button type="button" class="tile" @click="emit('go', 'garage')">
+      <button type="button" class="tile deal" style="--i: 1" @click="emit('go', 'garage')">
         <span class="tile-label">Garage</span>
         <strong>{{ ownedCount }} / {{ vehicles.length }}</strong>
         <progress :value="ownedCount" :max="vehicles.length" aria-label="Voitures découvertes"></progress>
       </button>
-      <button type="button" class="tile" @click="emit('go', 'race')">
+      <button type="button" class="tile deal" style="--i: 2" @click="emit('go', 'race')">
         <span class="tile-label">Prochain rival</span>
         <strong>{{ nextRival.name }}</strong>
         <small>{{ nextRival.circuit.name }}</small>
       </button>
-      <button type="button" class="tile" @click="emit('go', 'shop')">
+      <button type="button" class="tile deal" style="--i: 3" @click="emit('go', 'shop')">
         <span class="tile-label">Boosters</span>
         <strong>{{ tickets.reduce((n, [, c]) => n + c, 0) }} ticket{{ tickets.reduce((n, [, c]) => n + c, 0) > 1 ? 's' : '' }}</strong>
         <small>{{ save.credits }} crédits</small>

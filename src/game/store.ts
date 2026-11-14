@@ -30,7 +30,7 @@ export function notify(text: string, tone: 'info' | 'error' = 'info') {
 // Exécute une action de jeu : un texte retourné est un refus affiché au joueur, sinon on sauvegarde.
 export function act(action: (s: Save) => string | undefined | void, success?: string, cue?: Cue) {
   const problem = action(save)
-  if (typeof problem === 'string') { notify(problem, 'error'); return false }
+  if (typeof problem === 'string') { notify(problem, 'error'); sound('error'); buzz([12, 40, 12]); return false }
   persist()
   if (success) notify(success)
   if (cue) sound(cue)

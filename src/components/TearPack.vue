@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { palettes, sparks } from '../game/fx'
+import { buzz } from '../game/store'
 import PackArt from './PackArt.vue'
 
 defineProps<{ booster: string; torn: boolean; reduced: boolean }>()
@@ -9,6 +11,7 @@ const progress = ref(0)
 const bend = ref(0)
 const fromRight = ref(false)
 const dragging = ref(false)
+let sparkAt = 0, notch = 0
 let finger: { id: number; startX: number; startY: number; distance: number; direction: number } | undefined
 
 const packStyle = computed(() => ({
@@ -39,6 +42,9 @@ function move(event: PointerEvent) {
   const vertical = Math.abs(event.clientY - finger.startY)
   progress.value = Math.min(1, Math.max(0, horizontal / finger.distance))
   bend.value = progress.value * finger.direction * 5
+  // Étincelles et petits crans sous le doigt pendant la déchirure.
+  if (progress.value > 0.04 && event.timeStamp - sparkAt > 45) { sparkAt = event.timeStamp; sparks({ x: event.clientX, y: event.clientY }, palettes.pink, 3, 0.45) }
+  if (Math.floor(progress.value * 8) !== notch) { notch = Math.floor(progress.value * 8); buzz(5) }
   if (progress.value >= 1 && vertical <= 86) {
     finger = undefined
     dragging.value = false

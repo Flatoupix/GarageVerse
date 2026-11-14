@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { partById, vehicleById } from '../game/data'
+import { vTilt } from '../game/fx'
 import type { Opening } from '../game/save'
 import PullCard from './PullCard.vue'
 
-const props = defineProps<{ opening: Opening; faceUp: boolean; flipping: boolean; entering: boolean; cinematic: boolean }>()
+const props = defineProps<{ opening: Opening; faceUp: boolean; flipping: boolean; entering: boolean; cinematic: boolean; tell?: string; glow?: string }>()
 defineEmits<{ flip: []; next: []; quick: [] }>()
 
 const slot = computed(() => props.faceUp ? props.opening.revealed - 1 : props.opening.revealed)
@@ -17,11 +18,12 @@ const total = computed(() => props.opening.pulls.length)
 
 <template>
   <div class="reveal" :class="{ 'stack-entering': entering }">
-    <div class="stack-stage">
+    <div class="stack-stage" :class="glow && `glow-${glow}`">
+      <div v-if="glow === 'legendary' || glow === 'epic'" class="stage-rays" aria-hidden="true"></div>
       <div class="card-stack">
         <div v-if="slot < total - 1" class="stack-edge" aria-hidden="true"></div>
         <div :key="slot" class="flip-card" :class="{ 'is-flipping': flipping }">
-          <button v-if="!faceUp" type="button" class="card-back" :aria-label="`Retourner la carte ${slot + 1}`" @click="$emit('flip')">
+          <button v-if="!faceUp" type="button" class="card-back" :class="tell && `tell-${tell}`" :aria-label="`Retourner la carte ${slot + 1}`" @click="$emit('flip')">
             <span class="back-inset"></span><span class="back-sun"></span><span class="back-monogram">GV</span>
             <span class="back-caption">GARAGEVERSE</span>
           </button>
@@ -30,7 +32,7 @@ const total = computed(() => props.opening.pulls.length)
             <span class="back-caption">GARAGEVERSE</span>
           </div>
           <div v-if="faceUp" class="flip-front">
-            <PullCard :pull="pull" :cinematic="cinematic" />
+            <div v-tilt><PullCard :pull="pull" :cinematic="cinematic" /></div>
             <span v-if="pull.isNew" class="new-badge">Nouveau</span>
           </div>
         </div>

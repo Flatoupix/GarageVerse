@@ -41,8 +41,8 @@ const upgradable = (id: string) => (save.cars[id]?.copies ?? 0) > 1
     </div>
 
     <div v-if="tab === 'cars'" class="garage-grid">
-      <template v-for="v in carList" :key="v.id">
-        <button v-if="save.cars[v.id]" type="button" class="card-tile" @click="emit('inspect', 'car', v.id)">
+      <template v-for="(v, i) in carList" :key="v.id">
+        <button v-if="save.cars[v.id]" type="button" class="card-tile deal" :style="{ '--i': Math.min(i, 9) }" @click="emit('inspect', 'car', v.id)">
           <CarCard :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" compact />
           <span v-if="save.cars[v.id].copies > 1" class="copy-count">×{{ save.cars[v.id].copies }}</span>
           <span v-if="evolutionReady(v.id)" class="tile-tag">Évolution</span>
@@ -57,8 +57,8 @@ const upgradable = (id: string) => (save.cars[id]?.copies ?? 0) > 1
       </template>
     </div>
     <div v-else class="garage-grid parts-grid">
-      <template v-for="p in partList" :key="p.id">
-        <button v-if="save.parts[p.id]" type="button" class="card-tile" @click="emit('inspect', 'part', p.id)">
+      <template v-for="(p, i) in partList" :key="p.id">
+        <button v-if="save.parts[p.id]" type="button" class="card-tile deal" :style="{ '--i': Math.min(i, 9) }" @click="emit('inspect', 'part', p.id)">
           <PartCard :id="p.id" compact />
           <span class="copy-count">{{ freeParts(save, p.id) }}/{{ save.parts[p.id] }} libre{{ freeParts(save, p.id) > 1 ? 's' : '' }}</span>
         </button>

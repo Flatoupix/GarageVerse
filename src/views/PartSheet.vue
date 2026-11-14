@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { partById, progression, vehicleById } from '../game/data'
 import { compatibility } from '../game/rules'
 import { freeParts, scrapPart } from '../game/save'
+import { vTilt } from '../game/fx'
 import { act, save } from '../game/store'
 import PartCard from '../components/PartCard.vue'
 
@@ -15,7 +16,7 @@ const fits = computed(() => Object.keys(save.cars).map(id => vehicleById.get(id)
 
 <template>
   <div class="sheet">
-    <div class="sheet-card part-sheet-card"><PartCard :id="id" /></div>
+    <div class="sheet-card part-sheet-card"><div v-tilt><PartCard :id="id" /></div></div>
     <section class="sheet-section">
       <h3>Stock</h3>
       <p class="hint">{{ save.parts[id] ?? 0 }} exemplaire{{ (save.parts[id] ?? 0) > 1 ? 's' : '' }}, {{ Math.max(0, freeParts(save, id)) }} libre{{ freeParts(save, id) > 1 ? 's' : '' }}. Une pièce installée occupe un exemplaire et du potentiel de préparation.</p>
