@@ -34,7 +34,9 @@ let width = 0
 try {
   for (width of [320, 390]) {
     const page = await browser.newPage({ viewport: { width, height: width === 320 ? 640 : 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 })
-    await page.route('**/*', route => route.request().url().startsWith(url) ? route.continue() : route.abort())
+    // Seuls le jeu local et les polices Google Fonts sont autorisés : les captures montrent la vraie typographie.
+    const fonts = /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\//
+    await page.route('**/*', route => route.request().url().startsWith(url) || fonts.test(route.request().url()) ? route.continue() : route.abort())
     await page.routeWebSocket('**/*', route => route.close())
     page.setDefaultTimeout(4_000)
     const errors: string[] = []
@@ -67,6 +69,7 @@ try {
       const tab = (name: string) => page.locator('.tabbar button', { hasText: name }).tap()
       const credits = () => page.locator('.credits').getAttribute('aria-label')
       await page.goto(url)
+      await page.evaluate(() => document.fonts.ready)
       await capture('accueil')
       await tab('Boosters')
       await page.locator('.shop-item').first().locator('button').tap()

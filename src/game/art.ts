@@ -1,4 +1,4 @@
-import { defaultStyle, type EditionStyle } from './data'
+import { defaultStyle, formerStyle, PIXEL, type EditionStyle } from './data'
 
 const url = (files: Record<string, string>, folder: string) =>
   Object.fromEntries(Object.entries(files).map(([path, href]) => [path.slice(folder.length).replace(/\.webp$/, ''), href]))
@@ -7,6 +7,14 @@ const partArt = url(import.meta.glob<string>('../assets/parts/*.webp', { eager: 
 const rivalArt = url(import.meta.glob<string>('../assets/rivals/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/rivals/')
 const packArt = url(import.meta.glob<string>('../assets/packs/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/packs/')
 const uiArt = url(import.meta.glob<string>('../assets/ui/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/ui/')
+// Jeu pixel art : fichiers <id>.px.webp, affichés sans lissage (règle CSS img[src*=".px"]).
+const pixelUrl = (files: Record<string, string>, folder: string) =>
+  Object.fromEntries(Object.entries(url(files, folder)).map(([id, href]) => [id.replace(/\.px$/, ''), href]))
+const pixelCar = pixelUrl(import.meta.glob<string>('../assets/pixel/cars/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/pixel/cars/')
+const pixelPart = pixelUrl(import.meta.glob<string>('../assets/pixel/parts/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/pixel/parts/')
+const pixelRival = pixelUrl(import.meta.glob<string>('../assets/pixel/rivals/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/pixel/rivals/')
+const pixelPack = pixelUrl(import.meta.glob<string>('../assets/pixel/packs/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/pixel/packs/')
+const pixelUi = pixelUrl(import.meta.glob<string>('../assets/pixel/ui/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/pixel/ui/')
 const legacy = url(import.meta.glob<string>('../assets/*.webp', { eager: true, query: '?url', import: 'default' }), '../assets/')
 
 export interface Edition { style: EditionStyle; art?: string; drift?: { backdrop: string; car: string } }
@@ -19,13 +27,15 @@ const legacyArt: Record<string, Partial<Record<EditionStyle, Edition>>> = {
 }
 
 export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edition {
-  const primary = defaultStyle(id)
-  if (style === primary && primary !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
+  // Tant que l'image pixel d'une carte manque, son édition par défaut montre l'illustration précédente.
+  if (style === PIXEL) return pixelCar[id] ? { style, art: pixelCar[id] } : { ...edition(id, formerStyle(id)), style }
+  const former = formerStyle(id)
+  if (style === former && former !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
   return legacyArt[id]?.[style] ?? { style: 'Synthwave', art: carArt[id] }
 }
 export const art = {
-  part: (id: string) => partArt[id] as string | undefined,
-  rival: (id: string) => rivalArt[id] as string | undefined,
-  pack: (id: string) => packArt[id] as string | undefined,
-  hero: uiArt.hero as string | undefined,
+  part: (id: string) => (pixelPart[id] ?? partArt[id]) as string | undefined,
+  rival: (id: string) => (pixelRival[id] ?? rivalArt[id]) as string | undefined,
+  pack: (id: string) => (pixelPack[id] ?? packArt[id]) as string | undefined,
+  hero: (pixelUi.hero ?? uiArt.hero) as string | undefined,
 }

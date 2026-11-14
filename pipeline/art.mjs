@@ -26,6 +26,9 @@ const option = name => { const i = args.indexOf(`--${name}`); return i >= 0 ? ar
 const kinds = (option('kind') ?? 'cars,parts,rivals,packs,ui').split(',')
 const only = option('only')?.split(',')
 const parallel = Number(option('jobs') ?? 4)
+// --set pixel produit le jeu d'illustrations pixel art dans src/assets/pixel/<kind>/<id>.webp, en basse définition.
+const set = option('set') ?? 'main'
+const pixel = set === 'pixel'
 
 const NO_TEXT = 'Strictly no text, no letters, no numbers, no logos, no brand badges, no readable license plates, no watermark, no card frame or border.'
 const STYLE = 'Style: premium 1980s synthwave / outrun poster illustration, clean crisp shapes, glossy reflections and chrome highlights, ' +
@@ -40,6 +43,19 @@ const LOOKS = {
   watercolor: 'Style: vintage travel sketchbook illustration, loose watercolor washes and ink lines on textured paper, warm sunny palette.',
   pulp: 'Style: retro-futuristic pulp sci-fi illustration, airbrushed gradients, dramatic lighting, bold saturated colors, 1970s paperback cover feel.',
 }
+const PIXEL_STYLE = 'Style: authentic 16-bit era pixel art, like a 1990s Super Nintendo, Mega Drive or arcade racing game: clearly visible square pixels on a coarse grid, ' +
+  'limited 32-color palette, hard edges, careful ordered dithering, no anti-aliasing, no smooth gradients, no blur, no painterly texture. ' +
+  'Warm and varied retro palette with natural daylight or dusk colors, not neon, not synthwave, no magenta-and-cyan grid.'
+const PIXEL_SCENES = {
+  sunset: 'a coastal road at sunset with palm trees and a calm sea',
+  city: 'a city street at dusk with shop fronts, street lamps and parked scooters',
+  highway: 'an open desert highway with mesas and cacti under a clear sky',
+  mountain: 'a winding mountain road with pine trees, guardrails and rocky peaks',
+  track: 'a race circuit with red-and-white curbs, a grandstand and pit garages on a sunny afternoon',
+  retro: 'a futuristic city of the 1980s imagination under a starry night sky',
+}
+// Le décor propre aux cartes 51 à 100 décrit parfois son style d'origine : on n'en garde que le lieu.
+const placeOnly = text => text.split(/,\s*(?:drawn|illustrated|painted|rendered|photographed|captured|shot|in the style)\b/i)[0]
 const SCENES = {
   sunset: 'a striped synthwave sunset over a glowing magenta and cyan perspective grid floor, palm tree silhouettes',
   city: 'a rain-wet neon city street at night, magenta and cyan glowing signs without readable text, reflections on the asphalt',
@@ -56,10 +72,38 @@ function jobs() {
       ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
       : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
     const alt = v.look && v.look !== 'synthwave' && LOOKS[v.look]
+    if (pixel) {
+      list.push({ kind: 'cars', id: v.id, size: [160, 240], prompt:
+        `Pixel art collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible and large, ` +
+        `centered in the lower two thirds, wheels on the ground unless it flies. Scene: ${v.setting ? placeOnly(v.setting) : PIXEL_SCENES[v.scene]}. ${PIXEL_STYLE} ${NO_TEXT}` })
+      continue
+    }
     list.push({ kind: 'cars', id: v.id, size: [640, 960], prompt:
       `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
       `centered in the lower two thirds, slight low camera angle, wheels on the ground unless it flies. ` +
       (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${STYLE} ${NO_TEXT}`) })
+  }
+  if (pixel) {
+    if (kinds.includes('parts')) for (const p of garage.parts) list.push({ kind: 'parts', id: p.id, size: [128, 128], prompt:
+      `Pixel art item icon for a retro racing game, square 1:1. Subject: ${p.art}, a single large object centered, like an inventory item. ` +
+      `Background: plain dark slate blue with a subtle checker floor. ${PIXEL_STYLE} ${NO_TEXT}` })
+    if (kinds.includes('rivals')) for (const r of garage.rivals) list.push({ kind: 'rivals', id: r.id, size: [128, 128], prompt:
+      `Pixel art character portrait for a racing rival, square 1:1, head and shoulders, like a 1990s arcade character select screen. ` +
+      `Subject: ${r.art.replace(/,?\s*synthwave portrait/i, '')}. Fictional person. Background: a simple garage or pit lane backdrop. ${PIXEL_STYLE} ${NO_TEXT}` })
+    if (kinds.includes('packs')) {
+      const looks = {
+        neon: 'a red sports car crossing a finish line under a chequered flag, cheering crowd, blue sky',
+        night: 'a city at night in the rain with lit windows and a car drifting around a corner, headlight beams',
+        overdrive: 'a gold-trimmed supercar blasting off a speedway straight with heat haze and a grandstand',
+      }
+      for (const b of garage.boosters) list.push({ kind: 'packs', id: b.id, size: [150, 225], prompt:
+        `Pixel art printed on the front of a trading-card booster pack, portrait 2:3, fills the whole image edge to edge. ` +
+        `Design: ${looks[b.id]}. Leave the top 25% calmer for a title overlay. ${PIXEL_STYLE} ${NO_TEXT}` })
+    }
+    if (kinds.includes('ui')) list.push({ kind: 'ui', id: 'hero', size: [225, 338], prompt:
+      `Pixel art title screen background for a retro mobile racing game, portrait 2:3. A cosy roadside garage at dusk with its door open, ` +
+      `tools on the walls, a covered car inside, a petrol pump and a road heading to the hills. Keep the top third mostly sky for a title. ${PIXEL_STYLE} ${NO_TEXT}` })
+    return list.filter(j => !only || only.includes(j.id))
   }
   if (kinds.includes('parts')) for (const p of garage.parts) list.push({ kind: 'parts', id: p.id, size: [512, 512], prompt:
     `Mechanic part card illustration, square 1:1. Subject: ${p.art}, single hero object, centered, studio product shot. ` +
@@ -95,7 +139,8 @@ function run(command, commandArgs, options = {}) {
   })
 }
 
-const target = job => join(root, 'src/assets', job.kind, `${job.id}.webp`)
+const target = job => join(root, 'src/assets', ...(pixel ? ['pixel'] : []), job.kind, `${job.id}${pixel ? '.px' : ''}.webp`)
+const key = job => (pixel ? 'pixel/' : '') + `${job.kind}/${job.id}`
 
 // Moteurs d'image : Codex enregistre ./out.png dans un dossier isolé ; Antigravity dépose l'image dans son
 // dossier « brain », retrouvée grâce au nom imposé. En mode auto, une limite d'usage Codex bascule sur agy.
@@ -156,12 +201,20 @@ async function convert(file, job) {
   if (ch > h) { ch = h; cw = Math.round(h * tw / th) }
   const out = target(job)
   await mkdir(dirname(out), { recursive: true })
+  if (pixel) {
+    // Réduction par moyenne de zone vers la grille de pixels cible, puis WebP sans perte : l'interface agrandit sans lissage.
+    const small = file.replace(/\.png$/, '-small.png')
+    const scaled = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vf',
+      `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},scale=${tw}:${th}:flags=area`, small])
+    if (scaled.code !== 0) return scaled
+    return run('cwebp', ['-quiet', '-lossless', small, '-o', out])
+  }
   return run('cwebp', ['-quiet', '-q', '82', '-crop', String(Math.floor((w - cw) / 2)), String(Math.floor((h - ch) / 2)), String(cw), String(ch),
     '-resize', String(tw), String(th), file, '-o', out])
 }
 
 async function generate(job) {
-  const fix = reviews[`${job.kind}/${job.id}`]
+  const fix = reviews[`${key(job)}`]
   const prompt = job.prompt + (fix && !fix.ok && fix.fix ? ` Important correction from art review: ${fix.fix}` : '')
   const work = await mkdtemp(join(tmpdir(), `gv-${job.id}-`))
   const started = Date.now()
@@ -182,10 +235,10 @@ async function generate(job) {
     if (webp.code !== 0) detail = webp.stderr
   }
   await rm(work, { recursive: true, force: true })
-  log[`${job.kind}/${job.id}`] = { status, engine: used, seconds: Math.round((Date.now() - started) / 1000), tokens: made.tokens,
+  log[`${key(job)}`] = { status, engine: used, seconds: Math.round((Date.now() - started) / 1000), tokens: made.tokens,
     prompt: createHash('sha1').update(prompt).digest('hex').slice(0, 10), at: new Date().toISOString(), ...(status === 'ok' ? {} : { detail }) }
   await writeFile(logFile, JSON.stringify(log, null, 2))
-  console.log(`${status === 'ok' ? '✓' : '✗'} ${job.kind}/${job.id} [${used}] ${log[`${job.kind}/${job.id}`].seconds}s${status === 'ok' ? '' : ` ${detail}`}`)
+  console.log(`${status === 'ok' ? '✓' : '✗'} ${key(job)} [${used}] ${log[`${key(job)}`].seconds}s${status === 'ok' ? '' : ` ${detail}`}`)
 }
 
 async function review(list) {
@@ -196,9 +249,11 @@ async function review(list) {
       const v = roster.vehicles.find(x => x.id === job.id)
       const expected = job.kind === 'cars' ? `${v.year} ${v.name} ${v.version}${v.culture ? ` (${v.culture.work})` : ''}, ${v.paint}`
         : job.kind === 'parts' ? garage.parts.find(p => p.id === job.id).art : job.id
-      return `- key "${job.kind}/${job.id}", file ${target(job)}: expected ${expected}`
+      return `- key "${key(job)}", file ${target(job)}: expected ${expected}`
     }).join('\n')
-    const prompt = 'You are the art director of a retro car trading-card game. Most cards are synthwave, some use a deliberate alternative style (poster, rally photo, comic, anime, magazine, watercolor, pulp): judge each against its own intended style. Open and look at each image file listed below. ' +
+    const prompt = (pixel
+      ? 'You are the art director of a retro car trading-card game whose cards are 16-bit pixel art (low resolution files shown enlarged): judge each image as pixel art, the subject must be recognisable and faithful. Open and look at each image file listed below. '
+      : 'You are the art director of a retro car trading-card game. Most cards are synthwave, some use a deliberate alternative style (poster, rally photo, comic, anime, magazine, watercolor, pulp): judge each against its own intended style. Open and look at each image file listed below. ') +
       'For each one judge: (1) is the subject recognisably the expected vehicle or object (body shape, proportions, key design cues)? ' +
       '(2) is it free of readable text, logos and watermarks? (3) does it fit a cohesive synthwave palette and read well as a small card? ' +
       'Answer ONLY with a JSON object mapping each key to {"ok": boolean, "score": 1-10, "issue": "short French note", "fix": "short English instruction for regenerating, empty if ok"}. ' +
@@ -211,8 +266,8 @@ async function review(list) {
       Object.assign(reviews, JSON.parse(json))
       await writeFile(reviewFile, JSON.stringify(reviews, null, 2))
       for (const job of batch) {
-        const r = reviews[`${job.kind}/${job.id}`]
-        console.log(`${r?.ok ? '✓' : '✗'} ${job.kind}/${job.id} ${r?.score ?? '?'}/10 ${r?.issue ?? 'pas de verdict'}`)
+        const r = reviews[`${key(job)}`]
+        console.log(`${r?.ok ? '✓' : '✗'} ${key(job)} ${r?.score ?? '?'}/10 ${r?.issue ?? 'pas de verdict'}`)
       }
     } catch {
       console.log(`✗ revue illisible pour ${batch.map(j => j.id).join(', ')}: ${result.stderr.slice(-300) || result.stdout.slice(-300)}`)
@@ -224,10 +279,10 @@ let list = jobs()
 if (flag('review')) {
   await review(list)
 } else {
-  if (flag('redo')) list = list.filter(job => reviews[`${job.kind}/${job.id}`]?.ok === false)
+  if (flag('redo')) list = list.filter(job => reviews[`${key(job)}`]?.ok === false)
   else if (!flag('force')) list = list.filter(job => !existsSync(target(job)))
   console.log(`${list.length} image(s) à générer (moteur ${engine}), ${parallel} en parallèle.`)
-  if (flag('dry-run')) { for (const job of list) console.log(`· ${job.kind}/${job.id}`); process.exit(0) }
+  if (flag('dry-run')) { for (const job of list) console.log(`· ${key(job)}`); process.exit(0) }
   const queue = [...list]
   await Promise.all(Array.from({ length: Math.min(parallel, queue.length) }, async () => {
     while (queue.length) {
@@ -236,7 +291,7 @@ if (flag('review')) {
       await generate(queue.shift())
     }
   }))
-  const failed = list.filter(job => log[`${job.kind}/${job.id}`]?.status !== 'ok')
+  const failed = list.filter(job => log[`${key(job)}`]?.status !== 'ok')
   console.log(`Terminé : ${list.length - failed.length} ok, ${failed.length} en échec.`)
   if (failed.length) process.exitCode = 1
 }

@@ -175,6 +175,8 @@ const lastWinner = ref<'player' | 'other'>('other')
 function abandon() {
   act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0 }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, 'Course abandonnée')
 }
+// Libellés courts pour la piste, qui doit tenir sur une ligne de cinq cases à 320 px.
+const trackLabels = { depart: 'Départ', virage: 'Virages', ligne: 'Droite', endurance: 'Endur.' } as const
 const name = (id: string) => `${vehicleById.get(id)!.name}`
 </script>
 
@@ -204,7 +206,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <li v-for="(sector, i) in duel.sectors" :key="i" :style="{ '--i': i }" :class="{ current: i === trackIndex, done: i < trackIndex,
           win: i < trackIndex && duel.rounds[i]?.winner === 'player', loss: i < trackIndex && duel.rounds[i]?.winner === 'rival' }">
           <span class="track-icon" aria-hidden="true">{{ sectorIcons[sector] }}</span>
-          <span class="track-name">{{ sectorLabels[sector] }}</span>
+          <span class="track-name" :title="sectorLabels[sector]">{{ trackLabels[sector] }}</span>
           <span class="track-cond">{{ known(i) ? `${conditionIcons[duel.conditions[i]]} ${conditionLabels[duel.conditions[i]]}` : '? Inconnu' }}</span>
         </li>
       </ol>

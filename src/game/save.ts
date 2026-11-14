@@ -88,9 +88,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     if (!v || !car) continue
     const styles = stylesOf(id)
     const editions = Array.isArray(car.editions) ? car.editions.filter(s => styles.includes(s)) : []
+    // Une nouvelle édition par défaut (aujourd'hui le pixel art) est offerte aux voitures déjà possédées et affichée.
     const primary = defaultStyle(id)
-    const usesOldDefault = primary !== 'Synthwave' && !editions.includes(primary) && editions.includes('Synthwave')
-    if (!editions.length || usesOldDefault) editions.unshift(primary)
+    const usesOldDefault = !editions.includes(primary)
+    if (usesOldDefault) editions.unshift(primary)
     const stage = int(car.stage, 0, 3, 0)
     const installed: string[] = []
     for (const partId of car.parts ?? []) {
@@ -100,7 +101,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const levels = { acc: 0, vit: 0, man: 0, end: 0 }
     for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
     save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
-      shown: usesOldDefault && car.shown === 'Synthwave' ? primary : editions.includes(car.shown) ? car.shown : editions[0],
+      shown: usesOldDefault ? primary : editions.includes(car.shown) ? car.shown : editions[0],
       favorite: car.favorite === true, upgrades: levels }
   }
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))

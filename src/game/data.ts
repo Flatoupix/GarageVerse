@@ -65,9 +65,12 @@ export const sectorIcons: Record<Sector, string> = { depart: '⇧', virage: '↝
 export const conditionLabels: Record<Condition, string> = { sec: 'Sec', pluie: 'Pluie', nuit: 'Nuit', terre: 'Terre', ville: 'Ville' }
 export const conditionIcons: Record<Condition, string> = { sec: '☀', pluie: '☂', nuit: '☾', terre: '⛰', ville: '▦' }
 
-export type EditionStyle = 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique'
-const defaultStyles: Record<string, EditionStyle> = { clio: 'Photo', twingo: 'Gouache', panda: 'Rallye argentique' }
-export const defaultStyle = (id: string): EditionStyle => defaultStyles[id] ?? 'Synthwave'
+export type EditionStyle = 'Pixel 16 bits' | 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique'
+// Le pixel art 16 bits est l'édition par défaut de toutes les cartes ; l'illustration précédente devient une édition à collectionner.
+export const PIXEL: EditionStyle = 'Pixel 16 bits'
+const formerStyles: Record<string, EditionStyle> = { clio: 'Photo', twingo: 'Gouache', panda: 'Rallye argentique' }
+export const formerStyle = (id: string): EditionStyle => formerStyles[id] ?? 'Synthwave'
+export const defaultStyle = (_id: string): EditionStyle => PIXEL
 // Nom affiché du style d'illustration d'une carte qui n'a qu'une édition (champ look du roster).
 const lookLabels: Record<string, string> = {
   poster: 'Affiche', rally: 'Rallye argentique', comic: 'Bande dessinée', anime: 'Anime', magazine: 'Magazine',
@@ -78,8 +81,8 @@ const altStyles: Record<string, EditionStyle[]> = {
   clio: ['Classic'], elise: ['Classic'], r34: ['Classic'], venom: ['Classic', 'Pixel Art'], brian: ['Classic'],
 }
 export function stylesOf(id: string): EditionStyle[] {
-  const primary = defaultStyle(id)
-  const styles: EditionStyle[] = [primary]
-  if (primary !== 'Synthwave') styles.push('Synthwave')
+  const former = formerStyle(id)
+  const styles: EditionStyle[] = [PIXEL, former]
+  if (former !== 'Synthwave') styles.push('Synthwave')
   return styles.concat(altStyles[id] ?? [])
 }

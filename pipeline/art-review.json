@@ -598,5 +598,821 @@
     "score": 10,
     "issue": "Rendu parfait de la Ford Falcon XB Interceptor dans une ambiance crépusculaire sans texte",
     "fix": ""
+  },
+  "pixel/cars/clio": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette de Clio 3 fidèle, optiques et proportions très bien respectées.",
+    "fix": ""
+  },
+  "pixel/cars/twingo": {
+    "ok": true,
+    "score": 10,
+    "issue": "Bouille emblématique de la Twingo 1 parfaitement reconnaissable, teinte turquoise idéale.",
+    "fix": ""
+  },
+  "pixel/cars/p205": {
+    "ok": true,
+    "score": 10,
+    "issue": "205 GTI exemplaire, liseré rouge, jantes et custode fidèles dans un décor rétro réussi.",
+    "fix": ""
+  },
+  "pixel/cars/deuch": {
+    "ok": true,
+    "score": 9,
+    "issue": "2CV jaune pastel très fidèle, capote grise et phares ronds bien identifiables.",
+    "fix": ""
+  },
+  "pixel/cars/golf1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Golf 1 GTI bien caractérisée avec son liseré de calandre rouge et ses passages de roues noirs.",
+    "fix": ""
+  },
+  "pixel/cars/panda": {
+    "ok": true,
+    "score": 9,
+    "issue": "Panda 4x4 d'époque très réussie, profil cubique et garde au sol bien posée.",
+    "fix": ""
+  },
+  "pixel/cars/c4zr1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Corvette C4 ZR-1 fidèle, profil aérodynamique et phares escamotables nets.",
+    "fix": ""
+  },
+  "pixel/cars/f40": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ferrari F40 immédiatement reconnaissable sur circuit, aileron et écopes NACA conformes.",
+    "fix": ""
+  },
+  "pixel/cars/p930": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette 930 Turbo et aileron whale-tail très fidèles, ambiance sunset rétro soignée.",
+    "fix": ""
+  },
+  "pixel/cars/supra": {
+    "ok": true,
+    "score": 9,
+    "issue": "Lignes Mk4, optiques et aileron caractéristiques impeccables en orange candy.",
+    "fix": ""
+  },
+  "pixel/cars/r34": {
+    "ok": true,
+    "score": 9,
+    "issue": "Face avant R34 et teinte Bayside Blue immédiatement reconnaissables, pixels nets.",
+    "fix": ""
+  },
+  "pixel/cars/venom": {
+    "ok": true,
+    "score": 8,
+    "issue": "Aéro carbone et profil de l'hypercar bien restitués, décor désertique contrasté.",
+    "fix": ""
+  },
+  "pixel/cars/mx5nb": {
+    "ok": true,
+    "score": 9,
+    "issue": "Optiques fixes NB et gabarit roadster parfaitement respectés, vert anglais fidèle.",
+    "fix": ""
+  },
+  "pixel/cars/scirocco": {
+    "ok": true,
+    "score": 8,
+    "issue": "Modèle GT24 bien campé avec son kit large et aileron, livrée épurée sans logos.",
+    "fix": ""
+  },
+  "pixel/cars/s15": {
+    "ok": true,
+    "score": 9,
+    "issue": "Lignes acérées de la Silvia S15 et teinte pourpre perle très esthétiques.",
+    "fix": ""
+  },
+  "pixel/cars/elise": {
+    "ok": true,
+    "score": 9,
+    "issue": "Face avant ronde et proportions légères de la S1 parfaitement identifiables.",
+    "fix": ""
+  },
+  "pixel/cars/mf1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente fidélité, poste de conduite central et écope de toit bien visibles.",
+    "fix": ""
+  },
+  "pixel/cars/stratos": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette en coin et livrée rallye tricolore fidèles, sans texte ni logo.",
+    "fix": ""
+  },
+  "pixel/cars/dmc": {
+    "ok": true,
+    "score": 10,
+    "issue": "Carrosserie inox brossé et ambiance urbaine synthwave rétro-futuriste parfaites.",
+    "fix": ""
+  },
+  "pixel/cars/firebird": {
+    "ok": true,
+    "score": 9,
+    "issue": "Face avant à quadruple optique et liserés dorés fidèles, très bonne lisibilité.",
+    "fix": ""
+  },
+  "pixel/cars/beetle": {
+    "ok": true,
+    "score": 9,
+    "issue": "Galbes iconiques de la Coccinelle très reconnaissables et superbe palette côtière.",
+    "fix": ""
+  },
+  "pixel/cars/esprit": {
+    "ok": true,
+    "score": 9,
+    "issue": "Design en coin Giugiaro blanc pur impeccable et fort contraste au coucher de soleil.",
+    "fix": ""
+  },
+  "pixel/cars/elise111s": {
+    "ok": true,
+    "score": 9,
+    "issue": "Optiques rondes et proportions de l'Elise S1 racing green parfaitement respectées.",
+    "fix": ""
+  },
+  "pixel/cars/elise190": {
+    "ok": true,
+    "score": 8,
+    "issue": "Excellente Elise S1 en orange chrome, bien que l'aileron piste spécifique de la Sport 190 soit discret ou absent.",
+    "fix": ""
+  },
+  "pixel/cars/bttf": {
+    "ok": true,
+    "score": 9,
+    "issue": "DeLorean temporelle très fidèle avec réacteurs, câblages et reflets synthwave soignés.",
+    "fix": ""
+  },
+  "pixel/cars/kitt": {
+    "ok": true,
+    "score": 9,
+    "issue": "Trans Am noire brillante et scanner frontal rouge emblématique parfaitement reconnaissables.",
+    "fix": ""
+  },
+  "pixel/cars/brian": {
+    "ok": true,
+    "score": 9,
+    "issue": "Nissan Skyline R34 très fidèle avec sa livrée bleue électrique, aucun texte parasite.",
+    "fix": ""
+  },
+  "pixel/cars/herbie": {
+    "ok": true,
+    "score": 8,
+    "issue": "Silhouette de Coccinelle et bandes tricolores très reconnaissables ; macarons blancs laissés vierges sans numéro 53.",
+    "fix": ""
+  },
+  "pixel/cars/bond": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ligne en coin de la Lotus Esprit fidèle avec ses ailerons escamotables et projection d'eau dynamique.",
+    "fix": ""
+  },
+  "pixel/cars/taxi": {
+    "ok": true,
+    "score": 9,
+    "issue": "Taxi volant jaune en lévitation parfaitement reconnaissable dans un décor urbain vertical.",
+    "fix": ""
+  },
+  "pixel/cars/ecto1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ambulance Cadillac 1959 bien restituée avec galerie de toit détaillée et ailerons rouges, sans texte parasite.",
+    "fix": ""
+  },
+  "pixel/cars/batmobile": {
+    "ok": true,
+    "score": 8,
+    "issue": "Batmobile 1989 très fidèle avec turbine frontale et ailerons caractéristiques, excellente lisibilité.",
+    "fix": ""
+  },
+  "pixel/cars/abarth": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle, proportions et bandes latérales Abarth bien respectées",
+    "fix": ""
+  },
+  "pixel/cars/logan": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette tricorps et calandre plastique de la Logan bien reconnaissables",
+    "fix": ""
+  },
+  "pixel/cars/ek9": {
+    "ok": true,
+    "score": 9,
+    "issue": "Fidèle à l'EK9 avec aileron et sièges Recaro rouges bien visibles",
+    "fix": ""
+  },
+  "pixel/cars/mx5na": {
+    "ok": true,
+    "score": 10,
+    "issue": "Parfaitement reconnaissable, phares pop-up levés et ambiance sunset réussis",
+    "fix": ""
+  },
+  "pixel/cars/m3e46": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ligne E46 M3 et teinte Laguna Seca fidèlement restituées",
+    "fix": ""
+  },
+  "pixel/cars/delta": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ailes élargies et calandre à double optique très bien rendues",
+    "fix": ""
+  },
+  "pixel/cars/evo8": {
+    "ok": true,
+    "score": 9,
+    "issue": "Face avant agressive, prise d'air de capot et aileron fidèles à l'Evo VIII",
+    "fix": ""
+  },
+  "pixel/cars/a110": {
+    "ok": true,
+    "score": 10,
+    "issue": "Silhouette berlinette basse et quadruple optique iconique impeccables",
+    "fix": ""
+  },
+  "pixel/cars/nsx": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle à la NSX NA1, toit noir signature et phares pop-up bien reconnaissables.",
+    "fix": ""
+  },
+  "pixel/cars/tesla": {
+    "ok": true,
+    "score": 9,
+    "issue": "Model S Plaid bien proportionnée avec un décor rétro-futuriste immersif et lisible.",
+    "fix": ""
+  },
+  "pixel/cars/gt500": {
+    "ok": true,
+    "score": 8,
+    "issue": "Silhouette musclée et bandes blanches caractéristiques de la GT500 bien rendues.",
+    "fix": ""
+  },
+  "pixel/cars/demon": {
+    "ok": true,
+    "score": 9,
+    "issue": "Allure agressive de la Challenger Demon, noir mat et touches rouges fidèles.",
+    "fix": ""
+  },
+  "pixel/cars/ruf": {
+    "ok": true,
+    "score": 9,
+    "issue": "RUF Yellowbird emblématique, aileron et galbe 911 vintage très bien exécutés.",
+    "fix": ""
+  },
+  "pixel/cars/cgt": {
+    "ok": true,
+    "score": 9,
+    "issue": "Carrera GT reconnaissable, belle gestion du targa, des écopes et de l'intérieur.",
+    "fix": ""
+  },
+  "pixel/cars/zonda": {
+    "ok": true,
+    "score": 9,
+    "issue": "Superbe interprétation de la Zonda R, texture carbone et accents orange nets.",
+    "fix": ""
+  },
+  "pixel/cars/agera": {
+    "ok": true,
+    "score": 9,
+    "issue": "Agera R fidèle avec pare-brise en visière et livrée blanche et orange distincte.",
+    "fix": ""
+  },
+  "pixel/cars/veyron": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle à la Veyron, carrosserie bicolore et calandre en fer à cheval parfaitement exécutées",
+    "fix": ""
+  },
+  "pixel/cars/h1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette cubique et calandre caractéristique du H1 parfaitement reconnaissables",
+    "fix": ""
+  },
+  "pixel/cars/r4l": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente fidélité à la 4L GTL avec protections latérales et jantes crème conformes",
+    "fix": ""
+  },
+  "pixel/cars/saxo": {
+    "ok": true,
+    "score": 8,
+    "issue": "Saxo VTS bien identifiable avec son jaune héliodore et ses extensions d'ailes",
+    "fix": ""
+  },
+  "pixel/cars/p106": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe rendu de la 106 Rallye Phase 1 avec jantes tôle blanches et bandes PTS conformes",
+    "fix": ""
+  },
+  "pixel/cars/p206": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ligne de la 206 très bien captée avec ouïes de capot et optiques en amande fidèles",
+    "fix": ""
+  },
+  "pixel/cars/uno": {
+    "ok": true,
+    "score": 9,
+    "issue": "Uno Turbo i.e. impeccable avec protections basses noires, liseré rouge et hayon spécifique",
+    "fix": ""
+  },
+  "pixel/cars/golf4": {
+    "ok": true,
+    "score": 9,
+    "issue": "Golf IV très reconnaissable avec son montant C massif et ses doubles projecteurs",
+    "fix": ""
+  },
+  "pixel/cars/corsa": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle à l'Opel Corsa B, forme ronde, pare-chocs noirs et teinte conformes.",
+    "fix": ""
+  },
+  "pixel/cars/fiesta": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe Fiesta XR2 Mk2 avec ses projecteurs auxiliaires, liseré rouge et jantes pepperpot.",
+    "fix": ""
+  },
+  "pixel/cars/espace": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente silhouette monospace de l'Espace I, livrée bi-ton beige et brun très fidèle.",
+    "fix": ""
+  },
+  "pixel/cars/ax": {
+    "ok": true,
+    "score": 9,
+    "issue": "AX GT rouge très reconnaissable avec ses jantes rallye blanches et son kit carrosserie.",
+    "fix": ""
+  },
+  "pixel/cars/kangoo": {
+    "ok": true,
+    "score": 9,
+    "issue": "Kangoo phase 1 jaune bien identifiable, feux et silhouette utilitaire parfaitement restitués.",
+    "fix": ""
+  },
+  "pixel/cars/civiceg": {
+    "ok": true,
+    "score": 10,
+    "issue": "Civic EG VTi parfaitement reconnaissable, silhouette fluide et aileron conformes.",
+    "fix": ""
+  },
+  "pixel/cars/micra": {
+    "ok": true,
+    "score": 9,
+    "issue": "Micra K11 bubble-car fidèle, couleur menthe et phares ronds bien proportionnés.",
+    "fix": ""
+  },
+  "pixel/cars/swift": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle à la Suzuki Swift GTi de 1989 avec la baguette noire, le liseré rouge et les jantes argentées. Excellent rendu pixel art.",
+    "fix": ""
+  },
+  "pixel/cars/niva": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette carrée, calandre et feux ronds emblématiques de la Niva parfaitement reconnaissables.",
+    "fix": ""
+  },
+  "pixel/cars/duster": {
+    "ok": true,
+    "score": 9,
+    "issue": "Proportions fidèles du Duster Mk1, teinte marron métallisé, barres de toit et sabots bien identifiables.",
+    "fix": ""
+  },
+  "pixel/cars/volvo240": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ligne cubique caractéristique du break 240, pare-chocs massifs et calandre typique très bien rendus.",
+    "fix": ""
+  },
+  "pixel/cars/mini65": {
+    "ok": true,
+    "score": 10,
+    "issue": "Excellente fidélité de la Cooper S avec son toit blanc, ses feux additionnels et son ambiance rallye.",
+    "fix": ""
+  },
+  "pixel/cars/fiat500": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette ronde iconique de la Nuova 500, toit en toile replié et portes suicide bien représentés.",
+    "fix": ""
+  },
+  "pixel/cars/twizy": {
+    "ok": true,
+    "score": 9,
+    "issue": "Design atypique du Twizy très bien capté avec ses arches orange, ses roues extérieures et ses portières vitrées.",
+    "fix": ""
+  },
+  "pixel/cars/smart": {
+    "ok": true,
+    "score": 9,
+    "issue": "Cellule Tridion argentée contrastée et gabarit ultracourt immédiatement reconnaissables.",
+    "fix": ""
+  },
+  "pixel/cars/mehari": {
+    "ok": true,
+    "score": 9,
+    "issue": "Carrosserie nervurée orange, absence de portières et capote repliée très fidèles à la Méhari.",
+    "fix": ""
+  },
+  "pixel/cars/defender": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle au Defender 90 avec toit blanc et roue de secours arrière.",
+    "fix": ""
+  },
+  "pixel/cars/wrangler": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette YJ emblématique bien respectée avec les phares carrés et le soft top sable.",
+    "fix": ""
+  },
+  "pixel/cars/explorer": {
+    "ok": true,
+    "score": 9,
+    "issue": "Design fidèle à la première génération, calandre et bas de caisse gris impeccables.",
+    "fix": ""
+  },
+  "pixel/cars/combi": {
+    "ok": true,
+    "score": 9,
+    "issue": "Combi T1 bicolore parfaitement reconnaissable avec son pare-brise scindé.",
+    "fix": ""
+  },
+  "pixel/cars/hilux": {
+    "ok": true,
+    "score": 9,
+    "issue": "Hilux 4x4 patiné très réussi avec sa benne ouverte et ses jantes blanches.",
+    "fix": ""
+  },
+  "pixel/cars/p504": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ligne Pininfarina et optiques trapézoïdales caractéristiques très fidèlement retranscrites.",
+    "fix": ""
+  },
+  "pixel/cars/simca": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente livrée Rallye 2 avec capot noir mat et bandes latérales sur fond jaune.",
+    "fix": ""
+  },
+  "pixel/cars/transit": {
+    "ok": true,
+    "score": 9,
+    "issue": "Parfaite allure de van utilitaire Mk2, calandre noire et patine cohérentes.",
+    "fix": ""
+  },
+  "pixel/cars/r5gt": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette Supercinq fidèle, kit carrosserie et ambiance rétro impeccables",
+    "fix": ""
+  },
+  "pixel/cars/ae86": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style bicolore panda et phares escamotables fidèles, sans lettrage parasite",
+    "fix": ""
+  },
+  "pixel/cars/rx7": {
+    "ok": true,
+    "score": 9,
+    "issue": "Lignes fluides de la FD3S bien respectées avec phares levés et jantes 5 branches",
+    "fix": ""
+  },
+  "pixel/cars/impreza": {
+    "ok": true,
+    "score": 9,
+    "issue": "Modèle GC8 STI très reconnaissable, teinte bleue et jantes or fidèles, sans sponsors",
+    "fix": ""
+  },
+  "pixel/cars/cosworth": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aileron whale-tail emblématique et ouïes de capot bien reproduits, scène dynamique",
+    "fix": ""
+  },
+  "pixel/cars/quattro": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ailes blister et face avant carrée conformes à l'Ur-Quattro, aucun logo parasite",
+    "fix": ""
+  },
+  "pixel/cars/m3e30": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ailes élargies typiques et calandre E30 très lisibles sur sol à damier rétro",
+    "fix": ""
+  },
+  "pixel/cars/evo2": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aileron haut et kit carrosserie agressif de l'Evo II parfaitement retranscrits",
+    "fix": ""
+  },
+  "pixel/cars/golf2": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très fidèle à la Golf 2 GTI 16S, calandre liseré rouge et jantes conformes.",
+    "fix": ""
+  },
+  "pixel/cars/r32": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette et détails de la R32 GT-R immédiatement reconnaissables, ambiance Shuto réussie.",
+    "fix": ""
+  },
+  "pixel/cars/celica": {
+    "ok": true,
+    "score": 9,
+    "issue": "Optiques rondes et aileron ST205 impeccables, livrée blanche propre sans logos.",
+    "fix": ""
+  },
+  "pixel/cars/camaro": {
+    "ok": true,
+    "score": 9,
+    "issue": "Superbe Camaro 69 Hugger Orange, capot cowl-induction et bandes blanches fidèles.",
+    "fix": ""
+  },
+  "pixel/cars/mustang67": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ligne fastback et teinte Dark Moss Green bien respectées avec chromes d'époque.",
+    "fix": ""
+  },
+  "pixel/cars/charger": {
+    "ok": true,
+    "score": 10,
+    "issue": "Excellente Charger 1970 Plum Crazy, toit vinyle, calandre fermée et bumblebee stripe parfaits.",
+    "fix": ""
+  },
+  "pixel/cars/eleanor": {
+    "ok": true,
+    "score": 10,
+    "issue": "Détails Eleanor irréprochables avec feux additionnels, échappement latéral et décor LA River.",
+    "fix": ""
+  },
+  "pixel/cars/domcharger": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe réplique de la Charger de Dom, compresseur proéminent avec 3 papillons rouges fidèles.",
+    "fix": ""
+  },
+  "pixel/cars/countach": {
+    "ok": true,
+    "score": 10,
+    "issue": "Silhouette LP400 periscopio impeccable, jantes perforées et prises d'air fidèles dans un superbe dégradé synthwave.",
+    "fix": ""
+  },
+  "pixel/cars/testarossa": {
+    "ok": true,
+    "score": 9,
+    "issue": "Stries latérales et silhouette Testarossa parfaitement rendues dans une superbe ambiance Outrun.",
+    "fix": ""
+  },
+  "pixel/cars/jpjeep": {
+    "ok": true,
+    "score": 10,
+    "issue": "Wrangler YJ Sahara immédiatement identifiable sans marquage textuel, scène sous la pluie très dynamique.",
+    "fix": ""
+  },
+  "pixel/cars/interceptor": {
+    "ok": true,
+    "score": 10,
+    "issue": "Nez Concorde, gros compresseur proéminent et échappements latéraux fidèles à l'Interceptor de Mad Max.",
+    "fix": ""
+  },
+  "pixel/cars/multipla": {
+    "ok": true,
+    "score": 9,
+    "issue": "Double étage de phares et proportions atypiques fidèles au Multipla phase 1 d'origine.",
+    "fix": ""
+  },
+  "pixel/cars/1000tipla": {
+    "ok": true,
+    "score": 10,
+    "issue": "Kit carrosserie ultra-large riveté, aileron GT et arceau cage fidèles à la version Vilebrequin.",
+    "fix": ""
+  },
+  "pixel/parts/pneus-route": {
+    "ok": true,
+    "score": 9,
+    "issue": "Pile de pneus et jante alu bien définies, format icône très lisible pour une carte d'équipement.",
+    "fix": ""
+  },
+  "pixel/parts/pneus-pluie": {
+    "ok": true,
+    "score": 9,
+    "issue": "Sculptures d'évacuation profondes et gerbes d'eau dynamiques très explicites pour un pneu pluie.",
+    "fix": ""
+  },
+  "pixel/parts/pneus-semi": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Pneu semi-slick avec bande de roulement incandescente parfaitement lisible",
+    "fix": ""
+  },
+  "pixel/parts/pneus-terre": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Pneu terre/rallye agressif avec projection de poussière dynamique",
+    "fix": ""
+  },
+  "pixel/parts/susp-filetes": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Paire de combinés filetés rouges bien proportionnée et contrastée",
+    "fix": ""
+  },
+  "pixel/parts/susp-drift": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Kit grand angle avec fusées élargies et crémaillère bien identifiables",
+    "fix": ""
+  },
+  "pixel/parts/susp-rallye": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Amortisseur de rallye à long débattement avec ressort doré et bonbonne",
+    "fix": ""
+  },
+  "pixel/parts/freins-endurance": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Plaquettes de compétition et disque ventilé/percé très lisibles",
+    "fix": ""
+  },
+  "pixel/parts/freins-carbone": {
+    "ok": true,
+    "score": 10,
+    "issue": "R.A.S. - Disque carbone incandescent avec étrier jaune, excellent contraste",
+    "fix": ""
+  },
+  "pixel/parts/boite-courte": {
+    "ok": true,
+    "score": 9,
+    "issue": "R.A.S. - Boîte mécanique en coupe avec pignonnerie exposée bien visible",
+    "fix": ""
+  },
+  "pixel/parts/boite-seq": {
+    "ok": true,
+    "score": 9,
+    "issue": "Levier séquentiel net avec grille rétroéclairée néon bien lisible.",
+    "fix": ""
+  },
+  "pixel/parts/autobloquant": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente vue écorchée de différentiel à glissement limité.",
+    "fix": ""
+  },
+  "pixel/parts/kit-turbo": {
+    "ok": true,
+    "score": 10,
+    "issue": "Turbocharger parfaitement identifiable avec carter d'échappement incandescent.",
+    "fix": ""
+  },
+  "pixel/parts/turbo-hybride": {
+    "ok": true,
+    "score": 9,
+    "issue": "Gros turbo hybride bien détaillé avec ailettes aux reflets titane.",
+    "fix": ""
+  },
+  "pixel/parts/compresseur": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe compresseur blower chromé avec écope monté sur bloc V8.",
+    "fix": ""
+  },
+  "pixel/parts/admission": {
+    "ok": true,
+    "score": 9,
+    "issue": "Filtre à air conique rouge et silencieux inox polis très nets et lisibles.",
+    "fix": ""
+  },
+  "pixel/parts/stage1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Calculateur moteur ECU ouvert avec pistes néon lumineuses et connecteur.",
+    "fix": ""
+  },
+  "pixel/parts/k9k": {
+    "ok": true,
+    "score": 9,
+    "issue": "Bloc moteur diesel soigné monté sur son support d'atelier à roulettes.",
+    "fix": ""
+  },
+  "pixel/parts/batterie": {
+    "ok": true,
+    "score": 9,
+    "issue": "Batterie haute décharge bien reconnaissable avec cellules cyan lumineuses et blindage industriel.",
+    "fix": ""
+  },
+  "pixel/parts/eco-croisiere": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ordinateur de bord rétro très lisible avec icône de feuille éco et jauges vertes.",
+    "fix": ""
+  },
+  "pixel/parts/allegement": {
+    "ok": true,
+    "score": 9,
+    "issue": "Duo siège baquet et capot carbone ajouré parfaitement identifiable avec motif tressé net.",
+    "fix": ""
+  },
+  "pixel/parts/aileron": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aileron GT haut avec montants verticaux ajourés et dérives rouges très lisible en pixel art.",
+    "fix": ""
+  },
+  "pixel/parts/nitro": {
+    "ok": true,
+    "score": 9,
+    "issue": "Bouteilles jumelées de nitro bleu vif avec vannes et jets de vapeur de purge impeccables.",
+    "fix": ""
+  },
+  "pixel/parts/underglow": {
+    "ok": true,
+    "score": 9,
+    "issue": "Kit néon magenta enroulé avec connecteur, luminescence et palette synthwave exemplaires.",
+    "fix": ""
+  },
+  "pixel/rivals/lola": {
+    "ok": true,
+    "score": 9,
+    "issue": "Portrait de pilote style anime 90s très expressif, palette rétro et décor de stand réussis.",
+    "fix": ""
+  },
+  "pixel/rivals/cassette": {
+    "ok": true,
+    "score": 9,
+    "issue": "Design rétro impeccable avec mulet, lunettes aviateur réfléchissantes et casque audio.",
+    "fix": ""
+  },
+  "pixel/rivals/kenji": {
+    "ok": true,
+    "score": 10,
+    "issue": "Portrait pixel art de Kenji très réussi avec cure-dent, blouson de course et coupé sport en arrière-plan.",
+    "fix": ""
+  },
+  "pixel/rivals/roxy": {
+    "ok": true,
+    "score": 10,
+    "issue": "Roxy fidèle avec tresse rousse, casque jet en main et décor de stand rallye.",
+    "fix": ""
+  },
+  "pixel/rivals/baron": {
+    "ok": true,
+    "score": 10,
+    "issue": "Baron très élégant avec crinière blanche, costume blanc, foulard et gants de conduite.",
+    "fix": ""
+  },
+  "pixel/rivals/nyx": {
+    "ok": true,
+    "score": 10,
+    "issue": "Nyx mystérieuse avec chevelure violette, visière magenta néon et combinaison en cuir noir.",
+    "fix": ""
+  },
+  "pixel/packs/neon": {
+    "ok": true,
+    "score": 10,
+    "issue": "Supercar rouge franchissant la ligne d'arrivée sous le drapeau à damier, ciel dégagé pour le titre.",
+    "fix": ""
+  },
+  "pixel/packs/night": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe drift nocturne sous la pluie dans une ruelle rétro, phares allumés et ciel propice au titre.",
+    "fix": ""
+  },
+  "pixel/packs/overdrive": {
+    "ok": true,
+    "score": 10,
+    "issue": "Supercar noire et or lancée sur circuit avec vibreurs, tribunes et ciel ouvert pour le logo.",
+    "fix": ""
+  },
+  "pixel/ui/hero": {
+    "ok": true,
+    "score": 10,
+    "issue": "Écran d'accueil chaleureux d'atelier au crépuscule avec voiture bâchée, pompe rétro et ciel dégagé.",
+    "fix": ""
   }
 }
