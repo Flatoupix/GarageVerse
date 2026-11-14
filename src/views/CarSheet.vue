@@ -8,6 +8,7 @@ import { circuitScores, compatibility, engagements, partUnlockLevel, potential, 
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
 import { craft, craftCheck, freeParts, install, installCheck, prepOf, scrapCar, sellCar, sellCheck, sellPrice, stageCost, uninstall, upgrade, upgradeCheck, upgradeStat } from '../game/save'
 import { act, buzz, save } from '../game/store'
+import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
 
 const props = defineProps<{ id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean }>()
@@ -56,6 +57,7 @@ const modules = computed(() => upgradeKeys.map(key => {
 function improve(key: StatKey) {
   const level = (car.value?.upgrades[key] ?? 0) + 1
   if (!act(s => upgradeStat(s, props.id, key), `${upgrades[key].label} · niveau ${level}`, 'upgrade')) return
+  tutorialAction(10, 11)
   buzz(18)
   sparks('.car-sheet-portrait', palettes.cyan, 22, 0.8)
 }

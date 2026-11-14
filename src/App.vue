@@ -5,6 +5,8 @@ import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { buzz, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themes, unlocked, type Theme } from './game/theme'
 import { glossary, glossaryOpen, glossarySections, openHelp } from './game/help'
+import MechanicGuide from './components/MechanicGuide.vue'
+import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
@@ -26,6 +28,8 @@ const tabs: { id: Screen; label: string; icon: string }[] = [
   { id: 'home', label: 'Accueil', icon: '◐' }, { id: 'shop', label: 'Boosters', icon: '▱' },
   { id: 'garage', label: 'Garage', icon: '▦' }, { id: 'race', label: 'Course', icon: '⟶' },
 ]
+
+watch(() => save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
 
 // Crédits : le compteur défile et un montant flottant signale chaque gain ou dépense.
 const fx = ref<HTMLCanvasElement>()
@@ -59,12 +63,15 @@ onMounted(() => {
 
 function go(destination: Screen) {
   toast.value = null
+  if (destination === 'shop' || destination === 'booster') tutorialAction(0, 1)
+  if (destination === 'race') tutorialAction(2, 3)
   screen.value = destination
   window.scrollTo(0, 0)
   void nextTick(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))
 }
 
 function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+  if (screen.value === 'garage' && kind === 'car') tutorialAction(2, 3)
   inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)
@@ -176,6 +183,8 @@ function toggleSetting(key: Setting) {
 
     <p v-if="storageWarning" class="storage-warning" role="alert">La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.</p>
 
+    <MechanicGuide />
+
     <HomeView v-if="screen === 'home'" @go="go" />
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
     <BoosterView v-else-if="screen === 'booster'" @garage="go('garage')" @shop="go('shop')" @inspect="inspect" />
@@ -217,6 +226,7 @@ function toggleSetting(key: Setting) {
     <dialog ref="settings" class="modal settings-modal">
       <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>
       <h2>Réglages</h2>
+      <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">Revoir le tutoriel</button>
       <fieldset class="theme-picker">
         <legend>Thème</legend>
         <label v-for="t in themes" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">

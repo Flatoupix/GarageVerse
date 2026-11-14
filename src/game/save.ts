@@ -17,7 +17,11 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
 export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId }
+export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect'
+export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
+export const tutorialSteps = 12
 export interface Save {
+  tutorial: Tutorial
   version: 2
   daily: { date: string; won: boolean; booster: boolean; streak: number; lastWin: string }
   credits: number
@@ -36,6 +40,7 @@ export interface Save {
 export function newSave(): Save {
   const start = progression.start
   const save: Save = {
+    tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true, theme: 'neon' },
   }
@@ -64,6 +69,7 @@ function migrate(raw: string | null, save: Save) {
       if (!opening?.collected) continue
       for (const key of opening.editions ?? []) if (legacyEditions[key]) addCar(save, ...legacyEditions[key])
     }
+    if (Object.keys(old.record ?? {}).length) save.tutorial.status = 'done'
     if (old.preferences) save.preferences = { ...save.preferences, ...old.preferences }
   } catch { /* ancienne sauvegarde illisible : on repart du garage de départ */ }
 }
@@ -128,6 +134,13 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       save.duel = duel
     }
   } catch { save.duel = null }
+  const tutorial = input.tutorial
+  if (tutorial) save.tutorial = {
+    step: int(tutorial.step, 0, tutorialSteps - 1, 0),
+    status: tutorial.status === 'done' || tutorial.status === 'skipped' ? tutorial.status : 'active',
+    seen: (['nitro', 'heat', 'daily', 'perfect'] as const).filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
+  }
+  else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {
     sound: input.preferences?.sound !== false,
     reducedMotion: input.preferences?.reducedMotion === true,

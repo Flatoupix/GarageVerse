@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { discover } from '../game/tutorial'
 import { art } from '../game/art'
 import { constraintText } from '../game/daily'
 import { boosterById, conditionIcons, conditionLabels, rivalById, vehicles } from '../game/data'
@@ -8,7 +9,7 @@ import { act, dailySelected, ownedCount, save } from '../game/store'
 
 const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race'] }>()
 const challenge = computed(() => todayChallenge(save))
-function openDaily() { dailySelected.value = true; if (!save.duel) act(prepareDaily); emit('go', 'race') }
+function openDaily() { discover('daily'); dailySelected.value = true; if (!save.duel) act(prepareDaily); emit('go', 'race') }
 const pending = computed(() => save.sealed || (save.opening && save.opening.view !== 'recap'))
 const tickets = computed(() => Object.entries(save.tickets).filter(([, n]) => n > 0))
 const nextRival = computed(() => {

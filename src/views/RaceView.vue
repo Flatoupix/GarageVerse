@@ -11,6 +11,7 @@ import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks
 import { circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, type Round } from '../game/rules'
 import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
+import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
@@ -66,6 +67,7 @@ function toggle(id: string) {
 }
 function start() {
   if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
+    tutorialAction(0, 4)
     picked.value = 0; nitro.value = false; detail.value = null
     sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
   }
@@ -148,6 +150,7 @@ function engage() {
   const d = duel.value
   if (!d || d.winner) return
   const round = playRound(d, { car: picked.value, nitro: nitro.value }, Math.random)
+  tutorialAction(4, 9)
   shown.value = round
   detail.value = null
   nitro.value = false
@@ -178,6 +181,7 @@ function proceed() {
   if (duel.value?.winner) {
     const won = duel.value.winner === 'player'
     reward.value = settleDuel(save) ?? null
+    tutorialAction(0, 10)
     persist()
     sound(reward.value?.perfect ? 'legend' : won ? 'win' : 'lose')
     lastWinner.value = won ? 'player' : 'other'

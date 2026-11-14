@@ -138,3 +138,6 @@ pendant les secteurs continuent d’utiliser le hasard habituel du moteur.
 ### Apparence des éditions au tirage
 
 La fiche voiture liste les éditions possédées en lecture seule. Au tirage d’une voiture déjà possédée dans une autre édition, tu peux garder l’apparence actuelle (choix par défaut) ou afficher cette édition. Ce choix est sauvegardé immédiatement, repris au récapitulatif, dans le garage et en course, et conservé au rechargement. Une nouvelle voiture prend l’édition tirée. Un doublon de l’édition affichée indique « Doublon : +1 exemplaire » sans choix. Chaque tirage ajoute son édition et son exemplaire au récapitulatif, une seule fois ; les choix n’empêchent ni la carte suivante ni « Tout révéler ». Les cinq cartes sont toujours attribuées, et les apparences suivent l’ordre des choix si une voiture revient dans le même sachet.
+
+### Le mécano
+Une sauvegarde neuve reçoit un tutoriel en 12 étapes, dans l’interface existante. Les actions font aussi avancer les bulles, sans les valider. « Passer le tutoriel » ferme le parcours ; « Revoir le tutoriel » dans les Réglages le relance sans changer la partie. La progression est sauvegardée. Après le parcours, des bulles uniques expliquent la nitro, la surchauffe, le défi du jour et la victoire parfaite.
