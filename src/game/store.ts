@@ -1,7 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 import { playCue, type Cue } from '../feedback'
 import { vehicles } from './data'
-import { LEGACY_KEY, readSave, SAVE_KEY, type Save } from './save'
+import { LEGACY_KEY, refreshDaily, readSave, SAVE_KEY, type Save } from './save'
 
 function load(): Save {
   try { return readSave(localStorage.getItem(SAVE_KEY), localStorage.getItem(LEGACY_KEY)) } catch { storageWarning.value = true; return readSave(null) }
@@ -46,3 +46,7 @@ systemMotion.addEventListener('change', event => { systemReduced.value = event.m
 export const reducedMotion = computed(() => systemReduced.value || save.preferences.reducedMotion)
 
 export const ownedCount = computed(() => vehicles.filter(v => save.cars[v.id]).length)
+
+export const dailySelected = ref(false)
+setInterval(() => { const before = save.daily.date; refreshDaily(save); if (before !== save.daily.date) persist() }, 1000)
+window.addEventListener('focus', () => { refreshDaily(save); persist() })

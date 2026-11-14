@@ -592,3 +592,9 @@ button.card-back { animation: back-bob 2.6s ease-in-out infinite; }
   .tabbar { inset: auto auto 16px 50%; transform: translateX(-50%); width: 460px; border-radius: 18px; border: 1px solid #2de2ff33; }
 }
 @media (min-width: 1000px) { .garage-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+/* Boucle quotidienne : les commandes restent lisibles sur les petits écrans. */
+.daily-panel { min-width: 0; }
+.daily-panel p { overflow-wrap: anywhere; }
+.daily-panel .button { white-space: normal; overflow-wrap: anywhere; height: auto; min-height: 48px; }
+.daily-panel .button + .button { margin-top: 12px; }

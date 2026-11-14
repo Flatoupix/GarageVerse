@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { dailyChallenge, constraintText } from '../game/daily'
 import { art } from '../game/art'
 import { boosterById, rivalById, vehicles } from '../game/data'
-import { unlockedRivals } from '../game/save'
-import { ownedCount, save } from '../game/store'
+import { claimDailyBooster, prepareDaily, unlockedRivals } from '../game/save'
+import { act, dailySelected, ownedCount, save } from '../game/store'
 
 const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race'] }>()
+const challenge = computed(() => dailyChallenge(save.daily.date))
+function openDaily() { dailySelected.value = true; if (!save.duel) act(prepareDaily); emit('go', 'race') }
 const pending = computed(() => save.sealed || (save.opening && save.opening.view !== 'recap'))
 const tickets = computed(() => Object.entries(save.tickets).filter(([, n]) => n > 0))
 const nextRival = computed(() => {
@@ -33,6 +36,17 @@ const nextRival = computed(() => {
       </div>
     </section>
 
+    <section class="how daily-panel" aria-labelledby="daily-title">
+      <h2 id="daily-title">Défi du jour</h2>
+      <p>{{ challenge.rival.circuit.name }}</p>
+      <p>{{ constraintText(challenge.constraint) }}</p>
+      <p>Récompense : {{ challenge.reward }} crédits · une fois par jour</p>
+      <p v-if="save.daily.won">Défi réussi</p>
+      <p>Série : {{ save.daily.streak }} jour{{ save.daily.streak > 1 ? 's' : '' }}</p>
+      <button class="button primary wide" type="button" @click="openDaily">Défi du jour · {{ save.daily.won ? 'Rejouer' : 'Participer' }}</button>
+      <button v-if="!save.daily.booster" class="button quiet wide" type="button" @click="act(claimDailyBooster, 'Un ticket Neon Drive ajouté')">Récupérer le booster du jour</button>
+      <p v-else role="status">Reviens demain</p>
+    </section>
     <section class="home-tiles">
       <button type="button" class="tile deal" style="--i: 1" @click="emit('go', 'garage')">
         <span class="tile-label">Garage</span>

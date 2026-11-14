@@ -88,3 +88,25 @@ Ajouter une voiture consiste à ajouter une entrée dans `roster.json` puis à l
 ## 9. Ouvert après les premiers essais
 
 Le multijoueur, le paiement et la PWA restent hors périmètre. Les valeurs réelles des fiches et les droits (marques, œuvres) doivent être vérifiés avant toute diffusion. Il reste aussi à tester l’équilibrage de la Ligue Overdrive avec de vraies collections plutôt qu’avec la simulation.
+
+## Boucle quotidienne
+
+L’accueil propose un défi du jour et un ticket Neon Drive gratuit. Le tirage utilise
+la date locale AAAA-MM-JJ et un générateur déterministe indépendant : circuit de
+cinq secteurs, météo et adversaire généré restent identiques pour tous ce jour-là.
+Les six rivaux et leur progression restent inchangés.
+
+La contrainte choisit un plafond de coût réduit, au moins une voiture d’une
+catégorie donnée ou au moins une voiture d’une rareté donnée. Si le trio de départ
+ne peut pas la respecter, un plafond égal à son coût la remplace. Une écurie valide
+est préremplie depuis les voitures possédées ; toute sélection invalide indique
+la raison sur le bouton désactivé. Le défi réutilise les duels de secteur et
+l’arrivée des courses habituelles.
+
+La première victoire rapporte 180 crédits. Rejouer reste possible sans nouveau
+gain. La série augmente après une victoire le lendemain de la précédente ; un
+jour manqué l’interrompt. Le booster quotidien ajoute exactement un ticket, puis
+l’accueil affiche « Reviens demain ». La date, la réussite, la récupération, la
+série et la dernière victoire sont conservées dans garageverse:v2, avec des valeurs
+par défaut pour les anciennes sauvegardes. Au changement de date, réussite et
+récupération sont réinitialisées ; une course de la veille ne donne plus de gain.

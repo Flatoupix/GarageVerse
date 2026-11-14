@@ -1,22 +1,26 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
+import { dailyChallenge, constraintText } from '../game/daily'
 import { art, edition } from '../game/art'
 import {
   conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statShort, vehicleById, vehicles,
 } from '../game/data'
 import { confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween } from '../game/fx'
 import { evaluate, lineupCost, overheated, playRound, rivalLineup, statsOf, type Round } from '../game/rules'
-import { lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
-import { act, buzz, persist, reducedMotion, save, sound } from '../game/store'
+import { dailyLineupCheck, startDaily, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
+import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import CarCard from '../components/CarCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string]; go: [screen: 'garage' | 'shop'] }>()
-const chosen = ref<string | null>(save.duel?.rivalId ?? null)
-const rival = computed(() => chosen.value ? rivalById.get(chosen.value) : undefined)
+const chosen = ref<string | null>(save.duel?.rivalId ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
+dailySelected.value = false
+const challenge = computed(() => dailyChallenge(chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
+const isDaily = computed(() => chosen.value?.startsWith('daily:'))
+const rival = computed(() => isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
 const league = computed(() => rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
 const cost = computed(() => lineupCost(save.lineup))
-const problem = computed(() => rival.value ? lineupCheck(save, save.lineup, rival.value.id) : undefined)
+const problem = computed(() => isDaily.value ? dailyLineupCheck(save) : rival.value ? lineupCheck(save, save.lineup, rival.value.id) : undefined)
 const garageCars = computed(() => vehicles.filter(v => save.cars[v.id]).sort((a, b) => a.cost - b.cost))
 
 function toggle(id: string) {
@@ -28,7 +32,7 @@ function toggle(id: string) {
   void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, save.lineup.indexOf(id) + 1)})`, 1.1))
 }
 function start() {
-  if (rival.value && act(s => startDuel(s, rival.value!.id, Math.random))) {
+  if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
     picked.value = 0; nitro.value = false
     sound('rev'); streaks(palettes.cyan, 30); flash('#2de2ff', 0.2); buzz([20, 40, 60])
   }
@@ -140,7 +144,7 @@ function proceed() {
 }
 const lastWinner = ref<'player' | 'other'>('other')
 function abandon() {
-  act(s => { if (s.duel) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0 }; s.record[s.duel.rivalId].losses++; s.duel = null } }, 'Course abandonnée')
+  act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0 }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, 'Course abandonnée')
 }
 const name = (id: string) => `${vehicleById.get(id)!.name}`
 </script>
@@ -235,6 +239,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p>{{ rival.circuit.name }} : {{ rival.circuit.sectors.map(s => sectorLabels[s]).join(' · ') }}. Conditions fréquentes :
           {{ Object.keys(rival.circuit.conditions).slice(0, 2).map(c => conditionLabels[c as keyof typeof conditionLabels]).join(', ') }}.</p>
       </div>
+      <section v-if="isDaily" class="how daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
       <div class="cap-meter" :class="{ over: cost > league.cap }">
         <span>Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / league.cap * 100)}%` }"></span></div><b>{{ cost }}/{{ league.cap }}</b>
       </div>
@@ -245,7 +250,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </button>
       </div>
       <p class="rival-preview">En face : {{ rivalLineup(rival).map(e => `${name(e.id)} (Stage ${e.prep.stage})`).join(' · ') }}</p>
-      <button type="button" class="button primary wide" :disabled="Boolean(problem)" @click="start">{{ problem ?? 'Lancer la course' }} <span v-if="!problem" aria-hidden="true">⟶</span></button>
+      <button type="button" class="button primary wide" :disabled="Boolean(problem)" @click="start">{{ isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem" aria-hidden="true">⟶</span></button>
       <h2 class="list-title">Ton garage</h2>
       <ul class="pick-list">
         <li v-for="v in garageCars" :key="v.id">

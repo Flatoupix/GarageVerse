@@ -1,9 +1,10 @@
+import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import {
   boosterById, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Rarity,
 } from './data'
-import { compatibility, createDuel, lineupCost, potential, prepUsed, racer, type Duel, type Prep, type Rng } from './rules'
+import { compatibility, createRace, rivalLineup, createDuel, lineupCost, potential, prepUsed, racer, type Duel, type Prep, type Rng } from './rules'
 
 export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
@@ -14,6 +15,7 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean }
 export interface Save {
   version: 2
+  daily: { date: string; won: boolean; booster: boolean; streak: number; lastWin: string }
   credits: number
   tickets: Record<string, number>
   cars: Record<string, OwnedCar>
@@ -29,7 +31,7 @@ export interface Save {
 export function newSave(): Save {
   const start = progression.start
   const save: Save = {
-    version: 2, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
+    version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true },
   }
   for (const id of start.vehicles) addCar(save, id, 'Synthwave')
@@ -70,6 +72,12 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   try { input = JSON.parse(raw ?? 'null') } catch { input = null }
   if (input?.version !== 2) { migrate(legacy, save); return save }
 
+  if (input.daily) save.daily = {
+    date: typeof input.daily.date === 'string' ? input.daily.date : localDate(),
+    won: input.daily.won === true, booster: input.daily.booster === true,
+    streak: int(input.daily.streak, 0, 100000, 0), lastWin: typeof input.daily.lastWin === 'string' ? input.daily.lastWin : '',
+  }
+  refreshDaily(save)
   save.credits = int(input.credits, 0, 1e7, save.credits)
   save.tickets = Object.fromEntries(Object.entries(input.tickets ?? {}).filter(([id]) => boosterById.has(id)).map(([id, n]) => [id, int(n, 0, 99, 0)]))
   save.cars = {}
@@ -100,7 +108,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)))
   try {
     const duel = input.duel
-    if (duel && rivalById.has(duel.rivalId) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
+    if (duel && (rivalById.has(duel.rivalId) || /^daily:\d{4}-\d{2}-\d{2}$/.test(duel.rivalId)) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
       for (const who of ['player', 'rival'] as const) duel[who].lineup = duel[who].lineup.map(r => racer(r.id, r.prep))
       save.duel = duel
     }
@@ -282,6 +290,20 @@ export interface Reward { credits: number; ticket?: string }
 export function settleDuel(save: Save): Reward | undefined {
   const duel = save.duel
   if (!duel?.winner) return
+  if (duel.rivalId.startsWith('daily:')) {
+    refreshDaily(save)
+    const date = duel.rivalId.slice(6)
+    const reward = { credits: 0 }
+    if (duel.winner === 'player' && date === save.daily.date && !save.daily.won) {
+      save.daily.streak = save.daily.lastWin === previousDate(date) ? save.daily.streak + 1 : 1
+      save.daily.lastWin = date
+      save.daily.won = true
+      reward.credits = dailyChallenge(date).reward
+      save.credits += reward.credits
+    }
+    save.duel = null
+    return reward
+  }
   const rival = rivalById.get(duel.rivalId)!, league = leagueById.get(rival.league)!
   const record = save.record[rival.id] ??= { wins: 0, losses: 0 }
   let reward: Reward
@@ -302,4 +324,33 @@ export function settleDuel(save: Save): Reward | undefined {
 export const unlockedRivals = (save: Save) => {
   const order = [...rivalById.values()]
   return order.filter((r, i) => i === 0 || (save.record[order[i - 1].id]?.wins ?? 0) > 0).map(r => r.id)
+}
+
+export function refreshDaily(save: Save, date = localDate()) {
+  if (save.daily.date === date) return
+  save.daily.date = date
+  save.daily.won = false
+  save.daily.booster = false
+  if (save.daily.lastWin !== previousDate(date)) save.daily.streak = 0
+}
+export function claimDailyBooster(save: Save) {
+  refreshDaily(save)
+  if (save.daily.booster) return 'Reviens demain'
+  save.daily.booster = true
+  save.tickets.neon = (save.tickets.neon ?? 0) + 1
+}
+export function dailyLineupCheck(save: Save) {
+  if (save.lineup.some(id => !save.cars[id])) return 'Voiture absente du garage'
+  return constraintCheck(save.lineup, dailyChallenge().constraint)
+}
+export function prepareDaily(save: Save) {
+  refreshDaily(save)
+  save.lineup = validDailyLineup(Object.keys(save.cars), dailyChallenge().constraint) ?? []
+}
+export function startDaily(save: Save) {
+  refreshDaily(save)
+  const problem = dailyLineupCheck(save)
+  if (problem) return problem
+  const challenge = dailyChallenge()
+  save.duel = createRace(challenge.rival.id, challenge.rival.circuit, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(challenge.rival), dailyRng(challenge.date))
 }
