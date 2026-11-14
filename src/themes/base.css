@@ -1042,3 +1042,9 @@ button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow
 .swipe-hint { margin: 8px auto; max-width: 28ch; padding-inline: 8px; color: var(--muted); font-size: .8rem; line-height: 1.4; }
 .motion-reduced .swipe-card { transition: none; }
 @media (prefers-reduced-motion: reduce) { .swipe-card { transition: none; } }
+
+/* Choix d’apparence au tirage, indépendant des actions de progression. */
+.pull-edition { width: min(100%, 420px); min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--night); text-align: center; }
+.pull-edition p { margin: 0 0 8px; }
+.pull-edition-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pull-edition-actions .button { flex: 1 1 160px; min-width: 0; white-space: normal; }

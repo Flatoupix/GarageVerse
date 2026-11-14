@@ -11,7 +11,7 @@ export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
 
 export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number> }
-export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean } | { kind: 'part'; id: string; isNew: boolean }
+export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean; showEdition?: boolean } | { kind: 'part'; id: string; isNew: boolean }
 export interface Opening { booster: string; pulls: Pull[]; revealed: number; view: 'back' | 'face' | 'recap'; collected: boolean }
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
@@ -91,7 +91,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     if (!v || !car) continue
     const styles = stylesOf(id)
     const editions = Array.isArray(car.editions) ? car.editions.filter(s => styles.includes(s)) : []
-    // Une nouvelle édition par défaut (aujourd'hui le pixel art) est offerte aux voitures déjà possédées et affichée.
+    // Offre l’édition par défaut sans remplacer une apparence déjà choisie.
     const primary = defaultStyle(id)
     const usesOldDefault = !editions.includes(primary)
     if (usesOldDefault) editions.unshift(primary)
@@ -104,7 +104,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const levels = { acc: 0, vit: 0, man: 0, end: 0 }
     for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
     save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
-      shown: usesOldDefault ? primary : editions.includes(car.shown) ? car.shown : editions[0],
+      shown: editions.includes(car.shown) ? car.shown : editions[0],
       favorite: car.favorite === true, upgrades: levels }
   }
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
@@ -187,7 +187,7 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
     const v = weighted(unseen.length ? unseen : pool, favor, rng)
     const [primary, ...alts] = stylesOf(v.id)
     const style = alts.length && rng() < booster.altChance ? weighted(alts, () => 1, rng) : primary
-    const pull: Pull = { kind: 'car', id: v.id, style, isNew: !save.cars[v.id]?.editions.includes(style) && !seen.has(`edition:${v.id}:${style}`) }
+    const pull: Pull = { kind: 'car', id: v.id, style, isNew: !save.cars[v.id] && !seen.has(`car:${v.id}`) }
     seen.add(`car:${v.id}`)
     seen.add(`edition:${v.id}:${style}`)
     return pull
@@ -201,11 +201,41 @@ export function tear(save: Save, rng: Rng) {
   save.sealed = null
 }
 
+// Apparence prévue après les cartes précédentes, avant leur attribution au récapitulatif.
+export function openingStyle(save: Save, index: number): EditionStyle | undefined {
+  const pulls = save.opening?.pulls ?? []
+  const pull = pulls[index]
+  if (pull?.kind !== 'car') return
+  let shown = save.cars[pull.id]?.shown
+  for (const previous of pulls.slice(0, index + 1)) {
+    if (previous.kind === 'car' && previous.id === pull.id) {
+      shown ??= previous.style
+      if (previous.showEdition) shown = previous.style
+    }
+  }
+  return shown
+}
+
+export function showPullEdition(save: Save, index: number) {
+  const opening = save.opening
+  const pull = opening?.pulls[index]
+  if (!opening || opening.collected || opening.view !== 'face' || index !== opening.revealed - 1 || pull?.kind !== 'car') return
+  pull.showEdition = true
+  const car = save.cars[pull.id]
+  if (car) {
+    if (!car.editions.includes(pull.style)) car.editions.push(pull.style)
+    car.shown = pull.style
+  }
+}
+
 export function collect(save: Save) {
   const opening = save.opening
   if (!opening || opening.collected || opening.revealed !== opening.pulls.length) return
   for (const pull of opening.pulls) {
-    if (pull.kind === 'car') addCar(save, pull.id, pull.style)
+    if (pull.kind === 'car') {
+      addCar(save, pull.id, pull.style)
+      if (pull.showEdition) save.cars[pull.id].shown = pull.style
+    }
     else save.parts[pull.id] = (save.parts[pull.id] ?? 0) + 1
   }
   opening.collected = true

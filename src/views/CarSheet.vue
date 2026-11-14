@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import { art, edition } from '../game/art'
-import { families, partById, parts, progression, statLabels, stylesOf, vehicleById, vehicles, type Rival, type StatKey } from '../game/data'
+import { families, partById, parts, progression, statLabels, styleLabel, vehicleById, vehicles, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
@@ -184,10 +184,7 @@ function workshop(key?: StatKey) {
       <div class="sheet-card">
         <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
       </div>
-      <div v-if="car && car.editions.length > 1" class="edition-picker" aria-label="Éditions possédées">
-        <button v-for="style in stylesOf(id).filter(s => car.editions.includes(s))" :key="style" type="button"
-          :aria-pressed="car.shown === style" @click="act(() => { car.shown = style })">{{ style }}</button>
-      </div>
+      <p v-if="car" class="hint">Éditions : {{ car.editions.map(style => styleLabel(v, style)).join(', ') }}</p>
       <section v-if="!car" class="sheet-section">
         <h3>Pas encore dans ton garage</h3>
         <p v-if="v.craft" class="hint">Évolution de {{ base?.name }} {{ base?.version }}. Prépare-la au Stage {{ v.craft.stage }}, puis débloque-la pour {{ v.craft.credits }} crédits.</p>

@@ -3,7 +3,7 @@ import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { edition } from '../game/art'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
-import { collect, tear, type Pull } from '../game/save'
+import { collect, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
 import { buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
 import PullCard from '../components/PullCard.vue'
 import RevealStack from '../components/RevealStack.vue'
@@ -16,6 +16,15 @@ const booster = computed(() => boosterId.value ? boosterById.get(boosterId.value
 const opening = computed(() => save.opening ?? undefined)
 const faceUp = computed(() => opening.value?.view === 'face')
 const recap = computed(() => opening.value?.view === 'recap')
+const currentPull = computed(() => opening.value?.pulls[(opening.value?.revealed ?? 0) - 1])
+const differentEdition = computed(() => currentPull.value?.kind === 'car' &&
+  currentPull.value.style !== openingStyle(save, (opening.value?.revealed ?? 0) - 1))
+function showEdition() {
+  showPullEdition(save, (opening.value?.revealed ?? 0) - 1)
+  persist()
+}
+const recapPulls = computed(() => opening.value?.pulls.map(pull => pull.kind === 'car'
+  ? { ...pull, style: save.cars[pull.id]?.shown ?? pull.style } : pull) ?? [])
 const tearing = ref(false)
 const stackEntering = ref(false)
 const flipping = ref(false)
@@ -157,7 +166,7 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
     <div v-else-if="recap" class="recap">
       <p class="recap-progress">{{ newCount }} {{ newCount === 1 ? 'nouvelle carte' : 'nouvelles cartes' }} dans ton garage</p>
       <div class="recap-grid">
-        <button v-for="(pull, index) in opening.pulls" :key="index" type="button" class="card-tile deal" :style="{ '--i': index }" @click="emit('inspect', pull.kind, pull.id)">
+        <button v-for="(pull, index) in recapPulls" :key="index" type="button" class="card-tile deal" :style="{ '--i': index }" @click="emit('inspect', pull.kind, pull.id)">
           <PullCard :pull="pull" compact />
           <span v-if="pull.isNew" class="tile-tag">Nouveau</span>
         </button>
@@ -168,7 +177,20 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
       </div>
     </div>
     <RevealStack v-else :opening="opening" :face-up="faceUp" :flipping="flipping && !reduced" :entering="stackEntering"
-      :cinematic="cinematic && !reduced" :tell="tell" :glow="glow" @flip="flipCard" @next="nextCard()" @swipe="swipeCard" @quick="quickReveal" />
+      :cinematic="cinematic && !reduced" :tell="tell" :glow="glow" @flip="flipCard" @next="nextCard()" @swipe="swipeCard" @quick="quickReveal">
+      <template #edition>
+        <aside v-if="currentPull?.kind === 'car' && !currentPull.isNew" class="pull-edition" aria-live="polite">
+          <template v-if="differentEdition">
+            <p>Tu as déjà cette voiture</p>
+            <div class="pull-edition-actions">
+              <button type="button" class="button ghost" @click="persist">Garder l’apparence actuelle</button>
+              <button type="button" class="button primary" @click="showEdition">Afficher cette édition</button>
+            </div>
+          </template>
+          <p v-else>Doublon : +1 exemplaire</p>
+        </aside>
+      </template>
+    </RevealStack>
   </main>
   <main v-else class="play empty-state">
     <h1 tabindex="-1">Aucun booster en cours</h1>

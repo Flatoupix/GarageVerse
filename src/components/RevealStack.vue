@@ -112,6 +112,7 @@ function pointerCancel(event: PointerEvent) {
         </div>
       </div>
     </div>
+    <slot v-if="faceUp" name="edition" />
     <p v-if="faceUp && opening.revealed === 1" class="swipe-hint">Glisse la carte pour passer à la suivante</p>
     <div class="stack-indicators" aria-hidden="true">
       <span v-for="position in total" :key="position" :class="{ revealed: position <= opening.revealed, current: position === slot + 1 }"></span>
