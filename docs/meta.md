@@ -37,6 +37,8 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 
 Les doublons alimentent la progression, comme le demande la bible. Le garage de départ contient la Clio III, la Twingo I et la Panda 4×4, trois pièces, 300 crédits et deux tickets Neon Drive.
 
+**Emplacements d’amélioration sur la carte.** Sous les statistiques, la carte d’une voiture possédée montre un emplacement par groupe d’atelier, dans l’ordre des statistiques : éteint d’origine, à moitié allumé au niveau 1, pleinement allumé au niveau 2. Deux voyants signalent les pièces montées, colorés selon leur rareté. Les styles communs à tous les thèmes vivent dans `src/themes/shared.css`.
+
 Le garage propose une recherche, des filtres et un accès aux favoris et à l’écurie. L’atelier associe les pneus et la suspension à la maniabilité, la transmission et le nitro à l’accélération, le moteur et le turbo à la vitesse, et les freins et le châssis à l’endurance.
 
 ## 5. Course en secteurs
@@ -48,6 +50,8 @@ C’est la piste « épreuve en secteurs » de la bible, enrichie de choix simul
 3. **Engagement.** À chaque secteur, chaque pilote engage une voiture en secret et peut brûler une charge de **Nitro** (+2, deux charges par course). Une voiture court `1 + ⌊END/4⌋` secteurs, hors bonus. Au-delà, elle **surchauffe** (−3).
 4. **Résolution.** Score = statistique préparée + modificateurs de terrain + capacités et pièces + Nitro. En cas d’égalité, l’Endurance départage. La course se joue au meilleur des cinq secteurs.
 5. **Part de hasard.** Comme les dégâts d’un jeu de combat au tour par tour, chaque voiture fait de 88 à 112 % de son score, au moins ±1 (« Forme du jour »). Une fois sur seize, elle signe un « Secteur parfait » (environ ×1,5, au moins +2). Une fois sur vingt-quatre, un incident lui coûte environ 40 % (au moins 2 points) : faux départ, tête-à-queue, aspiration ratée, crevaison ou aquaplaning. La pluie et la terre augmentent ce risque de moitié, la surchauffe le double. Le joueur voit la fourchette de score avant d’engager une voiture (`luckRange`, `src/game/rules.ts`).
+
+**Mise en scène d’un secteur.** Une mini-course (`src/components/SectorRun.vue`) joue le détail de score ligne par ligne : chaque bonus fait avancer la voiture, chaque malus la freine, la nitro la pousse et un incident la fait partir en tête-à-queue. Un toucher passe l’animation, le mouvement réduit la saute. À scores égaux, le verdict indique l’Endurance des deux voitures qui a départagé. La nitro et le bouton « Engager » restent collés au bas de l’écran.
 
 | Terrain | Modificateurs communs |
 | --- | --- |

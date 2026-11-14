@@ -13,6 +13,7 @@ import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
+import SectorRun from '../components/SectorRun.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
 const chosen = ref<string | null>(save.duel?.rivalId ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
@@ -92,9 +93,21 @@ const shown = ref<Round | null>(null)
 const reward = ref<Reward | null>(null)
 const index = computed(() => duel.value?.rounds.length ?? 0)
 
-// Mise en scène d'un secteur : les scores défilent, puis le verdict tombe. Tant qu'il n'est pas tombé,
-// la piste et le tableau de score n'affichent pas encore ce secteur.
+// Mise en scène d'un secteur : une mini-course joue le détail de score ligne par ligne, puis le verdict tombe.
+// Tant qu'il n'est pas tombé, la piste et le tableau de score n'affichent pas encore ce secteur.
 const settled = ref(true)
+const step = ref(0)
+const STEP_MS = 560
+const runArts = computed(() => shown.value
+  ? { player: carArt('player', shown.value.player.car), rival: carArt('rival', shown.value.rival.car) } : {})
+// À scores égaux, l'Endurance des deux voitures départage : le verdict le dit.
+const tieBreak = computed(() => {
+  const round = shown.value, d = duel.value
+  if (!round || !d || round.player.score !== round.rival.score) return ''
+  const mine = d.player.lineup[round.player.car].stats.end, theirs = d.rival.lineup[round.rival.car].stats.end
+  return round.winner === 'tie' ? `Égalité à ${round.player.score}, et même Endurance (${mine}) : personne ne marque.`
+    : `Égalité à ${round.player.score} : l’Endurance départage, ${mine} pour toi contre ${theirs}.`
+})
 const counts = reactive({ player: 0, rival: 0 })
 const rewardShown = ref(0)
 let timers: ReturnType<typeof setTimeout>[] = []
@@ -113,8 +126,23 @@ const carArt = (who: 'player' | 'rival', car: number) => {
   return edition(id, who === 'player' ? save.cars[id]?.shown : undefined).art
 }
 
+// Une ligne du détail de score par étape, pour les deux voitures à la fois.
+function advance(round: Round, to: number) {
+  step.value = to
+  sound('tick')
+  for (const who of ['player', 'rival'] as const) {
+    const lines = round[who].lines.slice(0, to), line = round[who].lines[to - 1]
+    counts[who] = lines.reduce((sum, l) => sum + l.value, 0)
+    if (!line || to === 1) continue
+    if (line.label === 'Nitro') { sound('nitro'); flash(tone.gold, 0.22); streaks(palettes.fire, 40, who === 'player' ? 1 : -1) }
+    else if (to === round[who].lines.length && round[who].luck === 'incident') { shake(2); if (who === 'player') buzz([40, 30, 40]) }
+  }
+}
+function skipRun() { if (shown.value && !settled.value) { clear(); settle(shown.value) } }
+
 function settle(round: Round) {
   settled.value = true
+  step.value = Math.max(round.player.lines.length, round.rival.lines.length) + 1
   counts.player = round.player.score
   counts.rival = round.rival.score
   sound('slam')
@@ -162,16 +190,10 @@ function engage() {
     settled.value = false
     counts.player = counts.rival = 0
     sound('whoosh')
-    if (round.player.nitro || round.rival.nitro) {
-      sound('nitro'); flash(tone.gold, 0.22)
-      streaks(palettes.fire, 40, round.player.nitro ? 1 : -1)
-    }
-    let ticked = 0
-    for (const who of ['player', 'rival'] as const) stops.push(tween(0, round[who].score, 750, value => {
-      if (value !== counts[who] && performance.now() - ticked > 55) { ticked = performance.now(); sound('tick') }
-      counts[who] = value
-    }))
-    timers.push(setTimeout(() => settle(round), 920))
+    step.value = 0
+    const steps = Math.max(round.player.lines.length, round.rival.lines.length)
+    for (let k = 1; k <= steps; k++) timers.push(setTimeout(() => advance(round, k), 320 + (k - 1) * STEP_MS))
+    timers.push(setTimeout(() => settle(round), 320 + steps * STEP_MS + 240))
   }
   const free = d.player.lineup.findIndex((_, car) => !overheated(d.player, car))
   if (overheated(d.player, picked.value) && free >= 0) picked.value = free
@@ -248,14 +270,12 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <section v-if="shown" class="round-result" :class="settled ? shown.winner : 'pending'">
         <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? 'Secteur gagné' : shown.winner === 'rival' ? 'Secteur perdu' : 'Égalité parfaite' }}</h2>
         <h2 v-else>{{ sectorLabels[shown.sector] }} · {{ conditionLabels[shown.condition] }}</h2>
+        <SectorRun :round="shown" :step="step" :running="!settled" :arts="runArts" @skip="skipRun" />
+        <p v-if="settled && tieBreak" class="tie-note">{{ tieBreak }}</p>
         <div class="duel-columns">
           <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col"
             :class="[who, { winner: settled && shown.winner === who, loser: settled && shown.winner !== who && shown.winner !== 'tie', boosted: shown[who].nitro }]">
-            <div class="clash-car">
-              <img v-if="carArt(who, shown[who].car)" :src="carArt(who, shown[who].car)" alt="" />
-              <span v-if="shown[who].nitro" class="clash-nitro">Nitro</span>
-            </div>
-            <span class="duel-who">{{ who === 'player' ? 'Toi' : rival.name }}</span>
+            <span class="duel-who">{{ who === 'player' ? 'Toi' : rival.name }} <span v-if="shown[who].nitro" class="clash-nitro">Nitro</span></span>
             <strong>{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
             <span class="duel-score" :aria-label="`${shown[who].score} points`">{{ counts[who] }}</span>
             <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ l.label }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
@@ -308,11 +328,14 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <p><span v-help="'forme'">Fourchette de score</span> sur ce secteur : <strong>{{ carDetail.range[0] }}–{{ carDetail.range[1] }}</strong> points · sans nitro</p>
         </section>
         <p class="engage-hint">Sous chaque voiture : sa <span v-help="'forme'">fourchette de score</span> et ses <span v-help="'secteurs'">secteurs restants</span>.</p>
-        <label class="nitro-toggle" :class="{ off: !duel.player.nitro, armed: nitro }">
-          <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" @change="armNitro" />
-          <span><span v-help="'nitro'">Nitro</span> <small>{{ duel.player.nitro }} charge{{ duel.player.nitro > 1 ? 's' : '' }} · +2 sur ce secteur</small></span>
-        </label>
-        <button type="button" class="button primary wide" :class="{ 'nitro-armed': nitro }" @click="engage">Engager {{ duel.player.lineup[picked].vehicle.name }} <span aria-hidden="true">⟶</span></button>
+        <!-- Toujours à portée de pouce : la nitro et le bouton restent collés au bas de l'écran. -->
+        <div class="engage-actions">
+          <label class="nitro-toggle" :class="{ off: !duel.player.nitro, armed: nitro }">
+            <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" @change="armNitro" />
+            <span><span v-help="'nitro'">Nitro</span> <small>{{ duel.player.nitro }} charge{{ duel.player.nitro > 1 ? 's' : '' }} · +2</small></span>
+          </label>
+          <button type="button" class="button primary" :class="{ 'nitro-armed': nitro }" @click="engage">Engager <span class="engage-pick">{{ duel.player.lineup[picked].vehicle.name }}</span> <span aria-hidden="true">⟶</span></button>
+        </div>
         <button type="button" class="button quiet wide" @click="abandon">Abandonner</button>
       </section>
     </template>

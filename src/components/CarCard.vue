@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { edition } from '../game/art'
-import { rarityClass, rarityMark, sectorIcons, statLabels, statShort, styleLabel, vehicleById, vehicles, type EditionStyle, type StatKey } from '../game/data'
-import { STAT_CAP, statsOf, type Prep } from '../game/rules'
+import { partById, rarityClass, rarityMark, sectorIcons, statLabels, statShort, styleLabel, vehicleById, vehicles, type EditionStyle, type StatKey } from '../game/data'
+import { partUnlockLevel, STAT_CAP, statsOf, upgrades, type Prep } from '../game/rules'
 
 const props = defineProps<{ id: string; styleName?: EditionStyle; prep?: Prep; cinematic?: boolean; compact?: boolean }>()
 const v = computed(() => vehicleById.get(props.id)!)
@@ -11,6 +11,14 @@ const stats = computed(() => statsOf(v.value, props.prep ?? { stage: 0, parts: [
 const keys: StatKey[] = ['acc', 'vit', 'man', 'end']
 const category = computed(() => v.value.culture?.aura[0] ?? v.value.tags[0])
 const title = computed(() => props.id === 'venom' ? 'Venom F5' : v.value.name)
+// Emplacements d'amélioration, un par groupe d'atelier et alignés sous la statistique qu'il améliore :
+// éteint d'origine, à moitié allumé au niveau 1, pleinement allumé au niveau 2, avec un voyant par pièce montée.
+const mods = computed(() => props.prep && keys.map(key => {
+  const level = Math.min(partUnlockLevel, props.prep!.upgrades?.[key] ?? 0)
+  const fitted = props.prep!.parts.map(id => partById.get(id)).filter(part => part && (upgrades[key].families as string[]).includes(part.family))
+  const text = [`niveau ${level} sur ${partUnlockLevel}`, ...fitted.map(part => part!.name)].join(', ')
+  return { key, level, fitted, label: `${upgrades[key].label} : ${text}` }
+}))
 const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: sectorIcons.ligne, man: sectorIcons.virage, end: sectorIcons.endurance }
 </script>
 
@@ -68,6 +76,20 @@ const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: secto
             <span class="bar" :style="{ '--fill': stats[key] / STAT_CAP }" aria-hidden="true"></span></dd>
         </div>
       </dl>
+      <ul v-if="mods" class="mod-row" aria-label="Améliorations">
+        <li v-for="mod in mods" :key="mod.key" class="mod-slot" :class="`level-${mod.level}`" :title="mod.label">
+          <span class="visually-hidden">{{ mod.label }}</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <g v-if="mod.key === 'man'"><circle cx="8" cy="8" r="6" /><circle cx="8" cy="8" r="2.4" /></g>
+            <path v-else-if="mod.key === 'acc'" d="M4 3v10M8 3v10M12 3v5M4 8h8" />
+            <path v-else-if="mod.key === 'vit'" d="M4 2.5h8v6H4zM4 5.5h8M8 8.5V12M6.2 13.2h3.6" />
+            <g v-else><circle cx="7" cy="8" r="5.5" /><circle cx="7" cy="8" r="1.4" /><path class="mod-caliper" d="M12.2 4.6a6.4 6.4 0 0 1 0 6.8" /></g>
+          </svg>
+          <span class="mod-lamps" aria-hidden="true">
+            <i v-for="n in 2" :key="n" :class="mod.fitted[n - 1] ? `fitted rarity-${rarityClass[mod.fitted[n - 1]!.rarity]}` : ''"></i>
+          </span>
+        </li>
+      </ul>
       <div v-if="!compact" class="signature">
         <span class="signature-mark" aria-hidden="true">✦</span>
         <div><b>{{ v.signature.name }}</b><span>{{ v.signature.text }}</span></div>

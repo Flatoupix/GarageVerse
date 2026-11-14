@@ -5,6 +5,7 @@ import carnet from '../themes/carnet.css?inline'
 import consoleSheet from '../themes/console.css?inline'
 import dos from '../themes/dos.css?inline'
 import neon from '../themes/neon.css?inline'
+import shared from '../themes/shared.css?inline'
 import sobre from '../themes/sobre.css?inline'
 import sport from '../themes/sport.css?inline'
 import { vehicleById } from './data'
@@ -51,7 +52,7 @@ let sheet: HTMLStyleElement | undefined
 export function applyTheme(id: Theme) {
   theme.value = id
   sheet ??= document.head.appendChild(document.createElement('style'))
-  sheet.textContent = sheets[id]
+  sheet.textContent = sheets[id] + shared
   document.documentElement.dataset.theme = id
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themes.find(t => t.id === id)!.color)
 }
