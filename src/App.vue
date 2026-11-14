@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
-import { boosterOrder, boosters, cardDetails, type BoosterId, type EditionId } from './catalog'
+import { boosterOrder, boosters, cardDetails, editionIds, type BoosterId, type EditionId } from './catalog'
 import { collect, emptySave, ownedCopies, readSave, SAVE_KEY, tear } from './collection'
 import { playCue } from './feedback'
 import CardFace from './components/CardFace.vue'
@@ -35,11 +35,17 @@ const mainHeading = ref<HTMLElement>()
 const copies = computed(() => ownedCopies(save.value))
 const nextBooster = computed(() => boosterOrder.find(id => !save.value.openings[id]?.collected))
 const featuredBooster = computed(() => activeId.value ?? nextBooster.value ?? 'after-hours')
+const showMissing = ref(false)
 const groupedCopies = computed(() => {
   const counts = new Map<EditionId, number>()
   for (const { editionId } of copies.value) counts.set(editionId, (counts.get(editionId) ?? 0) + 1)
-  return [...counts.entries()]
+  return counts
 })
+const garageEditions = computed(() => showMissing.value ? editionIds : editionIds.filter(id => groupedCopies.value.has(id)))
+const selectedVariants = computed(() => selectedEdition.value
+  ? editionIds.filter(id => cardDetails(id).edition.cardId === selectedDetails.value?.edition.cardId && groupedCopies.value.has(id))
+  : [])
+const upcomingEditions = computed(() => opening.value?.editions.filter(id => !groupedCopies.value.has(id)).length ?? 0)
 let tearTimer: ReturnType<typeof setTimeout> | undefined
 let stackTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -84,6 +90,12 @@ function startBooster(id: BoosterId) {
     flipping.value = false
     cinematic.value = false
     persist()
+  }
+  for (const editionId of boosters[id].editions) {
+    const { edition } = cardDetails(editionId)
+    for (const url of [edition.artwork, edition.drift?.backdrop, edition.drift?.car]) {
+      if (url) new Image().src = url
+    }
   }
   go('booster')
 }
@@ -230,9 +242,11 @@ function showCard(id: EditionId) {
         </div>
       </div>
       <div v-else-if="recap" class="recap">
+        <p class="recap-progress">{{ upcomingEditions }} {{ upcomingEditions === 1 ? 'nouvelle édition' : 'nouvelles éditions' }} pour ton garage</p>
         <div class="recap-grid">
           <button v-for="(id, index) in opening.editions" :key="index" type="button" class="card-tile" @click="showCard(id)">
             <CardFace :edition-id="id" />
+            <span v-if="!groupedCopies.has(id)" class="tile-tag">Nouveau</span>
           </button>
         </div>
         <button type="button" class="button primary" @click="sendToGarage">Ajouter au garage <span aria-hidden="true">→</span></button>
@@ -245,13 +259,25 @@ function showCard(id: EditionId) {
       <div class="garage-heading">
         <span class="eyebrow"><span></span> Collection 001</span>
         <h1 ref="mainHeading" tabindex="-1">Mon garage</h1>
-        <p>{{ copies.length }} {{ copies.length === 1 ? 'exemplaire' : 'exemplaires' }} · {{ groupedCopies.length }} {{ groupedCopies.length === 1 ? 'édition' : 'éditions' }}</p>
+        <p>{{ copies.length }} {{ copies.length === 1 ? 'exemplaire' : 'exemplaires' }}</p>
       </div>
-      <div v-if="copies.length" class="garage-grid">
-        <button v-for="[id, count] in groupedCopies" :key="id" type="button" class="card-tile" @click="showCard(id)">
-          <CardFace :edition-id="id" />
-          <span v-if="count > 1" class="copy-count">×{{ count }}</span>
-        </button>
+      <div class="collection-progress">
+        <div><strong>Éditions découvertes</strong><span>{{ groupedCopies.size }} / {{ editionIds.length }}</span></div>
+        <progress :value="groupedCopies.size" :max="editionIds.length" aria-label="Éditions découvertes"></progress>
+        <label class="missing-toggle"><input type="checkbox" v-model="showMissing" /> Afficher les éditions manquantes</label>
+      </div>
+      <div v-if="garageEditions.length" class="garage-grid">
+        <template v-for="id in garageEditions" :key="id">
+          <button v-if="groupedCopies.has(id)" type="button" class="card-tile" @click="showCard(id)">
+            <CardFace :edition-id="id" />
+            <span v-if="(groupedCopies.get(id) ?? 0) > 1" class="copy-count">×{{ groupedCopies.get(id) }}</span>
+          </button>
+          <div v-else class="missing-card">
+            <span>001 / {{ cardDetails(id).card.number }}</span>
+            <strong>{{ cardDetails(id).vehicle.name }}</strong>
+            <span>{{ cardDetails(id).edition.style }}</span>
+          </div>
+        </template>
       </div>
       <p v-else class="garage-empty">Les cartes de ton premier booster apparaîtront ici.</p>
       <button v-if="nextBooster" type="button" class="button primary" @click="startBooster(featuredBooster)">
@@ -271,7 +297,11 @@ function showCard(id: EditionId) {
     <dialog ref="detail" class="modal detail-modal" aria-label="Détail de la carte">
       <form method="dialog"><button class="close-modal" aria-label="Fermer la carte">×</button></form>
       <CardFace v-if="selectedEdition" :edition-id="selectedEdition" />
+      <div v-if="selectedVariants.length > 1" class="edition-picker" aria-label="Éditions possédées">
+        <button v-for="id in selectedVariants" :key="id" type="button" :aria-pressed="id === selectedEdition" @click="selectedEdition = id">{{ cardDetails(id).edition.style }}</button>
+      </div>
       <p v-if="selectedDetails && selectedDetails.card.culture" class="detail-culture">Aura culturelle permanente · {{ selectedDetails.card.culture.work }}</p>
+      <p v-if="selectedDetails" class="detail-culture">{{ selectedDetails.card.signature.description }}</p>
     </dialog>
   </div>
 </template>

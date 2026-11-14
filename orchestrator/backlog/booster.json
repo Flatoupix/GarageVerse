@@ -1,0 +1,14 @@
+{
+  "id": "booster",
+  "title": "Créer une interaction tactile d’ouverture de booster",
+  "brief": "Déchirer un booster au doigt, jouer des animations 2D/2.5D, révéler progressivement cinq cartes et donner une mise en scène spéciale à la carte rare. Sur la branche de base, le prototype implémente déjà ce parcours. Vérifier les écarts et ne modifier que ce qui manque ou régresse. Un résultat sans diff est valide si les contrôles passent.",
+  "requirements": [
+    "Un petit glissement annulé laisse le sachet scellé. Un balayage complet et le bouton d’ouverture atteignent la pile.",
+    "Le joueur révèle exactement cinq cartes, une par une ou via la révélation rapide.",
+    "La Skyline de Brian déclenche son drift dans le lot After Hours. Le mouvement réduit montre la composition fixe.",
+    "Les cartes rejoignent le garage et la reprise après rechargement ne les attribue pas une deuxième fois.",
+    "Le garage indique la progression sur six éditions et permet de comparer les deux styles de la Venom. Les commandes et les cartes restent lisibles à 320 et 390 px."
+  ],
+  "paths": ["src/"],
+  "browser": "booster"
+}

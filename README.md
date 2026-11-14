@@ -217,3 +217,13 @@ Le premier sachet est **Collection 001**. Le deuxième, **After Hours**, est aus
 ### Visuels de démonstration
 
 Les illustrations WebP dans `src/assets/` sont remplaçables. L’affiche Pixel Art fournie sert d’illustration à l’édition alternative de la Venom. Les illustrations Classic, le décor de nuit et le calque de la Skyline sont générés pour le prototype privé. Le catalogue relie les visuels aux cartes dans `src/catalog.ts`.
+
+### Progression de collection dans la démo
+
+Les deux boosters permettent de découvrir six éditions et d’obtenir dix exemplaires. Le garage indique la progression, affiche les manquantes à la demande et permet de comparer les versions Classic et Pixel Art de la Venom sur une même fiche. Le cadre indique la rareté de collection. Le profil et la capacité signature expriment le rôle envisagé pour les futurs duels. L’aura de la Skyline de Brian conserve son propre emplacement.
+
+Pour le premier essai, vérifier sur téléphone si les cartes restent lisibles, si les finitions donnent envie d’inspecter un tirage, et si le garage donne envie d’ouvrir le second booster. Les premiers choix de méta à prototyper ensuite sont le rôle d’une voiture par secteur, le coût de préparation et l’usage des doublons. La rareté, la finition et l’aura gardent des fonctions distinctes.
+
+### Orchestrateur local
+
+Voir [l’installation, les commandes et les rapports](orchestrator/README.md).
