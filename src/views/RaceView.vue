@@ -66,7 +66,7 @@ function toggle(id: string) {
 }
 function start() {
   if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
-    picked.value = 0; nitro.value = false
+    picked.value = 0; nitro.value = false; detail.value = null
     sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
   }
 }
@@ -75,6 +75,17 @@ function start() {
 const duel = computed(() => save.duel)
 const picked = ref(0)
 const nitro = ref(false)
+const detail = ref<{ side: 'player' | 'rival'; car: number } | null>(null)
+const carDetail = computed(() => {
+  const d = duel.value, selected = detail.value
+  if (!d || !selected || d.winner || d.rounds.length >= d.sectors.length) return null
+  const side = d[selected.side], car = side.lineup[selected.car]
+  return {
+    car, remaining: car.uses - side.used[selected.car],
+    stat: sectorStat[d.sectors[d.rounds.length]],
+    range: luckRange(evaluate(d, selected.side, selected.car, false).score),
+  }
+})
 const shown = ref<Round | null>(null)
 const reward = ref<Reward | null>(null)
 const index = computed(() => duel.value?.rounds.length ?? 0)
@@ -123,6 +134,7 @@ function settle(round: Round) {
 
 function pick(car: number, event: Event) {
   picked.value = car
+  detail.value = { side: 'player', car }
   pop(event.currentTarget as Element, 1.06, 220)
 }
 function armNitro() {
@@ -137,6 +149,7 @@ function engage() {
   if (!d || d.winner) return
   const round = playRound(d, { car: picked.value, nitro: nitro.value }, Math.random)
   shown.value = round
+  detail.value = null
   nitro.value = false
   persist()
   clear()
@@ -248,23 +261,41 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p class="engage-goal">Le plus gros score gagne le secteur. Remporte le plus de secteurs sur {{ duel.sectors.length }}. Ici, c’est {{ statArticle[sectorStat[duel.sectors[index]]] }}<b>{{ statLabels[sectorStat[duel.sectors[index]]] }}</b> qui compte : choisis ta voiture.</p>
         <p class="engage-brief">Secteur {{ index + 1 }}/{{ duel.sectors.length }} · <b v-help="duel.sectors[index]">{{ sectorLabels[duel.sectors[index]] }}</b> (<span v-help="sectorStat[duel.sectors[index]]">{{ statLabels[sectorStat[duel.sectors[index]]] }}</span>)
           · <span v-help="duel.conditions[index]">{{ conditionIcons[duel.conditions[index]] }} {{ conditionLabels[duel.conditions[index]] }}</span></p>
+        <h2 class="engage-rival-title">Voitures de {{ rival.name }}</h2>
+        <div class="engage-cars engage-rivals" aria-label="Écurie adverse">
+          <button v-for="(r, car) in duel.rival.lineup" :key="car" type="button"
+            class="engage-car engage-rival" :class="{ hot: overheated(duel.rival, car) }"
+            :aria-label="`Voiture adverse : ${r.vehicle.name}`" aria-controls="engage-detail"
+            @click="detail = { side: 'rival', car }">
+            <img v-if="carArt('rival', car)" :src="carArt('rival', car)" alt="" />
+            <span class="engage-name">{{ r.vehicle.name }}</span>
+            <span class="engage-uses">{{ r.uses - duel.rival.used[car] }} secteur{{ r.uses - duel.rival.used[car] > 1 ? 's' : '' }}</span>
+            <span v-if="overheated(duel.rival, car)" class="engage-heat">Surchauffe −3</span>
+            <span class="engage-uses">Nitro ×{{ duel.rival.nitro }}</span>
+          </button>
+        </div>
         <div class="engage-cars" role="radiogroup" aria-label="Voiture engagée">
           <button v-for="(r, car) in duel.player.lineup" :key="car" type="button" role="radio" :aria-checked="picked === car"
-            class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="pick(car, $event)">
+            aria-controls="engage-detail" class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="pick(car, $event)">
             <img v-if="edition(r.id, save.cars[r.id]?.shown).art" :src="edition(r.id, save.cars[r.id]?.shown).art" alt="" />
             <span class="engage-name">{{ r.vehicle.name }}</span>
             <span :key="projections[car]" class="engage-score" :aria-label="`de ${luckRange(projections[car])[0]} à ${luckRange(projections[car])[1]} points`">{{ rangeText(projections[car]) }}</span>
             <span class="engage-uses">{{ overheated(duel.player, car) ? 'Surchauffe −3' : `${r.uses - duel.player.used[car]} secteur${r.uses - duel.player.used[car] > 1 ? 's' : ''}` }}</span>
           </button>
         </div>
+        <section v-if="carDetail" id="engage-detail" class="engage-detail" aria-labelledby="engage-detail-title">
+          <h2 id="engage-detail-title">{{ carDetail.car.vehicle.name }}</h2>
+          <dl class="engage-stats">
+            <div v-for="stat in (['acc', 'vit', 'man', 'end'] as const)" :key="stat"
+              :class="{ 'sector-stat': stat === carDetail.stat }" :aria-current="stat === carDetail.stat ? 'true' : undefined">
+              <dt><span v-help="stat">{{ statLabels[stat] }}</span><small v-if="stat === carDetail.stat"> · secteur en cours</small></dt>
+              <dd>{{ carDetail.car.stats[stat] }}</dd>
+            </div>
+          </dl>
+          <p><span v-help="'secteurs'">Secteurs restants</span> : {{ carDetail.remaining }}</p>
+          <p><span v-help="'forme'">Fourchette de score</span> sur ce secteur : <strong>{{ carDetail.range[0] }}–{{ carDetail.range[1] }}</strong> points · sans nitro</p>
+        </section>
         <p class="engage-hint">Sous chaque voiture : sa <span v-help="'forme'">fourchette de score</span> et ses <span v-help="'secteurs'">secteurs restants</span>.</p>
-        <div class="rival-line" aria-label="Écurie adverse">
-          <span class="rival-line-title">Voitures de {{ rival.name }} :</span>
-          <span v-for="(r, car) in duel.rival.lineup" :key="car" class="rival-car" :class="{ hot: overheated(duel.rival, car) }">
-            {{ r.vehicle.name }} <small>{{ Math.max(0, r.uses - duel.rival.used[car]) }} sect.</small>
-          </span>
-          <span class="rival-car nitro-left">Nitro ×{{ duel.rival.nitro }}</span>
-        </div>
         <label class="nitro-toggle" :class="{ off: !duel.player.nitro, armed: nitro }">
           <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" @change="armNitro" />
           <span><span v-help="'nitro'">Nitro</span> <small>{{ duel.player.nitro }} charge{{ duel.player.nitro > 1 ? 's' : '' }} · +2 sur ce secteur</small></span>
