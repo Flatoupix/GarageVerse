@@ -24,7 +24,7 @@ const part = computed(() => partById.get(props.id)!)
         <strong>{{ part.name }}</strong>
       </div>
       <p class="part-text">{{ part.text }}</p>
-      <footer class="card-foot"><span>Carte Mécanique</span><span>Synthwave</span></footer>
+      <footer class="card-foot"><span>Carte Mécanique</span><span>Pixel 16 bits</span></footer>
     </div>
   </article>
 </template>

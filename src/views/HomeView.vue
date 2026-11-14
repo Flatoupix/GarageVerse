@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { constraintText } from '../game/daily'
-import { art } from '../game/art'
 import { boosterById, conditionIcons, conditionLabels, rivalById, vehicles } from '../game/data'
 import { claimDailyBooster, prepareDaily, todayChallenge, unlockedRivals } from '../game/save'
 import { act, dailySelected, ownedCount, save } from '../game/store'
@@ -21,7 +20,6 @@ const nextRival = computed(() => {
 <template>
   <main class="home">
     <section class="hero" aria-labelledby="home-title">
-      <img v-if="art.hero" class="hero-picture" :src="art.hero" alt="" />
       <div class="hero-sun" aria-hidden="true"></div>
       <div class="hero-content">
         <span class="eyebrow"><span></span> Collection 001 · Neon Drive</span>

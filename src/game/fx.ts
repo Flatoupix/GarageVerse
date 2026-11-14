@@ -9,18 +9,18 @@ interface Particle { kind: Kind; x: number; y: number; vx: number; vy: number; l
 export type Target = Element | string | { x: number; y: number } | null | undefined
 
 export const palettes = {
-  cyan: ['#2de2ff', '#8ff3ff', '#ffffff'],
-  pink: ['#ff5fd2', '#ff9be0', '#ffffff'],
-  sun: ['#ffb347', '#ff7a3d', '#ffd27a'],
-  gold: ['#ffd27a', '#ff5fd2', '#8ff3ff', '#8b5cff', '#ffffff'],
-  fire: ['#ffb347', '#ff5e3a', '#ff2a8a', '#ffffff'],
+  cyan: ['#5a6988', '#ead4aa'],
+  pink: ['#0099db', '#2ce8f5'],
+  sun: ['#b55088', '#68386c', '#ead4aa'],
+  gold: ['#feae34', '#f77622', '#ead4aa'],
+  fire: ['#feae34', '#f77622', '#e43b44', '#ead4aa'],
 }
 export const rarityPalette: Record<Rarity, string[]> = { Courante: palettes.cyan, Rare: palettes.pink, Épique: palettes.sun, Légendaire: palettes.gold }
 
 let canvas: HTMLCanvasElement | undefined
 let ctx: CanvasRenderingContext2D | null = null
 let width = 0, height = 0, raf = 0, last = 0
-let flashColor = '#fff', flashAlpha = 0
+let flashColor = '#ead4aa', flashAlpha = 0
 const particles: Particle[] = []
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
 const pick = <T>(list: T[]) => list[Math.floor(Math.random() * list.length)]
@@ -55,6 +55,11 @@ function start() {
 
 function frame(now: number) {
   if (!ctx) return
+  if (reducedMotion.value) {
+    particles.length = 0; flashAlpha = 0; raf = 0
+    ctx.clearRect(0, 0, width, height)
+    return
+  }
   const dt = Math.min(0.05, (now - last) / 1000)
   last = now
   ctx.clearRect(0, 0, width, height)
@@ -73,33 +78,27 @@ function frame(now: number) {
     p.x += p.vx * dt
     p.y += p.vy * dt
     ctx.globalAlpha = Math.min(1, t * 1.6)
+    const x = Math.round(p.x), y = Math.round(p.y), size = Math.max(2, Math.round(p.size))
+    ctx.globalCompositeOperation = 'source-over'
+    ctx.fillStyle = p.color
     if (p.kind === 'spark') {
       p.vx *= 1 - dt * 2.4; p.vy = p.vy * (1 - dt * 2.4) + 520 * dt
-      ctx.globalCompositeOperation = 'lighter'
-      ctx.strokeStyle = p.color; ctx.lineWidth = p.size * (0.4 + t); ctx.lineCap = 'round'
-      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.045, p.y - p.vy * 0.045); ctx.stroke()
+      ctx.fillRect(x, y, size, size)
     } else if (p.kind === 'streak') {
-      ctx.globalCompositeOperation = 'lighter'
-      ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'round'
-      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x - p.vx * 0.09, p.y); ctx.stroke()
+      ctx.fillRect(x, y, Math.round(Math.abs(p.vx) * 0.09), size)
     } else if (p.kind === 'confetti') {
-      p.vy += 620 * dt; p.vx *= 1 - dt * 0.9; p.rot += p.spin * dt
-      ctx.globalCompositeOperation = 'source-over'
-      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.scale(1, Math.cos(p.rot * 2.3))
-      ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size * 0.3, p.size, p.size * 0.6); ctx.restore()
+      p.vy += 620 * dt; p.vx *= 1 - dt * 0.9
+      ctx.fillRect(x, y, size, size)
     } else if (p.kind === 'ring') {
       p.size += p.spin * dt
-      ctx.globalCompositeOperation = 'lighter'
+      const radius = Math.round(p.size)
       ctx.globalAlpha = t
-      ctx.strokeStyle = p.color; ctx.lineWidth = 1 + 5 * t
-      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.stroke()
+      ctx.strokeStyle = p.color; ctx.lineWidth = 2
+      ctx.strokeRect(x - radius, y - radius, radius * 2, radius * 2)
     } else {
-      ctx.globalCompositeOperation = 'source-over'
-      ctx.font = `900 ${p.size}px Orbitron, sans-serif`
+      ctx.font = `400 ${Math.round(p.size)}px "Press Start 2P", monospace`
       ctx.textAlign = 'center'
-      ctx.shadowColor = p.color; ctx.shadowBlur = 12
-      ctx.fillStyle = p.color; ctx.fillText(p.text!, p.x, p.y)
-      ctx.shadowBlur = 0
+      ctx.fillText(p.text!, x, y)
     }
   }
   ctx.globalAlpha = 1
@@ -124,7 +123,7 @@ export function sparks(target: Target, colors = palettes.cyan, count = 26, power
   }
 }
 
-export function ring(target: Target, color = '#2de2ff', speed = 520) {
+export function ring(target: Target, color = '#2ce8f5', speed = 520) {
   if (!start()) return
   const { x, y } = point(target)
   particles.push({ kind: 'ring', x, y, vx: 0, vy: 0, life: 0.5, max: 0.5, size: 12, color, rot: 0, spin: speed })
@@ -156,13 +155,13 @@ export function streaks(colors = palettes.fire, count = 34, direction = 1) {
   }
 }
 
-export function floatText(target: Target, text: string, color = '#ffb347', size = 22) {
+export function floatText(target: Target, text: string, color = '#feae34', size = 22) {
   if (!start()) return
   const { x, y } = point(target)
   particles.push({ kind: 'text', x, y, vx: 0, vy: -46, life: 1.1, max: 1.1, size, color, rot: 0, spin: 0, text })
 }
 
-export function flash(color = '#ffffff', strength = 0.5) {
+export function flash(color = '#ead4aa', strength = 0.5) {
   if (!start()) return
   flashColor = color
   flashAlpha = Math.max(flashAlpha, strength)
@@ -175,13 +174,13 @@ export function shake(level: 1 | 2 | 3 = 1) {
   const d = [0, 4, 8, 14][level]
   el?.animate({
     translate: ['0 0', `${d}px ${-d * 0.6}px`, `${-d}px ${d * 0.5}px`, `${d * 0.6}px ${d * 0.3}px`, `${-d * 0.3}px ${-d * 0.2}px`, '0 0'],
-  }, { duration: 170 + level * 90, easing: 'ease-out' })
+  }, { duration: 170 + level * 90, easing: 'steps(6, end)' })
 }
 
 export function pop(target: Target, scale = 1.14, duration = 320) {
   if (reducedMotion.value) return
   const el = typeof target === 'string' ? document.querySelector(target) : target
-  if (el instanceof Element) el.animate({ scale: ['1', String(scale), '0.97', '1'] }, { duration, easing: 'cubic-bezier(.2,.9,.3,1.3)' })
+  if (el instanceof Element) el.animate({ scale: ['1', String(scale), '0.97', '1'] }, { duration, easing: 'steps(6, end)' })
 }
 
 // Fait défiler une valeur numérique vers sa cible ; retourne de quoi l'annuler.

@@ -34,7 +34,7 @@ watch(() => save.credits, (now, before) => {
   const delta = now - before
   creditMove.value = delta > 0 ? 'gain' : 'spend'
   floatText({ x: (wallet.value?.getBoundingClientRect().left ?? 0) + 30, y: (wallet.value?.getBoundingClientRect().bottom ?? 40) + 22 },
-    `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`, delta > 0 ? '#ffb347' : '#ff5fd2', 18)
+    `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`, delta > 0 ? '#feae34' : '#b55088', 18)
   if (delta > 0) sound('coin')
   pop(wallet.value, 1.18)
   stopCredits = tween(shownCredits.value, now, 600, v => { shownCredits.value = v }, () => { creditMove.value = null })

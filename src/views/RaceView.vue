@@ -63,7 +63,7 @@ function toggle(id: string) {
 function start() {
   if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
     picked.value = 0; nitro.value = false
-    sound('rev'); streaks(palettes.cyan, 30); flash('#2de2ff', 0.2); buzz([20, 40, 60])
+    sound('rev'); streaks(palettes.cyan, 30); flash('#2ce8f5', 0.2); buzz([20, 40, 60])
   }
 }
 
@@ -106,8 +106,8 @@ function settle(round: Round) {
   timers.push(setTimeout(() => sound(round.winner === 'player' ? 'collect' : round.winner === 'rival' ? 'lose' : 'flip'), 160))
   void nextTick(() => {
     const score = `.duel-col.${round.winner} .duel-score`
-    if (round.winner === 'player') { sparks(score, palettes.cyan, 42, 1.1); ring(score, '#2de2ff'); flash('#2de2ff', 0.18); pop(score, 1.4) }
-    else if (round.winner === 'rival') { sparks(score, palettes.pink, 22, 0.9); flash('#ff2a8a', 0.16); pop(score, 1.25) }
+    if (round.winner === 'player') { sparks(score, palettes.cyan, 42, 1.1); ring(score, '#2ce8f5'); flash('#2ce8f5', 0.18); pop(score, 1.4) }
+    else if (round.winner === 'rival') { sparks(score, palettes.pink, 22, 0.9); flash('#e43b44', 0.16); pop(score, 1.25) }
     pop('.scoreboard', 1.25)
   })
 }
@@ -137,7 +137,7 @@ function engage() {
     counts.player = counts.rival = 0
     sound('whoosh')
     if (round.player.nitro || round.rival.nitro) {
-      sound('nitro'); flash('#ffb347', 0.22)
+      sound('nitro'); flash('#feae34', 0.22)
       streaks(palettes.fire, 40, round.player.nitro ? 1 : -1)
     }
     let ticked = 0
@@ -161,7 +161,7 @@ function proceed() {
     lastWinner.value = won ? 'player' : 'other'
     clear()
     if (won) {
-      confetti(); flash('#ffd27a', 0.32); buzz([40, 60, 40, 60, 80])
+      confetti(); flash('#feae34', 0.32); buzz([40, 60, 40, 60, 80])
       timers.push(setTimeout(() => confetti(palettes.gold, 60), 650))
     } else shake(1)
     let ticked = 0

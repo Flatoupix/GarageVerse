@@ -10,7 +10,7 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 
 | Dimension | Traduction en jeu |
 | --- | --- |
-| Rareté | Courante, Rare, Épique, Légendaire. Elle règle la fréquence en booster et le cadre de la carte (chrome cyan, magenta, coucher de soleil, holographique animé). |
+| Rareté | Courante, Rare, Épique, Légendaire. Elle règle la fréquence en booster et le cadre de la carte (gris bleu, bleu, rose, or à reflet par paliers). |
 | Puissance | Quatre scores de base sur 10 (ACC, VIT, MAN, END), plafonnés à 12 après préparation, et le coût d’écurie. |
 | Aura | Les éditions culturelles portent leurs étiquettes (Cinéma, Série, Nostalgie, Tuning…). Elles gagnent +1 la Nuit. Certaines capacités comptent les alliés qui partagent une étiquette. |
 | Édition artistique | Synthwave, photo, gouache et rallye argentique. Classic et Pixel Art pour certaines cartes. Les éditions d’une voiture partagent les mêmes statistiques. |
@@ -70,15 +70,15 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 
 Chaque booster contient cinq cartes, dont au plus une pièce. Le jeu détermine le type puis la rareté de chaque carte et choisit des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé au moment de la déchirure. Un rechargement retrouve le même lot, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
-## 7. Direction artistique synthwave
+## 7. Direction artistique rétro pixel 16 bits
 
-- **Palette.** Nuit `#0b0420`, magenta `#ff2a8a`, rose `#ff5fd2`, cyan `#2de2ff`, violet `#8b5cff`, soleil `#ffb347`.
-- **Typographies.** Orbitron pour les titres et les scores, Chakra Petch pour le texte.
-- **Motifs.** Soleil rayé, grille en perspective animée, chrome dégradé sur les titres, halos néon.
-- **Cadres de rareté.** Chrome cyan, magenta, coucher de soleil, puis holographique animé pour les légendaires, avec un flash lumineux à la révélation.
-- **Illustrations.** Les trois voitures de départ ont chacune une direction visuelle : photo automobile pour la Clio, gouache en ville pour la Twingo et reportage de rallye argentique pour la Panda. Les illustrations synthwave restent disponibles comme éditions de ces voitures et figurent sur le reste du catalogue. Les cartes 51 à 100 ont chacune un style choisi pour leur personnalité (champ `look` du roster : affiche de film, rallye argentique, bande dessinée, anime, magazine, aquarelle, pulp ou synthwave) et un décor propre (champ `setting`), générés par `node pipeline/art.mjs`.
-- **Retours de jeu.** Chaque action répond : son synthétisé et vibration au toucher, particules et secousse à la déchirure, révélation graduée selon la rareté (halo sur la carte encore cachée, explosion, rayons et confettis pour une légendaire), duel de secteur mis en scène (scores qui défilent, verdict, étincelles), compteur de crédits animé. Le moteur vit dans `src/game/fx.ts`.
-- **Mouvement réduit.** Il coupe la grille animée, l’holographique et les révélations, sans perte d’information.
+- **Palette Endesga 32.** Variables de `:root` : nuit `--night` #181425, fond `--background` #262b44, panneau `--panel` #3a4466, gris bleu `--slate` #5a6988, crème `--text` #ead4aa, sable `--sand` #e4a672, brun `--brown` #b86f50, rouge `--red` #e43b44, orange `--orange` #f77622, jaune `--yellow` #feae34, vert `--green` #63c74d, bleu `--blue` #0099db, bleu clair `--light-blue` #2ce8f5, prune `--plum` #68386c, rose `--rose` #b55088, contour `--outline` #0b0a12. Texte crème sur les surfaces sombres ; texte contour sur les boutons jaunes.
+- **Typographies.** Press Start 2P pour les titres, chiffres et étiquettes courtes, à taille modeste ; Pixelify Sans pour le texte courant, au moins 15 px.
+- **Menus de console et borne de course.** Damier discret immobile, contours pleins de 2 à 4 px, coins carrés, ombres pleines décalées sans flou. Les boutons descendent au toucher, avec une ombre réduite et un contour de focus clavier jaune.
+- **Cartes.** Cadres Courante gris bleu, Rare bleu, Épique rose, Légendaire or avec reflet animé par `steps()`. Coût en pièce pixel et statistiques en blocs segmentés.
+- **Illustrations.** Les nouvelles illustrations pixel art sont produites séparément. La classe utilitaire `.pixelated` applique `image-rendering: pixelated` et sera posée sur les nouvelles images. Les éditions de collection existantes sont conservées.
+- **Retours de jeu.** Sons et logique inchangés ; étincelles et confettis carrés à coordonnées entières, traits de vitesse pixel et carrés qui s’agrandissent à la place des anneaux. Flash et secousse conservés dans `src/game/fx.ts`. Animations d’entrée et de révélation par paliers.
+- **Mouvement réduit.** La préférence du jeu et celle du système coupent animations, reflet, particules, flash et secousse sans perte d’information.
 
 ## 8. Production automatisée
 

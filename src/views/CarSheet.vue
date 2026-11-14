@@ -55,8 +55,8 @@ function stageUp() {
   const stage = (car.value?.stage ?? 0) + 1
   if (!act(s => upgrade(s, props.id), `Stage ${stage} atteint`, 'upgrade')) return
   buzz([20, 30, 40])
-  flash('#ffb347', 0.22); shake(stage === 3 ? 2 : 1)
-  sparks('.sheet-card', palettes.sun, 30 + stage * 14, 1.1); ring('.sheet-card', '#ffb347', 700)
+  flash('#feae34', 0.22); shake(stage === 3 ? 2 : 1)
+  sparks('.sheet-card', palettes.sun, 30 + stage * 14, 1.1); ring('.sheet-card', '#feae34', 700)
   pop('.sheet-card', 1.08, 420)
 }
 function fit(partId: string, name: string) {
@@ -68,7 +68,7 @@ function unlock(id: string, open = false) {
   const e = vehicleById.get(id)!
   if (!act(s => craft(s, id), `${e.name} ${e.version} débloquée`, 'legend')) return
   buzz([30, 50, 40, 50, 60])
-  flash('#ffffff', 0.6); shake(2); confetti(rarityPalette[e.rarity]); sparks('.sheet-card', rarityPalette[e.rarity], 60, 1.3)
+  flash('#ead4aa', 0.6); shake(2); confetti(rarityPalette[e.rarity]); sparks('.sheet-card', rarityPalette[e.rarity], 60, 1.3)
   if (open) emit('open', id)
 }
 function toggleLineup() {
