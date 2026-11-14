@@ -37,6 +37,7 @@ export const glossary = {
   stage: { term: 'Stage', text: 'Niveau de préparation d’une voiture (0 à 3). Chaque Stage augmente la place disponible pour monter des pièces ; au Stage 2, sa meilleure statistique gagne aussi 1 point.' },
   atelier: { term: 'Atelier', text: 'Dépense des crédits pour monter d’un niveau un groupe de statistiques d’une voiture (2 niveaux par groupe). Au niveau 2, tu peux y monter une pièce de ta collection.' },
   piece: { term: 'Pièce', text: 'Carte Mécanique à monter sur une voiture : elle ajoute un bonus, parfois seulement sur un secteur ou une météo.' },
+  vente: { term: 'Vente', text: 'Vends une voiture entière depuis sa fiche : elle quitte ta collection et ses pièces redeviennent libres. Tu reçois deux fois son prix de recyclage selon sa rareté, plus 10 crédits par Stage, la moitié des crédits dépensés à l’atelier (arrondie à l’entier inférieur) et le prix de recyclage de chaque doublon. Retire-la d’abord de tes écuries, y compris celle du défi du jour. Tu ne peux pas la vendre pendant une course qui l’engage, ni garder moins de trois voitures.' },
   edition: { term: 'Édition', text: 'Style d’illustration d’une carte (pixel, synthwave…). Au tirage d’une voiture déjà possédée, tu peux afficher l’édition tirée ou garder l’apparence actuelle. Une nouvelle voiture prend l’édition tirée. La fiche liste tes éditions en lecture seule. Elles ne changent pas les statistiques.' },
   ecurie: { term: 'Écurie', text: 'Les trois voitures que tu engages en course. À chaque secteur, tu choisis en secret laquelle court.' },
 } satisfies Record<string, HelpEntry>
@@ -49,7 +50,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },
   { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
-  { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition'] },
+  { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition', 'vente'] },
 ]
 
 // Retrouve l'explication d'une ligne du détail de score (« Pluie · intégrale », « Faux départ »…).

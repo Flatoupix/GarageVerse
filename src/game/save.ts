@@ -116,6 +116,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     save.opening = { booster: o.booster, pulls: o.pulls, revealed, collected: Boolean(o.collected),
       view: o.collected || (revealed === 5 && o.view === 'recap') ? 'recap' : revealed && (o.view === 'face' || revealed === 5) ? 'face' : 'back' }
   }
+  save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
   save.lineup = (input.lineup ?? []).filter(id => save.cars[id]).slice(0, 3)
   save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)).map(([id, record]) => [id, {
     wins: int(record?.wins, 0, 100000, 0), losses: int(record?.losses, 0, 100000, 0), perfect: record?.perfect === true,
@@ -334,6 +335,31 @@ export function scrapCar(save: Save, id: string): string | undefined {
   if (!car || !v || car.copies < 2) return 'Aucun doublon'
   car.copies--
   save.credits += progression.scrap[v.rarity]
+}
+
+// La vente porte sur toute la voiture, doublons compris ; ses pièces restent au stock.
+export function sellPrice(save: Save, id: string): number {
+  const car = save.cars[id], v = vehicleById.get(id)
+  if (!car || !v) return 0
+  const spent = upgradeKeys.reduce((total, key) =>
+    total + upgradePrices.slice(0, car.upgrades[key]).reduce((sum, price) => sum + price, 0), 0)
+  return progression.scrap[v.rarity] * (2 + car.copies - 1) + 10 * car.stage + Math.floor(spent / 2)
+}
+
+export function sellCheck(save: Save, id: string): string | undefined {
+  if (!save.cars[id]) return 'Voiture absente du garage'
+  if (save.lineup.includes(id)) return 'Retire cette voiture de ton écurie avant de la vendre'
+  if (save.dailyLineup?.includes(id)) return 'Retire cette voiture de l’écurie du défi du jour avant de la vendre'
+  if (save.duel?.player.lineup.some(car => car.id === id)) return 'Cette voiture est engagée dans une course en cours'
+  if (Object.keys(save.cars).length <= 3) return 'Tu dois garder au moins trois voitures dans ton garage'
+}
+
+export function sellCar(save: Save, id: string): string | undefined {
+  const problem = sellCheck(save, id)
+  if (problem) return problem
+  const price = sellPrice(save, id)
+  delete save.cars[id]
+  save.credits += price
 }
 
 export function scrapPart(save: Save, id: string): string | undefined {

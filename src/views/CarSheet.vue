@@ -1,20 +1,27 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { art, edition } from '../game/art'
 import { families, partById, parts, progression, statLabels, styleLabel, vehicleById, vehicles, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
-import { craft, craftCheck, freeParts, install, installCheck, prepOf, scrapCar, stageCost, uninstall, upgrade, upgradeCheck, upgradeStat } from '../game/save'
+import { craft, craftCheck, freeParts, install, installCheck, prepOf, scrapCar, sellCar, sellCheck, sellPrice, stageCost, uninstall, upgrade, upgradeCheck, upgradeStat } from '../game/save'
 import { act, buzz, save } from '../game/store'
 import CarCard from '../components/CarCard.vue'
 
 const props = defineProps<{ id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean }>()
-const emit = defineEmits<{ open: [id: string] }>()
+const emit = defineEmits<{ open: [id: string]; close: [] }>()
 const v = computed(() => vehicleById.get(props.id)!)
 const car = computed(() => save.cars[props.id])
 const panel = ref<'overview' | 'workshop' | 'card'>(props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview')
+const confirmingSale = ref(false)
+const salePrice = computed(() => sellPrice(save, props.id))
+const saleProblem = computed(() => sellCheck(save, props.id))
+watch(() => props.id, () => { confirmingSale.value = false })
+function sell() {
+  if (act(s => sellCar(s, props.id), `+${salePrice.value} crédits`)) emit('close')
+}
 const selected = ref<StatKey | undefined>(props.suggestedStat)
 const prep = computed(() => prepOf(save, props.id))
 const stats = computed(() => statsOf(v.value, prep.value))
@@ -103,6 +110,18 @@ function workshop(key?: StatKey) {
       <button type="button" :aria-pressed="panel === 'workshop'" @click="workshop()">Atelier</button>
       <button type="button" :aria-pressed="panel === 'card'" @click="panel = 'card'">Carte</button>
     </div>
+
+    <section v-if="car" class="sheet-section car-sale">
+      <template v-if="confirmingSale">
+        <p>Vendre {{ v.name }} ? Elle quittera ta collection.</p>
+        <div class="car-sale-actions">
+          <button type="button" class="button primary" :disabled="Boolean(saleProblem)" @click="sell">Confirmer la vente</button>
+          <button type="button" class="button ghost" @click="confirmingSale = false">Annuler</button>
+        </div>
+      </template>
+      <button v-else type="button" class="button ghost" :disabled="Boolean(saleProblem)" @click="confirmingSale = true">Vendre · {{ salePrice }} crédits</button>
+      <p v-if="saleProblem" class="hint" role="status">{{ saleProblem }}</p>
+    </section>
 
     <template v-if="car && panel === 'overview'">
       <section v-if="circuit" class="sheet-section">

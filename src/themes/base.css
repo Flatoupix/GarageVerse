@@ -1048,3 +1048,9 @@ button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow
 .pull-edition p { margin: 0 0 8px; }
 .pull-edition-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .pull-edition-actions .button { flex: 1 1 160px; min-width: 0; white-space: normal; }
+
+/* Vente : les commandes se replient sur les petits écrans. */
+.car-sale { min-width: 0; overflow-wrap: anywhere; }
+.car-sale-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.car-sale .button { max-width: 100%; min-width: 0; white-space: normal; }
+.car-sale-actions .button { flex: 1 1 160px; }
