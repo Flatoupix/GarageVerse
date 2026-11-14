@@ -75,6 +75,61 @@ Pour construire le deck, comparer un format centré sur une voiture et ses pièc
 | Évolutions Lotus · 2 | 23 Lotus Elise 111S · 24 Lotus Elise Sport 190 |
 | Éditions spéciales et fiction · 8 | 25 DeLorean temporelle (*Retour vers le futur*) · 26 KITT (*K2000*) · 27 Nissan Skyline de Brian (*2 Fast 2 Furious*) · 28 Choupette, Coccinelle nº 53 · 29 Lotus Esprit de James Bond · 30 Taxi de Korben Dallas (*Le Cinquième Élément*) · 31 Ecto-1 (*Ghostbusters*) · 32 Batmobile du film de 1989 |
 
+#### Véhicules candidats pour de futures cartes
+
+Les numéros de cette liste servent au repérage. Les renvois indiquent les liens avec les cartes de la Collection 001.
+
+1. Abarth 500
+2. Acura NSX
+3. Alpine A110 (1973)
+4. Aston Martin DB7
+5. Audi R8 V10
+6. Bentley Continental GT
+7. BMW M3 E46
+8. BMW M5 E60
+9. BRABUS XLP 800 6×6
+10. Bugatti Veyron
+11. BYD Yangwang U9 Xtreme
+12. Cadillac Escalade
+13. Chevrolet Corvette C6 ZR1
+14. Citroën C1
+15. Dacia Logan
+16. De Tomaso Pantera
+17. Dodge Challenger SRT Demon 170
+18. Ferrari Enzo
+19. Fiat Punto
+20. Ford Mustang Shelby GT500
+21. GMC Sierra 3500HD
+22. Hennessey Venom F5 — version à préciser par rapport à la Revolution Evolution (carte 12)
+23. Honda Civic Type R EK9
+24. Hummer H1
+25. Hyundai i30 N
+26. Jaguar F-Type
+27. Jeep Grand Cherokee Trackhawk
+28. Koenigsegg Agera
+29. Koenigsegg One:1
+30. KTM X-Bow
+31. Lamborghini Aventador SV
+32. Lancia Delta HF Integrale
+33. Lexus IS 200
+34. Lotus Elise — version à préciser par rapport aux cartes 16, 23 et 24
+35. Mazda MX-5 NA
+36. McLaren Senna
+37. Mercedes-Benz CLR (1999)
+38. Mercedes-Benz SLR McLaren
+39. Mitsubishi Lancer Evolution VIII
+40. Nissan Skyline GT-R R34 V-Spec — finition à examiner pour la carte 11 ou une carte dédiée
+41. Opel Zafira OPC
+42. Pagani Zonda R
+43. Porsche Carrera GT
+44. RAM 1500 TRX
+45. Renault Master
+46. RUF CTR « Yellowbird »
+47. SEAT Ibiza 6L
+48. Tesla Model S
+49. Toyota Supra Mk4 — déjà référencée comme carte 10
+50. Volkswagen Passat B5
+
 ### 6. Direction artistique et design des cartes
 
 **Direction établie.** Rétro premium en 2D et 2.5D. Des silhouettes fidèles, des cadrages d’illustration automobile et une énergie de jeu rétro. Les aplats, les contours, les reflets et les éléments de décor donnent du volume. La lisibilité des cartes à l’écran prime sur la quantité d’effets. Le rendu low-poly générique est écarté.
