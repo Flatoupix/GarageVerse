@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { buzz, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themes, unlocked, type Theme } from './game/theme'
+import { glossary, glossaryOpen, glossarySections, openHelp } from './game/help'
 import BoosterView from './views/BoosterView.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
@@ -17,6 +18,8 @@ type Setting = 'sound' | 'reducedMotion' | 'vibration'
 
 const screen = ref<Screen>(save.duel ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
+const lexicon = ref<HTMLDialogElement>()
+const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
 const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
@@ -42,6 +45,10 @@ watch(() => save.credits, (now, before) => {
 })
 
 onMounted(() => {
+  document.addEventListener('click', closeHelp)
+  document.addEventListener('keydown', onKey, true)
+  addEventListener('scroll', onScroll, true)
+  addEventListener('resize', onResize)
   if (fx.value) mountFx(fx.value)
   // Retour tactile et sonore discret sur chaque commande.
   document.addEventListener('click', event => {
@@ -87,6 +94,50 @@ watch(openThemes, (now, before) => {
   if (fresh) setTimeout(() => { notify(`Thème « ${fresh.name} » débloqué dans les Réglages`); sound('legend') }, 2700)
 })
 
+// Aide rapide : la bulle passe au premier plan (au-dessus des fiches ouvertes) et se ferme au toucher suivant.
+const helpEntry = computed(() => openHelp.value && glossary[openHelp.value.key])
+const bubbleStyle = computed(() => {
+  const at = openHelp.value
+  if (!at) return undefined
+  const half = Math.min(150, innerWidth * 0.45)
+  return {
+    left: `${Math.min(Math.max(at.x, half + 8), innerWidth - half - 8)}px`,
+    ...(at.above ? { bottom: `${Math.max(8, innerHeight - at.y + 8)}px`, top: 'auto' } : { top: `${Math.max(8, at.y + 8)}px`, bottom: 'auto' }),
+    maxHeight: `${Math.max(120, (at.above ? at.y : innerHeight - at.y) - 24)}px`,
+  }
+})
+// Dans une fiche ouverte, la bulle se place dans la fiche : sinon le dialogue modal la rendrait inerte.
+const bubbleHost = computed(() => openHelp.value?.from.closest('dialog[open]') ?? 'body')
+// Attendre que la bulle ait rejoint la fiche ou la page avant de l'afficher.
+watch(openHelp, async value => {
+  await nextTick()
+  const el = bubble.value as (HTMLElement & { showPopover?: () => void; hidePopover?: () => void }) | undefined
+  if (!el?.showPopover) return
+  try { if (value) { el.hidePopover!(); el.showPopover() } else el.hidePopover!() } catch { /* déjà dans l'état voulu */ }
+})
+function closeHelp(event: Event) {
+  if (openHelp.value && !bubble.value?.contains(event.target as Node)) openHelp.value = null
+}
+function dismissHelp(focus = false) {
+  const from = openHelp.value?.from
+  openHelp.value = null
+  if (focus) from?.focus()
+}
+const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape' && openHelp.value) { event.preventDefault(); dismissHelp(true) } }
+const onScroll = (event: Event) => { if (!bubble.value?.contains(event.target as Node)) openHelp.value = null }
+const onResize = () => { openHelp.value = null }
+onUnmounted(() => {
+  document.removeEventListener('click', closeHelp)
+  document.removeEventListener('keydown', onKey, true)
+  removeEventListener('scroll', onScroll, true)
+  removeEventListener('resize', onResize)
+})
+function showLexicon() {
+  openHelp.value = null
+  glossaryOpen.value = true
+}
+watch(glossaryOpen, open => { if (open && !lexicon.value?.open) lexicon.value?.showModal() })
+
 function chooseTheme(id: Theme) {
   if (id === theme.value || !unlocked(save, id)) return
   save.preferences.theme = id
@@ -110,7 +161,8 @@ function toggleSetting(key: Setting) {
       </button>
       <div class="wallet">
         <span ref="wallet" class="credits" :class="creditMove" :aria-label="`${save.credits} crédits`"><span aria-hidden="true">₡ {{ shownCredits }}</span></span>
-        <button v-if="!installed" type="button" class="settings-button" :aria-label="fullscreen ? 'Quitter le plein écran' : 'Plein écran'"
+        <button type="button" class="settings-button help-button" aria-label="Lexique : comprendre les règles" @click="showLexicon">?</button>
+        <button v-if="!installed" type="button" class="settings-button fullscreen-button" :aria-label="fullscreen ? 'Quitter le plein écran' : 'Plein écran'"
           :aria-pressed="fullscreen" @click="toggleFullscreen">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
             <path v-if="fullscreen" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/><path v-else d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
@@ -140,6 +192,27 @@ function toggleSetting(key: Setting) {
 
     <canvas ref="fx" class="fx-canvas" aria-hidden="true"></canvas>
     <div v-if="toast" :key="toast.text" class="toast" :class="toast.tone" role="status">{{ toast.text }}</div>
+
+    <Teleport :to="bubbleHost">
+    <div ref="bubble" popover="manual" class="help-bubble" :style="bubbleStyle" role="dialog" aria-label="Explication">
+      <template v-if="helpEntry">
+        <button type="button" class="help-close" aria-label="Fermer l’explication" @click="dismissHelp(true)">×</button>
+        <b>{{ helpEntry.term }}</b>
+        <p>{{ helpEntry.text }}</p>
+        <button type="button" class="link" @click="showLexicon">Tout le lexique</button>
+      </template>
+    </div>
+    </Teleport>
+
+    <dialog ref="lexicon" class="modal lexicon-modal" aria-label="Lexique" @close="glossaryOpen = false">
+      <form method="dialog"><button class="close-modal" aria-label="Fermer le lexique">×</button></form>
+      <h2>Lexique</h2>
+      <p class="lexicon-intro">Touche un mot souligné en pointillé, partout dans le jeu, pour voir son explication.</p>
+      <section v-for="section in glossarySections" :key="section.title" class="lexicon-section">
+        <h3>{{ section.title }}</h3>
+        <dl><template v-for="key in section.keys" :key="key"><dt>{{ glossary[key].term }}</dt><dd>{{ glossary[key].text }}</dd></template></dl>
+      </section>
+    </dialog>
 
     <dialog ref="settings" class="modal settings-modal">
       <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>

@@ -55,7 +55,7 @@ C’est la piste « épreuve en secteurs » de la bible, enrichie de choix simul
 | Ville | Citadine +1, hypercar et muscle −1 |
 | Nuit | Éditions culturelles +1 |
 
-Le joueur doit pouvoir expliquer son choix : le panneau de résultat détaille chaque bonus. Il peut se relancer après un mauvais départ grâce aux capacités « retour en force » et à la Nitro gardée pour la fin. Une carte commune garde un usage : une Twingo sous la pluie en ville vaut mieux qu’une hypercar.
+Le joueur doit pouvoir expliquer son choix : le panneau de résultat détaille chaque bonus. **Aide rapide** (`src/game/help.ts`) : les termes soulignés en pointillé (statistiques, secteurs, météo, lignes du détail de score, nitro, Stage…) ouvrent une bulle d’explication ; le bouton « ? » de l’en-tête ouvre le lexique complet. Avant chaque secteur, une consigne rappelle le but et la statistique qui compte. Il peut se relancer après un mauvais départ grâce aux capacités « retour en force » et à la Nitro gardée pour la fin. Une carte commune garde un usage : une Twingo sous la pluie en ville vaut mieux qu’une hypercar.
 
 **Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. L’IA voit les mêmes informations que le joueur.
 

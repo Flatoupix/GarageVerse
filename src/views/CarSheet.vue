@@ -3,6 +3,7 @@ import { computed, nextTick, ref } from 'vue'
 import { art, edition } from '../game/art'
 import { families, partById, parts, progression, statLabels, stylesOf, vehicleById, vehicles, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
+import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
 import { craft, craftCheck, freeParts, install, installCheck, prepOf, scrapCar, stageCost, uninstall, upgrade, upgradeCheck, upgradeStat } from '../game/save'
@@ -115,7 +116,7 @@ function workshop(key?: StatKey) {
         <h3>Statistiques</h3>
         <ul class="car-stats">
           <li v-for="key in upgradeKeys" :key="key">
-            <b>{{ statLabels[key] }}</b><strong>{{ stats[key] }}<small>/{{ STAT_CAP }}</small></strong>
+            <b v-help="key">{{ statLabels[key] }}</b><strong>{{ stats[key] }}<small>/{{ STAT_CAP }}</small></strong>
             <span class="stat-track" aria-hidden="true"><span :style="{ width: `${stats[key] / STAT_CAP * 100}%` }"></span></span>
             <p>{{ statUse[key] }}</p>
           </li>
@@ -196,7 +197,7 @@ function workshop(key?: StatKey) {
         </button>
       </section>
       <section v-else class="sheet-section">
-        <h3>Stage {{ car.stage }}/3</h3>
+        <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3</h3>
         <p class="hint">Les stages augmentent le potentiel pour monter des cartes Mécanique. Ils donnent accès aux évolutions lorsqu’il y en a.</p>
         <button v-if="next" type="button" class="button ghost" @click="stageUp">
           Passer au Stage {{ next.stage }} · {{ next.credits }} crédits<template v-if="next.duplicates"> + {{ next.duplicates }} doublon{{ next.duplicates > 1 ? 's' : '' }}</template>
