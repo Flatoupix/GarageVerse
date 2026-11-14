@@ -32,7 +32,20 @@ const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: secto
       </div>
     </header>
     <div class="card-art">
-      <img v-if="look.art" :src="look.art" alt="" draggable="false" :class="{ pixel: look.style === 'Pixel Art' }" />
+      <div v-if="look.scene" class="pixel-scene" :class="look.scene.fx.map(fx => `fx-${fx}`)" :style="{ '--scene-bg': `url(${look.scene.bg})` }" aria-hidden="true">
+        <div class="scene-bg"></div>
+        <div v-if="look.scene.fx.includes('speed')" class="scene-speed"><i></i><i></i><i></i></div>
+        <div v-if="look.scene.fx.includes('dust') || look.scene.fx.includes('smoke')" class="scene-cloud"><i></i><i></i><i></i><i></i></div>
+        <img v-if="look.scene.chaser" :src="look.scene.chaser" alt="" class="scene-chaser" draggable="false" />
+        <div class="scene-car">
+          <img :src="look.scene.car" alt="" draggable="false" />
+          <i v-if="look.scene.fx.includes('flames') || look.scene.fx.includes('turbine')" class="scene-flame"></i>
+          <i v-if="look.scene.fx.includes('headlights')" class="scene-beam"></i>
+          <i v-if="look.scene.fx.includes('scanner')" class="scene-scanner"></i>
+          <span v-if="look.scene.fx.includes('sparks')" class="scene-sparks"><i></i><i></i><i></i><i></i></span>
+        </div>
+      </div>
+      <img v-else-if="look.art" :src="look.art" alt="" draggable="false" :class="{ pixel: look.style === 'Pixel Art' }" />
       <div v-else class="art-missing" aria-hidden="true"><span>{{ v.name }}</span></div>
       <div v-if="cinematic && look.drift" class="drift-scene" aria-hidden="true">
         <img :src="look.drift.backdrop" alt="" class="drift-backdrop" />

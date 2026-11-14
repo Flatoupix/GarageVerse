@@ -934,3 +934,37 @@ button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow
 .engage-car { gap: 3px; }
 .engage-name { display: block; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .engage-score { margin: 0; }
+
+/* ——— Légendaires animées : la voiture roule devant un décor qui défile, effets en blocs de pixels ——— */
+.pixel-scene { position: absolute; inset: 0; overflow: hidden; container-type: size; background: var(--night); image-rendering: pixelated; }
+.pixel-scene img { image-rendering: pixelated; }
+.scene-bg { position: absolute; inset: 0; background: var(--scene-bg) 0 0 / auto 100cqh repeat-x; animation: scene-scroll 7s steps(56) infinite; }
+@keyframes scene-scroll { to { background-position: -400cqh 0; } }
+.scene-car { position: absolute; left: 12%; bottom: 5%; width: 74%; aspect-ratio: 2; animation: scene-bob .36s steps(2) infinite; }
+.scene-car > img { position: absolute; inset: 0; width: 100%; height: 100%; }
+@keyframes scene-bob { 50% { translate: 0 -1.2cqh; } }
+.scene-chaser { position: absolute; left: -12%; bottom: 3%; width: 52%; animation: scene-chase 1.6s steps(4) infinite, scene-bob .3s steps(2) infinite; }
+@keyframes scene-chase { 0%, 100% { translate: 0 0; } 50% { translate: 6cqh 0; } }
+.scene-flame { position: absolute; left: -9%; bottom: 13%; width: 12%; height: 13%;
+  background: linear-gradient(90deg, transparent 0 15%, var(--orange) 15% 45%, var(--yellow) 45% 80%, var(--text) 80%);
+  clip-path: polygon(0 35%, 30% 15%, 30% 0, 100% 20%, 100% 80%, 30% 100%, 30% 85%, 0 65%); animation: scene-flicker .16s steps(2) infinite; }
+.fx-turbine .scene-flame { width: 20%; left: -17%; height: 20%; bottom: 20%; background: linear-gradient(90deg, transparent 0 10%, var(--blue) 10% 40%, var(--light-blue) 40% 75%, var(--text) 75%); }
+@keyframes scene-flicker { 50% { scale: .55 .8; opacity: .75; } }
+.scene-beam { position: absolute; right: -48%; bottom: 14%; width: 50%; height: 26%; background: var(--yellow); opacity: .32;
+  clip-path: polygon(0 40%, 100% 0, 100% 100%, 0 62%); animation: scene-beam 1.2s steps(2) infinite; }
+@keyframes scene-beam { 50% { opacity: .2; } }
+.scene-scanner { position: absolute; right: 2.5%; bottom: 33%; width: 3.5%; height: 4.5%; background: var(--red); box-shadow: 0 0 0 1px var(--outline);
+  animation: scene-scan 1s steps(6) infinite alternate; }
+@keyframes scene-scan { from { translate: -260% 0; } to { translate: 0 0; } }
+.scene-sparks i { position: absolute; width: 3.5%; aspect-ratio: 1; background: var(--light-blue); animation: scene-spark .5s steps(2) infinite; }
+.scene-sparks i:nth-child(1) { left: 8%; top: 20%; } .scene-sparks i:nth-child(2) { left: 46%; top: 2%; animation-delay: .12s; }
+.scene-sparks i:nth-child(3) { left: 78%; top: 30%; animation-delay: .25s; } .scene-sparks i:nth-child(4) { left: 30%; top: 72%; animation-delay: .37s; background: var(--text); }
+@keyframes scene-spark { 50% { opacity: 0; } }
+.scene-speed i { position: absolute; right: -40%; height: 1.4cqh; width: 30%; background: var(--text); opacity: .55; animation: scene-streak .5s steps(5) infinite; }
+.scene-speed i:nth-child(1) { top: 22%; } .scene-speed i:nth-child(2) { top: 41%; animation-delay: .18s; width: 18%; } .scene-speed i:nth-child(3) { top: 63%; animation-delay: .33s; }
+@keyframes scene-streak { to { translate: -480% 0; } }
+.scene-cloud i { position: absolute; bottom: 5%; width: 9cqh; height: 9cqh; background: var(--sand); opacity: .7; animation: scene-puff .9s steps(4) infinite; }
+.fx-smoke .scene-cloud i { background: var(--text); width: 14cqh; height: 14cqh; }
+.scene-cloud i:nth-child(1) { left: 6%; } .scene-cloud i:nth-child(2) { left: 1%; animation-delay: .22s; }
+.scene-cloud i:nth-child(3) { left: 9%; animation-delay: .45s; } .scene-cloud i:nth-child(4) { left: 3%; animation-delay: .67s; }
+@keyframes scene-puff { from { translate: 0 0; scale: .5; } to { translate: -24cqh -12cqh; scale: 1.4; opacity: 0; } }

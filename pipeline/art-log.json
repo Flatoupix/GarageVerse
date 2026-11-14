@@ -2131,5 +2131,171 @@
     "tokens": 19813,
     "prompt": "41836c3e6d",
     "at": "2026-11-14T14:40:49.778Z"
+  },
+  "pixel/anim/kitt-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 41,
+    "tokens": 18695,
+    "prompt": "22ed6aaf96",
+    "at": "2026-11-14T15:35:46.901Z"
+  },
+  "pixel/anim/kitt-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 13178,
+    "prompt": "9c94e49c31",
+    "at": "2026-11-14T15:35:50.329Z"
+  },
+  "pixel/anim/f40-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 37,
+    "tokens": 15483,
+    "prompt": "1e21ac605b",
+    "at": "2026-11-14T15:36:38.077Z"
+  },
+  "pixel/anim/f40-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 21659,
+    "prompt": "f0c32e5fe0",
+    "at": "2026-11-14T15:36:45.945Z"
+  },
+  "pixel/anim/venom-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 17799,
+    "prompt": "3f572ad9d4",
+    "at": "2026-11-14T15:37:20.471Z"
+  },
+  "pixel/anim/venom-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 21086,
+    "prompt": "a885fcb850",
+    "at": "2026-11-14T15:37:29.036Z"
+  },
+  "pixel/anim/mf1-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 39,
+    "tokens": 21101,
+    "prompt": "c1ee30e266",
+    "at": "2026-11-14T15:37:59.857Z"
+  },
+  "pixel/anim/mf1-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 40,
+    "tokens": 17366,
+    "prompt": "59b4abb1aa",
+    "at": "2026-11-14T15:38:09.238Z"
+  },
+  "pixel/anim/elise190-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 37,
+    "tokens": 21223,
+    "prompt": "935ac40172",
+    "at": "2026-11-14T15:38:37.007Z"
+  },
+  "pixel/anim/elise190-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 18112,
+    "prompt": "8f49059df9",
+    "at": "2026-11-14T15:38:57.516Z"
+  },
+  "pixel/anim/bttf-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 39551,
+    "prompt": "df561344b3",
+    "at": "2026-11-14T15:39:31.750Z"
+  },
+  "pixel/anim/bttf-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 18371,
+    "prompt": "1a048a3b96",
+    "at": "2026-11-14T15:39:40.475Z"
+  },
+  "pixel/anim/brian-bg": {
+    "status": "failed",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 15168,
+    "prompt": "4e8603ed5e",
+    "at": "2026-11-14T15:40:24.380Z",
+    "detail": "tokens used | 15 168"
+  },
+  "pixel/anim/batmobile-bg": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 132,
+    "prompt": "3d374476cc",
+    "at": "2026-11-14T15:42:36.848Z"
+  },
+  "pixel/anim/brian-car": {
+    "status": "convert-failed",
+    "engine": "agy",
+    "seconds": 206,
+    "prompt": "8f87f7760e",
+    "at": "2026-11-14T15:43:06.547Z",
+    "detail": "[Parsed_crop_0 @ 0x77c6c48600] Invalid too big or non positive size for width '848' or height '424'\n[Parsed_crop_0 @ 0x77c6c48600] Failed to configure input pad on Parsed_crop_0\n[vf#0:0 @ 0x77c7048000] Error reinitializing filters!\n[vf#0:0 @ 0x77c7048000] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x77c7048000] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x77c6c58000] [enc:mjpeg @ 0x77c70101c0] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x77c6c58000] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x77c6c58000] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x77c6c48180] Nothing was written into output file, because at least one of its streams received no packets.\n"
+  },
+  "pixel/anim/batmobile-car": {
+    "status": "convert-failed",
+    "engine": "agy",
+    "seconds": 147,
+    "prompt": "e68a84ecaf",
+    "at": "2026-11-14T15:45:03.919Z",
+    "detail": "[Parsed_crop_0 @ 0x7ca5038600] Invalid too big or non positive size for width '848' or height '424'\n[Parsed_crop_0 @ 0x7ca5038600] Failed to configure input pad on Parsed_crop_0\n[vf#0:0 @ 0x7ca4c40000] Error reinitializing filters!\n[vf#0:0 @ 0x7ca4c40000] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x7ca4c40000] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x7ca4c3c000] [enc:mjpeg @ 0x7ca500c1c0] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x7ca4c3c000] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x7ca4c3c000] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x7ca5038180] Nothing was written into output file, because at least one of its streams received no packets.\n"
+  },
+  "pixel/anim/zonda-bg": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 167,
+    "prompt": "50605676a8",
+    "at": "2026-11-14T15:45:53.282Z"
+  },
+  "pixel/anim/agera-bg": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 109,
+    "prompt": "77ecb71271",
+    "at": "2026-11-14T15:47:41.983Z"
+  },
+  "pixel/anim/zonda-car": {
+    "status": "convert-failed",
+    "engine": "agy",
+    "seconds": 174,
+    "prompt": "6af35f3471",
+    "at": "2026-11-14T15:47:58.117Z",
+    "detail": "Output /Users/pierrenowak/.gemini/antigravity-cli/brain/1d2d0b5f-67d2-4866-9973-a2fd1562dacd/gv_anim_zonda_car_1794671254966.jpg same as Input #0 - exiting\nError opening output file /Users/pierrenowak/.gemini/antigravity-cli/brain/1d2d0b5f-67d2-4866-9973-a2fd1562dacd/gv_anim_zonda_car_1794671254966.jpg.\nError opening output files: Invalid argument\n"
+  },
+  "pixel/anim/agera-car": {
+    "status": "failed",
+    "engine": "agy",
+    "seconds": 284,
+    "prompt": "a287c63f94",
+    "at": "2026-11-14T15:52:26.291Z",
+    "detail": "> **Erreur 429 RESOURCE_EXHAUSTED** : La capacité sur ce modèle est actuellement épuisée (réinitialisation du quota prévue dans environ 4h50). | Aucun fichier n'a été créé ou modifié. Tu pourras relancer la requête une fois le quota réinitialisé."
+  },
+  "pixel/anim/veyron-bg": {
+    "status": "failed",
+    "engine": "agy",
+    "seconds": 283,
+    "prompt": "6c6f89fe2e",
+    "at": "2026-11-14T15:52:40.909Z",
+    "detail": "To generate the image, I have invoked the image generator subagent. I will wait for it to finish. | La génération de l'image `gv_anim_veyron_bg` a échoué en raison d'un épuisement du quota sur le modèle d'image (`gemini-3.1-flash-image`, erreur HTTP 429 RESOURCE_EXHAUSTED). Le quota sera réinitialisé dans environ 4h50. Aucune image n'a pu être créée."
   }
 }

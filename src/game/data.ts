@@ -18,6 +18,7 @@ export interface Vehicle {
   signature: { name: string; text: string; effects: Effect[] }
   culture?: { work: string; base?: string; aura: string[] }
   evolvesFrom?: string; craft?: { stage: number; credits: number }; look?: string
+  anim?: { setting: string; fx: string[] }
 }
 
 export interface Part {

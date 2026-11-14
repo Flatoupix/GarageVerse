@@ -28,7 +28,9 @@ const only = option('only')?.split(',')
 const parallel = Number(option('jobs') ?? 4)
 // --set pixel produit le jeu d'illustrations pixel art dans src/assets/pixel/<kind>/<id>.webp, en basse définition.
 const set = option('set') ?? 'main'
-const pixel = set === 'pixel'
+const anim = set === 'anim'
+// --set anim produit les calques des légendaires animées : décor qui boucle et voiture détourée, en pixel art.
+const pixel = set === 'pixel' || anim
 
 const NO_TEXT = 'Strictly no text, no letters, no numbers, no logos, no brand badges, no readable license plates, no watermark, no card frame or border.'
 const STYLE = 'Style: premium 1980s synthwave / outrun poster illustration, clean crisp shapes, glossy reflections and chrome highlights, ' +
@@ -82,6 +84,25 @@ function jobs() {
       `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
       `centered in the lower two thirds, slight low camera angle, wheels on the ground unless it flies. ` +
       (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${STYLE} ${NO_TEXT}`) })
+  }
+  if (anim) {
+    for (const v of roster.vehicles.filter(v => v.anim)) {
+      const subject = v.culture
+        ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
+        : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
+      list.push({ kind: 'anim', id: `${v.id}-bg`, size: [240, 120], post: 'strip', prompt:
+        `Pixel art side-scrolling game background, wide landscape 2:1, seen from the side like a 1990s racing game level. ` +
+        `Scene: ${v.anim.setting}. A flat road runs horizontally across the bottom fifth of the image, from edge to edge. ` +
+        `No vehicles, no people in the foreground. ${PIXEL_STYLE} ${NO_TEXT}` })
+      list.push({ kind: 'anim', id: `${v.id}-car`, size: [128, 64], post: 'key', prompt:
+        `Pixel art game sprite, wide 2:1. Subject: ${subject}, seen in exact side profile facing right, as if driving to the right. ` +
+        `The whole car fills about 92% of the image width, wheels touching the bottom edge. ` +
+        `Background: one flat uniform pure magenta color #FF00FF everywhere around the car, no shadow, no ground, no scenery, no magenta on the car itself. ${PIXEL_STYLE} ${NO_TEXT}` })
+      if (v.anim.fx.includes('trex')) list.push({ kind: 'anim', id: `${v.id}-trex`, size: [96, 96], post: 'key', prompt:
+        `Pixel art game sprite, square. Subject: a huge running Tyrannosaurus rex seen in side profile facing right, mouth open, roaring, in full stride. ` +
+        `Background: one flat uniform pure magenta color #FF00FF everywhere around it, no shadow, no ground. ${PIXEL_STYLE} ${NO_TEXT}` })
+    }
+    return list.filter(j => !only || only.some(id => j.id === id || j.id.startsWith(id + '-')))
   }
   if (pixel) {
     if (kinds.includes('parts')) for (const p of garage.parts) list.push({ kind: 'parts', id: p.id, size: [128, 128], prompt:
@@ -140,6 +161,7 @@ function run(command, commandArgs, options = {}) {
 }
 
 const target = job => join(root, 'src/assets', ...(pixel ? ['pixel'] : []), job.kind, `${job.id}${pixel ? '.px' : ''}.webp`)
+// Calques animés : décor dupliqué en miroir pour boucler sans raccord, voiture détourée du fond magenta.
 const key = job => (pixel ? 'pixel/' : '') + `${job.kind}/${job.id}`
 
 // Moteurs d'image : Codex enregistre ./out.png dans un dossier isolé ; Antigravity dépose l'image dans son
@@ -207,6 +229,20 @@ async function convert(file, job) {
     const scaled = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vf',
       `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},scale=${tw}:${th}:flags=area`, small])
     if (scaled.code !== 0) return scaled
+    if (job.post === 'strip') {
+      const strip = file.replace(/\.png$/, '-strip.png')
+      const made = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', small, '-filter_complex', '[0]split[a][b];[b]hflip[c];[a][c]hstack', strip])
+      if (made.code !== 0) return made
+      return run('cwebp', ['-quiet', '-lossless', strip, '-o', out])
+    }
+    if (job.post === 'key') {
+      const keyed = file.replace(/\.png$/, '-key.png')
+      const made = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vf',
+        `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},colorkey=0xFF00FF:0.32:0.08,scale=${tw}:${th}:flags=area,format=rgba,` +
+        "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(gte(alpha(X,Y),120),255,0)'", keyed])
+      if (made.code !== 0) return made
+      return run('cwebp', ['-quiet', '-lossless', '-exact', keyed, '-o', out])
+    }
     return run('cwebp', ['-quiet', '-lossless', small, '-o', out])
   }
   return run('cwebp', ['-quiet', '-q', '82', '-crop', String(Math.floor((w - cw) / 2)), String(Math.floor((h - ch) / 2)), String(cw), String(ch),
