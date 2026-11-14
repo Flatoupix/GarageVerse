@@ -13,7 +13,10 @@ export const LEGACY_KEY = 'garageverse:v1'
 export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number> }
 export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean } | { kind: 'part'; id: string; isNew: boolean }
 export interface Opening { booster: string; pulls: Pull[]; revealed: number; view: 'back' | 'face' | 'recap'; collected: boolean }
-export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean }
+// Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
+export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
+export type ThemeId = (typeof themeIds)[number]
+export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId }
 export interface Save {
   version: 2
   daily: { date: string; won: boolean; booster: boolean; streak: number; lastWin: string }
@@ -34,7 +37,7 @@ export function newSave(): Save {
   const start = progression.start
   const save: Save = {
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true },
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true, theme: 'neon' },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
@@ -126,6 +129,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     sound: input.preferences?.sound !== false,
     reducedMotion: input.preferences?.reducedMotion === true,
     vibration: input.preferences?.vibration !== false,
+    theme: themeIds.find(id => id === input.preferences?.theme) ?? 'neon',
   }
   return save
 }

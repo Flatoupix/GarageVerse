@@ -6,8 +6,8 @@ import {
   conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
   type Condition, type Rival, type StatKey,
 } from '../game/data'
-import { confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween } from '../game/fx'
-import { circuitPriorities, circuitScores, evaluate, lineupCost, overheated, playRound, racer, rivalLineup, type Round } from '../game/rules'
+import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
+import { circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, type Round } from '../game/rules'
 import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import CarCard from '../components/CarCard.vue'
@@ -51,6 +51,8 @@ const recommendedCars = computed(() => priorities.value.map(priority => {
   return { ...priority, best }
 }))
 const pointsText = (value: number) => value.toFixed(1).replace('.', ',')
+// Score attendu avec sa part de hasard : « 7-9 », ou une seule valeur quand la forme du jour ne change rien.
+const rangeText = (value: number) => { const [low, high] = luckRange(value); return low === high ? String(value) : `${low}-${high}` }
 
 function toggle(id: string) {
   act(() => {
@@ -63,7 +65,7 @@ function toggle(id: string) {
 function start() {
   if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
     picked.value = 0; nitro.value = false
-    sound('rev'); streaks(palettes.cyan, 30); flash('#2ce8f5', 0.2); buzz([20, 40, 60])
+    sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
   }
 }
 
@@ -106,9 +108,14 @@ function settle(round: Round) {
   timers.push(setTimeout(() => sound(round.winner === 'player' ? 'collect' : round.winner === 'rival' ? 'lose' : 'flip'), 160))
   void nextTick(() => {
     const score = `.duel-col.${round.winner} .duel-score`
-    if (round.winner === 'player') { sparks(score, palettes.cyan, 42, 1.1); ring(score, '#2ce8f5'); flash('#2ce8f5', 0.18); pop(score, 1.4) }
-    else if (round.winner === 'rival') { sparks(score, palettes.pink, 22, 0.9); flash('#e43b44', 0.16); pop(score, 1.25) }
+    if (round.winner === 'player') { sparks(score, palettes.cyan, 42, 1.1); ring(score, tone.cyan); flash(tone.cyan, 0.18); pop(score, 1.4) }
+    else if (round.winner === 'rival') { sparks(score, palettes.pink, 22, 0.9); flash(tone.rose, 0.16); pop(score, 1.25) }
     pop('.scoreboard', 1.25)
+    for (const who of ['player', 'rival'] as const) {
+      const at = `.duel-col.${who} .duel-score`, luck = round[who].luck
+      if (luck === 'perfect') { floatText(at, 'Parfait !', tone.gold, 20); sparks(at, palettes.gold, 36, 1.2); if (who === 'player') { sound('legend'); flash(tone.gold, 0.25) } }
+      if (luck === 'incident') { floatText(at, round[who].lines.at(-1)!.label, tone.rose, 16); shake(2); if (who === 'player') buzz([40, 30, 40]) }
+    }
   })
 }
 
@@ -137,7 +144,7 @@ function engage() {
     counts.player = counts.rival = 0
     sound('whoosh')
     if (round.player.nitro || round.rival.nitro) {
-      sound('nitro'); flash('#feae34', 0.22)
+      sound('nitro'); flash(tone.gold, 0.22)
       streaks(palettes.fire, 40, round.player.nitro ? 1 : -1)
     }
     let ticked = 0
@@ -161,7 +168,7 @@ function proceed() {
     lastWinner.value = won ? 'player' : 'other'
     clear()
     if (won) {
-      confetti(); flash('#feae34', 0.32); buzz([40, 60, 40, 60, 80])
+      confetti(); flash(tone.gold, 0.32); buzz([40, 60, 40, 60, 80])
       timers.push(setTimeout(() => confetti(palettes.gold, 60), 650))
     } else shake(1)
     let ticked = 0
@@ -243,7 +250,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="pick(car, $event)">
             <img v-if="edition(r.id, save.cars[r.id]?.shown).art" :src="edition(r.id, save.cars[r.id]?.shown).art" alt="" />
             <span class="engage-name">{{ r.vehicle.name }}</span>
-            <span :key="projections[car]" class="engage-score">{{ projections[car] }}</span>
+            <span :key="projections[car]" class="engage-score" :aria-label="`de ${luckRange(projections[car])[0]} à ${luckRange(projections[car])[1]} points`">{{ rangeText(projections[car]) }}</span>
             <span class="engage-uses">{{ overheated(duel.player, car) ? 'Surchauffe −3' : `${r.uses - duel.player.used[car]} secteur${r.uses - duel.player.used[car] > 1 ? 's' : ''}` }}</span>
           </button>
         </div>

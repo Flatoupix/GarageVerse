@@ -21,7 +21,7 @@ const nextRival = computed(() => {
 <template>
   <main class="home">
     <section class="hero" aria-labelledby="home-title">
-      <img v-if="art.hero" class="hero-picture pixelated" :src="art.hero" alt="" />
+      <img v-if="art.hero" class="hero-picture" :src="art.hero" alt="" />
       <div class="hero-sun" aria-hidden="true"></div>
       <div class="hero-content">
         <span class="eyebrow"><span></span> Collection 001 · Neon Drive</span>
@@ -76,7 +76,7 @@ const nextRival = computed(() => {
       <ol>
         <li><b>Collectionne.</b> Chaque booster contient cinq cartes Voiture ou Mécanique.</li>
         <li><b>Prépare.</b> Améliore chaque voiture avec des crédits et monte des pièces à partir du niveau 2.</li>
-        <li><b>Cours.</b> Trois voitures sous le plafond de ta ligue, cinq secteurs, une voiture engagée en secret à chaque secteur.</li>
+        <li><b>Cours.</b> Trois voitures sous le plafond de ta ligue, cinq secteurs, une voiture engagée en secret à chaque secteur. Chaque secteur garde une part de chance : forme du jour, secteur parfait ou incident.</li>
         <li><b>Réinvestis.</b> Crédits, tickets et doublons alimentent le garage.</li>
       </ol>
     </section>

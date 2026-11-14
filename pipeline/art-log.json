@@ -2229,13 +2229,12 @@
     "at": "2026-11-14T15:39:40.475Z"
   },
   "pixel/anim/brian-bg": {
-    "status": "failed",
+    "status": "ok",
     "engine": "codex",
-    "seconds": 53,
-    "tokens": 15168,
+    "seconds": 47,
+    "tokens": 21582,
     "prompt": "4e8603ed5e",
-    "at": "2026-11-14T15:40:24.380Z",
-    "detail": "tokens used | 15 168"
+    "at": "2026-11-14T18:44:00.801Z"
   },
   "pixel/anim/batmobile-bg": {
     "status": "ok",
@@ -2245,20 +2244,20 @@
     "at": "2026-11-14T15:42:36.848Z"
   },
   "pixel/anim/brian-car": {
-    "status": "convert-failed",
-    "engine": "agy",
-    "seconds": 206,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 20958,
     "prompt": "8f87f7760e",
-    "at": "2026-11-14T15:43:06.547Z",
-    "detail": "[Parsed_crop_0 @ 0x77c6c48600] Invalid too big or non positive size for width '848' or height '424'\n[Parsed_crop_0 @ 0x77c6c48600] Failed to configure input pad on Parsed_crop_0\n[vf#0:0 @ 0x77c7048000] Error reinitializing filters!\n[vf#0:0 @ 0x77c7048000] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x77c7048000] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x77c6c58000] [enc:mjpeg @ 0x77c70101c0] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x77c6c58000] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x77c6c58000] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x77c6c48180] Nothing was written into output file, because at least one of its streams received no packets.\n"
+    "at": "2026-11-14T18:44:04.614Z"
   },
   "pixel/anim/batmobile-car": {
-    "status": "convert-failed",
-    "engine": "agy",
-    "seconds": 147,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 41,
+    "tokens": 17766,
     "prompt": "e68a84ecaf",
-    "at": "2026-11-14T15:45:03.919Z",
-    "detail": "[Parsed_crop_0 @ 0x7ca5038600] Invalid too big or non positive size for width '848' or height '424'\n[Parsed_crop_0 @ 0x7ca5038600] Failed to configure input pad on Parsed_crop_0\n[vf#0:0 @ 0x7ca4c40000] Error reinitializing filters!\n[vf#0:0 @ 0x7ca4c40000] Task finished with error code: -22 (Invalid argument)\n[vf#0:0 @ 0x7ca4c40000] Terminating thread with return code -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x7ca4c3c000] [enc:mjpeg @ 0x7ca500c1c0] Could not open encoder before EOF\n[vost#0:0/mjpeg @ 0x7ca4c3c000] Task finished with error code: -22 (Invalid argument)\n[vost#0:0/mjpeg @ 0x7ca4c3c000] Terminating thread with return code -22 (Invalid argument)\n[out#0/image2 @ 0x7ca5038180] Nothing was written into output file, because at least one of its streams received no packets.\n"
+    "at": "2026-11-14T18:44:41.834Z"
   },
   "pixel/anim/zonda-bg": {
     "status": "ok",
@@ -2275,27 +2274,91 @@
     "at": "2026-11-14T15:47:41.983Z"
   },
   "pixel/anim/zonda-car": {
-    "status": "convert-failed",
-    "engine": "agy",
-    "seconds": 174,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 41,
+    "tokens": 16653,
     "prompt": "6af35f3471",
-    "at": "2026-11-14T15:47:58.117Z",
-    "detail": "Output /Users/pierrenowak/.gemini/antigravity-cli/brain/1d2d0b5f-67d2-4866-9973-a2fd1562dacd/gv_anim_zonda_car_1794671254966.jpg same as Input #0 - exiting\nError opening output file /Users/pierrenowak/.gemini/antigravity-cli/brain/1d2d0b5f-67d2-4866-9973-a2fd1562dacd/gv_anim_zonda_car_1794671254966.jpg.\nError opening output files: Invalid argument\n"
+    "at": "2026-11-14T18:44:46.080Z"
   },
   "pixel/anim/agera-car": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 284,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 17349,
     "prompt": "a287c63f94",
-    "at": "2026-11-14T15:52:26.291Z",
-    "detail": "> **Erreur 429 RESOURCE_EXHAUSTED** : La capacité sur ce modèle est actuellement épuisée (réinitialisation du quota prévue dans environ 4h50). | Aucun fichier n'a été créé ou modifié. Tu pourras relancer la requête une fois le quota réinitialisé."
+    "at": "2026-11-14T18:45:27.617Z"
   },
   "pixel/anim/veyron-bg": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 283,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 37,
+    "tokens": 22506,
     "prompt": "6c6f89fe2e",
-    "at": "2026-11-14T15:52:40.909Z",
-    "detail": "To generate the image, I have invoked the image generator subagent. I will wait for it to finish. | La génération de l'image `gv_anim_veyron_bg` a échoué en raison d'un épuisement du quota sur le modèle d'image (`gemini-3.1-flash-image`, erreur HTTP 429 RESOURCE_EXHAUSTED). Le quota sera réinitialisé dans environ 4h50. Aucune image n'a pu être créée."
+    "at": "2026-11-14T18:45:23.373Z"
+  },
+  "pixel/anim/veyron-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 41,
+    "tokens": 21495,
+    "prompt": "b5fa0bb83a",
+    "at": "2026-11-14T18:46:04.783Z"
+  },
+  "pixel/anim/jpjeep-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 12643,
+    "prompt": "b5c68aa781",
+    "at": "2026-11-14T18:46:13.727Z"
+  },
+  "pixel/anim/jpjeep-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 22439,
+    "prompt": "c9600f7f73",
+    "at": "2026-11-14T18:46:56.195Z"
+  },
+  "pixel/anim/jpjeep-trex": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 24172,
+    "prompt": "de152c9ad7",
+    "at": "2026-11-14T18:46:56.609Z"
+  },
+  "pixel/anim/interceptor-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 18286,
+    "prompt": "0965433672",
+    "at": "2026-11-14T18:47:38.087Z"
+  },
+  "pixel/anim/interceptor-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 13576,
+    "prompt": "369ac53d1a",
+    "at": "2026-11-14T18:47:39.716Z"
+  },
+  "pixel/anim/1000tipla-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 40,
+    "tokens": 16920,
+    "prompt": "6a11dde0ba",
+    "at": "2026-11-14T18:48:17.929Z"
+  },
+  "pixel/anim/1000tipla-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 17125,
+    "prompt": "bdc325d628",
+    "at": "2026-11-14T18:48:31.481Z"
   }
 }

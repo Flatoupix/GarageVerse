@@ -29,7 +29,8 @@ export interface Part {
 
 export type SlotTable = Partial<Record<Rarity, number>> & { partChance: number }
 export interface Booster { id: string; name: string; tagline: string; price: number; slots: SlotTable[]; altChance: number; favorTags?: string[]; favorWeight?: number }
-export interface LineupEntry { id: string; stage: number; parts: string[] }
+// Un rival peut aussi monter ses groupes de statistiques à l’atelier (0 à 2 niveaux), comme le joueur.
+export interface LineupEntry { id: string; stage: number; parts: string[]; upgrades?: Partial<Record<StatKey, number>> }
 export interface Rival {
   id: string; name: string; title: string; league: string
   circuit: { name: string; sectors: Sector[]; conditions: Partial<Record<Condition, number>> }

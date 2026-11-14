@@ -46,6 +46,7 @@ C’est la piste « épreuve en secteurs » de la bible, enrichie de choix simul
 2. **Circuit.** Cinq secteurs connus d’avance : Départ (ACC), Virages (MAN), Ligne droite (VIT) et Endurance (END). La condition (Sec, Pluie, Nuit, Terre, Ville) n’est annoncée que pour le secteur en cours et le suivant.
 3. **Engagement.** À chaque secteur, chaque pilote engage une voiture en secret et peut brûler une charge de **Nitro** (+2, deux charges par course). Une voiture court `1 + ⌊END/4⌋` secteurs, hors bonus. Au-delà, elle **surchauffe** (−3).
 4. **Résolution.** Score = statistique préparée + modificateurs de terrain + capacités et pièces + Nitro. En cas d’égalité, l’Endurance départage. La course se joue au meilleur des cinq secteurs.
+5. **Part de hasard.** Comme les dégâts d’un jeu de combat au tour par tour, chaque voiture fait de 88 à 112 % de son score, au moins ±1 (« Forme du jour »). Une fois sur seize, elle signe un « Secteur parfait » (environ ×1,5, au moins +2). Une fois sur vingt-quatre, un incident lui coûte environ 40 % (au moins 2 points) : faux départ, tête-à-queue, aspiration ratée, crevaison ou aquaplaning. La pluie et la terre augmentent ce risque de moitié, la surchauffe le double. Le joueur voit la fourchette de score avant d’engager une voiture (`luckRange`, `src/game/rules.ts`).
 
 | Terrain | Modificateurs communs |
 | --- | --- |
@@ -58,7 +59,7 @@ Le joueur doit pouvoir expliquer son choix : le panneau de résultat détaille c
 
 **Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. L’IA voit les mêmes informations que le joueur.
 
-Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’écurie pour chaque secteur selon un score moyen estimé. Les deux rivaux de la ligue Néon roulent d’origine.
+Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’écurie pour chaque secteur selon un score moyen estimé. Lola roule d’origine ; les rivaux suivants montent aussi leurs groupes de statistiques à l’atelier (champ `upgrades` des écuries). Cible de la simulation (`node pipeline/balance.mjs`) : garage de départ d’origine 70 % contre Lola et 57 % contre Cassette, 83 % et 72 % avec une amélioration par voiture ; contre des écuries Stage 1 de leur ligue, Kenji 75 %, Roxy 71 %, le Baron 56 % et Nyx 55 %.
 
 ## 6. Boosters et économie
 
@@ -70,7 +71,11 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 
 Chaque booster contient cinq cartes, dont au plus une pièce. Le jeu détermine le type puis la rareté de chaque carte et choisit des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé au moment de la déchirure. Un rechargement retrouve le même lot, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
-## 7. Direction artistique rétro pixel 16 bits
+## 7. Direction artistique et thèmes d’interface
+
+- **Thèmes au choix.** Réglages › Thème, enregistré dans la sauvegarde (`preferences.theme`). Synthwave (style d’origine, par défaut, `src/themes/neon.css`), Rétro pixel (`src/themes/base.css`), puis Sobre, Sport auto et Carnet de garage, qui ajoutent leurs variables et ornements à la base (`src/themes/<id>.css`). Trois thèmes se débloquent en jouant (`unlock` dans `src/game/theme.ts`, conditions qui ne régressent pas, annonce par notification) : Borne d’arcade après 10 victoires, Console 16 bits à 25 voitures, Atelier PC 1991 avec une Légendaire. La base règle rayon (`--radius`), relief (`--lift`), rythme des animations (`--ease`) et échelle des titres (`--dz`) par variables. Seuls les menus changent : les cartes gardent leurs éditions. En Synthwave, l’accueil, les sachets, les rivaux et les pièces reprennent leurs illustrations d’origine ; les autres thèmes montrent le pixel art. Les effets (`src/game/fx.ts`) suivent le thème : couleurs propres, particules carrées en Rétro pixel, traits lumineux ailleurs.
+
+Le thème Rétro pixel suit les règles ci-dessous.
 
 - **Palette Endesga 32.** Variables de `:root` : nuit `--night` #181425, fond `--background` #262b44, panneau `--panel` #3a4466, gris bleu `--slate` #5a6988, crème `--text` #ead4aa, sable `--sand` #e4a672, brun `--brown` #b86f50, rouge `--red` #e43b44, orange `--orange` #f77622, jaune `--yellow` #feae34, vert `--green` #63c74d, bleu `--blue` #0099db, bleu clair `--light-blue` #2ce8f5, prune `--plum` #68386c, rose `--rose` #b55088, contour `--outline` #0b0a12. Texte crème sur les surfaces sombres ; texte contour sur les boutons jaunes.
 - **Typographies.** Press Start 2P pour les titres, chiffres et étiquettes courtes, à taille modeste ; Pixelify Sans pour le texte courant, au moins 15 px.

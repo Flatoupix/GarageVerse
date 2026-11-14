@@ -1,4 +1,5 @@
 import { defaultStyle, formerStyle, PIXEL, vehicleById, type EditionStyle } from './data'
+import { theme } from './theme'
 
 const url = (files: Record<string, string>, folder: string) =>
   Object.fromEntries(Object.entries(files).map(([path, href]) => [path.slice(folder.length).replace(/\.webp$/, ''), href]))
@@ -42,9 +43,12 @@ export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edi
   if (style === former && former !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
   return legacyArt[id]?.[style] ?? { style: 'Synthwave', art: carArt[id] }
 }
+// Le thème Synthwave reprend les illustrations d'origine des pièces, rivaux, sachets et de l'accueil ; les autres thèmes montrent le pixel art.
+const pick = (pixel: Record<string, string>, former: Record<string, string>, id: string) =>
+  (theme.value === 'neon' ? former[id] ?? pixel[id] : pixel[id] ?? former[id]) as string | undefined
 export const art = {
-  part: (id: string) => (pixelPart[id] ?? partArt[id]) as string | undefined,
-  rival: (id: string) => (pixelRival[id] ?? rivalArt[id]) as string | undefined,
-  pack: (id: string) => (pixelPack[id] ?? packArt[id]) as string | undefined,
-  hero: (pixelUi.hero ?? uiArt.hero) as string | undefined,
+  part: (id: string) => pick(pixelPart, partArt, id),
+  rival: (id: string) => pick(pixelRival, rivalArt, id),
+  pack: (id: string) => pick(pixelPack, packArt, id),
+  get hero() { return pick(pixelUi, uiArt, 'hero') },
 }

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import type { Rival, StatKey } from './game/data'
-import { floatText, mountFx, pop, tween } from './game/fx'
-import { buzz, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
+import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
+import { buzz, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
+import { applyTheme, theme, themes, unlocked, type Theme } from './game/theme'
 import BoosterView from './views/BoosterView.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
@@ -12,7 +13,7 @@ import RaceView from './views/RaceView.vue'
 import ShopView from './views/ShopView.vue'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
-type Setting = keyof typeof save.preferences
+type Setting = 'sound' | 'reducedMotion' | 'vibration'
 
 const screen = ref<Screen>(save.duel ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
@@ -34,7 +35,7 @@ watch(() => save.credits, (now, before) => {
   const delta = now - before
   creditMove.value = delta > 0 ? 'gain' : 'spend'
   floatText({ x: (wallet.value?.getBoundingClientRect().left ?? 0) + 30, y: (wallet.value?.getBoundingClientRect().bottom ?? 40) + 22 },
-    `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`, delta > 0 ? '#feae34' : '#b55088', 18)
+    `${delta > 0 ? '+' : '−'}${Math.abs(delta)}`, delta > 0 ? tone.gold : tone.rose, 18)
   if (delta > 0) sound('coin')
   pop(wallet.value, 1.18)
   stopCredits = tween(shownCredits.value, now, 600, v => { shownCredits.value = v }, () => { creditMove.value = null })
@@ -44,7 +45,7 @@ onMounted(() => {
   if (fx.value) mountFx(fx.value)
   // Retour tactile et sonore discret sur chaque commande.
   document.addEventListener('click', event => {
-    const control = (event.target as Element).closest?.('button, [role="radio"], label.setting, label.nitro-toggle, label.missing-toggle')
+    const control = (event.target as Element).closest?.('button, [role="radio"], label.setting, label.theme-option, label.nitro-toggle, label.missing-toggle')
     if (control && !(control as HTMLButtonElement).disabled) { sound('tap'); buzz(6) }
   }, true)
 })
@@ -77,6 +78,21 @@ async function toggleFullscreen() {
   } catch {
     // Le navigateur peut refuser sans geste utilisateur valide : on reste en fenêtre.
   }
+}
+
+// Un thème débloqué en cours de partie est annoncé une fois.
+const openThemes = computed(() => themes.filter(t => unlocked(save, t.id)).map(t => t.id))
+watch(openThemes, (now, before) => {
+  const fresh = themes.find(t => now.includes(t.id) && !before.includes(t.id))
+  if (fresh) setTimeout(() => { notify(`Thème « ${fresh.name} » débloqué dans les Réglages`); sound('legend') }, 2700)
+})
+
+function chooseTheme(id: Theme) {
+  if (id === theme.value || !unlocked(save, id)) return
+  save.preferences.theme = id
+  applyTheme(id)
+  themeFx(id)
+  persist()
 }
 
 function toggleSetting(key: Setting) {
@@ -128,6 +144,17 @@ function toggleSetting(key: Setting) {
     <dialog ref="settings" class="modal settings-modal">
       <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>
       <h2>Réglages</h2>
+      <fieldset class="theme-picker">
+        <legend>Thème</legend>
+        <label v-for="t in themes" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
+          <input type="radio" name="theme" :value="t.id" :checked="theme === t.id" :disabled="!unlocked(save, t.id)" @change="chooseTheme(t.id)" />
+          <span class="theme-swatch" aria-hidden="true"><i v-for="c in t.swatch" :key="c" :style="{ background: c }"></i></span>
+          <span class="theme-text"><b>{{ t.name }}</b>
+            <small v-if="unlocked(save, t.id) || !t.unlock">{{ t.hint }}</small>
+            <small v-else class="theme-goal">🔒 {{ t.unlock.goal }} · {{ t.unlock.progress(save).join(' / ') }}</small>
+          </span>
+        </label>
+      </fieldset>
       <label class="setting"><span>Son</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
       <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
       <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>

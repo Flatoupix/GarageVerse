@@ -142,7 +142,7 @@ export function circuitScores(r: Racer, circuit: Rival['circuit']) {
 // ——— Duel en cinq secteurs ———
 
 export interface Side { lineup: Racer[]; used: number[]; nitro: number; points: number }
-export interface Play { car: number; nitro: boolean; score: number; lines: ScoreLine[]; overheated: boolean }
+export interface Play { car: number; nitro: boolean; score: number; lines: ScoreLine[]; overheated: boolean; luck?: 'perfect' | 'incident' }
 export interface Round { sector: Sector; condition: Condition; player: Play; rival: Play; winner: 'player' | 'rival' | 'tie' }
 export interface Duel {
   rivalId: string; sectors: Sector[]; conditions: Condition[]
@@ -164,7 +164,7 @@ function side(lineup: { id: string; prep: Prep }[]): Side {
 }
 
 export function rivalLineup(rival: Rival) {
-  return rival.lineup.map(entry => ({ id: entry.id, prep: { stage: entry.stage, parts: entry.parts } }))
+  return rival.lineup.map(entry => ({ id: entry.id, prep: { stage: entry.stage, parts: entry.parts, upgrades: entry.upgrades } }))
 }
 
 export function createRace(rivalId: string, circuit: Rival['circuit'], player: { id: string; prep: Prep }[],
@@ -218,17 +218,53 @@ export function aiChoice(duel: Duel, who: 'player' | 'rival', rng: Rng): { car: 
   return { car: best.car, nitro }
 }
 
+// ——— Part de hasard, à la manière des jeux de combat au tour par tour ———
+// Chaque secteur, une voiture fait entre 88 et 112 % de son score, au moins ±1 (forme du jour). Rarement, elle signe un secteur
+// parfait (environ ×1,5) ou subit un incident (environ −40 %). Le choix de la voiture et du nitro reste décisif : l'écart moyen entre deux voitures dépasse la variation.
+export const LUCK = { spread: 0.12, perfect: 1 / 16, incident: 1 / 24 }
+const perfectBonus = (score: number) => Math.max(2, Math.round(score / 2))
+const incidentMalus = (score: number) => Math.max(2, Math.round(score * 0.4))
+const incidentLabels: Record<Sector, string> = { depart: 'Faux départ', virage: 'Tête-à-queue', ligne: 'Aspiration ratée', endurance: 'Crevaison' }
+
+// Fourchette affichée avant d'engager une voiture, hors secteur parfait et incident.
+export function luckRange(score: number): [number, number] {
+  const swing = Math.max(1, Math.round(Math.max(0, score) * LUCK.spread))
+  return [score - swing, score + swing]
+}
+
+// Pluie, terre et voiture en surchauffe rendent l'incident plus probable.
+export function incidentChance(condition: Condition, overheatedCar: boolean) {
+  return LUCK.incident * (condition === 'pluie' || condition === 'terre' ? 1.5 : 1) * (overheatedCar ? 2 : 1)
+}
+
+function applyLuck(play: Play, sector: Sector, condition: Condition, rng: Rng) {
+  const roll = rng()
+  const incident = incidentChance(condition, play.overheated)
+  let line: ScoreLine | undefined
+  if (roll < LUCK.perfect) { play.luck = 'perfect'; line = { label: 'Secteur parfait', value: perfectBonus(play.score) } }
+  else if (roll < LUCK.perfect + incident) {
+    play.luck = 'incident'
+    line = { label: condition === 'pluie' ? 'Aquaplaning' : incidentLabels[sector], value: -incidentMalus(play.score) }
+  } else {
+    const [low, high] = luckRange(play.score)
+    const value = low + Math.floor(rng() * (high - low + 1)) - play.score
+    if (value) line = { label: 'Forme du jour', value }
+  }
+  if (line) { play.lines.push(line); play.score += line.value }
+}
+
 export function playRound(duel: Duel, choice: { car: number; nitro: boolean }, rng: Rng): Round {
   if (duel.winner || duel.rounds.length >= duel.sectors.length) throw new Error('Course terminée')
   const ai = aiChoice(duel, 'rival', rng)
   const player = evaluate(duel, 'player', choice.car, choice.nitro, ai.car)
   const rival = evaluate(duel, 'rival', ai.car, ai.nitro, choice.car)
+  const index = duel.rounds.length
+  for (const play of [player, rival]) applyLuck(play, duel.sectors[index], duel.conditions[index], rng)
   let winner: Round['winner'] = player.score > rival.score ? 'player' : rival.score > player.score ? 'rival' : 'tie'
   if (winner === 'tie') {
     const a = duel.player.lineup[choice.car].stats.end, b = duel.rival.lineup[ai.car].stats.end
     winner = a > b ? 'player' : b > a ? 'rival' : 'tie'
   }
-  const index = duel.rounds.length
   const round: Round = { sector: duel.sectors[index], condition: duel.conditions[index], player, rival, winner }
   for (const [who, play] of [['player', player], ['rival', rival]] as const) {
     duel[who].used[play.car]++

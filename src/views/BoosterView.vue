@@ -2,7 +2,7 @@
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { edition } from '../game/art'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
-import { confetti, flash, palettes, rarityPalette, ring, shake, sparks } from '../game/fx'
+import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
 import { collect, tear, type Pull } from '../game/save'
 import { buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
 import PullCard from '../components/PullCard.vue'
@@ -43,7 +43,7 @@ function celebrate(rarity: Rarity, target = '.card-stack') {
   ring(target, colors[0])
   if (rarity === 'Rare') { sparks(target, colors, 28); buzz(15); return }
   if (rarity === 'Épique') { flash(colors[0], 0.28); sparks(target, colors, 46, 1.2); shake(1); buzz([15, 30, 25]); return }
-  flash('#ead4aa', 0.75); shake(3); sparks(target, colors, 80, 1.5); ring(target, '#feae34', 900); confetti(); buzz([30, 50, 40, 50, 60])
+  flash(tone.light, 0.75); shake(3); sparks(target, colors, 80, 1.5); ring(target, tone.gold, 900); confetti(); buzz([30, 50, 40, 50, 60])
 }
 
 // Une carte légendaire ou une édition animée reçoit la mise en scène exceptionnelle.
@@ -64,7 +64,7 @@ function openPack() {
   sound('tear')
   buzz(25)
   const pack = document.querySelector('.tear-pack')?.getBoundingClientRect()
-  flash('#b55088', 0.35); shake(2)
+  flash(tone.rose, 0.35); shake(2)
   if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, [...palettes.pink, ...palettes.cyan], 44, 1.1)
   for (const pull of save.opening!.pulls) if (pull.kind === 'car') {
     const look = edition(pull.id, pull.style)

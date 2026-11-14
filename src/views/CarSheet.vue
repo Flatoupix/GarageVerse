@@ -2,7 +2,7 @@
 import { computed, nextTick, ref } from 'vue'
 import { art, edition } from '../game/art'
 import { families, partById, parts, progression, statLabels, stylesOf, vehicleById, vehicles, type Rival, type StatKey } from '../game/data'
-import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt } from '../game/fx'
+import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
 import { craft, craftCheck, freeParts, install, installCheck, prepOf, scrapCar, stageCost, uninstall, upgrade, upgradeCheck, upgradeStat } from '../game/save'
@@ -55,8 +55,8 @@ function stageUp() {
   const stage = (car.value?.stage ?? 0) + 1
   if (!act(s => upgrade(s, props.id), `Stage ${stage} atteint`, 'upgrade')) return
   buzz([20, 30, 40])
-  flash('#feae34', 0.22); shake(stage === 3 ? 2 : 1)
-  sparks('.sheet-card', palettes.sun, 30 + stage * 14, 1.1); ring('.sheet-card', '#feae34', 700)
+  flash(tone.gold, 0.22); shake(stage === 3 ? 2 : 1)
+  sparks('.sheet-card', palettes.sun, 30 + stage * 14, 1.1); ring('.sheet-card', tone.gold, 700)
   pop('.sheet-card', 1.08, 420)
 }
 function fit(partId: string, name: string) {
@@ -68,7 +68,7 @@ function unlock(id: string, open = false) {
   const e = vehicleById.get(id)!
   if (!act(s => craft(s, id), `${e.name} ${e.version} débloquée`, 'legend')) return
   buzz([30, 50, 40, 50, 60])
-  flash('#ead4aa', 0.6); shake(2); confetti(rarityPalette[e.rarity]); sparks('.sheet-card', rarityPalette[e.rarity], 60, 1.3)
+  flash(tone.light, 0.6); shake(2); confetti(rarityPalette[e.rarity]); sparks('.sheet-card', rarityPalette[e.rarity], 60, 1.3)
   if (open) emit('open', id)
 }
 function toggleLineup() {

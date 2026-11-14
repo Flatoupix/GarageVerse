@@ -1,428 +1,452 @@
 {
   "carWinRates": [
     {
-      "id": "domcharger",
-      "name": "Dodge Charger de Dom Fast & Furious",
-      "cost": 6,
-      "rarity": "Épique",
-      "winRate": 0.725,
-      "sectorsRun": 2.26
-    },
-    {
-      "id": "jpjeep",
-      "name": "Jeep Jurassic Park Jurassic Park",
-      "cost": 5,
-      "rarity": "Légendaire",
-      "winRate": 0.719,
-      "sectorsRun": 2.58
-    },
-    {
-      "id": "1000tipla",
-      "name": "1000tipla Vilebrequin",
-      "cost": 6,
-      "rarity": "Légendaire",
-      "winRate": 0.681,
-      "sectorsRun": 2.16
-    },
-    {
-      "id": "kitt",
-      "name": "KITT K2000",
-      "cost": 6,
-      "rarity": "Légendaire",
-      "winRate": 0.669,
-      "sectorsRun": 1.97
-    },
-    {
       "id": "herbie",
       "name": "Choupette Coccinelle nº 53",
       "cost": 4,
       "rarity": "Épique",
-      "winRate": 0.662,
-      "sectorsRun": 2.45
+      "winRate": 0.669,
+      "sectorsRun": 2.44
     },
     {
-      "id": "interceptor",
-      "name": "V8 Interceptor Mad Max",
-      "cost": 6,
-      "rarity": "Légendaire",
-      "winRate": 0.644,
-      "sectorsRun": 2.04
-    },
-    {
-      "id": "r32",
-      "name": "Nissan Skyline GT-R R32 2.6 Twin Turbo",
-      "cost": 5,
-      "rarity": "Rare",
-      "winRate": 0.637,
-      "sectorsRun": 2.02
-    },
-    {
-      "id": "eleanor",
-      "name": "Eleanor 60 secondes chrono",
+      "id": "domcharger",
+      "name": "Dodge Charger de Dom Fast & Furious",
       "cost": 6,
       "rarity": "Épique",
-      "winRate": 0.637,
-      "sectorsRun": 2.42
-    },
-    {
-      "id": "explorer",
-      "name": "Ford Explorer XLT 1993 4.0 V6 4x4",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.625,
-      "sectorsRun": 1.69
-    },
-    {
-      "id": "r5gt",
-      "name": "Renault Super 5 GT Turbo Phase 2",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.606,
-      "sectorsRun": 1.68
-    },
-    {
-      "id": "testarossa",
-      "name": "Ferrari Testarossa 4.9",
-      "cost": 6,
-      "rarity": "Épique",
-      "winRate": 0.606,
-      "sectorsRun": 2.02
-    },
-    {
-      "id": "uno",
-      "name": "Fiat Uno Turbo i.e. 1.3 Turbo",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.6,
-      "sectorsRun": 1.39
-    },
-    {
-      "id": "clio",
-      "name": "Renault Clio III 1.5 dCi",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.594,
-      "sectorsRun": 1.28
-    },
-    {
-      "id": "combi",
-      "name": "Volkswagen Combi T1 1500",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.594,
-      "sectorsRun": 1.78
-    },
-    {
-      "id": "quattro",
-      "name": "Audi Quattro 1980 2.1 Turbo",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.594,
+      "winRate": 0.669,
       "sectorsRun": 2.31
-    },
-    {
-      "id": "taxi",
-      "name": "Taxi de Korben Dallas Le Cinquième Élément",
-      "cost": 4,
-      "rarity": "Épique",
-      "winRate": 0.588,
-      "sectorsRun": 2.23
-    },
-    {
-      "id": "fiat500",
-      "name": "Fiat 500 de 1957 Nuova 500",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.581,
-      "sectorsRun": 1.88
-    },
-    {
-      "id": "camaro",
-      "name": "Chevrolet Camaro Z28 1969 302",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.581,
-      "sectorsRun": 1.69
     },
     {
       "id": "brian",
       "name": "Skyline de Brian Nissan Skyline GT-R R34",
       "cost": 8,
       "rarity": "Légendaire",
-      "winRate": 0.575,
-      "sectorsRun": 2.4
-    },
-    {
-      "id": "p206",
-      "name": "Peugeot 206 HDi 2.0 HDi",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.575,
-      "sectorsRun": 1.21
-    },
-    {
-      "id": "bttf",
-      "name": "DeLorean temporelle Retour vers le futur",
-      "cost": 5,
-      "rarity": "Légendaire",
-      "winRate": 0.569,
-      "sectorsRun": 2.12
-    },
-    {
-      "id": "mustang67",
-      "name": "Ford Mustang Fastback 1967 289 V8",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.569,
+      "winRate": 0.625,
       "sectorsRun": 2.33
     },
     {
-      "id": "dmc",
-      "name": "DeLorean DMC-12 Série",
-      "cost": 2,
-      "rarity": "Rare",
-      "winRate": 0.563,
-      "sectorsRun": 1.64
-    },
-    {
-      "id": "charger",
-      "name": "Dodge Charger R/T 1970 440 Magnum",
-      "cost": 5,
-      "rarity": "Rare",
-      "winRate": 0.563,
-      "sectorsRun": 1.94
-    },
-    {
-      "id": "scirocco",
-      "name": "Volkswagen Scirocco GT24 · 24 Heures",
+      "id": "quattro",
+      "name": "Audi Quattro 1980 2.1 Turbo",
       "cost": 4,
       "rarity": "Rare",
-      "winRate": 0.556,
-      "sectorsRun": 1.95
+      "winRate": 0.613,
+      "sectorsRun": 2.22
     },
     {
-      "id": "mf1",
-      "name": "McLaren F1 Route",
+      "id": "agera",
+      "name": "Koenigsegg Agera R",
       "cost": 9,
       "rarity": "Légendaire",
-      "winRate": 0.556,
-      "sectorsRun": 2.09
+      "winRate": 0.588,
+      "sectorsRun": 1.91
     },
     {
-      "id": "evo8",
-      "name": "Mitsubishi Lancer Evolution VIII",
-      "cost": 5,
-      "rarity": "Rare",
-      "winRate": 0.556,
-      "sectorsRun": 2.08
-    },
-    {
-      "id": "hilux",
-      "name": "Toyota Hilux 1988 2.4 D 4x4",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.544,
-      "sectorsRun": 0.97
-    },
-    {
-      "id": "impreza",
-      "name": "Subaru Impreza WRX STI GC8 STI",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.544,
-      "sectorsRun": 2.26
-    },
-    {
-      "id": "c4zr1",
-      "name": "Chevrolet Corvette C4 ZR-1",
-      "cost": 5,
-      "rarity": "Rare",
-      "winRate": 0.537,
-      "sectorsRun": 2.08
-    },
-    {
-      "id": "elise190",
-      "name": "Lotus Elise Sport 190",
-      "cost": 5,
+      "id": "interceptor",
+      "name": "V8 Interceptor Mad Max",
+      "cost": 6,
       "rarity": "Légendaire",
-      "winRate": 0.537,
-      "sectorsRun": 2.48
+      "winRate": 0.588,
+      "sectorsRun": 2.19
     },
     {
-      "id": "tesla",
-      "name": "Tesla Model S Plaid",
-      "cost": 6,
+      "id": "delta",
+      "name": "Lancia Delta HF Integrale Evoluzione",
+      "cost": 5,
       "rarity": "Épique",
-      "winRate": 0.537,
-      "sectorsRun": 1.59
-    },
-    {
-      "id": "supra",
-      "name": "Toyota Supra Mk4 Twin Turbo",
-      "cost": 6,
-      "rarity": "Épique",
-      "winRate": 0.531,
-      "sectorsRun": 1.96
-    },
-    {
-      "id": "firebird",
-      "name": "Pontiac Firebird Trans Am 6.6",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.531,
-      "sectorsRun": 1.73
-    },
-    {
-      "id": "r4l",
-      "name": "Renault 4L GTL 1.1",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.531,
-      "sectorsRun": 1.12
-    },
-    {
-      "id": "cosworth",
-      "name": "Ford Escort RS Cosworth 2.0 Turbo",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.531,
-      "sectorsRun": 1.98
+      "winRate": 0.575,
+      "sectorsRun": 2.03
     },
     {
       "id": "wrangler",
       "name": "Jeep Wrangler YJ Sahara 1992 4.0",
       "cost": 2,
       "rarity": "Courante",
-      "winRate": 0.525,
-      "sectorsRun": 1.19
+      "winRate": 0.575,
+      "sectorsRun": 1.29
     },
     {
-      "id": "r34",
-      "name": "Nissan Skyline GT-R R34",
-      "cost": 6,
-      "rarity": "Épique",
-      "winRate": 0.519,
-      "sectorsRun": 1.94
-    },
-    {
-      "id": "ecto1",
-      "name": "Ecto-1 Ghostbusters",
-      "cost": 3,
-      "rarity": "Épique",
-      "winRate": 0.519,
-      "sectorsRun": 1.77
-    },
-    {
-      "id": "duster",
-      "name": "Dacia Duster 1.5 dCi 4x4",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.519,
-      "sectorsRun": 1.05
-    },
-    {
-      "id": "p504",
-      "name": "Peugeot 504 GL 2.0",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.519,
-      "sectorsRun": 0.9
-    },
-    {
-      "id": "multipla",
-      "name": "Fiat Multipla 1.9 JTD",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.519,
-      "sectorsRun": 0.98
-    },
-    {
-      "id": "veyron",
-      "name": "Bugatti Veyron 16.4",
-      "cost": 10,
+      "id": "jpjeep",
+      "name": "Jeep Jurassic Park Jurassic Park",
+      "cost": 5,
       "rarity": "Légendaire",
-      "winRate": 0.512,
-      "sectorsRun": 2.19
+      "winRate": 0.575,
+      "sectorsRun": 2.71
     },
     {
-      "id": "golf4",
-      "name": "Volkswagen Golf IV TDI 1.9 TDI 110",
+      "id": "taxi",
+      "name": "Taxi de Korben Dallas Le Cinquième Élément",
+      "cost": 4,
+      "rarity": "Épique",
+      "winRate": 0.569,
+      "sectorsRun": 2.24
+    },
+    {
+      "id": "evo8",
+      "name": "Mitsubishi Lancer Evolution VIII",
+      "cost": 5,
+      "rarity": "Rare",
+      "winRate": 0.569,
+      "sectorsRun": 2.09
+    },
+    {
+      "id": "1000tipla",
+      "name": "1000tipla Vilebrequin",
+      "cost": 6,
+      "rarity": "Légendaire",
+      "winRate": 0.569,
+      "sectorsRun": 2.11
+    },
+    {
+      "id": "explorer",
+      "name": "Ford Explorer XLT 1993 4.0 V6 4x4",
       "cost": 2,
       "rarity": "Courante",
-      "winRate": 0.512,
-      "sectorsRun": 1.15
+      "winRate": 0.563,
+      "sectorsRun": 1.7
     },
     {
-      "id": "transit",
-      "name": "Ford Transit Mk2 2.0 essence",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.512,
-      "sectorsRun": 1.36
+      "id": "c4zr1",
+      "name": "Chevrolet Corvette C4 ZR-1",
+      "cost": 5,
+      "rarity": "Rare",
+      "winRate": 0.556,
+      "sectorsRun": 2.06
     },
     {
-      "id": "niva",
-      "name": "Lada Niva 1600",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.506,
-      "sectorsRun": 1.18
+      "id": "tesla",
+      "name": "Tesla Model S Plaid",
+      "cost": 6,
+      "rarity": "Épique",
+      "winRate": 0.556,
+      "sectorsRun": 1.45
+    },
+    {
+      "id": "kitt",
+      "name": "KITT K2000",
+      "cost": 6,
+      "rarity": "Légendaire",
+      "winRate": 0.55,
+      "sectorsRun": 1.95
     },
     {
       "id": "mehari",
       "name": "Citroën Méhari 2 roues motrices",
       "cost": 1,
       "rarity": "Courante",
-      "winRate": 0.506,
-      "sectorsRun": 1.24
+      "winRate": 0.55,
+      "sectorsRun": 1.41
     },
     {
-      "id": "volvo240",
-      "name": "Volvo 240 Break 245 GL 2.3",
+      "id": "combi",
+      "name": "Volkswagen Combi T1 1500",
       "cost": 1,
       "rarity": "Courante",
-      "winRate": 0.5,
-      "sectorsRun": 0.98
+      "winRate": 0.55,
+      "sectorsRun": 1.78
     },
     {
-      "id": "simca",
-      "name": "Simca 1000 Rallye 2 1.3",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.5,
-      "sectorsRun": 1.82
-    },
-    {
-      "id": "golf2",
-      "name": "Volkswagen Golf GTI Mk2 1.8 16S",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.5,
-      "sectorsRun": 1.79
-    },
-    {
-      "id": "s15",
-      "name": "Nissan Silvia S15 Spec-S",
+      "id": "mustang67",
+      "name": "Ford Mustang Fastback 1967 289 V8",
       "cost": 4,
       "rarity": "Rare",
-      "winRate": 0.494,
-      "sectorsRun": 2.23
+      "winRate": 0.55,
+      "sectorsRun": 2.29
+    },
+    {
+      "id": "charger",
+      "name": "Dodge Charger R/T 1970 440 Magnum",
+      "cost": 5,
+      "rarity": "Rare",
+      "winRate": 0.55,
+      "sectorsRun": 2.02
     },
     {
       "id": "bond",
       "name": "Lotus Esprit de James Bond L'espion qui m'aimait",
       "cost": 5,
       "rarity": "Épique",
-      "winRate": 0.494,
+      "winRate": 0.544,
+      "sectorsRun": 2.21
+    },
+    {
+      "id": "m3e46",
+      "name": "BMW M3 E46",
+      "cost": 5,
+      "rarity": "Rare",
+      "winRate": 0.544,
+      "sectorsRun": 2.08
+    },
+    {
+      "id": "r5gt",
+      "name": "Renault Super 5 GT Turbo Phase 2",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.544,
+      "sectorsRun": 1.78
+    },
+    {
+      "id": "r32",
+      "name": "Nissan Skyline GT-R R32 2.6 Twin Turbo",
+      "cost": 5,
+      "rarity": "Rare",
+      "winRate": 0.544,
+      "sectorsRun": 2.16
+    },
+    {
+      "id": "mf1",
+      "name": "McLaren F1 Route",
+      "cost": 9,
+      "rarity": "Légendaire",
+      "winRate": 0.537,
+      "sectorsRun": 2.07
+    },
+    {
+      "id": "mx5nb",
+      "name": "Mazda MX-5 NB 1.8",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.531,
+      "sectorsRun": 1.72
+    },
+    {
+      "id": "p504",
+      "name": "Peugeot 504 GL 2.0",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.531,
+      "sectorsRun": 0.88
+    },
+    {
+      "id": "supra",
+      "name": "Toyota Supra Mk4 Twin Turbo",
+      "cost": 6,
+      "rarity": "Épique",
+      "winRate": 0.525,
+      "sectorsRun": 1.93
+    },
+    {
+      "id": "r34",
+      "name": "Nissan Skyline GT-R R34",
+      "cost": 6,
+      "rarity": "Épique",
+      "winRate": 0.525,
+      "sectorsRun": 2.09
+    },
+    {
+      "id": "r4l",
+      "name": "Renault 4L GTL 1.1",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.525,
+      "sectorsRun": 1.18
+    },
+    {
+      "id": "gt500",
+      "name": "Ford Mustang Shelby GT500 2020",
+      "cost": 6,
+      "rarity": "Épique",
+      "winRate": 0.519,
+      "sectorsRun": 2.06
+    },
+    {
+      "id": "ruf",
+      "name": "RUF CTR Yellowbird",
+      "cost": 7,
+      "rarity": "Épique",
+      "winRate": 0.519,
       "sectorsRun": 2.28
+    },
+    {
+      "id": "h1",
+      "name": "Hummer H1 6.5 TD",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.519,
+      "sectorsRun": 1.06
+    },
+    {
+      "id": "uno",
+      "name": "Fiat Uno Turbo i.e. 1.3 Turbo",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.519,
+      "sectorsRun": 1.44
+    },
+    {
+      "id": "transit",
+      "name": "Ford Transit Mk2 2.0 essence",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.519,
+      "sectorsRun": 1.36
+    },
+    {
+      "id": "celica",
+      "name": "Toyota Celica GT-Four ST205 2.0 Turbo",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.519,
+      "sectorsRun": 2.09
+    },
+    {
+      "id": "eleanor",
+      "name": "Eleanor 60 secondes chrono",
+      "cost": 6,
+      "rarity": "Épique",
+      "winRate": 0.519,
+      "sectorsRun": 2.44
     },
     {
       "id": "twingo",
       "name": "Renault Twingo I 1.2",
       "cost": 1,
       "rarity": "Courante",
+      "winRate": 0.512,
+      "sectorsRun": 1.51
+    },
+    {
+      "id": "p930",
+      "name": "Porsche 911 Turbo 930",
+      "cost": 7,
+      "rarity": "Épique",
+      "winRate": 0.512,
+      "sectorsRun": 1.81
+    },
+    {
+      "id": "ecto1",
+      "name": "Ecto-1 Ghostbusters",
+      "cost": 3,
+      "rarity": "Épique",
+      "winRate": 0.512,
+      "sectorsRun": 1.85
+    },
+    {
+      "id": "corsa",
+      "name": "Opel Corsa B 1.2i",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.512,
+      "sectorsRun": 1.41
+    },
+    {
+      "id": "kangoo",
+      "name": "Renault Kangoo 1.9 D",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.512,
+      "sectorsRun": 0.99
+    },
+    {
+      "id": "elise190",
+      "name": "Lotus Elise Sport 190",
+      "cost": 5,
+      "rarity": "Légendaire",
+      "winRate": 0.506,
+      "sectorsRun": 2.48
+    },
+    {
+      "id": "demon",
+      "name": "Dodge Challenger SRT Demon 170",
+      "cost": 7,
+      "rarity": "Épique",
+      "winRate": 0.506,
+      "sectorsRun": 1.64
+    },
+    {
+      "id": "duster",
+      "name": "Dacia Duster 1.5 dCi 4x4",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.506,
+      "sectorsRun": 0.99
+    },
+    {
+      "id": "hilux",
+      "name": "Toyota Hilux 1988 2.4 D 4x4",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.506,
+      "sectorsRun": 1.02
+    },
+    {
+      "id": "camaro",
+      "name": "Chevrolet Camaro Z28 1969 302",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.506,
+      "sectorsRun": 1.78
+    },
+    {
+      "id": "clio",
+      "name": "Renault Clio III 1.5 dCi",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.5,
+      "sectorsRun": 1.23
+    },
+    {
+      "id": "beetle",
+      "name": "Volkswagen Coccinelle 1303",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.5,
+      "sectorsRun": 1.09
+    },
+    {
+      "id": "veyron",
+      "name": "Bugatti Veyron 16.4",
+      "cost": 10,
+      "rarity": "Légendaire",
+      "winRate": 0.5,
+      "sectorsRun": 2.13
+    },
+    {
+      "id": "abarth",
+      "name": "Abarth 500 1.4 T-Jet",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.494,
+      "sectorsRun": 1.69
+    },
+    {
+      "id": "impreza",
+      "name": "Subaru Impreza WRX STI GC8 STI",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.494,
+      "sectorsRun": 2.31
+    },
+    {
+      "id": "golf1",
+      "name": "Volkswagen Golf GTI Mk1",
+      "cost": 3,
+      "rarity": "Rare",
       "winRate": 0.487,
-      "sectorsRun": 1.48
+      "sectorsRun": 1.27
+    },
+    {
+      "id": "scirocco",
+      "name": "Volkswagen Scirocco GT24 · 24 Heures",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.487,
+      "sectorsRun": 1.97
+    },
+    {
+      "id": "esprit",
+      "name": "Lotus Esprit S1",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.487,
+      "sectorsRun": 1.69
+    },
+    {
+      "id": "bttf",
+      "name": "DeLorean temporelle Retour vers le futur",
+      "cost": 5,
+      "rarity": "Légendaire",
+      "winRate": 0.487,
+      "sectorsRun": 2.25
     },
     {
       "id": "defender",
@@ -430,71 +454,103 @@
       "cost": 2,
       "rarity": "Courante",
       "winRate": 0.487,
-      "sectorsRun": 1.11
+      "sectorsRun": 1.12
     },
     {
-      "id": "gt500",
-      "name": "Ford Mustang Shelby GT500 2020",
-      "cost": 6,
-      "rarity": "Épique",
-      "winRate": 0.481,
-      "sectorsRun": 2.19
-    },
-    {
-      "id": "ae86",
-      "name": "Toyota Sprinter Trueno AE86 GT APEX",
-      "cost": 3,
+      "id": "evo2",
+      "name": "Mercedes 190E 2.5-16 Evo II Evolution II",
+      "cost": 4,
       "rarity": "Rare",
+      "winRate": 0.487,
+      "sectorsRun": 2.51
+    },
+    {
+      "id": "batmobile",
+      "name": "Batmobile Film de 1989",
+      "cost": 8,
+      "rarity": "Légendaire",
       "winRate": 0.481,
-      "sectorsRun": 1.88
+      "sectorsRun": 2
     },
     {
-      "id": "deuch",
-      "name": "Citroën 2CV 2CV6",
+      "id": "ax",
+      "name": "Citroën AX GT 1.4",
       "cost": 1,
       "rarity": "Courante",
-      "winRate": 0.475,
-      "sectorsRun": 0.99
+      "winRate": 0.481,
+      "sectorsRun": 1.19
     },
     {
-      "id": "panda",
-      "name": "Fiat Panda 4×4 Série 1",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.475,
-      "sectorsRun": 0.91
-    },
-    {
-      "id": "delta",
-      "name": "Lancia Delta HF Integrale Evoluzione",
-      "cost": 5,
-      "rarity": "Épique",
-      "winRate": 0.475,
-      "sectorsRun": 1.94
-    },
-    {
-      "id": "saxo",
-      "name": "Citroën Saxo VTS 1.6 16V",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.475,
-      "sectorsRun": 1.39
-    },
-    {
-      "id": "mx5nb",
-      "name": "Mazda MX-5 NB 1.8",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.469,
-      "sectorsRun": 1.71
-    },
-    {
-      "id": "demon",
-      "name": "Dodge Challenger SRT Demon 170",
+      "id": "countach",
+      "name": "Lamborghini Countach LP400 LP400",
       "cost": 7,
       "rarity": "Épique",
+      "winRate": 0.481,
+      "sectorsRun": 1.82
+    },
+    {
+      "id": "logan",
+      "name": "Dacia Logan 1.5 dCi",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.475,
+      "sectorsRun": 0.84
+    },
+    {
+      "id": "p106",
+      "name": "Peugeot 106 Rallye 1.3",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.475,
+      "sectorsRun": 1.76
+    },
+    {
+      "id": "golf2",
+      "name": "Volkswagen Golf GTI Mk2 1.8 16S",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.475,
+      "sectorsRun": 1.85
+    },
+    {
+      "id": "multipla",
+      "name": "Fiat Multipla 1.9 JTD",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.475,
+      "sectorsRun": 0.98
+    },
+    {
+      "id": "stratos",
+      "name": "Lancia Stratos HF",
+      "cost": 4,
+      "rarity": "Épique",
       "winRate": 0.469,
-      "sectorsRun": 1.57
+      "sectorsRun": 1.96
+    },
+    {
+      "id": "dmc",
+      "name": "DeLorean DMC-12 Série",
+      "cost": 2,
+      "rarity": "Rare",
+      "winRate": 0.469,
+      "sectorsRun": 1.77
+    },
+    {
+      "id": "niva",
+      "name": "Lada Niva 1600",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.469,
+      "sectorsRun": 1.13
+    },
+    {
+      "id": "rx7",
+      "name": "Mazda RX-7 FD Type R",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.469,
+      "sectorsRun": 1.44
     },
     {
       "id": "elise111s",
@@ -502,319 +558,263 @@
       "cost": 4,
       "rarity": "Épique",
       "winRate": 0.463,
-      "sectorsRun": 2.33
+      "sectorsRun": 2.31
     },
     {
-      "id": "abarth",
-      "name": "Abarth 500 1.4 T-Jet",
+      "id": "golf4",
+      "name": "Volkswagen Golf IV TDI 1.9 TDI 110",
       "cost": 2,
       "rarity": "Courante",
       "winRate": 0.463,
-      "sectorsRun": 1.82
-    },
-    {
-      "id": "ruf",
-      "name": "RUF CTR Yellowbird",
-      "cost": 7,
-      "rarity": "Épique",
-      "winRate": 0.463,
-      "sectorsRun": 1.99
-    },
-    {
-      "id": "kangoo",
-      "name": "Renault Kangoo 1.9 D",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.463,
-      "sectorsRun": 1.07
-    },
-    {
-      "id": "beetle",
-      "name": "Volkswagen Coccinelle 1303",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.456,
-      "sectorsRun": 1.07
-    },
-    {
-      "id": "evo2",
-      "name": "Mercedes 190E 2.5-16 Evo II Evolution II",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.456,
-      "sectorsRun": 2.57
-    },
-    {
-      "id": "celica",
-      "name": "Toyota Celica GT-Four ST205 2.0 Turbo",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.456,
-      "sectorsRun": 2.24
-    },
-    {
-      "id": "batmobile",
-      "name": "Batmobile Film de 1989",
-      "cost": 8,
-      "rarity": "Légendaire",
-      "winRate": 0.45,
-      "sectorsRun": 1.98
-    },
-    {
-      "id": "h1",
-      "name": "Hummer H1 6.5 TD",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.45,
-      "sectorsRun": 1.06
-    },
-    {
-      "id": "p106",
-      "name": "Peugeot 106 Rallye 1.3",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.45,
-      "sectorsRun": 1.77
-    },
-    {
-      "id": "p930",
-      "name": "Porsche 911 Turbo 930",
-      "cost": 7,
-      "rarity": "Épique",
-      "winRate": 0.444,
-      "sectorsRun": 1.81
-    },
-    {
-      "id": "cgt",
-      "name": "Porsche Carrera GT 980",
-      "cost": 8,
-      "rarity": "Épique",
-      "winRate": 0.444,
-      "sectorsRun": 1.5
-    },
-    {
-      "id": "corsa",
-      "name": "Opel Corsa B 1.2i",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.444,
-      "sectorsRun": 1.41
-    },
-    {
-      "id": "micra",
-      "name": "Nissan Micra K11 1.0 16V",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.438,
-      "sectorsRun": 1.09
-    },
-    {
-      "id": "logan",
-      "name": "Dacia Logan 1.5 dCi",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.431,
-      "sectorsRun": 0.8
-    },
-    {
-      "id": "m3e46",
-      "name": "BMW M3 E46",
-      "cost": 5,
-      "rarity": "Rare",
-      "winRate": 0.431,
-      "sectorsRun": 2
-    },
-    {
-      "id": "smart",
-      "name": "Smart Fortwo 0.6 Turbo",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.431,
-      "sectorsRun": 1.1
-    },
-    {
-      "id": "fiesta",
-      "name": "Ford Fiesta XR2 1.6",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.425,
-      "sectorsRun": 1.6
-    },
-    {
-      "id": "countach",
-      "name": "Lamborghini Countach LP400 LP400",
-      "cost": 7,
-      "rarity": "Épique",
-      "winRate": 0.425,
-      "sectorsRun": 1.85
+      "sectorsRun": 1.13
     },
     {
       "id": "espace",
       "name": "Renault Espace I 2000 GTS",
       "cost": 1,
       "rarity": "Courante",
-      "winRate": 0.419,
-      "sectorsRun": 1.01
+      "winRate": 0.463,
+      "sectorsRun": 0.99
     },
     {
-      "id": "esprit",
-      "name": "Lotus Esprit S1",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.412,
-      "sectorsRun": 1.74
-    },
-    {
-      "id": "elise",
-      "name": "Lotus Elise S1",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.406,
-      "sectorsRun": 1.5
-    },
-    {
-      "id": "stratos",
-      "name": "Lancia Stratos HF",
-      "cost": 4,
-      "rarity": "Épique",
-      "winRate": 0.406,
-      "sectorsRun": 1.86
-    },
-    {
-      "id": "ek9",
-      "name": "Honda Civic Type R EK9",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.406,
-      "sectorsRun": 1.68
-    },
-    {
-      "id": "rx7",
-      "name": "Mazda RX-7 FD Type R",
+      "id": "cosworth",
+      "name": "Ford Escort RS Cosworth 2.0 Turbo",
       "cost": 4,
       "rarity": "Rare",
-      "winRate": 0.406,
-      "sectorsRun": 1.44
-    },
-    {
-      "id": "m3e30",
-      "name": "BMW M3 E30 2.3",
-      "cost": 4,
-      "rarity": "Rare",
-      "winRate": 0.406,
-      "sectorsRun": 1.88
-    },
-    {
-      "id": "p205",
-      "name": "Peugeot 205 GTI 1.9",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.4,
-      "sectorsRun": 1.86
-    },
-    {
-      "id": "mx5na",
-      "name": "Mazda MX-5 NA 1.6",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.394,
-      "sectorsRun": 1.09
-    },
-    {
-      "id": "civiceg",
-      "name": "Honda Civic EG VTi 1.6 VTEC",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.394,
-      "sectorsRun": 1.71
-    },
-    {
-      "id": "nsx",
-      "name": "Acura NSX NA1",
-      "cost": 5,
-      "rarity": "Épique",
-      "winRate": 0.375,
-      "sectorsRun": 1.98
-    },
-    {
-      "id": "mini65",
-      "name": "Austin Mini Cooper S 1965 1275",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.375,
-      "sectorsRun": 1.14
-    },
-    {
-      "id": "f40",
-      "name": "Ferrari F40 Série",
-      "cost": 8,
-      "rarity": "Légendaire",
-      "winRate": 0.369,
-      "sectorsRun": 1.17
-    },
-    {
-      "id": "ax",
-      "name": "Citroën AX GT 1.4",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.362,
-      "sectorsRun": 1.06
-    },
-    {
-      "id": "swift",
-      "name": "Suzuki Swift GTi 1.3 16V",
-      "cost": 2,
-      "rarity": "Courante",
-      "winRate": 0.362,
-      "sectorsRun": 1.72
-    },
-    {
-      "id": "golf1",
-      "name": "Volkswagen Golf GTI Mk1",
-      "cost": 3,
-      "rarity": "Rare",
-      "winRate": 0.356,
-      "sectorsRun": 1.29
-    },
-    {
-      "id": "agera",
-      "name": "Koenigsegg Agera R",
-      "cost": 9,
-      "rarity": "Légendaire",
-      "winRate": 0.35,
-      "sectorsRun": 1.88
-    },
-    {
-      "id": "venom",
-      "name": "Hennessey Venom F5 Revolution Evolution",
-      "cost": 10,
-      "rarity": "Légendaire",
-      "winRate": 0.331,
+      "winRate": 0.463,
       "sectorsRun": 1.89
-    },
-    {
-      "id": "twizy",
-      "name": "Renault Twizy 80",
-      "cost": 1,
-      "rarity": "Courante",
-      "winRate": 0.331,
-      "sectorsRun": 1.48
     },
     {
       "id": "a110",
       "name": "Alpine A110 1600 S",
       "cost": 3,
       "rarity": "Rare",
-      "winRate": 0.319,
+      "winRate": 0.456,
+      "sectorsRun": 1.76
+    },
+    {
+      "id": "smart",
+      "name": "Smart Fortwo 0.6 Turbo",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.456,
+      "sectorsRun": 1.09
+    },
+    {
+      "id": "ae86",
+      "name": "Toyota Sprinter Trueno AE86 GT APEX",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.456,
+      "sectorsRun": 1.86
+    },
+    {
+      "id": "deuch",
+      "name": "Citroën 2CV 2CV6",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.45,
+      "sectorsRun": 1.01
+    },
+    {
+      "id": "venom",
+      "name": "Hennessey Venom F5 Revolution Evolution",
+      "cost": 10,
+      "rarity": "Légendaire",
+      "winRate": 0.45,
+      "sectorsRun": 1.93
+    },
+    {
+      "id": "nsx",
+      "name": "Acura NSX NA1",
+      "cost": 5,
+      "rarity": "Épique",
+      "winRate": 0.45,
+      "sectorsRun": 1.85
+    },
+    {
+      "id": "simca",
+      "name": "Simca 1000 Rallye 2 1.3",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.45,
+      "sectorsRun": 1.79
+    },
+    {
+      "id": "p206",
+      "name": "Peugeot 206 HDi 2.0 HDi",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.444,
+      "sectorsRun": 1.31
+    },
+    {
+      "id": "volvo240",
+      "name": "Volvo 240 Break 245 GL 2.3",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.444,
+      "sectorsRun": 1.03
+    },
+    {
+      "id": "m3e30",
+      "name": "BMW M3 E30 2.3",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.444,
+      "sectorsRun": 1.63
+    },
+    {
+      "id": "p205",
+      "name": "Peugeot 205 GTI 1.9",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.438,
+      "sectorsRun": 1.82
+    },
+    {
+      "id": "panda",
+      "name": "Fiat Panda 4×4 Série 1",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.438,
+      "sectorsRun": 0.91
+    },
+    {
+      "id": "firebird",
+      "name": "Pontiac Firebird Trans Am 6.6",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.438,
+      "sectorsRun": 1.72
+    },
+    {
+      "id": "civiceg",
+      "name": "Honda Civic EG VTi 1.6 VTEC",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.438,
+      "sectorsRun": 1.74
+    },
+    {
+      "id": "fiat500",
+      "name": "Fiat 500 de 1957 Nuova 500",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.438,
+      "sectorsRun": 1.73
+    },
+    {
+      "id": "testarossa",
+      "name": "Ferrari Testarossa 4.9",
+      "cost": 6,
+      "rarity": "Épique",
+      "winRate": 0.438,
+      "sectorsRun": 2.09
+    },
+    {
+      "id": "fiesta",
+      "name": "Ford Fiesta XR2 1.6",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.431,
       "sectorsRun": 1.61
+    },
+    {
+      "id": "elise",
+      "name": "Lotus Elise S1",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.425,
+      "sectorsRun": 1.55
+    },
+    {
+      "id": "twizy",
+      "name": "Renault Twizy 80",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.419,
+      "sectorsRun": 1.59
+    },
+    {
+      "id": "s15",
+      "name": "Nissan Silvia S15 Spec-S",
+      "cost": 4,
+      "rarity": "Rare",
+      "winRate": 0.412,
+      "sectorsRun": 2.23
+    },
+    {
+      "id": "mx5na",
+      "name": "Mazda MX-5 NA 1.6",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.412,
+      "sectorsRun": 1.05
     },
     {
       "id": "zonda",
       "name": "Pagani Zonda R Piste",
       "cost": 8,
       "rarity": "Légendaire",
-      "winRate": 0.294,
-      "sectorsRun": 1.63
+      "winRate": 0.406,
+      "sectorsRun": 1.61
+    },
+    {
+      "id": "micra",
+      "name": "Nissan Micra K11 1.0 16V",
+      "cost": 1,
+      "rarity": "Courante",
+      "winRate": 0.406,
+      "sectorsRun": 1.08
+    },
+    {
+      "id": "mini65",
+      "name": "Austin Mini Cooper S 1965 1275",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.406,
+      "sectorsRun": 1.09
+    },
+    {
+      "id": "swift",
+      "name": "Suzuki Swift GTi 1.3 16V",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.394,
+      "sectorsRun": 1.76
+    },
+    {
+      "id": "saxo",
+      "name": "Citroën Saxo VTS 1.6 16V",
+      "cost": 2,
+      "rarity": "Courante",
+      "winRate": 0.381,
+      "sectorsRun": 1.36
+    },
+    {
+      "id": "ek9",
+      "name": "Honda Civic Type R EK9",
+      "cost": 3,
+      "rarity": "Rare",
+      "winRate": 0.369,
+      "sectorsRun": 1.58
+    },
+    {
+      "id": "cgt",
+      "name": "Porsche Carrera GT 980",
+      "cost": 8,
+      "rarity": "Épique",
+      "winRate": 0.362,
+      "sectorsRun": 1.45
+    },
+    {
+      "id": "f40",
+      "name": "Ferrari F40 Série",
+      "cost": 8,
+      "rarity": "Légendaire",
+      "winRate": 0.35,
+      "sectorsRun": 1.27
     }
   ],
   "rivals": [
@@ -831,38 +831,38 @@
     {
       "id": "kenji",
       "league": "chrome",
-      "playerWinRate": 0.97
+      "playerWinRate": 0.753
     },
     {
       "id": "roxy",
       "league": "chrome",
-      "playerWinRate": 0.913
+      "playerWinRate": 0.71
     },
     {
       "id": "baron",
       "league": "overdrive",
-      "playerWinRate": 0.97
+      "playerWinRate": 0.56
     },
     {
       "id": "nyx",
       "league": "overdrive",
-      "playerWinRate": 0.877
+      "playerWinRate": 0.55
     }
   ],
   "starterByRival": {
     "lola": {
-      "starterNoPrep": 0.979,
-      "starterBeginner": 0.991,
+      "starterNoPrep": 0.703,
+      "starterBeginner": 0.825,
       "starterPrepared": 1
     },
     "cassette": {
-      "starterNoPrep": 0.863,
-      "starterBeginner": 0.94,
+      "starterNoPrep": 0.567,
+      "starterBeginner": 0.716,
       "starterPrepared": 1
     }
   },
-  "starterNoPrep": 0.979,
-  "starterBeginner": 0.991,
+  "starterNoPrep": 0.703,
+  "starterBeginner": 0.825,
   "starterPrepared": 1,
   "clioVsVenom": [
     {
