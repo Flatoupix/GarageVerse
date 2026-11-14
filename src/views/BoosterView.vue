@@ -99,7 +99,7 @@ function flipCard() {
   burstTimer = setTimeout(() => celebrate(rarity), reduced.value ? 0 : 170)
 }
 
-function nextCard() {
+function nextCard(swiped = false) {
   const current = opening.value
   if (!current || current.view !== 'face') return
   current.view = current.revealed === current.pulls.length ? 'recap' : 'back'
@@ -107,7 +107,13 @@ function nextCard() {
   cinematic.value = false
   persist()
   if (current.view === 'recap') finish()
-  else { sound('whoosh'); focusRevealAction() }
+  else { if (!swiped) sound('whoosh'); focusRevealAction() }
+}
+
+function swipeCard() {
+  sound('whoosh')
+  buzz(15)
+  nextCard(true)
 }
 
 function quickReveal() {
@@ -162,7 +168,7 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
       </div>
     </div>
     <RevealStack v-else :opening="opening" :face-up="faceUp" :flipping="flipping && !reduced" :entering="stackEntering"
-      :cinematic="cinematic && !reduced" :tell="tell" :glow="glow" @flip="flipCard" @next="nextCard" @quick="quickReveal" />
+      :cinematic="cinematic && !reduced" :tell="tell" :glow="glow" @flip="flipCard" @next="nextCard()" @swipe="swipeCard" @quick="quickReveal" />
   </main>
   <main v-else class="play empty-state">
     <h1 tabindex="-1">Aucun booster en cours</h1>

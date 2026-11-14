@@ -1030,3 +1030,15 @@ button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow
 
 .perfect-banner { padding: 12px; border: 3px solid var(--sun); color: var(--sun); background: var(--night-2); font-weight: 700; overflow-wrap: anywhere; }
 .perfect-star { color: var(--sun); }
+
+/* Le déplacement du geste reste indépendant du retournement de la carte. */
+.card-stack { touch-action: pan-y; }
+.card-stack.swipe-ready { cursor: grab; user-select: none; -webkit-user-select: none; }
+.swipe-card { position: absolute; inset: 0; transform: translateX(var(--swipe-x, 0px)) rotate(var(--swipe-angle, 0deg)); transition: transform 380ms cubic-bezier(.2, 1.5, .4, 1); }
+.card-stack:has(.flip-front) .swipe-card { position: relative; }
+.swipe-dragging { cursor: grabbing; }
+.swipe-dragging .swipe-card { transition: none; }
+.swipe-leaving .swipe-card { transition: transform 240ms ease-in; pointer-events: none; }
+.swipe-hint { margin: 8px auto; max-width: 28ch; padding-inline: 8px; color: var(--muted); font-size: .8rem; line-height: 1.4; }
+.motion-reduced .swipe-card { transition: none; }
+@media (prefers-reduced-motion: reduce) { .swipe-card { transition: none; } }
