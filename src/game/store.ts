@@ -48,5 +48,6 @@ export const reducedMotion = computed(() => systemReduced.value || save.preferen
 export const ownedCount = computed(() => vehicles.filter(v => save.cars[v.id]).length)
 
 export const dailySelected = ref(false)
-setInterval(() => { const before = save.daily.date; refreshDaily(save); if (before !== save.daily.date) persist() }, 1000)
+// Passage de minuit : le défi et le booster du jour se renouvellent sans recharger la page.
+setInterval(() => { const before = save.daily.date; refreshDaily(save); if (before !== save.daily.date) persist() }, 30_000)
 window.addEventListener('focus', () => { refreshDaily(save); persist() })

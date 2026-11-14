@@ -23,9 +23,14 @@ node orchestrator/cycle.ts run booster
 node orchestrator/cycle.ts queue booster autre-tache --dry-run
 node orchestrator/cycle.ts status <identifiant>
 node orchestrator/cycle.ts resume <identifiant>
+node orchestrator/cycle.ts integrate <identifiant>
 ```
 
-`run` sélectionne `orchestrator/backlog/booster.json` par défaut. Pour ajouter une tâche, copier ce fichier sous un nouvel identifiant, adapter le brief et renseigner les fichiers ou répertoires modifiables dans `paths`. Les tâches peuvent cibler `src/`, `docs/`, `README.md` et `index.html`. Les scripts d’installation et de test restent sous contrôle humain. Le scénario navigateur fourni est propre au booster. Le mode `--dry-run` valide les entrées et affiche le parcours et ses limites sans appeler les agents, Git ou le navigateur.
+`integrate` reprend les commits d’un cycle terminé sur la branche de base du clone local `.orchestrator/source`. Le push reste manuel. Si Codex atteint son quota ou perd sa session pendant l’implémentation, Claude prend le relais dans la même copie de travail.
+
+`run` sélectionne `orchestrator/backlog/booster.json` par défaut. Pour ajouter une tâche, copier `backlog/defi-du-jour.json` sous un nouvel identifiant, adapter le brief et renseigner les fichiers ou répertoires modifiables dans `paths`. Les tâches peuvent cibler `src/`, `docs/`, `README.md` et `index.html`. Les scripts d’installation et de test restent sous contrôle humain.
+
+Le champ `browser` choisit le scénario Chrome : `neon` rejoue le parcours complet de la version Neon Drive (boutique, ouverture, garage, fiche, course jusqu’à l’arrivée, rechargements), `booster` est le scénario de l’ancien prototype. Avec `neon`, le champ facultatif `flow` ajoute des étapes propres à la tâche, jouées après le parcours commun : `{ "reset": true }` (sauvegarde neuve), `{ "tab": "Accueil" }`, `{ "tap": "nom accessible du bouton" }`, `{ "expect": "texte visible" }` et `{ "capture": "nom" }`. Les exigences de la tâche doivent donc fixer les libellés que ces étapes utilisent. Les captures ainsi produites sont celles que relit Antigravity. Le mode `--dry-run` valide les entrées et affiche le parcours et ses limites sans appeler les agents, Git ou le navigateur.
 
 `queue` enchaîne les identifiants indiqués, chacun dans sa propre branche à partir de la base configurée. La file s’arrête au premier blocage. Reprendre le cycle concerné, puis relancer les tâches qui restent si nécessaire.
 
@@ -36,13 +41,14 @@ Utiliser **Ctrl+C** pour arrêter proprement. La reprise conserve le nombre d’
 | Étape | Résultat |
 | --- | --- |
 | Claude · plan | Critères observables à partir de la tâche et de la bible |
-| Codex · implémentation | Proposition de patch Git ou rapport expliquant que la base suffit |
+| Codex · implémentation | Modifications dans une copie jetable, relevées en patch Git, ou rapport expliquant que la base suffit |
 | Contrôles | Typage et build, puis parcours Chrome avec événements tactiles à 320 et 390 px |
 | Antigravity · UX | Revue de captures produites par les contrôles, accessibles via un outil MCP local et limité aux PNG du cycle |
-| Claude · revue | Avis à partir du diff, des contrôles et de la revue UX |
+| Antigravity · contre-revue | Second avis sur le diff, par un modèle différent de l’auteur. Consultatif : son absence ne bloque pas le cycle |
+| Claude · revue | Avis à partir du diff, des contrôles, de la revue UX et de la contre-revue, dont il vérifie les constats |
 | Préparation de PR | Rapport Markdown et patch Git local si des commits sont à soumettre |
 
-Chaque cycle a sa propre copie Git et une branche `orchestrator/<identifiant>`. La base par défaut est `prototype/mobile-tcg`, où l’interaction existe déjà. Le dépôt distant est retiré de la copie après le clonage. Codex travaille en lecture seule et propose un patch structuré. Le script vérifie les chemins et le type de patch, l’applique dans la copie isolée puis crée un commit local. Les outils de Claude sont désactivés pour ces appels. Antigravity reçoit une configuration MCP temporaire propre au dossier de revue. La capacité du modèle à ouvrir les images est vérifiée par les appels effectifs à l’outil, avec une capture inspectée à chaque largeur. Si l’accès est refusé, le cycle indique un blocage.
+Chaque cycle a sa propre copie Git et une branche `orchestrator/<identifiant>`. La base par défaut est `prototype/mobile-tcg`, où l’interaction existe déjà. Le dépôt distant est retiré de la copie après le clonage. Codex écrit dans une copie jetable du dépôt, confinée à ce dossier, sans réseau ni destination distante, où il peut vérifier le typage. Le script relève le diff limité aux chemins de la tâche, vérifie les chemins et le type de patch, l’applique dans la copie isolée puis crée un commit local. La copie jetable est ensuite supprimée. Les outils de Claude sont désactivés pour ces appels. Antigravity reçoit une configuration MCP temporaire propre au dossier de revue. La capacité du modèle à ouvrir les images est vérifiée par les appels effectifs à l’outil, avec une capture inspectée à chaque largeur. Si l’accès est refusé, le cycle indique un blocage.
 
 Le cycle cherche d’abord la branche de base dans la copie locale `.orchestrator/source` ou dans le clone courant, si celui-ci a le bon dépôt d’origine. Il consulte GitHub lorsque la branche locale est absente.
 

@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
-import { dailyChallenge, constraintCap, constraintText } from '../game/daily'
+import { constraintCap, constraintText } from '../game/daily'
 import { art, edition } from '../game/art'
 import {
   conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statShort, vehicleById, vehicles,
 } from '../game/data'
 import { confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween } from '../game/fx'
 import { evaluate, lineupCost, overheated, playRound, rivalLineup, statsOf, type Round } from '../game/rules'
-import { dailyLineupCheck, prepareDaily, startDaily, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
+import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import CarCard from '../components/CarCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string]; go: [screen: 'garage' | 'shop'] }>()
 const chosen = ref<string | null>(save.duel?.rivalId ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
 dailySelected.value = false
-const challenge = computed(() => dailyChallenge(chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
+const challenge = computed(() => todayChallenge(save, chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
 const isDaily = computed(() => chosen.value?.startsWith('daily:'))
 const rival = computed(() => isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
 const league = computed(() => rival.value ? leagueById.get(rival.value.league) : undefined)
@@ -158,7 +158,8 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     <section v-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
       <span class="eyebrow">{{ rival?.circuit.name }}</span>
       <h1 tabindex="-1">{{ lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
-      <p :aria-label="`+${reward.credits} crédits`">+{{ rewardShown }} crédits<template v-if="reward.ticket"> · 1 ticket booster</template></p>
+      <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? 'Défi déjà récompensé aujourd’hui.' : 'Retente le défi quand tu veux.' }}</p>
+      <p v-else :aria-label="`+${reward.credits} crédits`">+{{ rewardShown }} crédits<template v-if="reward.ticket"> · 1 ticket booster</template></p>
       <div class="recap-actions">
         <button type="button" class="button primary" @click="reward = null; chosen = null">Rivaux <span aria-hidden="true">⟶</span></button>
         <button type="button" class="button quiet" @click="emit('go', reward?.ticket ? 'shop' : 'garage')">{{ reward.ticket ? 'Ouvrir le ticket' : 'Préparer au garage' }}</button>
@@ -242,7 +243,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p>{{ rival.circuit.name }} : {{ rival.circuit.sectors.map(s => sectorLabels[s]).join(' · ') }}. Conditions fréquentes :
           {{ Object.keys(rival.circuit.conditions).slice(0, 2).map(c => conditionLabels[c as keyof typeof conditionLabels]).join(', ') }}.</p>
       </div>
-      <section v-if="isDaily" class="how daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
+      <section v-if="isDaily" class="daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
       <div class="cap-meter" :class="{ over: cost > cap }">
         <span>Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
       </div>

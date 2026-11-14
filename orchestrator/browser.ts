@@ -4,7 +4,10 @@ import { extname, resolve, sep } from 'node:path'
 import { chromium } from 'playwright'
 import assert from 'node:assert/strict'
 
-const [build, directory, chrome] = process.argv.slice(2)
+const [build, directory, chrome, scenario = 'booster', flowJson = '[]'] = process.argv.slice(2)
+type FlowStep = { tab?: string; tap?: string; expect?: string; capture?: string; reset?: true }
+const flow: FlowStep[] = JSON.parse(flowJson)
+const label = scenario === 'neon' ? 'Parcours complet Neon Drive' : 'Parcours tactile et collection'
 const types: Record<string, string> = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.webp': 'image/webp',
   '.png': 'image/png', '.woff2': 'font/woff2', '.svg': 'image/svg+xml',
@@ -39,6 +42,8 @@ try {
     const button = (name: string | RegExp) => page.getByRole('button', { name, exact: typeof name === 'string' })
     const capture = async (name: string) => {
       const file = `${width}-${name}.png`
+      // Une notification passagère ne doit pas figurer sur la capture.
+      await page.locator('.toast').waitFor({ state: 'detached', timeout: 3_500 }).catch(() => {})
       await page.locator('.card-art img').evaluateAll(images => Promise.all(
         images.map(image => (image as HTMLImageElement).decode()),
       ))
@@ -57,7 +62,74 @@ try {
       await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
       await client.detach()
     }
+    // Version Neon Drive : boutique, ouverture, garage, fiche, course jusqu'à l'arrivée, puis les étapes propres à la tâche.
+    const neon = async () => {
+      const tab = (name: string) => page.locator('.tabbar button', { hasText: name }).tap()
+      const credits = () => page.locator('.credits').getAttribute('aria-label')
+      await page.goto(url)
+      await capture('accueil')
+      await tab('Boosters')
+      await page.locator('.shop-item').first().locator('button').tap()
+      await capture('sachet')
+      await swipe(.12)
+      await page.getByTestId('tear-zone').waitFor()
+      await swipe(.80)
+      await page.locator('.card-stack').waitFor()
+      for (let slot = 0; slot < 5; slot++) {
+        await button(/^Retourner la carte$/).tap()
+        if (slot === 0) {
+          await page.reload()
+          await page.locator('.flip-front').waitFor()
+          await capture('carte')
+        }
+        await button(slot === 4 ? /^Voir le récapitulatif/ : /^Carte suivante/).tap()
+      }
+      assert.equal(await page.locator('.recap-grid .card-tile').count(), 5)
+      await capture('recap')
+      await page.reload()
+      await tab('Garage')
+      const owned = await page.locator('.garage-grid .card-tile').count()
+      assert.ok(owned >= 3, 'Garage de départ incomplet')
+      await capture('garage')
+      await page.locator('.garage-grid .card-tile').first().tap()
+      await page.getByRole('dialog', { name: 'Détail de la carte' }).waitFor()
+      await capture('fiche')
+      await page.locator('.sheet-modal .close-modal').tap()
+      await tab('Course')
+      await page.locator('.rival-row').first().tap()
+      await button(/^Lancer la course/).tap()
+      await capture('course')
+      for (let sector = 0; sector < 5; sector++) {
+        await page.locator('.engage .button.primary').tap()
+        await page.locator('.round-result .verdict').waitFor()
+        if (sector === 0) await capture('duel')
+        if (sector === 2) { await page.reload(); await page.locator('.engage .button.primary').waitFor(); continue }
+        await page.locator('.round-result .button.primary').tap()
+      }
+      await page.locator('.race-end').waitFor()
+      await capture('arrivee')
+      const balance = await credits()
+      await page.reload()
+      assert.equal(await credits(), balance, 'Crédits perdus au rechargement')
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Débordement horizontal')
+      for (const step of flow) {
+        if (step.reset) { await page.evaluate(() => localStorage.clear()); await page.reload() }
+        else if (step.tab) await tab(step.tab)
+        else if (step.tap) await page.getByRole('button', { name: step.tap }).first().tap()
+        else if (step.expect) {
+          // L'élément attendu est amené à l'écran pour que la capture suivante le montre.
+          const target = page.getByText(step.expect).first()
+          await target.waitFor()
+          await target.evaluate(element => element.scrollIntoView({ block: 'center' }))
+        }
+        else if (step.capture) await capture(step.capture)
+      }
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), 'Débordement horizontal')
+      assert.deepEqual(errors, [])
+      checks.push({ name: `${label} à ${width}px`, status: 'pass' })
+    }
     try {
+      if (scenario === 'neon') { await neon(); continue }
       await page.goto(url)
       await button('Ouvrir un booster').tap()
       await capture('sachet')
@@ -112,10 +184,10 @@ try {
       await button('Ouvrir le sachet').tap()
       await button('Tout révéler').tap()
       assert.equal(await page.locator('.recap-grid .card-tile').count(), 5)
-      checks.push({ name: `Parcours tactile et collection à ${width}px`, status: 'pass' })
+      checks.push({ name: `${label} à ${width}px`, status: 'pass' })
     } catch (error) {
       const detail = error instanceof Error ? error.message.split('\n')[0] : 'Erreur du navigateur'
-      checks.push({ name: `Parcours tactile et collection à ${width}px`, status: 'fail', detail })
+      checks.push({ name: `${label} à ${width}px`, status: 'fail', detail })
       try { await capture('echec') } catch {}
     } finally {
       await page.close()

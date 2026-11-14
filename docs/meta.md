@@ -97,8 +97,8 @@ cinq secteurs, météo et adversaire généré restent identiques pour tous ce j
 Les six rivaux et leur progression restent inchangés.
 
 La contrainte choisit un plafond de coût réduit, au moins une voiture d’une
-catégorie donnée ou au moins une voiture d’une rareté donnée. Si le trio de départ
-ne peut pas la respecter, un plafond égal à son coût la remplace. Une écurie valide
+catégorie donnée ou au moins une voiture d’une rareté donnée. Si aucun trio du
+garage du joueur ne peut la respecter, un plafond de coût de 6 la remplace pour lui. Une écurie valide
 est préremplie depuis les voitures possédées ; toute sélection invalide indique
 la raison sur le bouton désactivé. Le défi réutilise les duels de secteur et
 l’arrivée des courses habituelles.
@@ -119,3 +119,5 @@ lancement reste désactivé avec sa raison, sans effacer l’écurie habituelle.
 La météo affichée sur l’accueil correspond aux conditions des cinq secteurs.
 Rejouer le défi reproduit ces conditions, tandis que les choix de l’adversaire
 pendant les secteurs continuent d’utiliser le hasard habituel du moteur.
+
+`node pipeline/check-daily.cjs` vérifie le tirage sur 365 dates, les plafonds, l’écurie indépendante et le booster unique.

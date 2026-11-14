@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { dailyChallenge, constraintText } from '../game/daily'
+import { constraintText } from '../game/daily'
 import { art } from '../game/art'
-import { boosterById, conditionLabels, rivalById, vehicles } from '../game/data'
-import { claimDailyBooster, prepareDaily, unlockedRivals } from '../game/save'
+import { boosterById, conditionIcons, conditionLabels, rivalById, vehicles } from '../game/data'
+import { claimDailyBooster, prepareDaily, todayChallenge, unlockedRivals } from '../game/save'
 import { act, dailySelected, ownedCount, save } from '../game/store'
 
 const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race'] }>()
-const challenge = computed(() => dailyChallenge(save.daily.date))
+const challenge = computed(() => todayChallenge(save))
 function openDaily() { dailySelected.value = true; if (!save.duel) act(prepareDaily); emit('go', 'race') }
 const pending = computed(() => save.sealed || (save.opening && save.opening.view !== 'recap'))
 const tickets = computed(() => Object.entries(save.tickets).filter(([, n]) => n > 0))
@@ -20,18 +20,6 @@ const nextRival = computed(() => {
 
 <template>
   <main class="home">
-    <section class="how daily-panel" aria-labelledby="daily-title">
-      <h2 id="daily-title">Défi du jour</h2>
-      <p>{{ challenge.rival.circuit.name }} · {{ [...new Set(challenge.weather)].map(c => conditionLabels[c]).join(' · ') }}</p>
-      <p>{{ constraintText(challenge.constraint) }}</p>
-      <p>Récompense : {{ challenge.reward }} crédits · une fois par jour</p>
-      <p v-if="save.daily.won">Défi réussi</p>
-      <p>Série : {{ save.daily.streak }} jour{{ save.daily.streak > 1 ? 's' : '' }}</p>
-      <button class="button primary wide" type="button" @click="openDaily">Défi du jour · {{ save.daily.won ? 'Rejouer' : 'Participer' }}</button>
-      <button v-if="!save.daily.booster" class="button quiet wide" type="button" @click="act(claimDailyBooster, 'Un ticket Neon Drive ajouté')">Récupérer le booster du jour</button>
-      <p v-else role="status">Reviens demain</p>
-    </section>
-
     <section class="hero" aria-labelledby="home-title">
       <img v-if="art.hero" class="hero-picture" :src="art.hero" alt="" />
       <div class="hero-sun" aria-hidden="true"></div>
@@ -45,6 +33,23 @@ const nextRival = computed(() => {
           Ouvrir {{ boosterById.get(tickets[0][0])!.name }} <span aria-hidden="true">↗</span>
         </button>
         <button v-else type="button" class="button primary" @click="emit('go', 'race')">Défier {{ nextRival.name }} <span aria-hidden="true">⟶</span></button>
+      </div>
+    </section>
+
+    <section class="daily-panel" :class="{ done: save.daily.won }" aria-labelledby="daily-title">
+      <div class="daily-head">
+        <h2 id="daily-title">Défi du jour</h2>
+        <span v-if="save.daily.streak" class="daily-streak">Série {{ save.daily.streak }} jour{{ save.daily.streak > 1 ? 's' : '' }}</span>
+      </div>
+      <p class="daily-circuit">{{ challenge.rival.circuit.name }}
+        <span v-for="c in [...new Set(challenge.weather)]" :key="c" class="daily-chip">{{ conditionIcons[c] }} {{ conditionLabels[c] }}</span>
+      </p>
+      <p class="daily-rule">{{ constraintText(challenge.constraint) }}</p>
+      <p class="daily-reward">{{ save.daily.won ? 'Défi réussi' : `Récompense : ${challenge.reward} crédits` }}</p>
+      <div class="daily-actions">
+        <button class="button primary" type="button" @click="openDaily">Défi du jour · {{ save.daily.won ? 'Rejouer' : 'Participer' }} <span aria-hidden="true">⟶</span></button>
+        <button v-if="!save.daily.booster" class="button ghost" type="button" @click="act(claimDailyBooster, 'Un ticket Neon Drive ajouté', 'coin')">Récupérer le booster du jour</button>
+        <p v-else class="daily-wait" role="status">Booster du jour récupéré. Reviens demain</p>
       </div>
     </section>
 

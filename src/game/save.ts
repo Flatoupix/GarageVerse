@@ -1,5 +1,5 @@
-import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 // Sauvegarde locale, économie du garage et tirage des boosters.
+import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
   boosterById, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Rarity,
@@ -327,6 +327,9 @@ export const unlockedRivals = (save: Save) => {
   return order.filter((r, i) => i === 0 || (save.record[order[i - 1].id]?.wins ?? 0) > 0).map(r => r.id)
 }
 
+// Défi du jour vu par ce joueur : la contrainte tient compte des voitures qu'il possède.
+export const todayChallenge = (save: Save, date = save.daily.date) => dailyChallenge(date, Object.keys(save.cars))
+
 export function refreshDaily(save: Save, date = localDate()) {
   if (save.daily.date === date) return
   save.daily.date = date
@@ -342,16 +345,16 @@ export function claimDailyBooster(save: Save) {
 }
 export function dailyLineupCheck(save: Save) {
   if ((save.dailyLineup ?? []).some(id => !save.cars[id])) return 'Voiture absente du garage'
-  return constraintCheck(save.dailyLineup ?? [], dailyChallenge().constraint)
+  return constraintCheck(save.dailyLineup ?? [], todayChallenge(save).constraint)
 }
 export function prepareDaily(save: Save) {
   refreshDaily(save)
-  save.dailyLineup = validDailyLineup(Object.keys(save.cars), dailyChallenge().constraint) ?? []
+  save.dailyLineup = validDailyLineup(Object.keys(save.cars), todayChallenge(save).constraint) ?? []
 }
 export function startDaily(save: Save) {
   refreshDaily(save)
   const problem = dailyLineupCheck(save)
   if (problem) return problem
-  const challenge = dailyChallenge()
+  const challenge = todayChallenge(save)
   save.duel = createRace(challenge.rival.id, challenge.rival.circuit, (save.dailyLineup ?? []).map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(challenge.rival), dailyRng(challenge.date))
 }

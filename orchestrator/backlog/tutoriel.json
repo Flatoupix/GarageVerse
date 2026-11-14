@@ -1,0 +1,31 @@
+{
+  "id": "tutoriel",
+  "title": "Guider la première course par un tutoriel jouable",
+  "brief": "Les règles de la course en secteurs (statistique du secteur, météo, endurance et surchauffe, nitro, plafond de coût) ne se devinent pas. Ajouter un tutoriel qui accompagne la toute première course d’une sauvegarde neuve contre le premier rival, sous forme de bulles courtes posées sur l’interface existante, sans écran séparé ni course factice. Réutiliser RaceView.vue, le moteur existant et le style synthwave (src/style.css). Tout le texte est en français, tutoiement, phrases courtes.",
+  "requirements": [
+    "Sur une sauvegarde neuve, l’accueil met en avant un bouton dont le nom accessible commence par « Apprendre à courir », qui ouvre l’écurie contre le premier rival avec le tutoriel actif.",
+    "Le tutoriel affiche une bulle à la fois, intitulée « Tutoriel », avec un compteur d’étapes (par exemple « 1/5 ») et un bouton « Compris » pour passer à la suivante. Il couvre au moins : le plafond de coût de l’écurie, la statistique et la météo du secteur, le nombre de secteurs que peut courir une voiture et la surchauffe, la nitro, et la lecture du résultat d’un secteur.",
+    "Chaque bulle apparaît au moment où l’élément concerné est à l’écran (écurie, choix de la voiture, nitro, résultat du secteur) et le désigne visuellement. Elle ne bloque jamais les commandes de jeu : on peut jouer sans cliquer sur « Compris ».",
+    "Un bouton « Passer le tutoriel » le ferme définitivement. Une fois terminé ou passé, il ne réapparaît plus, y compris après rechargement ; les réglages permettent de le relancer avec un bouton « Revoir le tutoriel ».",
+    "L’avancement du tutoriel est sauvegardé dans la sauvegarde existante ; une ancienne sauvegarde sans ce champ se charge sans erreur et considère le tutoriel comme terminé si le joueur a déjà disputé une course.",
+    "Les bulles sont lisibles et sans débordement horizontal à 320 et 390 px, ne masquent pas le bouton d’action principal, sont annoncées aux lecteurs d’écran (role status ou équivalent) et respectent le mouvement réduit.",
+    "Les courses, le défi du jour, les boosters et le garage fonctionnent comme avant."
+  ],
+  "paths": ["src/", "docs/"],
+  "browser": "neon",
+  "flow": [
+    { "reset": true },
+    { "tab": "Accueil" },
+    { "expect": "Apprendre à courir" },
+    { "capture": "tuto-accueil" },
+    { "tap": "Apprendre à courir" },
+    { "expect": "Tutoriel" },
+    { "capture": "tuto-ecurie" },
+    { "tap": "Compris" },
+    { "tap": "Lancer la course" },
+    { "expect": "Secteur 1/5" },
+    { "capture": "tuto-course" },
+    { "tap": "Passer le tutoriel" },
+    { "capture": "tuto-passe" }
+  ]
+}

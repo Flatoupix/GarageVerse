@@ -31,14 +31,16 @@ export function validDailyLineup(ids: string[], rule: Constraint): string[] | un
     if (!constraintCheck(trio, rule)) return trio
   }
 }
-export function dailyChallenge(date = localDate()) {
+// Le tirage est le même pour tout le monde. Seule la contrainte se replie sur un plafond de coût si le garage du joueur ne peut pas la tenir.
+export const FALLBACK_CAP = 6
+export function dailyChallenge(date = localDate(), owned: string[] = progression.start.vehicles) {
   const rng = dailyRng(date)
   const pick = <T>(items: T[]) => items[Math.floor(rng() * items.length)]
   const circuit = pick(rivals).circuit
   const vehicle = pick(vehicles)
   const type = pick(['cost', 'category', 'rarity'] as const)
   let constraint: Constraint = type === 'cost' ? { type, cap: 7 + Math.floor(rng() * 2) } : { type, value: type === 'category' ? pick(vehicle.tags) : vehicle.rarity }
-  if (!validDailyLineup(progression.start.vehicles, constraint)) constraint = { type: 'cost', cap: lineupCost(progression.start.vehicles) }
+  if (!validDailyLineup(owned, constraint)) constraint = { type: 'cost', cap: FALLBACK_CAP }
   const pool = vehicles.filter(v => v.cost <= 3)
   const lineup = [...pool] // La sélection sans remise conserve un tirage stable.
   const opponent = Array.from({ length: 3 }, () => { const index = Math.floor(rng() * lineup.length); return { id: lineup.splice(index, 1)[0].id, stage: 0, parts: [] } })

@@ -593,20 +593,27 @@ button.card-back { animation: back-bob 2.6s ease-in-out infinite; }
 }
 @media (min-width: 1000px) { .garage-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
-/* Boucle quotidienne : les commandes restent lisibles sur les petits écrans. */
-.daily-panel { min-width: 0; }
-.daily-panel p { overflow-wrap: anywhere; }
-.daily-panel .button { white-space: normal; overflow-wrap: anywhere; height: auto; min-height: 48px; }
-.daily-panel .button + .button { margin-top: 12px; }
-.home > .daily-panel { margin-top: 0; margin-bottom: 16px; }
+/* Boucle quotidienne */
+.daily-panel { min-width: 0; display: grid; gap: 6px; margin-top: 12px; padding: 14px; border-radius: 16px; border: 1px solid #ffb34777;
+  background: linear-gradient(140deg, #3b0d52cc, #1a0638cc 60%), repeating-linear-gradient(180deg, transparent 0 10px, #ffb3470f 10px 11px);
+  box-shadow: 0 0 22px #ffb34722; animation: deal-in 420ms cubic-bezier(.2,.9,.3,1.2) backwards; }
+.daily-panel.done { border-color: #2de2ff66; box-shadow: 0 0 22px #2de2ff22; }
+.daily-panel p { overflow-wrap: anywhere; font-size: .88rem; }
+.daily-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.daily-head h2 { font: 900 1.05rem var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--sun); text-shadow: 0 0 10px #ffb34788; }
+.daily-streak { padding: 3px 10px; border-radius: 99px; font: 700 .68rem var(--mono); text-transform: uppercase; color: #1b0630;
+  background: linear-gradient(90deg, var(--sun), var(--sun-2)); box-shadow: 0 0 10px #ffb34799; }
+.daily-circuit { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-weight: 700; }
+.daily-chip { padding: 2px 8px; border-radius: 99px; border: 1px solid var(--line); background: #0b042099; color: var(--muted); font: 600 .7rem var(--mono); }
+.daily-rule { color: var(--cyan); }
+.daily-reward { color: var(--sun); font-family: var(--mono); }
+.daily-panel.done .daily-reward { color: var(--cyan); }
+.daily-actions { display: grid; gap: 8px; margin-top: 6px; }
+.daily-panel .button { white-space: normal; overflow-wrap: anywhere; min-height: 48px; padding-block: 8px; }
+.daily-wait { color: var(--muted); text-align: center; }
 .daily-race > .button.primary { white-space: normal; padding-block: 12px; overflow-wrap: anywhere; }
 .daily-race .daily-panel { margin-block: 8px; padding: 12px; }
+.daily-race .daily-panel h2 { font: 900 .9rem var(--display); letter-spacing: .06em; text-transform: uppercase; color: var(--sun); }
 .daily-race .lineup-slots { margin-top: 12px; }
-/* Une notification ne doit jamais intercepter une commande de course. */
-.toast { pointer-events: none; top: calc(76px + env(safe-area-inset-top)); bottom: auto; }
-@media (max-width: 649px) {
-  .home .hero { min-height: 300px; }
-  .home .hero-content { padding: 20px 16px; }
-  .daily-race .page-heading h1 { font-size: 1.5rem; }
-  .daily-race .page-heading p { font-size: .8rem; }
-}
+/* Une notification ne doit jamais intercepter une commande. */
+.toast { pointer-events: none; }

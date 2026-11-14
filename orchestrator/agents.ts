@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { execute, failure, redact, sessionEnv } from './process.ts'
 import type { RunOptions } from './process.ts'
 
-export type Phase = 'plan' | 'implement' | 'ux' | 'review'
+export type Phase = 'plan' | 'implement' | 'ux' | 'critique' | 'review'
 export type Report = {
   status: 'pass' | 'changes' | 'blocked'
   summary: string
@@ -26,11 +26,13 @@ export function reportFrom(value: unknown, phase: Phase): Report {
   if (!value || typeof value !== 'object') throw new Error('Rapport JSON absent')
   const r = value as Report
   if (!['pass', 'changes', 'blocked'].includes(r.status) || typeof r.summary !== 'string' ||
-      !r.summary.trim() || r.summary.length > 1500 || typeof r.patch !== 'string' || r.patch.length > 150_000 ||
-      ![r.criteria, r.findings, r.evidence].every(list => Array.isArray(list) && list.length <= 20 &&
-        list.every(item => typeof item === 'string' && item.length <= 1000))) {
+      !r.summary.trim() || typeof r.patch !== 'string' || r.patch.length > 150_000 ||
+      ![r.criteria, r.findings, r.evidence].every(list => Array.isArray(list) && list.every(item => typeof item === 'string'))) {
     throw new Error('Rapport JSON invalide')
   }
+  // Un rapport bavard est tronqué plutôt que rejeté : le cycle ne doit pas se bloquer sur une longueur.
+  r.summary = r.summary.slice(0, 1500)
+  for (const key of ['criteria', 'findings', 'evidence'] as const) r[key] = r[key].slice(0, 20).map(item => item.slice(0, 1000))
   if (phase === 'plan' && r.status === 'pass' && !r.criteria.length) throw new Error('Critères d’acceptation absents')
   return { status: r.status, summary: redact(r.summary), criteria: r.criteria.map(redact),
     findings: r.findings.map(redact), evidence: r.evidence.map(redact), patch: phase === 'implement' ? r.patch : '' }
@@ -38,19 +40,29 @@ export function reportFrom(value: unknown, phase: Phase): Report {
 
 export async function invoke(
   phase: Phase, binaries: Record<'claude' | 'codex' | 'agy', string>, prompt: string,
-  step: string, options: RunOptions, budget: number, evidenceProgram: string,
-): Promise<{ report?: Report; tokens?: number; problem?: string }> {
+  step: string, options: RunOptions, budget: number, evidenceProgram: string, engine: 'codex' | 'claude' = 'codex',
+): Promise<{ report?: Report; tokens?: number; problem?: string; relay?: boolean }> {
   const schemaFile = join(step, 'report.schema.json')
   await writeFile(schemaFile, JSON.stringify(schema), { mode: 0o600 })
   let binary: string, args: string[], input: string | undefined
   let cwd = options.cwd
   const env = sessionEnv()
-  if (phase === 'implement') {
+  const codex = phase === 'implement' && engine === 'codex'
+  if (codex) {
     binary = binaries.codex
-    args = ['--ask-for-approval', 'never', 'exec', '--ignore-user-config', '--sandbox', 'read-only',
+    args = ['--ask-for-approval', 'never', 'exec', '--ignore-user-config', '--sandbox', 'workspace-write',
       '--ephemeral', '--json', '--output-schema', schemaFile,
-      '-c', 'mcp_servers={}', '-c', 'allow_login_shell=false', '-c', 'shell_environment_policy.inherit="none"', '-']
+      '-c', 'mcp_servers={}', '-c', 'allow_login_shell=false', '-c', 'shell_environment_policy.inherit="core"', '-']
     input = prompt
+  } else if (phase === 'critique') {
+    // Contre-revue du diff par Antigravity : le diff est dans le prompt, aucun outil n'est permis.
+    binary = binaries.agy
+    cwd = join(step, 'critique')
+    await mkdir(cwd, { recursive: true, mode: 0o700 })
+    const settings = { permissions: { deny: ['command(*)', 'unsandboxed(*)', 'write_file(*)', 'read_file(*)', 'read_url(*)', 'execute_url(*)', 'download_url(*)', 'mcp(*)'] } }
+    args = ['--sandbox', '--mode', 'plan', '--disable-slash-commands', '--log-file', '/dev/null', '--settings', JSON.stringify(settings),
+      '--print-timeout', `${Math.max(1, Math.floor(options.timeout / 1000) - 2)}s`,
+      '--output-format', 'json', '--json-schema', schemaFile, '-p', prompt]
   } else if (phase === 'ux') {
     binary = binaries.agy
     cwd = join(step, 'visual-review')
@@ -69,10 +81,16 @@ export async function invoke(
       '--output-format', 'json', '--json-schema', schemaFile, '-p', prompt]
   } else {
     binary = binaries.claude
-    cwd = step
+    // En relais de Codex, Claude édite la copie jetable et ne peut lancer que la vérification de typage.
+    const relay = phase === 'implement'
+    if (!relay) cwd = step
     args = ['--print', '--output-format', 'json', '--json-schema', JSON.stringify(schema),
-      '--permission-mode', 'plan', '--tools', '', '--strict-mcp-config', '--setting-sources', '',
-      '--no-session-persistence', '--no-chrome', '--max-budget-usd', String(budget)]
+      ...(relay
+        ? ['--permission-mode', 'acceptEdits', '--tools', 'Read,Edit,Write,Glob,Grep,Bash',
+          '--allowedTools', 'Read,Edit,Write,Glob,Grep,Bash(node node_modules/.bin/vue-tsc --noEmit)']
+        : ['--permission-mode', 'plan', '--tools', '']),
+      '--strict-mcp-config', '--setting-sources', '',
+      '--no-session-persistence', '--no-chrome', '--max-budget-usd', String(relay ? budget * 3 : budget)]
     input = prompt
   }
 
@@ -87,7 +105,7 @@ export async function invoke(
   }
   const result = await execute(binary, args, {
     ...options, cwd, env, input,
-    onLine: phase === 'implement' ? line => {
+    onLine: codex ? line => {
       try {
         const event = JSON.parse(line)
         if (event.type === 'turn.completed') addUsage(event.usage)
@@ -95,14 +113,22 @@ export async function invoke(
       } catch {}
     } : undefined,
   })
-  if (phase !== 'implement') {
+  if (!codex) {
     try {
       const json = JSON.parse(result.stdout)
       addUsage(json.usage)
-      if (!json.is_error && (phase !== 'ux' || json.status === 'SUCCESS')) final = json.structured_output
+      if (!json.is_error && ((phase !== 'ux' && phase !== 'critique') || json.status === 'SUCCESS')) final = json.structured_output
     } catch {}
   }
-  if (result.problem || result.code !== 0) return { problem: failure(result), tokens }
+  if (result.problem || result.code !== 0) {
+    const problem = failure(result)
+    // Quota ou session Codex indisponible : Claude prend le relais dans la même copie de travail.
+    if (codex && /quota|authentification/.test(problem)) {
+      const reply = await invoke(phase, binaries, prompt, step, options, budget, evidenceProgram, 'claude')
+      return { ...reply, tokens: (tokens ?? 0) + (reply.tokens ?? 0), relay: true }
+    }
+    return { problem, tokens }
+  }
   try {
     const report = reportFrom(typeof final === 'string' ? JSON.parse(final) : final, phase)
     if (phase === 'ux' && report.status !== 'blocked') {

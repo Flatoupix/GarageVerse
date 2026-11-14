@@ -4,7 +4,7 @@ import { createInterface } from 'node:readline'
 
 const directory = process.argv[2]
 const evidence = JSON.parse(await readFile(join(directory, 'browser.json'), 'utf8'))
-const available: string[] = evidence.screenshots.filter((file: unknown) => typeof file === 'string' && /^\d+-(?:sachet|carte|garage|legendaire|echec)\.png$/.test(file))
+const available: string[] = evidence.screenshots.filter((file: unknown) => typeof file === 'string' && /^\d+-[a-z0-9][a-z0-9-]{0,39}\.png$/.test(file))
 const stdin = createInterface({ input: process.stdin })
 for await (const line of stdin) {
   let request

@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { realpathSync } from 'node:fs'
-import { appendFile, mkdir, readFile, realpath, rename, rm, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { invoke } from './agents.ts'
@@ -8,7 +8,10 @@ import type { Phase, Report } from './agents.ts'
 import { execute, failure, redact, sessionEnv } from './process.ts'
 import type { Result, RunOptions } from './process.ts'
 
-type Task = { id: string; title: string; brief: string; requirements: string[]; paths: string[]; browser: 'booster' }
+// Une étape de parcours propre à la tâche, jouée après le scénario commun : onglet, bouton, texte attendu, capture ou remise à zéro.
+type FlowStep = { tab: string } | { tap: string } | { expect: string } | { capture: string } | { reset: true }
+type Task = { id: string; title: string; brief: string; requirements: string[]; paths: string[]; browser: 'booster' | 'neon'; flow?: FlowStep[] }
+const captureName = /^\d+-[a-z0-9][a-z0-9-]{0,39}\.png$/
 type Config = {
   repository: string; base: string; cli: Record<'claude' | 'codex' | 'agy' | 'chrome', string>
   limits: { cycleMinutes: number; stepMinutes: number; corrections: number; agentCalls: number; reportedTokens: number; claudeBudgetUsdPerCall: number }
@@ -24,7 +27,7 @@ type State = {
 }
 
 const here = import.meta.dirname
-const phases = ['prepare', 'plan', 'implement', 'tests', 'ux', 'review', 'finish']
+const phases = ['prepare', 'plan', 'implement', 'tests', 'ux', 'critique', 'review', 'finish']
 const store = process.env.GARAGEVERSE_RUNS_DIR ? resolve(process.env.GARAGEVERSE_RUNS_DIR) : resolve(here, '..', '.orchestrator')
 const json = async <T>(path: string): Promise<T> => JSON.parse(await readFile(path, 'utf8'))
 const slug = /^[a-z0-9][a-z0-9-]{0,79}$/
@@ -42,7 +45,16 @@ function validate(task: Task, config: Config) {
   const safePath = (path: string) => /^[a-zA-Z0-9][a-zA-Z0-9_./-]*$/.test(path) &&
     !path.split('/').some(segment => segment.startsWith('.')) &&
     (path.startsWith('src/') || path.startsWith('docs/') || path === 'README.md' || path === 'index.html')
-  if (!slug.test(task.id) || !task.title || !task.brief || task.browser !== 'booster' ||
+  const safeStep = (step: FlowStep) => {
+    const entries = Object.entries(step ?? {})
+    if (entries.length !== 1) return false
+    const [key, value] = entries[0]
+    if (key === 'reset') return value === true
+    if (key === 'capture') return typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,29}$/.test(value)
+    return ['tab', 'tap', 'expect'].includes(key) && typeof value === 'string' && value.length > 0 && value.length <= 80
+  }
+  if (!slug.test(task.id) || !task.title || !task.brief || !['booster', 'neon'].includes(task.browser) ||
+      (task.flow !== undefined && (!Array.isArray(task.flow) || task.flow.length > 30 || task.browser !== 'neon' || !task.flow.every(safeStep))) ||
       !Array.isArray(task.requirements) || !task.requirements.length ||
       task.requirements.some(value => typeof value !== 'string' || !value.trim()) ||
       !Array.isArray(task.paths) || !task.paths.length || task.paths.some(path => !safePath(path))) {
@@ -82,8 +94,9 @@ export function decide(state: Pick<State, 'stage' | 'correction' | 'tests' | 're
   if (state.stage === 'prepare') return 'plan'
   if (state.stage === 'plan') return 'implement'
   if (state.stage === 'implement') return 'tests'
-  if (state.stage === 'tests') return state.tests?.browser === 'pass' || state.tests?.browser === 'fail' ? 'ux' : 'review'
-  if (state.stage === 'ux') return 'review'
+  if (state.stage === 'tests') return state.tests?.browser === 'pass' || state.tests?.browser === 'fail' ? 'ux' : 'critique'
+  if (state.stage === 'ux') return 'critique'
+  if (state.stage === 'critique') return 'review'
   if (state.stage !== 'review') return 'finish'
   const approved = state.tests?.build === 'pass' && state.tests.browser === 'pass' &&
     state.reports.ux?.status === 'pass' && state.reports.review?.status === 'pass'
@@ -115,9 +128,10 @@ async function acquire(directory: string) {
 function agentPrompt(phase: Phase, state: State, context: string) {
   const instructions: Record<Phase, string> = {
     plan: 'Analyse la tâche et la base. Propose des critères d’acceptation observables. Utilise pass ou blocked.',
-    implement: 'Inspecte le dépôt en lecture seule. Développe une proposition d’implémentation sous forme de diff Git unifié complet dans patch. Si la base satisfait les critères, rends patch vide et justifie-le. Ne demande ni commit, ni push, ni modification directe. Utilise pass ou blocked.',
-    ux: 'Appelle inspect_capture du serveur MCP garageverse sur des captures des deux largeurs. Évalue la lisibilité, l’ergonomie, la hiérarchie et les défauts visuels. Cite les fichiers réellement consultés. Le rapport automatisé décrit le navigateur émulé. Utilise blocked si les images sont inaccessibles, changes pour un défaut et pass si la revue visuelle est concluante.',
-    review: 'Fais une revue critique du diff et des preuves. Un échec du build ou du scénario exige changes, y compris si le build en échec a empêché le scénario. Une preuve impossible à obtenir pour une raison d’environnement exige blocked. Un diff vide peut être valide si la base satisfait la tâche et que les preuves passent.',
+    implement: 'Tu travailles dans une copie jetable du dépôt, sans réseau. Modifie directement les fichiers, uniquement dans les chemins autorisés par la tâche (paths) : tout autre changement est ignoré. Respecte le style du code existant et les critères du plan. Vérifie le typage avec `node node_modules/.bin/vue-tsc --noEmit` et corrige les erreurs. Ne fais ni commit, ni push. Laisse le champ patch vide : l’orchestrateur relève lui-même le diff. Si la base satisfait déjà les critères, ne modifie rien et justifie-le. En passe de correction, traite les défauts listés dans les rapports et les tests. Utilise pass ou blocked.',
+    ux: 'Appelle inspect_capture du serveur MCP garageverse sur des captures des deux largeurs, en priorité celles des écrans que la tâche ajoute ou modifie. Évalue la lisibilité, l’ergonomie, la hiérarchie et les défauts visuels. Chaque capture montre une seule hauteur d’écran d’une page qui défile verticalement, avec une barre d’onglets fixe en bas : un contenu situé plus bas dans la page n’est pas un défaut, sauf s’il est recouvert alors que la page ne peut plus défiler. Ne signale que des défauts visibles sur l’image et causés par la tâche. Cite les fichiers réellement consultés. Le rapport automatisé décrit le navigateur émulé. Utilise blocked si les images sont inaccessibles, changes pour un défaut et pass si la revue visuelle est concluante.',
+    critique: 'Tu es un second relecteur, indépendant de l’auteur du code. Lis le diff fourni sans utiliser d’outil. Cherche les bugs, les cas limites, les régressions, les incohérences avec les règles du jeu et avec la sauvegarde, et les critères du plan non couverts. Rends des constats précis dans findings, avec le fichier et la fonction, chacun préfixé par Bloquant, Moyen ou Mineur. Utilise changes s’il y a au moins un constat bloquant, sinon pass.',
+    review: 'Le rapport critique vient d’un second modèle : vérifie chacun de ses constats contre le diff avant de le retenir, et écarte ceux qui sont faux. Fais une revue critique du diff et des preuves. Un échec du build ou du scénario exige changes, y compris si le build en échec a empêché le scénario. Une preuve impossible à obtenir pour une raison d’environnement exige blocked. Un diff vide peut être valide si la base satisfait la tâche et que les preuves passent.',
   }
   return [
     instructions[phase],
@@ -208,6 +222,7 @@ async function cycle(directory: string, resume: boolean) {
       if (remaining() <= 0) throw new Error('Durée totale du cycle atteinte')
       const stage = state.stage
       if (stage === 'review' && state.tests?.browser === 'skipped') delete state.reports.ux
+      if (stage === 'implement') delete state.reports.critique
       const step = join(directory, `${String(++state.sequence).padStart(2, '0')}-${stage}`)
       await mkdir(step, { mode: 0o700 })
       state.pending = { stage, sequence: state.sequence }
@@ -253,7 +268,8 @@ async function cycle(directory: string, resume: boolean) {
             detail: result.problem ?? redact((result.stderr || result.stdout).slice(-3400)) }
           if (result.problem) throw new Error('Build · ' + failure(result))
           if (state.tests.build === 'pass') {
-            const browser = await execute(process.execPath, [join(here, 'browser.ts'), join(checkout, 'dist'), step, state.config.cli.chrome], options())
+            const browser = await execute(process.execPath, [join(here, 'browser.ts'), join(checkout, 'dist'), step, state.config.cli.chrome,
+              state.task.browser, JSON.stringify(state.task.flow ?? [])], options())
             if (browser.problem || browser.code !== 0) {
               state.tests.browser = 'blocked'
               state.tests.detail = 'Navigateur indisponible · ' + failure(browser)
@@ -295,8 +311,14 @@ async function cycle(directory: string, resume: boolean) {
           let context = ''
           if (stage === 'plan') {
             const readme = await readFile(join(checkout, 'README.md'), 'utf8')
-            context = redact(readme.slice(0, 26_000))
-          } else if (stage === 'review') {
+            const meta = await readFile(join(checkout, 'docs', 'meta.md'), 'utf8').catch(() => '')
+            // Le planificateur n'a pas d'outil de lecture : on lui donne une carte du dépôt (fichiers du périmètre et signatures exportées).
+            const files = (await git(['ls-files', '--', ...state.task.paths])).stdout.split('\n').filter(file => !/\.(webp|png|jpg)$/.test(file)).join('\n')
+            const exported = (await git(['grep', '-n', '-E', '^export (async )?(function|const|type|interface|class) ', '--', 'src/*.ts'])).stdout
+              .split('\n').map(line => line.slice(0, 220)).join('\n')
+            context = redact([readme.slice(0, 26_000), meta.slice(0, 14_000),
+              'Fichiers du périmètre :\n' + files.slice(0, 6_000), 'Signatures exportées :\n' + exported.slice(0, 16_000)].filter(Boolean).join('\n\n'))
+          } else if (stage === 'review' || stage === 'critique') {
             const diff = await gitText(['diff', '--no-ext-diff', `${state.base}..HEAD`], 'Diff de revue')
             if (diff.length > 55_000) throw new Error('Diff trop volumineux pour une revue complète')
             context = redact(diff) || 'Aucun diff depuis la base.'
@@ -310,23 +332,47 @@ async function cycle(directory: string, resume: boolean) {
             }
             const evidence = await json<{ screenshots: string[]; checks: unknown[] }>(join(source, 'browser.json'))
             for (const name of evidence.screenshots) {
-              if (!/^\d+-(?:sachet|carte|garage|legendaire|echec)\.png$/.test(name)) throw new Error('Nom de capture invalide')
+              if (!captureName.test(name)) throw new Error('Nom de capture invalide')
               await writeFile(join(step, name), await readFile(join(source, name)), { mode: 0o600 })
             }
             await writeJson(join(step, 'browser.json'), evidence)
             context = JSON.stringify(evidence)
           }
+          // Codex écrit dans une copie jetable du dépôt, sans destination distante. Seul le diff relevé ici rejoint la copie isolée.
+          const workspace = stage === 'implement' ? join(step, 'workspace') : undefined
+          if (workspace) {
+            await rm(workspace, { recursive: true, force: true })
+            must(await git(['clone', '--no-local', '--no-tags', checkout, workspace], directory), 'Copie de travail Codex')
+            await gitText(['remote', 'remove', 'origin'], 'Retirer la destination distante', workspace)
+            await symlink(join(checkout, 'node_modules'), join(workspace, 'node_modules'))
+          }
           state.calls++
           state.unknownUsage++
           await save()
-          const reply = await invoke(stage, state.config.cli, agentPrompt(stage, state, context), step, options(),
+          const reply = await invoke(stage, state.config.cli, agentPrompt(stage, state, context), step, options(workspace),
             state.config.limits.claudeBudgetUsdPerCall, join(here, 'evidence.ts'))
           if (reply.tokens !== undefined) { state.tokens += reply.tokens; state.unknownUsage-- }
+          if (reply.relay) await log('Codex indisponible · Claude a pris le relais de l’implémentation')
+          // La contre-revue est un avis : son absence (quota, session) ne bloque pas le cycle.
+          if (stage === 'critique' && (!reply.report || reply.report.status === 'blocked')) {
+            await log('Contre-revue Antigravity indisponible · ' + (reply.problem ?? reply.report?.summary ?? 'rapport absent'))
+            reply.report = { status: 'pass', summary: 'Contre-revue indisponible, non prise en compte.', criteria: [], findings: [], evidence: [], patch: '' }
+          }
           if (!reply.report) {
             await writeJson(join(step, 'blocked.json'), { problem: reply.problem, tokens: reply.tokens })
             throw new Error(stage + ' · ' + (reply.problem ?? 'rapport absent'))
           }
-          const { patch, ...report } = reply.report
+          const { patch: _unused, ...report } = reply.report
+          let patch = ''
+          if (workspace) {
+            await gitText(['add', '-A', '--', ...state.task.paths], 'Indexer la proposition', workspace)
+            patch = await gitText(['diff', '--cached', '--no-ext-diff', 'HEAD'], 'Relever la proposition', workspace)
+            const stray = (await gitText(['status', '--porcelain'], 'État de la copie de travail', workspace)).split('\n')
+              .filter(line => line && line[1] !== ' ' && !line.endsWith(' node_modules')).map(line => line.slice(3))
+            if (stray.length) report.findings.push('Changements hors périmètre ignorés : ' + stray.slice(0, 8).join(', '))
+            if (patch.length > 150_000) throw new Error('Proposition trop volumineuse')
+            await rm(workspace, { recursive: true, force: true })
+          }
           await writeJson(join(step, 'report.json'), { ...report, tokens: reply.tokens })
           state.reports[stage] = report
           if (report.status === 'blocked') throw new Error(stage + ' · ' + report.summary)
@@ -378,7 +424,7 @@ async function cycle(directory: string, resume: boolean) {
 
 async function main() {
   const [command, arg, ...flags] = process.argv.slice(2)
-  const help = 'node orchestrator/cycle.ts doctor | run [booster] [--dry-run] | queue <tâches...> [--dry-run] | resume <cycle> | status <cycle>'
+  const help = 'node orchestrator/cycle.ts doctor | run [booster] [--dry-run] | queue <tâches...> [--dry-run] | resume <cycle> | status <cycle> | integrate <cycle>'
   if (!command || command === '--help') { console.log(help); return }
   const config = await json<Config>(join(here, 'config.json'))
   const sessions = () => Promise.all([
@@ -408,11 +454,29 @@ async function main() {
     if (!claudeActive || !codexActive || agy.code !== 0) process.exitCode = 1
     return
   }
-  if (command === 'status' || command === 'resume') {
+  if (command === 'status' || command === 'resume' || command === 'integrate') {
     if (!arg || !slug.test(arg) || flags.length) throw new Error(help)
     const directory = join(store, arg)
     const state = await json<State>(join(directory, 'state.json'))
     if (command === 'status') { console.log(JSON.stringify(state, null, 2)); return }
+    if (command === 'integrate') {
+      // Reprend les commits d'un cycle terminé sur la branche de base du clone local. Le push reste manuel.
+      if (state.status !== 'complete') throw new Error('Ce cycle n’est pas terminé')
+      const patch = join(directory, 'changes.patch')
+      if (!await readFile(patch).then(() => true, () => false)) { console.log('Aucun changement à intégrer'); return }
+      const source = join(store, 'source')
+      const run = (args: string[]) => execute('git', [...gitArgs, ...args], { cwd: source, env: sessionEnv(), timeout: 60_000 })
+      if (must(await run(['config', '--get', 'remote.origin.url']), 'Clone local').trim() !== config.repository ||
+          must(await run(['branch', '--show-current']), 'Branche du clone').trim() !== config.base) throw new Error('Le clone local n’est pas sur la branche de base')
+      if (must(await run(['status', '--porcelain']), 'État du clone').trim()) throw new Error('Le clone local a des modifications non commitées')
+      const applied = await run(['am', '--3way', patch])
+      if (applied.code !== 0 || applied.problem) {
+        await run(['am', '--abort'])
+        throw new Error('Intégration · le patch ne s’applique plus sur la branche de base')
+      }
+      console.log('Commits intégrés sur ' + config.base + ' · ' + must(await run(['log', '--oneline', `${state.base}..HEAD`]), 'Journal').trim())
+      return
+    }
     if (state.status === 'complete') throw new Error('Ce cycle est terminé')
     validate(state.task, state.config)
     await cycle(directory, true)

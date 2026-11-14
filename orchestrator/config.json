@@ -3,11 +3,11 @@
   "base": "prototype/mobile-tcg",
   "cli": { "claude": "claude", "codex": "codex", "agy": "agy", "chrome": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" },
   "limits": {
-    "cycleMinutes": 55,
-    "stepMinutes": 8,
+    "cycleMinutes": 90,
+    "stepMinutes": 15,
     "corrections": 3,
-    "agentCalls": 14,
-    "reportedTokens": 500000,
+    "agentCalls": 20,
+    "reportedTokens": 6000000,
     "claudeBudgetUsdPerCall": 2
   }
 }
