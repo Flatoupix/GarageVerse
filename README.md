@@ -139,3 +139,26 @@ Le prototype est prêt à être évalué quand on peut, sur smartphone, ouvrir u
 ---
 
 Document de départ · [Master Prompt GarageVerse](https://chatgpt.com/library?file_id=libfile_f9e9b0c4a8a88191a3bb500cf26bf419&account_id=personal)
+
+## Lancer le prototype mobile
+
+Prérequis local : Node.js 22 ou plus récent et Yarn 4.5.3 via Corepack. Si Corepack est absent, l’installer avec `npm install --global corepack`.
+
+```sh
+corepack yarn install --immutable
+corepack yarn dev
+```
+
+Ouvrir l’adresse affichée par Vite. Sur un téléphone connecté au même Wi-Fi privé, lancer `corepack yarn dev --host 0.0.0.0` et ouvrir l’adresse **Network** affichée par Vite. Pour vérifier le typage et produire le build, lancer `corepack yarn build`.
+
+Le premier sachet est **Collection 001**. Le deuxième, **After Hours**, est aussi accessible depuis l’accueil. Pour rejouer l’essai à zéro, utiliser une nouvelle fenêtre de navigation privée ou effacer les données du site. La sauvegarde est propre au navigateur et à l’adresse utilisée.
+
+### Premier essai joueur
+
+1. Ouvrir l’accueil et laisser la personne découvrir seule le sachet. Observer où elle pose le doigt, si elle trouve le bon geste et à quel moment elle passe au bouton.
+2. La laisser retourner les cartes à son rythme, consulter le récapitulatif et rejoindre le garage. Observer si elle lance spontanément un deuxième booster et à quel moment elle en a eu envie.
+3. Après le deuxième lot, lui demander quelle révélation lui est restée en tête et si elle retrouve les deux éditions de la Venom et l’aura de la Skyline de Brian dans le garage.
+
+### Visuels de démonstration
+
+Les illustrations WebP dans `src/assets/` sont remplaçables. L’affiche Pixel Art fournie sert d’illustration à l’édition alternative de la Venom. Les illustrations Classic, le décor de nuit et le calque de la Skyline sont générés pour le prototype privé. Le catalogue relie les visuels aux cartes dans `src/catalog.ts`.
