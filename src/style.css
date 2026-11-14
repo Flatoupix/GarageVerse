@@ -588,9 +588,9 @@ button.card-back { animation: none; }
 .engage-score { display: inline-block; justify-self: start; animation: score-bump 300ms steps(6, end); }
 @keyframes score-bump { from { scale: 1.4;  } }
 .nitro-toggle { transition: border-color 200ms, box-shadow 200ms, background 200ms; }
-.nitro-toggle.armed { border-color: var(--sun); background: var(--night-2); animation: none; }
+.nitro-toggle.armed { border-color: var(--orange); background: var(--green); animation: none; }
 @keyframes armed { from { box-shadow: 0 4px 0 var(--outline); } to { box-shadow: 0 4px 0 var(--outline); } }
-.button.nitro-armed { background: var(--night-2); animation: none; }
+.button.primary.nitro-armed { background: var(--green); animation: none; }
 @keyframes armed-button { from { box-shadow: 0 4px 0 var(--outline); } to { box-shadow: 0 4px 0 var(--outline); } }
 .round-result { overflow: hidden; animation: panel-in 260ms steps(6, end) backwards; transition: border-color 250ms, box-shadow 250ms; }
 @keyframes panel-in { from { opacity: 0; scale: .94; } }
@@ -618,7 +618,7 @@ button.card-back { animation: none; }
 .round-result .button { animation: deal-in 320ms 260ms backwards; }
 .race-end { position: relative; isolation: isolate; overflow: hidden; border-radius: 0; }
 .race-end h1 { animation: stamp 600ms steps(6, end) backwards; }
-.race-end.won h1 { font-size: clamp(2.4rem, 13vw, 4.5rem); }
+.race-end.won h1 { font-size: clamp(14px, 4vw, 22px); }
 .race-end.won::before { content: ''; position: absolute; z-index: -1; inset: -40%;
   background: var(--night-2); animation: none; }
 .race-end.lost h1 { animation: glitch 700ms steps(1) backwards;  }
@@ -789,6 +789,7 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 :where(button, input, select, [tabindex]):focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .button { padding-block: 10px; white-space: normal; }
 .button.primary, .tabs button[aria-pressed="true"], .daily-streak, .clash-nitro, .new-badge, .tile-tag { background: var(--yellow); color: var(--outline); border-color: var(--outline); }
+.button.primary:disabled { background: var(--panel); color: var(--text); border-color: var(--slate); box-shadow: none; }
 .button.primary::after, .pack-art::after, .tilt::after, .card-back::after { display: none; }
 .pack-art { background: var(--blue); border: 4px solid var(--outline); }
 .pack-wordmark { font-size: 9cqw; line-height: 1.5; background: none; color: var(--text); }
@@ -871,7 +872,7 @@ p, strong, h1, h2, h3, dd, .track li { overflow-wrap: normal; }
 .module-trigger { grid-template-columns: 32px minmax(0, 1fr) auto; }
 .module-trigger > :last-child { white-space: normal; }
 .module-level { grid-column: 2; }
-.nitro-toggle.armed { border-color: var(--yellow); }
+.nitro-toggle.armed { border-color: var(--orange); }
 
 /* Les surfaces claires portent une encre sombre, y compris leurs sous-libellés. */
 .notice, .rival-car, .rival-car small, .nitro-left,
@@ -884,6 +885,8 @@ p, strong, h1, h2, h3, dd, .track li { overflow-wrap: normal; }
 .stack-actions .button, .recap-actions .button { flex: 1 1 160px; min-width: 0; }
 .new-badge { top: 0; right: 0; padding: 4px 6px; font: 15px/1.2 var(--body); letter-spacing: 0; }
 .flip-front:has(.new-badge) { padding-top: 28px; }
+.recap-grid .card-tile { display: flex; flex-direction: column; align-items: stretch; justify-content: flex-end; gap: 8px; }
+.recap-grid .tile-tag, .recap-grid .new-badge { position: static; order: -1; align-self: flex-start; }
 .car-model strong, .card-title strong, .car-sheet-title h2 { overflow-wrap: break-word; }
 @media (min-width: 401px) and (max-width: 600px) {
   .track { grid-template-columns: repeat(2, minmax(0, 1fr)); }

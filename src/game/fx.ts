@@ -86,7 +86,8 @@ function frame(now: number) {
       ctx.fillRect(x, y, size, size)
     } else if (p.kind === 'streak') {
       ctx.globalAlpha = t * 0.45
-      ctx.fillRect(x, y, Math.min(48, Math.round(Math.abs(p.vx) * 0.02)), 2)
+      const w = Math.min(48, Math.round(Math.abs(p.vx) * 0.02))
+      ctx.fillRect(p.vx > 0 ? x - w : x, y, w, 2)
     } else if (p.kind === 'confetti') {
       p.vy += 620 * dt; p.vx *= 1 - dt * 0.9
       ctx.fillRect(x, y, size, size)
