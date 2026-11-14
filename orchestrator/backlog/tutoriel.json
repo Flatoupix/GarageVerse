@@ -1,31 +1,50 @@
 {
   "id": "tutoriel",
-  "title": "Guider la première course par un tutoriel jouable",
-  "brief": "Les règles de la course en secteurs (statistique du secteur, météo, endurance et surchauffe, nitro, plafond de coût) ne se devinent pas. Ajouter un tutoriel qui accompagne la toute première course d’une sauvegarde neuve contre le premier rival, sous forme de bulles courtes posées sur l’interface existante, sans écran séparé ni course factice. Réutiliser RaceView.vue, le moteur existant et le style synthwave (src/style.css). Tout le texte est en français, tutoiement, phrases courtes.",
+  "title": "Tutoriel guidé par le mécano pour la première partie",
+  "brief": "Retour de playtest : un nouveau joueur arrive, est perdu, touche partout sans comprendre. Ajouter un tutoriel guidé par « le mécano » qui accompagne la première partie d’une sauvegarde neuve, sous forme de bulles courtes posées sur l’interface existante (pas d’écran séparé ni de course factice) : 1) accueil : but du jeu en une phrase (collectionner des voitures et battre les rivaux secteur par secteur) ; 2) onglet Boosters : ouvrir le premier booster ; 3) garage : ce que veulent dire les quatre statistiques et la fiche voiture ; 4) course contre le premier rival : plafond de coût de l’écurie, statistique et météo du secteur, fourchette de score, voitures adverses, secteurs restants et surchauffe, nitro, lecture du résultat ; 5) atelier : améliorer une voiture avec des crédits ; 6) fin : rappel du bouton « ? » (lexique) et des mots soulignés (aide rapide de src/game/help.ts). Chaque bulle, intitulée « Le mécano », avec un compteur (par exemple « 2/8 »), apparaît quand l’élément concerné est à l’écran, le désigne visuellement (contour ou halo), et propose « Compris » pour passer. Elle ne bloque jamais les commandes du jeu : on peut jouer sans cliquer sur « Compris », et l’étape suivante se déclenche aussi quand le joueur fait l’action attendue. Un bouton « Passer le tutoriel » le ferme définitivement ; les Réglages proposent « Revoir le tutoriel ». Ensuite, une bulle courte du mécano apparaît la première fois que le joueur rencontre la nitro, la surchauffe, le défi du jour et une victoire parfaite (si elle existe), une seule fois chacune. L’avancement est sauvegardé dans la sauvegarde existante (src/game/save.ts) ; une ancienne sauvegarde sans ce champ se charge sans erreur et considère le tutoriel comme terminé si le joueur a déjà disputé une course. Réutiliser les variables CSS : toute nouvelle règle va dans src/themes/base.css et src/themes/neon.css, sans casser les autres thèmes de src/themes/. Tout le texte en français, tutoiement, phrases courtes.",
   "requirements": [
-    "Sur une sauvegarde neuve, l’accueil met en avant un bouton dont le nom accessible commence par « Apprendre à courir », qui ouvre l’écurie contre le premier rival avec le tutoriel actif.",
-    "Le tutoriel affiche une bulle à la fois, intitulée « Tutoriel », avec un compteur d’étapes (par exemple « 1/5 ») et un bouton « Compris » pour passer à la suivante. Il couvre au moins : le plafond de coût de l’écurie, la statistique et la météo du secteur, le nombre de secteurs que peut courir une voiture et la surchauffe, la nitro, et la lecture du résultat d’un secteur.",
-    "Chaque bulle apparaît au moment où l’élément concerné est à l’écran (écurie, choix de la voiture, nitro, résultat du secteur) et le désigne visuellement. Elle ne bloque jamais les commandes de jeu : on peut jouer sans cliquer sur « Compris ».",
-    "Un bouton « Passer le tutoriel » le ferme définitivement. Une fois terminé ou passé, il ne réapparaît plus, y compris après rechargement ; les réglages permettent de le relancer avec un bouton « Revoir le tutoriel ».",
-    "L’avancement du tutoriel est sauvegardé dans la sauvegarde existante ; une ancienne sauvegarde sans ce champ se charge sans erreur et considère le tutoriel comme terminé si le joueur a déjà disputé une course.",
-    "Les bulles sont lisibles et sans débordement horizontal à 320 et 390 px, ne masquent pas le bouton d’action principal, sont annoncées aux lecteurs d’écran (role status ou équivalent) et respectent le mouvement réduit.",
-    "Les courses, le défi du jour, les boosters et le garage fonctionnent comme avant."
+    "Sur une sauvegarde neuve, une bulle « Le mécano » apparaît sur l’accueil avec un compteur d’étapes, un bouton « Compris » et un bouton « Passer le tutoriel ». Les étapes couvrent le but du jeu, l’ouverture d’un booster, les quatre statistiques, la course (plafond, statistique et météo du secteur, fourchette de score, voitures adverses, surchauffe, nitro, résultat), l’atelier et le lexique.",
+    "Chaque bulle désigne visuellement l’élément concerné, apparaît quand il est à l’écran, ne bloque jamais les commandes du jeu et ne masque pas le bouton d’action principal ; faire l’action attendue fait aussi avancer le tutoriel.",
+    "« Passer le tutoriel » le ferme définitivement, y compris après rechargement ; les Réglages proposent « Revoir le tutoriel » qui le relance depuis le début.",
+    "Après le tutoriel, une bulle courte unique explique la nitro, la surchauffe et le défi du jour la première fois que le joueur les rencontre.",
+    "L’avancement est sauvegardé ; une ancienne sauvegarde sans ce champ se charge sans erreur et considère le tutoriel terminé si une course a déjà été disputée.",
+    "Les bulles sont lisibles et sans débordement horizontal à 320 et 390 px dans tous les thèmes, annoncées aux lecteurs d’écran (role status ou équivalent), respectent le mouvement réduit ; le parcours complet (booster, garage, course jusqu’à l’arrivée) passe sans toucher au tutoriel."
   ],
-  "paths": ["src/", "docs/"],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
   "browser": "neon",
   "flow": [
-    { "reset": true },
-    { "tab": "Accueil" },
-    { "expect": "Apprendre à courir" },
-    { "capture": "tuto-accueil" },
-    { "tap": "Apprendre à courir" },
-    { "expect": "Tutoriel" },
-    { "capture": "tuto-ecurie" },
-    { "tap": "Compris" },
-    { "tap": "Lancer la course" },
-    { "expect": "Secteur 1/5" },
-    { "capture": "tuto-course" },
-    { "tap": "Passer le tutoriel" },
-    { "capture": "tuto-passe" }
+    {
+      "reset": true
+    },
+    {
+      "expect": "Le mécano"
+    },
+    {
+      "capture": "tuto-accueil"
+    },
+    {
+      "tap": "Compris"
+    },
+    {
+      "capture": "tuto-etape2"
+    },
+    {
+      "tap": "Passer le tutoriel"
+    },
+    {
+      "capture": "tuto-passe"
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Revoir le tutoriel"
+    },
+    {
+      "capture": "tuto-reglages"
+    }
   ]
 }

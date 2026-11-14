@@ -1,0 +1,18 @@
+{
+  "id": "editions-tirage",
+  "title": "Éditions : choisir l’apparence au tirage, plus dans la fiche",
+  "brief": "Retour de playtest : pouvoir changer l’apparence d’une carte depuis sa fiche n’a pas de sens. Supprimer le sélecteur d’éditions de la fiche voiture (.edition-picker dans src/views/CarSheet.vue). À la place, le choix se fait au tirage : dans src/views/BoosterView.vue, quand une carte révélée est une voiture déjà possédée (pull.isNew === false) dans une édition différente de celle affichée (save.cars[id].shown), afficher sous la carte un encart « Tu as déjà cette voiture » avec deux boutons : « Garder l’apparence actuelle » et « Afficher cette édition ». Le second met save.cars[id].shown sur l’édition tirée (et l’ajoute à editions si besoin), avec sauvegarde. Si l’édition tirée est déjà possédée et déjà affichée, l’encart dit simplement « Doublon : +1 exemplaire » sans boutons. Une nouvelle voiture prend l’édition tirée comme apparence. L’encart ne bloque pas le passage à la carte suivante (choix par défaut : garder l’apparence actuelle). Le récapitulatif et le garage montrent l’apparence choisie. La fiche voiture garde la mention des éditions possédées en lecture seule (par exemple « Éditions : Pixel 16 bits, Synthwave »). Mettre à jour l’entrée « Édition » du lexique (src/game/help.ts) et docs/meta.md. Toute nouvelle règle CSS va dans src/themes/base.css et src/themes/neon.css. Texte en français, tutoiement.",
+  "requirements": [
+    "La fiche voiture ne permet plus de changer d’apparence : aucun bouton de choix d’édition ; les éditions possédées sont listées en lecture seule.",
+    "À l’ouverture d’un booster, une voiture déjà possédée tirée dans une autre édition affiche « Tu as déjà cette voiture » et les boutons « Garder l’apparence actuelle » et « Afficher cette édition » ; le second change l’apparence de la voiture dans le garage, la course et le récapitulatif, et survit au rechargement.",
+    "Un doublon dans l’édition déjà affichée affiche « Doublon : +1 exemplaire » sans choix ; une nouvelle voiture apparaît dans l’édition tirée.",
+    "L’encart ne bloque pas le passage à la carte suivante ni « Tout révéler » ; l’ouverture compte toujours cinq cartes.",
+    "Lisible à 320 et 390 px dans tous les thèmes, aucune erreur console ; le parcours complet passe."
+  ],
+  "paths": ["src/", "docs/"],
+  "browser": "neon",
+  "flow": [
+    { "tab": "Garage" },
+    { "capture": "garage" }
+  ]
+}

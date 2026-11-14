@@ -1,0 +1,18 @@
+{
+  "id": "booster-tactile",
+  "title": "Ouverture de booster tactile : toucher pour retourner, swiper pour passer à la carte suivante",
+  "brief": "Retour de playtest : à l’ouverture d’un booster, il est frustrant de ne pas pouvoir toucher la carte ou la swiper pour passer à la suivante. Dans src/views/BoosterView.vue (pile de cartes .card-stack, fonctions flipCard et nextCard) : toucher le dos de la carte la retourne ; une fois la carte révélée, la faire glisser horizontalement au doigt (pointer events, avec setPointerCapture) l’incline et la déplace en suivant le doigt ; au-delà d’un seuil (environ 30 % de la largeur ou un geste rapide), elle s’envole hors de l’écran du côté du geste, avec un petit son (src/feedback.ts) et une vibration (buzz de src/game/store.ts), puis la carte suivante arrive ; en deçà du seuil elle revient en place avec un rebond. Sur la dernière carte, le swipe ouvre le récapitulatif comme le bouton actuel. Toucher une carte révélée sans glisser ne fait rien de plus que maintenant (la cinématique des légendaires reste intacte). Les boutons actuels « Retourner la carte », « Carte suivante », « Voir le récapitulatif » et « Tout révéler » restent présents avec les mêmes noms (accessibilité et tests). Une indication discrète « Glisse la carte pour passer à la suivante » apparaît sous la première carte révélée d’une ouverture. Le mouvement réduit supprime l’inclinaison et l’envol (passage direct). Toute nouvelle règle CSS va dans src/themes/base.css et src/themes/neon.css. Texte en français, tutoiement.",
+  "requirements": [
+    "Toucher le dos d’une carte la retourne, comme le bouton « Retourner la carte ».",
+    "Glisser horizontalement une carte révélée au-delà du seuil la fait s’envoler et affiche la carte suivante (ou le récapitulatif après la cinquième) ; un glissement court la remet en place. Le geste fonctionne au doigt et à la souris.",
+    "Les boutons « Retourner la carte », « Carte suivante », « Voir le récapitulatif » et « Tout révéler » existent toujours et fonctionnent ; l’ouverture compte toujours exactement cinq cartes et la reprise après rechargement ne donne aucune carte en double.",
+    "Une indication « Glisse la carte pour passer à la suivante » s’affiche sous la première carte révélée.",
+    "Mouvement réduit : pas d’inclinaison ni d’envol. Lisible à 320 et 390 px dans tous les thèmes, aucune erreur console."
+  ],
+  "paths": ["src/"],
+  "browser": "neon",
+  "flow": [
+    { "tab": "Boosters" },
+    { "capture": "boutique" }
+  ]
+}

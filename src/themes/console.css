@@ -22,7 +22,7 @@ body { background: var(--background); }
 .button.ghost { background: #fff; color: var(--panel); border-color: #fff; }
 .tabbar button { background: none; border: 0; color: var(--muted); box-shadow: none; }
 .tabbar button[aria-current] { background: none; color: var(--yellow); }
-.tabbar button[aria-current]::before, .button.primary:not(:disabled)::before { content: '▶'; position: absolute; left: 6px; top: 50%; translate: 0 -50%; color: #fff; animation: console-cursor .5s steps(2) infinite; }
+.tabbar button[aria-current]::before, .button.primary:not(:disabled)::before { content: '▶' / ''; position: absolute; left: 6px; top: 50%; translate: 0 -50%; color: #fff; animation: console-cursor .5s steps(2) infinite; }
 .button.primary { position: relative; padding-left: 28px; }
 @keyframes console-cursor { 50% { translate: 3px -50%; } }
 .theme-option.chosen { box-shadow: 0 0 0 2px var(--yellow), 0 0 0 4px #fff, 0 0 0 6px var(--outline); }

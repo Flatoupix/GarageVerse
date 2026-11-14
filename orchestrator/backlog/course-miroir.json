@@ -1,0 +1,24 @@
+{
+  "id": "course-miroir",
+  "title": "Course miroir : voir les trois voitures adverses et les caractéristiques de chaque voiture",
+  "brief": "Retour de playtest : pendant une course, le joueur veut voir les caractéristiques de la voiture qu’il sélectionne, et voir les trois voitures adverses en face, dans une autre couleur, comme un miroir de son écurie. Dans src/views/RaceView.vue (section .engage), remplacer la ligne de pastilles des voitures adverses (.rival-line, titre « Voitures de … ») par une rangée de trois cartes adverses placée au-dessus des trois voitures du joueur : même format que les voitures du joueur (.engage-car), image retournée horizontalement et teinte rouge ou couleur rivale du thème, nom, secteurs restants, surchauffe éventuelle et charges de nitro du rival. Toucher une voiture (joueur ou rival) ouvre un panneau de détail sous les rangées, dans la page et sans fenêtre modale : nom, les quatre statistiques avec la statistique du secteur en cours mise en avant, secteurs restants, et fourchette de score sur ce secteur (luckRange de src/game/rules.ts appliquée au score de evaluate pour la voiture concernée). Toucher une voiture du joueur la sélectionne aussi pour l’engagement, comme aujourd’hui. Réutiliser les variables CSS des thèmes : toute nouvelle règle va dans src/themes/base.css et src/themes/neon.css (deux feuilles complètes, chargées selon le thème) et ne doit pas casser les thèmes Sobre, Sport auto, Carnet, Borne d’arcade, Console 16 bits et Atelier PC (src/themes/*.css). Conserver l’aide rapide existante (directive v-help de src/game/help.ts, consigne .engage-goal). Tout le texte en français, tutoiement.",
+  "requirements": [
+    "Au début de chaque secteur, la section d’engagement montre une rangée « Voitures de <nom du rival> » de trois cartes adverses, au-dessus des trois voitures du joueur, visuellement distinctes (teinte et image en miroir). Chaque carte adverse est un bouton dont le nom accessible commence par « Voiture adverse : » suivi du nom de la voiture.",
+    "Toucher une voiture adverse ou une voiture du joueur affiche un panneau de détail (titre = nom de la voiture) avec Accélération, Vitesse, Maniabilité, Endurance, la statistique du secteur en cours mise en avant, les secteurs restants et la fourchette de score sur ce secteur. Toucher une voiture du joueur la sélectionne aussi pour l’engagement.",
+    "Le choix du rival reste secret jusqu’au verdict : rien n’indique quelle voiture adverse sera engagée.",
+    "Le bouton principal « Engager … », la nitro, l’abandon et le duel de secteur fonctionnent comme avant ; le parcours complet de course jusqu’à l’arrivée passe.",
+    "Lisible et sans débordement horizontal à 320 et 390 px dans tous les thèmes, mouvement réduit respecté, aucune erreur console."
+  ],
+  "paths": ["src/"],
+  "browser": "neon",
+  "flow": [
+    { "tab": "Course" },
+    { "tap": "Lola Minitel" },
+    { "tap": "Lancer la course" },
+    { "expect": "Voitures de Lola Minitel" },
+    { "capture": "miroir" },
+    { "tap": "Voiture adverse : Citroën 2CV" },
+    { "expect": "Maniabilité" },
+    { "capture": "miroir-detail" }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "id": "victoire-parfaite",
+  "title": "Récompenser la victoire parfaite (tous les secteurs gagnés)",
+  "brief": "Retour de playtest : gagner tous les secteurs d’une course doit valoir nettement plus qu’une victoire serrée. Dans src/game/save.ts, settleDuel calcule la récompense d’une course contre un rival. Une victoire parfaite est une victoire où le joueur a gagné tous les secteurs de la course (duel.player.points === duel.sectors.length). Elle double les crédits de la récompense normale et ajoute un ticket du booster de la ligue du rival (même correspondance que la première victoire : neon → neon, chrome → night, overdrive → overdrive), en plus du ticket de première victoire éventuel. Le type Reward expose perfect: true. Le record du rival (save.record[id]) garde perfect: true dès la première victoire parfaite ; readSave normalise ce champ (ancienne sauvegarde sans le champ : false). Pour le défi du jour, une victoire parfaite double aussi les crédits du défi (seulement à la première victoire du jour). Dans src/views/RaceView.vue, l’écran d’arrivée affiche un bandeau « Victoire parfaite » avec une mise en scène plus forte que la victoire normale (effets de src/game/fx.ts et son 'legend' de src/feedback.ts), le détail de la récompense, et la liste des rivaux affiche une étoile « ★ » avec le nom accessible « Victoire parfaite obtenue » sur un rival déjà battu sans perdre un secteur. Ajouter l’entrée « Victoire parfaite » au lexique de src/game/help.ts (section En course). Toute nouvelle règle CSS va dans src/themes/base.css et src/themes/neon.css. Mettre à jour docs/meta.md. Texte en français, tutoiement.",
+  "requirements": [
+    "Une victoire où le joueur gagne tous les secteurs double les crédits de la récompense et ajoute un ticket du booster de la ligue ; une victoire ordinaire, une égalité et une défaite gardent exactement leurs récompenses actuelles.",
+    "L’écran d’arrivée d’une victoire parfaite affiche « Victoire parfaite » et la récompense détaillée (crédits doublés, ticket) ; la mise en scène est plus forte qu’une victoire normale et respecte le mouvement réduit.",
+    "Le record du rival mémorise la victoire parfaite ; la liste des rivaux affiche alors une étoile dont le nom accessible est « Victoire parfaite obtenue ». Une ancienne sauvegarde sans ce champ se charge sans erreur.",
+    "Le lexique (bouton « ? ») contient une entrée « Victoire parfaite ».",
+    "Les courses, le défi du jour et le parcours complet jusqu’à l’arrivée fonctionnent comme avant ; lisible à 320 et 390 px, aucune erreur console."
+  ],
+  "paths": ["src/", "docs/"],
+  "browser": "neon",
+  "flow": [
+    { "tap": "Lexique : comprendre les règles" },
+    { "expect": "Victoire parfaite" },
+    { "capture": "lexique-parfaite" },
+    { "tap": "Fermer le lexique" },
+    { "tab": "Course" },
+    { "capture": "rivaux" }
+  ]
+}

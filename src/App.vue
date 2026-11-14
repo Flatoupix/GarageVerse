@@ -71,7 +71,6 @@ function go(destination: Screen) {
 }
 
 function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
-  if (screen.value === 'garage' && kind === 'car') tutorialAction(2, 3)
   inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)

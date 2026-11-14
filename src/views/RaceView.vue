@@ -150,7 +150,8 @@ function engage() {
   const d = duel.value
   if (!d || d.winner) return
   const round = playRound(d, { car: picked.value, nitro: nitro.value }, Math.random)
-  tutorialAction(4, 9)
+  // Engager après la bulle de la nitro mène à la lecture du résultat ; les bulles 5 à 8 restent à lire avant.
+  tutorialAction(8, 9)
   shown.value = round
   detail.value = null
   nitro.value = false

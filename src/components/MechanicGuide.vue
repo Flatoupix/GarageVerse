@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { save } from '../game/store'
-import { discover, discovery, nextTutorial, skipTutorial } from '../game/tutorial'
+import { discover, discovery, nextTutorial, skipTutorial, understoodDiscovery } from '../game/tutorial'
 
 const steps = [
   ['.home .hero', 'Collectionne des voitures et bats les rivaux secteur par secteur. Ton premier booster t’attend dans Boosters.'],
@@ -31,10 +31,11 @@ let frame = 0
 function refresh() {
   const modal = document.querySelector('dialog[open]')
   if (save.tutorial.status !== 'active') {
+    // Chaque découverte se déclenche quand le joueur la rencontre vraiment : nitro armée, voiture en surchauffe…
     if (document.querySelector('.perfect-banner')) discover('perfect')
-    else if (document.querySelector('.engage-car.hot')) discover('heat')
-    else if (document.querySelector('.nitro-toggle')) discover('nitro')
-    else if (document.querySelector('.daily-race')) discover('daily')
+    if (document.querySelector('.engage-car.hot')) discover('heat')
+    if (document.querySelector('.nitro-toggle.armed')) discover('nitro')
+    if (document.querySelector('.daily-race')) discover('daily')
   }
   const found = entry.value ? [...document.querySelectorAll<HTMLElement>(entry.value[0])].find(el => el.getClientRects().length && (!modal || modal.contains(el))) ?? null : null
   if (found === target) return
@@ -44,7 +45,16 @@ function refresh() {
   host.value = found ? document.createElement('div') : null
   if (found && host.value) {
     found.setAttribute('data-mechanic', '')
-    found.before(host.value)
+    // Jamais au milieu d'une rangée de commandes : la bulle se place avant le bloc qui contient la rangée.
+    let anchor = found
+    for (let parent = anchor.parentElement; parent && parent !== document.body && !parent.matches('main, section, dialog'); parent = anchor.parentElement) {
+      const style = getComputedStyle(parent)
+      const row = (style.display.includes('flex') && !style.flexDirection.startsWith('column'))
+        || (style.display.includes('grid') && style.gridTemplateColumns.trim().split(/\s+/).length > 1)
+      if (!row) break
+      anchor = parent
+    }
+    anchor.before(host.value)
   }
 }
 function schedule() { cancelAnimationFrame(frame); frame = requestAnimationFrame(refresh) }
@@ -55,15 +65,18 @@ onMounted(() => {
   schedule()
 })
 onUnmounted(() => { observer.disconnect(); cancelAnimationFrame(frame); target?.removeAttribute('data-mechanic'); host.value?.remove() })
-function understood() {
+function understood(event: Event) {
+  const hadFocus = (event.currentTarget as HTMLElement).matches(':focus-visible')
   if (save.tutorial.status === 'active') nextTutorial()
-  else discovery.value = null
+  else understoodDiscovery()
+  // Au clavier, le focus suit la bulle suivante au lieu de retomber sur la page.
+  if (hadFocus) void nextTick(() => requestAnimationFrame(() => document.querySelector<HTMLElement>('.mechanic-guide button')?.focus()))
 }
 </script>
 
 <template>
   <Teleport v-if="host && entry" :to="host">
-    <aside class="mechanic-guide" role="status" :aria-label="`Le mécano${save.tutorial.status === 'active' ? ` ${save.tutorial.step + 1}/${steps.length}` : ''}`">
+    <aside class="mechanic-guide" role="region" aria-live="polite" :aria-label="`Le mécano${save.tutorial.status === 'active' ? ` ${save.tutorial.step + 1}/${steps.length}` : ''}`">
       <strong>Le mécano <span v-if="save.tutorial.status === 'active'">{{ save.tutorial.step + 1 }}/{{ steps.length }}</span></strong>
       <p>{{ entry[1] }}</p>
       <div class="mechanic-actions">

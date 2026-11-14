@@ -16,8 +16,12 @@ export function nextTutorial() {
 export function discover(key: Discovery) {
   if (save.tutorial.status === 'active' || save.tutorial.seen.includes(key) || discovery.value) return
   discovery.value = key
-  save.tutorial.seen.push(key)
-  persist()
+}
+// Une découverte n'est marquée vue qu'une fois lue : un rechargement avant « Compris » la remontre.
+export function understoodDiscovery() {
+  const key = discovery.value
+  if (key && !save.tutorial.seen.includes(key)) { save.tutorial.seen.push(key); persist() }
+  discovery.value = null
 }
 export function skipTutorial() {
   save.tutorial.status = 'skipped'

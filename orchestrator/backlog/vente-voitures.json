@@ -1,0 +1,19 @@
+{
+  "id": "vente-voitures",
+  "title": "Vendre une voiture dont on ne veut plus",
+  "brief": "Retour de playtest : pouvoir vendre ou recycler les voitures dont on ne veut plus. Le recyclage des doublons existe déjà (scrapCar dans src/game/save.ts, bouton « Recycler un doublon » de src/views/CarSheet.vue) ; le garder. Ajouter la vente d’une voiture entière : sellCar(save, id) dans src/game/save.ts retire la voiture de save.cars (elle sort de la collection : le compteur de voitures découvertes baisse), rend au stock du joueur les pièces montées dessus, et crédite un prix de vente calculé par sellPrice(save, id) : prix de base selon la rareté (progression.scrap de src/data/garage.json multiplié par 2), plus 10 crédits par Stage, plus la moitié des crédits dépensés en améliorations d’atelier (upgradePrices de src/game/rules.ts), plus progression.scrap pour chaque doublon en plus du premier exemplaire. Refus avec un message clair : voiture engagée dans l’écurie (save.lineup) ou dans l’écurie du défi du jour, course en cours avec cette voiture, ou garage réduit à moins de trois voitures après la vente. Une voiture débloquée par évolution peut être vendue. Dans CarSheet.vue, un bouton « Vendre · <prix> crédits » ; au toucher, une confirmation dans la fiche (pas de window.confirm) : « Vendre <nom> ? Elle quittera ta collection. » avec les boutons « Confirmer la vente » et « Annuler ». Après la vente, la fiche se ferme, un toast annonce le gain et le compteur de crédits s’anime comme pour les autres gains. Ajouter l’entrée « Vente » au lexique (src/game/help.ts, section Garage) et mettre à jour docs/meta.md (économie). Vérifier avec node pipeline/balance.mjs que les données restent cohérentes. Toute nouvelle règle CSS va dans src/themes/base.css et src/themes/neon.css. Texte en français, tutoiement.",
+  "requirements": [
+    "La fiche d’une voiture possédée propose « Vendre · <prix> crédits » ; la vente demande une confirmation dans la fiche (« Confirmer la vente » / « Annuler »).",
+    "Une vente confirmée retire la voiture du garage et de la collection, rend ses pièces montées au stock, crédite exactement le prix affiché et survit au rechargement.",
+    "La vente est refusée avec une raison lisible si la voiture est dans l’écurie, dans une course en cours, ou s’il resterait moins de trois voitures ; le bouton « Recycler un doublon » fonctionne comme avant.",
+    "Le lexique contient une entrée « Vente » ; docs/meta.md décrit le prix de vente.",
+    "Lisible à 320 et 390 px dans tous les thèmes, aucune erreur console ; le parcours complet passe."
+  ],
+  "paths": ["src/", "docs/"],
+  "browser": "neon",
+  "flow": [
+    { "tap": "Lexique : comprendre les règles" },
+    { "expect": "Vente" },
+    { "capture": "lexique-vente" }
+  ]
+}
