@@ -802,7 +802,7 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 .finish-legendary, .car-card.finish-legendary { --frame: var(--yellow); --accent: var(--yellow); --rail: var(--yellow); }
 .gv-card::after { display: none; }
 .gv-card.finish-legendary::after { display: block; content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 0 45%, var(--text) 45% 55%, transparent 55%); opacity: .18; animation: pixel-sheen 3s steps(8, end) infinite; mix-blend-mode: normal; }
-@keyframes pixel-sheen { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 100%); } }
+@keyframes pixel-sheen { from { translate: -100% 0; } to { translate: 100% 0; } }
 .car-card { grid-template-rows: auto auto auto; }
 .car-card .card-art { aspect-ratio: 1.5; }
 .car-masthead, .car-card-details, .card-body { background: var(--night); clip-path: none; }
@@ -820,7 +820,9 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 .car-card .stat-grid b, .car-card.compact .stat-grid b { font: 10px/1.5 var(--display); }
 .car-card .stat-grid .bar, .stat-grid .bar { height: 6px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 12 - 2px), var(--night) calc(100% / 12 - 2px) calc(100% / 12)), linear-gradient(var(--green), var(--green)) 0 0 / calc(var(--fill) * 100%) 100% no-repeat, var(--panel); }
 .stat-track, .cap-meter > div { height: 10px; }
-.stat-track > span, .cap-meter > div span, progress::-webkit-progress-value, progress::-moz-progress-bar { background: repeating-linear-gradient(90deg, var(--green) 0 6px, var(--night) 6px 8px); }
+.stat-track > span, .cap-meter > div span { background: repeating-linear-gradient(90deg, var(--green) 0 6px, var(--night) 6px 8px); }
+progress::-webkit-progress-value { background: repeating-linear-gradient(90deg, var(--green) 0 6px, var(--night) 6px 8px); }
+progress::-moz-progress-bar { background: repeating-linear-gradient(90deg, var(--green) 0 6px, var(--night) 6px 8px); }
 .part-card { display: flex; flex-direction: column; }
 .part-card .card-art { position: relative; inset: auto; aspect-ratio: 1.4; }
 .part-art > img { height: 100%; }
