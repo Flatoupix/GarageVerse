@@ -3,7 +3,7 @@ import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
 import { constraintCap, constraintText } from '../game/daily'
 import { art, edition } from '../game/art'
 import {
-  conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
+  boosterById, conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
   type Condition, type Rival, type StatKey,
 } from '../game/data'
 import { helpForLine, vHelp } from '../game/help'
@@ -179,10 +179,14 @@ function proceed() {
     const won = duel.value.winner === 'player'
     reward.value = settleDuel(save) ?? null
     persist()
-    sound(won ? 'win' : 'lose')
+    sound(reward.value?.perfect ? 'legend' : won ? 'win' : 'lose')
     lastWinner.value = won ? 'player' : 'other'
     clear()
-    if (won) {
+    if (reward.value?.perfect && !reducedMotion.value) {
+      confetti(palettes.gold, 180); streaks(palettes.gold, 60); flash(tone.gold, 0.5); shake(3)
+      buzz([60, 40, 60, 40, 120])
+      timers.push(setTimeout(() => { if (!reducedMotion.value) confetti(palettes.gold, 120) }, 650))
+    } else if (won) {
       confetti(); flash(tone.gold, 0.32); buzz([40, 60, 40, 60, 80])
       timers.push(setTimeout(() => confetti(palettes.gold, 60), 650))
     } else shake(1)
@@ -195,7 +199,7 @@ function proceed() {
 }
 const lastWinner = ref<'player' | 'other'>('other')
 function abandon() {
-  act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0 }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, 'Course abandonnée')
+  act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0, perfect: false }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, 'Course abandonnée')
 }
 // Libellés courts pour la piste, qui doit tenir sur une ligne de cinq cases à 320 px.
 const trackLabels = { depart: 'Départ', virage: 'Virages', ligne: 'Droite', endurance: 'Endur.' } as const
@@ -207,12 +211,15 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     <!-- Résultat final -->
     <section v-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
       <span class="eyebrow">{{ rival?.circuit.name }}</span>
-      <h1 tabindex="-1">{{ lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
+      <h1 tabindex="-1">{{ reward.perfect ? 'Victoire parfaite' : lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
+      <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> Tu as gagné tous les secteurs !</p>
       <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? 'Défi déjà récompensé aujourd’hui.' : 'Retente le défi quand tu veux.' }}</p>
-      <p v-else :aria-label="`+${reward.credits} crédits`">+{{ rewardShown }} crédits<template v-if="reward.ticket"> · 1 ticket booster</template></p>
+      <p v-else :aria-label="`+${reward.credits} crédits`">+{{ rewardShown }} crédits<template v-if="reward.perfect"> · crédits doublés</template></p>
+      <p v-if="reward.ticket">+1 ticket {{ boosterById.get(reward.ticket)?.name }} · première victoire</p>
+      <p v-if="reward.perfectTicket">+1 ticket {{ boosterById.get(reward.perfectTicket)?.name }} · victoire parfaite</p>
       <div class="recap-actions">
         <button type="button" class="button primary" @click="reward = null; chosen = null">Rivaux <span aria-hidden="true">⟶</span></button>
-        <button type="button" class="button quiet" @click="emit('go', reward?.ticket ? 'shop' : 'garage')">{{ reward.ticket ? 'Ouvrir le ticket' : 'Préparer au garage' }}</button>
+        <button type="button" class="button quiet" @click="emit('go', reward?.ticket || reward?.perfectTicket ? 'shop' : 'garage')">{{ reward.ticket || reward.perfectTicket ? 'Ouvrir les tickets' : 'Préparer au garage' }}</button>
       </div>
     </section>
 
@@ -369,7 +376,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <button type="button" class="rival-row" :disabled="!unlocked.includes(r.id)" @click="chosen = r.id">
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
-            <span class="rival-info"><b>{{ r.name }}</b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small></span>
+            <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small></span>
             <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ ${save.record[r.id].wins}` : 'Défier' }}</span>
           </button>
         </li>

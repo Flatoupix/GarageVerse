@@ -21,6 +21,7 @@ export const glossary = {
   inconnu: { term: 'Inconnu', text: 'La météo de ce secteur se révèle quand la course y arrive.' },
   forme: { term: 'Forme du jour (fourchette de score)', text: 'Le score d’une voiture varie un peu à chaque secteur : c’est la part de chance. La fourchette affichée sous chaque voiture, par exemple « 3-5 », te montre ce qu’elle peut marquer.' },
   parfait: { term: 'Secteur parfait', text: 'Une fois sur seize environ, une voiture signe un secteur parfait : son score monte d’environ 50 %.' },
+  victoireParfaite: { term: 'Victoire parfaite', text: 'Gagne tous les secteurs : tu doubles les crédits et tu reçois un ticket du booster de la ligue du rival, en plus du ticket de première victoire éventuel. Une étoile garde la trace de ton exploit. Pour le défi du jour, tu doubles les crédits de ta première victoire du jour.' },
   incident: { term: 'Incident', text: 'Faux départ, tête-à-queue, aspiration ratée, crevaison ou aquaplaning : environ une fois sur vingt-quatre, la voiture perd environ 40 % de son score. Plus fréquent sous la pluie, sur la terre et en surchauffe.' },
   nitro: { term: 'Nitro', text: 'À cocher avant d’engager une voiture : +2 points sur ce secteur (davantage avec certaines pièces). Tu as 2 charges par course, plus celles qu’apportent certaines voitures et pièces.' },
   surchauffe: { term: 'Surchauffe', text: `Chaque voiture peut courir un nombre limité de secteurs (affiché sous elle). Au-delà, elle surchauffe : −${OVERHEAT} points.` },
@@ -46,7 +47,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Les quatre statistiques', keys: ['acc', 'man', 'vit', 'end'] },
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },
-  { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'nitro', 'forme', 'parfait', 'incident', 'egalite'] },
+  { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
   { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition'] },
 ]

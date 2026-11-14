@@ -28,7 +28,7 @@ export interface Save {
   opening: Opening | null
   dailyLineup?: string[]
   lineup: string[]
-  record: Record<string, { wins: number; losses: number }>
+  record: Record<string, { wins: number; losses: number; perfect: boolean }>
   duel: Duel | null
   preferences: Preferences
 }
@@ -117,7 +117,9 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       view: o.collected || (revealed === 5 && o.view === 'recap') ? 'recap' : revealed && (o.view === 'face' || revealed === 5) ? 'face' : 'back' }
   }
   save.lineup = (input.lineup ?? []).filter(id => save.cars[id]).slice(0, 3)
-  save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)))
+  save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)).map(([id, record]) => [id, {
+    wins: int(record?.wins, 0, 100000, 0), losses: int(record?.losses, 0, 100000, 0), perfect: record?.perfect === true,
+  }]))
   try {
     const duel = input.duel
     if (duel && (rivalById.has(duel.rivalId) || /^daily:\d{4}-\d{2}-\d{2}$/.test(duel.rivalId)) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
@@ -328,30 +330,37 @@ export function startDuel(save: Save, rivalId: string, rng: Rng): string | undef
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
 }
 
-export interface Reward { credits: number; ticket?: string }
+export interface Reward { credits: number; ticket?: string; perfect?: true; perfectTicket?: string }
 export function settleDuel(save: Save): Reward | undefined {
   const duel = save.duel
   if (!duel?.winner) return
+  const perfect = duel.winner === 'player' && duel.player.points === duel.sectors.length
   if (duel.rivalId.startsWith('daily:')) {
     refreshDaily(save)
     const date = duel.rivalId.slice(6)
-    const reward = { credits: 0 }
+    const reward: Reward = perfect ? { credits: 0, perfect: true } : { credits: 0 }
     if (duel.winner === 'player' && date === save.daily.date && !save.daily.won) {
       save.daily.streak = save.daily.lastWin === previousDate(date) ? save.daily.streak + 1 : 1
       save.daily.lastWin = date
       save.daily.won = true
-      reward.credits = dailyChallenge(date).reward
+      reward.credits = dailyChallenge(date).reward * (perfect ? 2 : 1)
       save.credits += reward.credits
     }
     save.duel = null
     return reward
   }
   const rival = rivalById.get(duel.rivalId)!, league = leagueById.get(rival.league)!
-  const record = save.record[rival.id] ??= { wins: 0, losses: 0 }
+  const record = save.record[rival.id] ??= { wins: 0, losses: 0, perfect: false }
   let reward: Reward
   if (duel.winner === 'player') {
     reward = { credits: league.reward }
     if (record.wins === 0) reward.ticket = league.id === 'neon' ? 'neon' : league.id === 'chrome' ? 'night' : 'overdrive'
+    if (perfect) {
+      reward.perfect = true
+      reward.credits *= 2
+      reward.perfectTicket = league.id === 'neon' ? 'neon' : league.id === 'chrome' ? 'night' : 'overdrive'
+      record.perfect = true
+    }
     record.wins++
   } else {
     reward = { credits: duel.winner === 'tie' ? Math.round(league.reward / 2) : 30 }
@@ -359,6 +368,7 @@ export function settleDuel(save: Save): Reward | undefined {
   }
   save.credits += reward.credits
   if (reward.ticket) save.tickets[reward.ticket] = (save.tickets[reward.ticket] ?? 0) + 1
+  if (reward.perfectTicket) save.tickets[reward.perfectTicket] = (save.tickets[reward.perfectTicket] ?? 0) + 1
   save.duel = null
   return reward
 }

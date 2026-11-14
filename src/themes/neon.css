@@ -866,3 +866,6 @@ img[src*=".px"], .pixelated { image-rendering: pixelated; }
 .engage-stats dd { margin: 0; font-weight: 700; }
 .engage-stats small { font-size: .8em; }
 .engage-stats .sector-stat { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); font-weight: 700; }
+
+.perfect-banner { padding: 14px; border: 2px solid var(--sun); border-radius: 12px; color: var(--sun); background: var(--night-2); box-shadow: 0 0 24px #ffd27a55; font-weight: 700; overflow-wrap: anywhere; }
+.perfect-star { color: var(--sun); text-shadow: 0 0 10px #ffd27a88; }

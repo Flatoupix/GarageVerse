@@ -57,7 +57,7 @@ C’est la piste « épreuve en secteurs » de la bible, enrichie de choix simul
 
 Le joueur doit pouvoir expliquer son choix : le panneau de résultat détaille chaque bonus. **Aide rapide** (`src/game/help.ts`) : les termes soulignés en pointillé (statistiques, secteurs, météo, lignes du détail de score, nitro, Stage…) ouvrent une bulle d’explication ; le bouton « ? » de l’en-tête ouvre le lexique complet. Avant chaque secteur, une consigne rappelle le but et la statistique qui compte. Il peut se relancer après un mauvais départ grâce aux capacités « retour en force » et à la Nitro gardée pour la fin. Une carte commune garde un usage : une Twingo sous la pluie en ville vaut mieux qu’une hypercar.
 
-**Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. L’IA voit les mêmes informations que le joueur.
+**Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. Une victoire parfaite signifie que tu as gagné tous les secteurs : les crédits de la ligue sont doublés et tu reçois un ticket supplémentaire (neon → neon, chrome → night, overdrive → overdrive), cumulable avec celui de première victoire. Le record conserve cet exploit et une étoile ★ apparaît sur le rival, nommée « Victoire parfaite obtenue » pour les lecteurs d’écran. L’arrivée célèbre « Victoire parfaite » avec le son legend et des effets renforcés, désactivés en mouvement réduit. L’IA voit les mêmes informations que le joueur.
 
 Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’écurie pour chaque secteur selon un score moyen estimé. Lola roule d’origine ; les rivaux suivants montent aussi leurs groupes de statistiques à l’atelier (champ `upgrades` des écuries). Cible de la simulation (`node pipeline/balance.mjs`) : garage de départ d’origine 70 % contre Lola et 57 % contre Cassette, 83 % et 72 % avec une amélioration par voiture ; contre des écuries Stage 1 de leur ligue, Kenji 75 %, Roxy 71 %, le Baron 56 % et Nyx 55 %.
 
@@ -115,7 +115,7 @@ est préremplie depuis les voitures possédées ; toute sélection invalide indi
 la raison sur le bouton désactivé. Le défi réutilise les duels de secteur et
 l’arrivée des courses habituelles.
 
-La première victoire rapporte 180 crédits. Rejouer reste possible sans nouveau
+La première victoire rapporte 180 crédits, ou 360 crédits si tu gagnes tous les secteurs (victoire parfaite). Le défi ne donne pas de ticket de ligue. Rejouer reste possible sans nouveau
 gain. La série augmente après une victoire le lendemain de la précédente ; un
 jour manqué l’interrompt. Le booster quotidien ajoute exactement un ticket, puis
 l’accueil affiche « Reviens demain ». La date, la réussite, la récupération, la
