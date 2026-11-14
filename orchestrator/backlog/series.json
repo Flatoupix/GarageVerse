@@ -1,0 +1,46 @@
+{
+  "id": "series",
+  "title": "Ajouter des séries de collection avec récompenses",
+  "brief": "Donner des objectifs à la collection. Une série est un ensemble nommé de voitures à réunir (par exemple les stars de cinéma, les reines du rallye, la lignée Lotus, les hypercars de record, les muscle cars, les japonaises de légende). Réunir toutes les voitures d’une série permet de récupérer une récompense une seule fois. Les séries sont décrites dans les données (src/data/garage.json), pas dans le code des vues. Réutiliser le style synthwave existant (src/style.css), les effets de src/game/fx.ts et les sons de src/feedback.ts. Tout le texte est en français, tutoiement. Ne pas modifier l’équilibrage des voitures ni les rivaux existants.",
+  "requirements": [
+    "Le garage a un troisième onglet « Séries » à côté de Voitures et Mécaniques. Il liste au moins sept séries de trois à six voitures tirées du roster existant, chacune avec son nom, une courte description, sa récompense et une barre de progression (voitures possédées sur total).",
+    "Chaque série montre ses voitures : possédées en vignette illustrée, manquantes en silhouette nommée. Toucher une voiture ouvre sa fiche existante.",
+    "Une série nommée « Premiers tours de roue » réunit exactement les trois voitures de départ (Clio III, Twingo I, Panda 4×4) : elle est complète sur une sauvegarde neuve et apparaît en premier.",
+    "Une série complète affiche un bouton « Récupérer la récompense ». La récompense (crédits, et un ticket de booster pour les séries les plus difficiles) est versée une seule fois ; la série affiche ensuite « Récompense récupérée », y compris après rechargement.",
+    "Récupérer une récompense déclenche une célébration avec les effets existants (étincelles ou confettis, son), coupée en mouvement réduit.",
+    "L’accueil indique le nombre de séries complétées, et l’onglet Garage de la barre du bas signale par une pastille qu’une récompense de série est à récupérer.",
+    "Les récompenses récupérées sont sauvegardées dans la sauvegarde existante ; une ancienne sauvegarde sans ce champ se charge sans erreur.",
+    "Les nouveaux écrans sont lisibles et sans débordement horizontal à 320 et 390 px, et docs/meta.md décrit les séries."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tab": "Garage"
+    },
+    {
+      "tap": "Séries"
+    },
+    {
+      "expect": "Premiers tours de roue"
+    },
+    {
+      "capture": "series"
+    },
+    {
+      "tap": "Récupérer la récompense"
+    },
+    {
+      "expect": "Récompense récupérée"
+    },
+    {
+      "capture": "series-recompense"
+    }
+  ]
+}

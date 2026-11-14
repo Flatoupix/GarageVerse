@@ -1,0 +1,36 @@
+{
+  "id": "hors-ligne",
+  "title": "Rendre le jeu jouable hors ligne et la sauvegarde exportable",
+  "brief": "Le jeu s’installe sur l’écran d’accueil du téléphone mais ne s’ouvre pas sans réseau, et la sauvegarde ne vit que dans le navigateur. Ajouter un service worker écrit à la main (public/sw.js, sans dépendance) et un export/import de la sauvegarde. Le jeu est servi sous un sous-chemin (base Vite relative « ./ », GitHub Pages) : tous les chemins du service worker doivent être relatifs à son propre emplacement. Réutiliser le style synthwave existant (src/style.css), les effets de src/game/fx.ts et les sons de src/feedback.ts. Tout le texte est en français, tutoiement. Ne pas modifier l’équilibrage des voitures ni les rivaux existants.",
+  "requirements": [
+    "Un service worker public/sw.js est enregistré depuis src/main.ts, uniquement en production (import.meta.env.PROD) et avec un chemin relatif. Il met en cache la page, les scripts, les styles, les images et le manifeste au fil des requêtes du même domaine, répond d’abord par le réseau pour la page HTML (avec repli sur le cache) et d’abord par le cache pour les fichiers au nom haché, et ignore les requêtes d’autres domaines.",
+    "Une nouvelle version du jeu remplace l’ancienne au prochain chargement : les anciens caches sont supprimés à l’activation, et un nom de cache versionné est défini en tête du fichier.",
+    "Les réglages ont un bouton « Exporter la sauvegarde » qui télécharge un fichier JSON daté, et un bouton « Importer une sauvegarde » qui lit un fichier choisi par le joueur. L’import passe par la validation existante (readSave), demande confirmation avant de remplacer la partie en cours, et affiche une erreur claire si le fichier n’est pas une sauvegarde GarageVerse.",
+    "Les réglages indiquent l’état hors ligne : « Disponible hors ligne » quand le service worker est actif, sinon rien.",
+    "Sans service worker disponible (navigateur ancien, développement), le jeu fonctionne comme avant, sans erreur dans la console.",
+    "Les réglages restent lisibles et sans débordement horizontal à 320 et 390 px, et docs/meta.md décrit le mode hors ligne et l’export."
+  ],
+  "paths": [
+    "src/",
+    "public/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Exporter la sauvegarde"
+    },
+    {
+      "capture": "export"
+    },
+    {
+      "tap": "Fermer les réglages"
+    }
+  ]
+}

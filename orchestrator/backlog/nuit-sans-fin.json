@@ -1,0 +1,52 @@
+{
+  "id": "nuit-sans-fin",
+  "title": "Ajouter le mode Nuit sans fin",
+  "brief": "Donner une fin de partie rejouable. « Nuit sans fin » est une suite de courses contre des adversaires générés, de plus en plus forts ; la nuit s’arrête à la première défaite et le meilleur nombre de manches gagnées est conservé comme record. Réutiliser le moteur de course (src/game/rules.ts, createRace), la mise en scène de RaceView.vue et la manière dont le défi du jour génère un adversaire (src/game/daily.ts). Réutiliser le style synthwave existant (src/style.css), les effets de src/game/fx.ts et les sons de src/feedback.ts. Tout le texte est en français, tutoiement. Ne pas modifier l’équilibrage des voitures ni les rivaux existants.",
+  "requirements": [
+    "L’onglet Course affiche, avec la liste des rivaux, une entrée « Nuit sans fin » accessible dès une sauvegarde neuve, avec le record actuel (« Record : N manche(s) »).",
+    "L’écran du mode explique la règle en une phrase, montre le record, le plafond de coût de l’écurie et un bouton « Commencer la nuit ». L’écurie se compose comme pour une course, avec un plafond de coût propre au mode, et une écurie valide est préremplie sur une sauvegarde neuve : « Commencer la nuit » lance alors directement la première manche (l’écran affiche « Secteur 1/5 »).",
+    "Chaque manche est une course en cinq secteurs contre trois voitures générées. La difficulté monte à chaque manche (coût des voitures adverses, puis Stage et pièces), et le circuit et la météo changent.",
+    "Après une manche gagnée, un écran intermédiaire annonce la manche suivante et les crédits accumulés, avec les boutons « Manche suivante » et « Rentrer au garage » (qui encaisse les gains et termine la nuit). Une défaite termine la nuit : les crédits des manches déjà gagnées sont versés.",
+    "Le record de manches gagnées est mis à jour et célébré quand il est battu (effets existants, coupés en mouvement réduit).",
+    "Une nuit en cours (manche, gains accumulés, écurie) survit à un rechargement, et l’accueil propose de la reprendre. Abandonner une manche termine la nuit comme une défaite.",
+    "Le record et la nuit en cours sont sauvegardés dans la sauvegarde existante ; une ancienne sauvegarde sans ces champs se charge sans erreur. Les courses contre les rivaux et le défi du jour fonctionnent comme avant.",
+    "Les nouveaux écrans sont lisibles et sans débordement horizontal à 320 et 390 px, et docs/meta.md décrit le mode."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tab": "Course"
+    },
+    {
+      "expect": "Nuit sans fin"
+    },
+    {
+      "capture": "nuit-liste"
+    },
+    {
+      "tap": "Nuit sans fin"
+    },
+    {
+      "expect": "Record"
+    },
+    {
+      "capture": "nuit"
+    },
+    {
+      "tap": "Commencer la nuit"
+    },
+    {
+      "expect": "Secteur 1/5"
+    },
+    {
+      "capture": "nuit-manche"
+    }
+  ]
+}

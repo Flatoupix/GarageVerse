@@ -30,6 +30,16 @@ const parallel = Number(option('jobs') ?? 4)
 const NO_TEXT = 'Strictly no text, no letters, no numbers, no logos, no brand badges, no readable license plates, no watermark, no card frame or border.'
 const STYLE = 'Style: premium 1980s synthwave / outrun poster illustration, clean crisp shapes, glossy reflections and chrome highlights, ' +
   'palette of hot magenta, electric cyan, deep violet and sunset orange, subtle film grain. Cohesive with a retro trading-card game.'
+// Styles alternatifs : une carte peut sortir du synthwave (champ look du roster) avec son propre décor (champ setting).
+const LOOKS = {
+  poster: 'Style: hand-painted 1970s-80s movie poster illustration, visible gouache brushwork, dramatic rim lighting, rich warm palette, cinematic composition.',
+  rally: 'Style: gritty 1980s rally photograph on Kodachrome film, natural daylight, dust and mud spray, slight motion blur, authentic film grain.',
+  comic: 'Style: European ligne claire comic book panel, clean even ink outlines, flat bright colors, simple shading, playful and readable.',
+  anime: 'Style: 1990s Japanese anime cel illustration, hand-painted background, crisp cel shading, soft dusk gradients, nostalgic mood.',
+  magazine: 'Style: glossy 1990s car magazine studio photograph, softbox lighting, seamless colored backdrop, sharp reflections, photorealistic.',
+  watercolor: 'Style: vintage travel sketchbook illustration, loose watercolor washes and ink lines on textured paper, warm sunny palette.',
+  pulp: 'Style: retro-futuristic pulp sci-fi illustration, airbrushed gradients, dramatic lighting, bold saturated colors, 1970s paperback cover feel.',
+}
 const SCENES = {
   sunset: 'a striped synthwave sunset over a glowing magenta and cyan perspective grid floor, palm tree silhouettes',
   city: 'a rain-wet neon city street at night, magenta and cyan glowing signs without readable text, reflections on the asphalt',
@@ -45,9 +55,11 @@ function jobs() {
     const subject = v.culture
       ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
       : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
+    const alt = v.look && v.look !== 'synthwave' && LOOKS[v.look]
     list.push({ kind: 'cars', id: v.id, size: [640, 960], prompt:
       `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
-      `centered in the lower two thirds, slight low camera angle, wheels on the ground unless it flies. Scene: ${SCENES[v.scene]}. ${STYLE} ${NO_TEXT}` })
+      `centered in the lower two thirds, slight low camera angle, wheels on the ground unless it flies. ` +
+      (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${STYLE} ${NO_TEXT}`) })
   }
   if (kinds.includes('parts')) for (const p of garage.parts) list.push({ kind: 'parts', id: p.id, size: [512, 512], prompt:
     `Mechanic part card illustration, square 1:1. Subject: ${p.art}, single hero object, centered, studio product shot. ` +
@@ -186,7 +198,7 @@ async function review(list) {
         : job.kind === 'parts' ? garage.parts.find(p => p.id === job.id).art : job.id
       return `- key "${job.kind}/${job.id}", file ${target(job)}: expected ${expected}`
     }).join('\n')
-    const prompt = 'You are the art director of a retro synthwave car trading-card game. Open and look at each image file listed below. ' +
+    const prompt = 'You are the art director of a retro car trading-card game. Most cards are synthwave, some use a deliberate alternative style (poster, rally photo, comic, anime, magazine, watercolor, pulp): judge each against its own intended style. Open and look at each image file listed below. ' +
       'For each one judge: (1) is the subject recognisably the expected vehicle or object (body shape, proportions, key design cues)? ' +
       '(2) is it free of readable text, logos and watermarks? (3) does it fit a cohesive synthwave palette and read well as a small card? ' +
       'Answer ONLY with a JSON object mapping each key to {"ok": boolean, "score": 1-10, "issue": "short French note", "fix": "short English instruction for regenerating, empty if ok"}. ' +

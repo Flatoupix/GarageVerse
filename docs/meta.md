@@ -11,13 +11,13 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 | Dimension | Traduction en jeu |
 | --- | --- |
 | Rareté | Courante, Rare, Épique, Légendaire. Elle règle la fréquence en booster et le cadre de la carte (chrome cyan, magenta, coucher de soleil, holographique animé). |
-| Puissance | Quatre scores sur 10 (ACC, VIT, MAN, END) et le coût d’écurie. Une carte rare n’est pas forcément plus forte. |
+| Puissance | Quatre scores de base sur 10 (ACC, VIT, MAN, END), plafonnés à 12 après préparation, et le coût d’écurie. |
 | Aura | Les éditions culturelles portent leurs étiquettes (Cinéma, Série, Nostalgie, Tuning…). Elles gagnent +1 la Nuit. Certaines capacités comptent les alliés qui partagent une étiquette. |
-| Édition artistique | Synthwave pour les 50 voitures. Classic et Pixel Art pour certaines. L’édition ne change jamais les statistiques. |
+| Édition artistique | Synthwave, photo, gouache et rallye argentique. Classic et Pixel Art pour certaines cartes. Les éditions d’une voiture partagent les mêmes statistiques. |
 
 ## 3. Cartes
 
-**Voiture (50).** Numéro de collection, version, coût, quatre scores, transmission, motorisation, catégories, capacité signature et fiche réelle à vérifier. Les 32 cartes candidates de la bible sont reprises, avec 18 voitures de la liste des futures cartes : Abarth 500, Dacia Logan, Civic Type R EK9, MX-5 NA, M3 E46, Delta HF Integrale, Lancer Evo VIII, Alpine A110, NSX, Tesla Model S Plaid, Mustang Shelby GT500, Challenger Demon 170, RUF CTR Yellowbird, Carrera GT, Zonda R, Agera R, Veyron et Hummer H1.
+**Voiture (100).** Numéro de collection, version, coût, quatre scores, transmission, motorisation, catégories, capacité signature et fiche réelle à vérifier. Les 32 cartes candidates de la bible sont reprises, avec 18 voitures de la liste des futures cartes : Abarth 500, Dacia Logan, Civic Type R EK9, MX-5 NA, M3 E46, Delta HF Integrale, Lancer Evo VIII, Alpine A110, NSX, Tesla Model S Plaid, Mustang Shelby GT500, Challenger Demon 170, RUF CTR Yellowbird, Carrera GT, Zonda R, Agera R, Veyron et Hummer H1.
 
 **Mécanique (24).** Huit familles, une pièce par famille et par voiture : pneumatiques, suspension, freinage, transmission, suralimentation, gestion moteur, châssis et spécial. Chaque pièce a un coût de préparation de 1 à 3, des bonus de scores ou des effets conditionnels, et une compatibilité explicite. Exemples : *Kit angle drift* (propulsion uniquement), *Compresseur volumétrique* (V8, V10 ou V12), *Gros turbo hybride* (déjà turbo), *Pack batterie* (électrique), *Fiabilité K9K* (diesel) et *Éco-Croisière* (citadine, diesel ou berline). Les deux dernières reprennent les pistes de capacités de la bible.
 
@@ -27,6 +27,8 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 
 | Action | Effet |
 | --- | --- |
+| Atelier · niveau 1 puis niveau 2 | 10 puis 15 crédits par niveau. Chaque niveau ajoute 1 point à la statistique du groupe choisi, dans la limite de 12. |
+| Monter une carte Mécanique | Le niveau 2 du groupe ouvre le montage. La pièce occupe un exemplaire en stock et le retrait le libère. |
 | Stage 1 · 80 crédits | +1 potentiel |
 | Stage 2 · 200 crédits et 1 doublon | +1 potentiel, +1 à la meilleure statistique d’origine |
 | Stage 3 · 450 crédits et 2 doublons | +1 potentiel, débloque les évolutions |
@@ -34,13 +36,15 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 
 Les doublons alimentent la progression, comme le demande la bible. Le garage de départ contient la Clio III, la Twingo I et la Panda 4×4, trois pièces, 300 crédits et deux tickets Neon Drive.
 
+Le garage propose une recherche, des filtres et un accès aux favoris et à l’écurie. L’atelier associe les pneus et la suspension à la maniabilité, la transmission et le nitro à l’accélération, le moteur et le turbo à la vitesse, et les freins et le châssis à l’endurance.
+
 ## 5. Course en secteurs
 
 C’est la piste « épreuve en secteurs » de la bible, enrichie de choix simultanés.
 
 1. **Écurie.** Trois voitures dont le coût total respecte le plafond de la ligue : Néon 9, Chrome 15, Overdrive 22.
 2. **Circuit.** Cinq secteurs connus d’avance : Départ (ACC), Virages (MAN), Ligne droite (VIT) et Endurance (END). La condition (Sec, Pluie, Nuit, Terre, Ville) n’est annoncée que pour le secteur en cours et le suivant.
-3. **Engagement.** À chaque secteur, chaque pilote engage une voiture en secret et peut brûler une charge de **Nitro** (+2, deux charges par course). Une voiture court `1 + END/4` secteurs. Au-delà, elle **surchauffe** (−3).
+3. **Engagement.** À chaque secteur, chaque pilote engage une voiture en secret et peut brûler une charge de **Nitro** (+2, deux charges par course). Une voiture court `1 + ⌊END/4⌋` secteurs, hors bonus. Au-delà, elle **surchauffe** (−3).
 4. **Résolution.** Score = statistique préparée + modificateurs de terrain + capacités et pièces + Nitro. En cas d’égalité, l’Endurance départage. La course se joue au meilleur des cinq secteurs.
 
 | Terrain | Modificateurs communs |
@@ -54,15 +58,17 @@ Le joueur doit pouvoir expliquer son choix : le panneau de résultat détaille c
 
 **Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. L’IA voit les mêmes informations que le joueur.
 
+Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’écurie pour chaque secteur selon un score moyen estimé. Les deux rivaux de la ligue Néon roulent d’origine.
+
 ## 6. Boosters et économie
 
 | Booster | Prix | Spécificité |
 | --- | --- | --- |
-| Neon Drive | 150 | Collection 001, beaucoup de pièces |
-| After Hours | 250 | Pondération ×4 sur Cinéma, Série, Tuning et Drift, dernière carte au moins Épique |
+| Neon Drive | 150 | Majorité de voitures courantes, dernière voiture au moins Rare |
+| After Hours | 250 | Pondération ×4 sur Cinéma, Série, Tuning et Drift, dernière voiture au moins Rare |
 | Overdrive | 400 | Pondération ×3 sur hypercars, supercars et records |
 
-Chaque booster contient cinq cartes tirées emplacement par emplacement (rareté, puis voiture ou pièce). La table est versionnée dans `garage.json`. Le lot est tiré et sauvegardé au moment de la déchirure. Un rechargement retrouve le même lot, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
+Chaque booster contient cinq cartes, dont au plus une pièce. Le jeu détermine le type puis la rareté de chaque carte et choisit des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé au moment de la déchirure. Un rechargement retrouve le même lot, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
 ## 7. Direction artistique synthwave
 
@@ -70,7 +76,7 @@ Chaque booster contient cinq cartes tirées emplacement par emplacement (rareté
 - **Typographies.** Orbitron pour les titres et les scores, Chakra Petch pour le texte.
 - **Motifs.** Soleil rayé, grille en perspective animée, chrome dégradé sur les titres, halos néon.
 - **Cadres de rareté.** Chrome cyan, magenta, coucher de soleil, puis holographique animé pour les légendaires, avec un flash lumineux à la révélation.
-- **Illustrations.** Une scène par famille de voitures : ville néon pour les citadines et le tuning, désert pour les muscle cars et les hypercars, col pour le rallye, circuit de nuit pour la compétition, rétro-futur pour la science-fiction. Aucun texte ni logo dans les images.
+- **Illustrations.** Les trois voitures de départ ont chacune une direction visuelle : photo automobile pour la Clio, gouache en ville pour la Twingo et reportage de rallye argentique pour la Panda. Les illustrations synthwave restent disponibles comme éditions de ces voitures et figurent sur le reste du catalogue. Les cartes 51 à 100 ont chacune un style choisi pour leur personnalité (champ `look` du roster : affiche de film, rallye argentique, bande dessinée, anime, magazine, aquarelle, pulp ou synthwave) et un décor propre (champ `setting`), générés par `node pipeline/art.mjs`.
 - **Retours de jeu.** Chaque action répond : son synthétisé et vibration au toucher, particules et secousse à la déchirure, révélation graduée selon la rareté (halo sur la carte encore cachée, explosion, rayons et confettis pour une légendaire), duel de secteur mis en scène (scores qui défilent, verdict, étincelles), compteur de crédits animé. Le moteur vit dans `src/game/fx.ts`.
 - **Mouvement réduit.** Il coupe la grille animée, l’holographique et les révélations, sans perte d’information.
 

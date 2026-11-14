@@ -1,8 +1,8 @@
 // Simulation d'équilibrage : node pipeline/balance.mjs (compile ce fichier avec esbuild puis l'exécute).
 // Fait courir des écuries tirées au hasard l'une contre l'autre avec l'IA des deux côtés.
 import { writeFileSync } from 'node:fs'
-import { leagues, parts, rivals, vehicles, type Rival } from '../src/game/data'
-import { aiChoice, compatibility, createRace, playRound, potential, rivalLineup, statsOf, type Prep } from '../src/game/rules'
+import { leagues, parts, progression, rivals, vehicles, type Rival } from '../src/game/data'
+import { aiChoice, compatibility, createRace, partUnlockLevel, playRound, potential, rivalLineup, statsOf, upgradeForFamily, type Prep } from '../src/game/rules'
 
 let seed = 20261114
 const rng = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32)
@@ -22,7 +22,11 @@ function prepared(id: string, stage: number): Prep {
   for (const p of [...parts].filter(p => !compatibility(p, v)).sort((a, b) => gain(b.id) - gain(a.id))) {
     const used = prep.parts.reduce((n, x) => n + parts.find(y => y.id === x)!.cost, 0)
     if (used + p.cost > budget || prep.parts.some(x => parts.find(y => y.id === x)!.family === p.family)) continue
-    if (gain(p.id) > 0) prep.parts.push(p.id)
+    if (gain(p.id) > 0) {
+      prep.parts.push(p.id)
+      const key = upgradeForFamily(p.family)
+      if (key) (prep.upgrades ??= {})[key] = partUnlockLevel
+    }
   }
   return prep
 }
@@ -104,19 +108,26 @@ report.rivals = rivals.map(r => {
   return { id: r.id, league: r.league, playerWinRate: +(wins / games).toFixed(3) }
 })
 
-// 3. Écurie de départ contre le premier rival, sans préparation puis préparée.
-const starter = ['clio', 'twingo', 'panda']
-const lola = rivals[0]
+// 3. Écurie de départ contre la ligue Néon, de l'origine à la préparation avancée.
+const starter = progression.start.vehicles
 const beginner: Record<string, Prep> = {
-  clio: { stage: 1, parts: ['eco-croisiere'] }, twingo: { stage: 1, parts: ['pneus-route'] }, panda: { stage: 1, parts: ['underglow'] },
+  clio: { stage: 0, parts: [], upgrades: { vit: 1 } },
+  twingo: { stage: 0, parts: [], upgrades: { man: 1 } },
+  panda: { stage: 0, parts: [], upgrades: { acc: 1 } },
 }
-for (const [label, stage] of [['starterNoPrep', -1], ['starterBeginner', 1], ['starterPrepared', 2]] as const) {
-  let wins = 0
-  for (let i = 0; i < 400; i++) {
-    const lineup = starter.map(id => ({ id, prep: stage < 0 ? { stage: 0, parts: [] } : stage === 1 ? beginner[id] : prepared(id, stage) }))
-    if (race(lola.circuit, lineup, rivalLineup(lola)).winner === 'player') wins++
-  }
-  report[label] = +(wins / 400).toFixed(3)
+const starterResults = Object.fromEntries(rivals.filter(r => r.league === 'neon').map(rival => {
+  const rates = Object.fromEntries([['starterNoPrep', 0], ['starterBeginner', 1], ['starterPrepared', 2]].map(([label, level]) => {
+    const lineup = starter.map(id => ({ id, prep: level === 0 ? { stage: 0, parts: [] } : level === 1 ? beginner[id] : prepared(id, 2) }))
+    let wins = 0
+    for (let i = 0; i < 1500; i++) if (race(rival.circuit, lineup, rivalLineup(rival)).winner === 'player') wins++
+    return [label, +(wins / 1500).toFixed(3)]
+  }))
+  return [rival.id, rates]
+}))
+report.starterByRival = starterResults
+Object.assign(report, starterResults[rivals[0].id])
+for (const [id, rates] of Object.entries(starterResults)) {
+  console.log(`Garage d'origine contre ${id} : ${Math.round(rates.starterNoPrep * 100)} % de victoires.`)
 }
 
 // 4. Cas d'essai de la bible : Clio préparée contre Venom d'origine sur chaque type de secteur.

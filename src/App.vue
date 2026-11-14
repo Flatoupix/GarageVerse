@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onMounted, ref, watch } from 'vue'
+import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, tween } from './game/fx'
 import { buzz, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import BoosterView from './views/BoosterView.vue'
@@ -16,7 +17,7 @@ type Setting = keyof typeof save.preferences
 const screen = ref<Screen>(save.duel ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
 const sheet = ref<HTMLDialogElement>()
-const inspected = ref<{ kind: 'car' | 'part'; id: string } | null>(null)
+const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
   { id: 'home', label: 'Accueil', icon: '◐' }, { id: 'shop', label: 'Boosters', icon: '▱' },
   { id: 'garage', label: 'Garage', icon: '▦' }, { id: 'race', label: 'Course', icon: '⟶' },
@@ -55,8 +56,8 @@ function go(destination: Screen) {
   void nextTick(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))
 }
 
-function inspect(kind: 'car' | 'part', id: string) {
-  inspected.value = { kind, id }
+function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+  inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)
 }
@@ -135,10 +136,11 @@ function toggleSetting(key: Setting) {
       <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
     </dialog>
 
-    <dialog ref="sheet" class="modal sheet-modal" aria-label="Détail de la carte" @close="inspected = null">
+    <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? 'Fiche voiture' : 'Fiche pièce'" @close="inspected = null">
       <form method="dialog"><button class="close-modal" aria-label="Fermer">×</button></form>
-      <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :key="`c-${inspected.id}`" @open="id => inspect('car', id)" />
-      <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="id => inspect('car', id)" />
+      <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
+        :key="`c-${inspected.id}`" @open="id => inspect('car', id)" />
+      <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="(id, stat) => inspect('car', id, undefined, stat)" />
     </dialog>
   </div>
 </template>

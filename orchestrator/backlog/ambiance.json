@@ -1,0 +1,35 @@
+{
+  "id": "ambiance",
+  "title": "Ajouter une ambiance musicale synthwave générée",
+  "brief": "Le jeu est silencieux entre deux actions. Ajouter une musique d’ambiance synthwave entièrement synthétisée avec Web Audio, sans aucun fichier audio, dans l’esprit des sons existants de src/feedback.ts : une boucle de quelques mesures (basse en arpège, nappe, batterie légère) programmée avec une avance de planification pour rester régulière. Réutiliser le style synthwave existant (src/style.css), les effets de src/game/fx.ts et les sons de src/feedback.ts. Tout le texte est en français, tutoiement. Ne pas modifier l’équilibrage des voitures ni les rivaux existants.",
+  "requirements": [
+    "La musique ne démarre qu’après un premier geste du joueur (contrainte des navigateurs) et seulement si le réglage Musique est activé. Elle se met en pause quand la page passe en arrière-plan et reprend au retour.",
+    "Les réglages ont une case à cocher « Musique » distincte de « Son », et un curseur « Volume de la musique » (0 à 100) dont l’effet est immédiat. Les deux réglages sont sauvegardés ; une ancienne sauvegarde sans ces champs se charge sans erreur, musique activée à volume modéré.",
+    "La musique varie selon l’écran : calme à l’accueil, au garage et en boutique, plus rythmée pendant une course (batterie et tempo ou filtre plus ouverts), avec une transition douce entre les deux.",
+    "Les effets sonores existants restent audibles par-dessus la musique : le volume par défaut de la musique est nettement plus bas que celui des effets.",
+    "Le code de la musique vit dans un module dédié de src/ (par exemple src/music.ts), ne plante pas sur un navigateur sans Web Audio, et n’ajoute aucune dépendance ni fichier audio.",
+    "Les réglages restent lisibles et sans débordement horizontal à 320 et 390 px, et docs/meta.md décrit l’ambiance musicale."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Volume de la musique"
+    },
+    {
+      "capture": "musique"
+    },
+    {
+      "tap": "Fermer les réglages"
+    }
+  ]
+}

@@ -68,27 +68,27 @@
   "boosters": [
     { "id": "neon", "name": "Neon Drive", "tagline": "Collection 001", "price": 150,
       "slots": [
-        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.5 },
-        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.5 },
-        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.4 },
-        { "Rare": 80, "Épique": 17, "Légendaire": 3, "partChance": 0.3 },
-        { "Rare": 55, "Épique": 35, "Légendaire": 10, "partChance": 0.2 }
+        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.09 },
+        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.09 },
+        { "Courante": 85, "Rare": 13, "Épique": 2, "partChance": 0.09 },
+        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.09 },
+        { "Rare": 82, "Épique": 16, "Légendaire": 2, "partChance": 0 }
       ], "altChance": 0.08 },
     { "id": "night", "name": "After Hours", "tagline": "Édition de nuit · Culture", "price": 250, "favorTags": ["Cinéma", "Série", "Tuning", "Drift"], "favorWeight": 4,
       "slots": [
-        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.4 },
-        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.4 },
-        { "Rare": 75, "Épique": 22, "Légendaire": 3, "partChance": 0.3 },
-        { "Rare": 60, "Épique": 32, "Légendaire": 8, "partChance": 0.2 },
-        { "Épique": 75, "Légendaire": 25, "partChance": 0 }
+        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.11 },
+        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.11 },
+        { "Courante": 65, "Rare": 30, "Épique": 5, "partChance": 0.11 },
+        { "Courante": 40, "Rare": 47, "Épique": 12, "Légendaire": 1, "partChance": 0.11 },
+        { "Rare": 50, "Épique": 43, "Légendaire": 7, "partChance": 0 }
       ], "altChance": 0.12 },
     { "id": "overdrive", "name": "Overdrive", "tagline": "Hypercars et pièces rares", "price": 400, "favorTags": ["Hypercar", "Supercar", "Record"], "favorWeight": 3,
       "slots": [
-        { "Rare": 75, "Épique": 25, "partChance": 0.6 },
-        { "Rare": 75, "Épique": 25, "partChance": 0.6 },
-        { "Rare": 50, "Épique": 45, "Légendaire": 5, "partChance": 0.3 },
-        { "Épique": 80, "Légendaire": 20, "partChance": 0.2 },
-        { "Épique": 60, "Légendaire": 40, "partChance": 0 }
+        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.14 },
+        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.14 },
+        { "Courante": 40, "Rare": 44, "Épique": 15, "Légendaire": 1, "partChance": 0.14 },
+        { "Courante": 25, "Rare": 49, "Épique": 23, "Légendaire": 3, "partChance": 0.14 },
+        { "Épique": 82, "Légendaire": 18, "partChance": 0 }
       ], "altChance": 0.15 }
   ],
   "leagues": [
@@ -99,11 +99,11 @@
   "rivals": [
     { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon",
       "circuit": { "name": "Boulevard Minitel", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "ville": 4, "sec": 3, "nuit": 2, "pluie": 1 } },
-      "lineup": [{ "id": "twingo", "stage": 1, "parts": ["pneus-route", "boite-courte"] }, { "id": "deuch", "stage": 1, "parts": ["pneus-route"] }, { "id": "beetle", "stage": 1, "parts": ["freins-endurance"] }],
+      "lineup": [{ "id": "twingo", "stage": 0, "parts": [] }, { "id": "deuch", "stage": 0, "parts": [] }, { "id": "beetle", "stage": 0, "parts": [] }],
       "art": "a cheerful young woman with a teal bob haircut and oversized 80s jacket, synthwave portrait" },
     { "id": "cassette", "name": "DJ Cassette", "title": "Roi du roadster", "league": "neon",
-      "circuit": { "name": "Corniche Laser", "sectors": ["virage", "ligne", "virage", "endurance", "depart"], "conditions": { "sec": 4, "nuit": 3, "pluie": 2, "ville": 1 } },
-      "lineup": [{ "id": "mx5na", "stage": 3, "parts": ["susp-filetes", "underglow", "autobloquant", "admission"] }, { "id": "abarth", "stage": 2, "parts": ["boite-courte", "stage1", "pneus-pluie"] }, { "id": "panda", "stage": 1, "parts": ["pneus-terre"] }],
+      "circuit": { "name": "Corniche Laser", "sectors": ["virage", "ligne", "endurance", "virage", "depart"], "conditions": { "sec": 4, "ville": 3, "pluie": 2, "nuit": 1 } },
+      "lineup": [{ "id": "mx5na", "stage": 0, "parts": [] }, { "id": "panda", "stage": 0, "parts": [] }, { "id": "logan", "stage": 0, "parts": [] }],
       "art": "a laid-back DJ with headphones around his neck, mirrored aviator sunglasses and a mullet, synthwave portrait" },
     { "id": "kenji", "name": "Kenji Vapor", "title": "Drift de minuit", "league": "chrome",
       "circuit": { "name": "Wangan Vapor", "sectors": ["depart", "virage", "virage", "ligne", "endurance"], "conditions": { "nuit": 5, "pluie": 2, "sec": 2, "ville": 1 } },

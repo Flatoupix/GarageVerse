@@ -44,7 +44,7 @@ async function writeJson(path: string, data: unknown) {
 function validate(task: Task, config: Config) {
   const safePath = (path: string) => /^[a-zA-Z0-9][a-zA-Z0-9_./-]*$/.test(path) &&
     !path.split('/').some(segment => segment.startsWith('.')) &&
-    (path.startsWith('src/') || path.startsWith('docs/') || path === 'README.md' || path === 'index.html')
+    (path.startsWith('src/') || path.startsWith('docs/') || path.startsWith('public/') || path === 'README.md' || path === 'index.html')
   const safeStep = (step: FlowStep) => {
     const entries = Object.entries(step ?? {})
     if (entries.length !== 1) return false
@@ -422,9 +422,27 @@ async function cycle(directory: string, resume: boolean) {
   }
 }
 
+// Reprend les commits d'un cycle terminé sur la branche de base du clone local. Le push reste manuel.
+async function integrate(directory: string, state: State, config: Config) {
+  if (state.status !== 'complete') throw new Error('Ce cycle n’est pas terminé')
+  const patch = join(directory, 'changes.patch')
+  if (!await readFile(patch).then(() => true, () => false)) { console.log('Aucun changement à intégrer'); return }
+  const source = join(store, 'source')
+  const run = (args: string[]) => execute('git', [...gitArgs, ...args], { cwd: source, env: sessionEnv(), timeout: 60_000 })
+  if (must(await run(['config', '--get', 'remote.origin.url']), 'Clone local').trim() !== config.repository ||
+      must(await run(['branch', '--show-current']), 'Branche du clone').trim() !== config.base) throw new Error('Le clone local n’est pas sur la branche de base')
+  if (must(await run(['status', '--porcelain']), 'État du clone').trim()) throw new Error('Le clone local a des modifications non commitées')
+  const applied = await run(['am', '--3way', patch])
+  if (applied.code !== 0 || applied.problem) {
+    await run(['am', '--abort'])
+    throw new Error('Intégration · le patch ne s’applique plus sur la branche de base')
+  }
+  console.log('Commits intégrés sur ' + config.base + ' · ' + must(await run(['log', '--oneline', `${state.base}..HEAD`]), 'Journal').trim())
+}
+
 async function main() {
   const [command, arg, ...flags] = process.argv.slice(2)
-  const help = 'node orchestrator/cycle.ts doctor | run [booster] [--dry-run] | queue <tâches...> [--dry-run] | resume <cycle> | status <cycle> | integrate <cycle>'
+  const help = 'node orchestrator/cycle.ts doctor | run [booster] [--dry-run] | queue <tâches...> [--integrate] [--dry-run] | resume <cycle> | status <cycle> | integrate <cycle>'
   if (!command || command === '--help') { console.log(help); return }
   const config = await json<Config>(join(here, 'config.json'))
   const sessions = () => Promise.all([
@@ -459,24 +477,7 @@ async function main() {
     const directory = join(store, arg)
     const state = await json<State>(join(directory, 'state.json'))
     if (command === 'status') { console.log(JSON.stringify(state, null, 2)); return }
-    if (command === 'integrate') {
-      // Reprend les commits d'un cycle terminé sur la branche de base du clone local. Le push reste manuel.
-      if (state.status !== 'complete') throw new Error('Ce cycle n’est pas terminé')
-      const patch = join(directory, 'changes.patch')
-      if (!await readFile(patch).then(() => true, () => false)) { console.log('Aucun changement à intégrer'); return }
-      const source = join(store, 'source')
-      const run = (args: string[]) => execute('git', [...gitArgs, ...args], { cwd: source, env: sessionEnv(), timeout: 60_000 })
-      if (must(await run(['config', '--get', 'remote.origin.url']), 'Clone local').trim() !== config.repository ||
-          must(await run(['branch', '--show-current']), 'Branche du clone').trim() !== config.base) throw new Error('Le clone local n’est pas sur la branche de base')
-      if (must(await run(['status', '--porcelain']), 'État du clone').trim()) throw new Error('Le clone local a des modifications non commitées')
-      const applied = await run(['am', '--3way', patch])
-      if (applied.code !== 0 || applied.problem) {
-        await run(['am', '--abort'])
-        throw new Error('Intégration · le patch ne s’applique plus sur la branche de base')
-      }
-      console.log('Commits intégrés sur ' + config.base + ' · ' + must(await run(['log', '--oneline', `${state.base}..HEAD`]), 'Journal').trim())
-      return
-    }
+    if (command === 'integrate') { await integrate(directory, state, config); return }
     if (state.status === 'complete') throw new Error('Ce cycle est terminé')
     validate(state.task, state.config)
     await cycle(directory, true)
@@ -484,8 +485,10 @@ async function main() {
   }
   if (command !== 'run' && command !== 'queue') throw new Error(help)
   const argumentsList = arg ? [arg, ...flags] : []
-  const dry = argumentsList.at(-1) === '--dry-run'
-  const taskIds = dry ? argumentsList.slice(0, -1) : argumentsList
+  const dry = argumentsList.includes('--dry-run')
+  // Avec --integrate, chaque cycle validé rejoint la base locale avant le suivant : les tâches s'appuient les unes sur les autres.
+  const chain = argumentsList.includes('--integrate')
+  const taskIds = argumentsList.filter(value => !value.startsWith('--'))
   if (command === 'run' && !taskIds.length) taskIds.push('booster')
   if (!taskIds.length || (command === 'run' && taskIds.length !== 1) ||
       taskIds.some(id => !slug.test(id)) || new Set(taskIds).size !== taskIds.length) throw new Error(help)
@@ -514,6 +517,7 @@ async function main() {
     console.log(directory)
     await cycle(directory, false)
     if (process.exitCode) break
+    if (chain) await integrate(directory, await json<State>(join(directory, 'state.json')), config)
   }
 }
 

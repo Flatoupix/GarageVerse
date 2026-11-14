@@ -298,5 +298,305 @@
     "score": 9,
     "issue": "Silhouette carrée et détails caractéristiques très fidèles, teinte sable du Hummer bien intégrée à l'ambiance néon.",
     "fix": ""
+  },
+  "cars/r4l": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style aquarelle provençale réussi, modèle fidèle et sans texte.",
+    "fix": ""
+  },
+  "cars/saxo": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style bande dessinée / ligne claire vibrant, Saxo VTS bien identifiable.",
+    "fix": ""
+  },
+  "cars/p106": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style photo de rallye d'époque très immersif, détails Rallye conformes.",
+    "fix": ""
+  },
+  "cars/p206": {
+    "ok": true,
+    "score": 8,
+    "issue": "Rendu photo catalogue studio propre et fidèle, cadrage bien centré.",
+    "fix": ""
+  },
+  "cars/uno": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe ambiance synthwave rétro-futuriste, Uno Turbo parfaitement reconnaissable.",
+    "fix": ""
+  },
+  "cars/golf4": {
+    "ok": true,
+    "score": 8,
+    "issue": "Modèle très fidèle, bien que le fond bleu sombre atténue un peu le contraste.",
+    "fix": ""
+  },
+  "cars/corsa": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style illustration BD net et coloré, Corsa B pomme reconnaissable au premier coup d'œil.",
+    "fix": ""
+  },
+  "cars/fiesta": {
+    "ok": true,
+    "score": 9,
+    "issue": "Superbe composition pulp / affiche de film 80s, Fiesta XR2 et jantes pepperpot respectées.",
+    "fix": ""
+  },
+  "cars/espace": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aquarelle soignée, Espace I fidèlement représenté sans aucun texte.",
+    "fix": ""
+  },
+  "cars/ax": {
+    "ok": true,
+    "score": 9,
+    "issue": "Photo rallye dynamique d'époque, AX GT très reconnaissable et propre.",
+    "fix": ""
+  },
+  "cars/kangoo": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style BD franco-belge net et coloré, Kangoo 1 fidèle et sans lettrage.",
+    "fix": ""
+  },
+  "cars/civiceg": {
+    "ok": true,
+    "score": 10,
+    "issue": "Esthétique anime 90s superbe, Civic EG parfaitement proportionnée et lisible.",
+    "fix": ""
+  },
+  "cars/micra": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style anime pastel réussi, Micra K11 immédiatement identifiable et propre.",
+    "fix": ""
+  },
+  "cars/swift": {
+    "ok": true,
+    "score": 10,
+    "issue": "Ambiance touge anime impeccable, Swift GTi fidèle avec son liseré rouge.",
+    "fix": ""
+  },
+  "cars/niva": {
+    "ok": true,
+    "score": 9,
+    "issue": "Photo tout-terrain d'époque dans la boue, Niva 1600 brute et réaliste.",
+    "fix": ""
+  },
+  "cars/duster": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aquarelle pastorale élégante, Duster phase 1 bien campé et conforme.",
+    "fix": ""
+  },
+  "cars/volvo240": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aquarelle très réussie, silhouette de break Volvo 245 et détails chromés fidèles",
+    "fix": ""
+  },
+  "cars/mini65": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente photo de rallye vintage enneigée, Mini Cooper S dynamique et bien proportionnée",
+    "fix": ""
+  },
+  "cars/fiat500": {
+    "ok": true,
+    "score": 10,
+    "issue": "Aquarelle remarquable, détails d'époque parfaits (portes suicide, toit en toile replié)",
+    "fix": ""
+  },
+  "cars/twizy": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style rétro-futuriste soigné, architecture et arche orange du Twizy immédiatement reconnaissables",
+    "fix": ""
+  },
+  "cars/smart": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style ligne claire très lisible, cellule Tridion argentée et jantes à trois branches conformes",
+    "fix": ""
+  },
+  "cars/mehari": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe aquarelle côtière, carrosserie nervurée et configuration décapotée impeccables",
+    "fix": ""
+  },
+  "cars/defender": {
+    "ok": true,
+    "score": 9,
+    "issue": "Aquarelle de caractère, proportions du Defender 90 et roue de secours arrière parfaites",
+    "fix": ""
+  },
+  "cars/wrangler": {
+    "ok": true,
+    "score": 10,
+    "issue": "Style comics percutant, phares carrés YJ et liserés Sahara fidèlement retranscrits",
+    "fix": ""
+  },
+  "cars/explorer": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style peinture de paysage vintage réussi, Explorer XLT très fidèle et sans texte.",
+    "fix": ""
+  },
+  "cars/combi": {
+    "ok": true,
+    "score": 9,
+    "issue": "Rendu aquarelle côtier superbe, silhouette et éléments du Combi T1 parfaitement respectés.",
+    "fix": ""
+  },
+  "cars/hilux": {
+    "ok": true,
+    "score": 9,
+    "issue": "Grain photo rallye d'époque convaincant, Hilux patiné bien reconnaissable et dynamique.",
+    "fix": ""
+  },
+  "cars/p504": {
+    "ok": true,
+    "score": 9,
+    "issue": "Illustration pulp/aventure très réussie, calandre et phares trapézoïdaux de la 504 impeccables.",
+    "fix": ""
+  },
+  "cars/simca": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente ambiance rallye 70s, Simca 1000 Rallye 2 immédiatement identifiable et dynamique.",
+    "fix": ""
+  },
+  "cars/transit": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style bande dessinée ligne claire très propre, Transit Mk2 bien proportionné et lisible.",
+    "fix": ""
+  },
+  "cars/r5gt": {
+    "ok": true,
+    "score": 10,
+    "issue": "Synthwave pur et percutant, Super 5 GT Turbo Phase 2 fidèle et sans logos parasites.",
+    "fix": ""
+  },
+  "cars/ae86": {
+    "ok": true,
+    "score": 10,
+    "issue": "Superbe ambiance anime 90s sur col de montagne, AE86 fidèle et totalement exempte de lettrage.",
+    "fix": ""
+  },
+  "cars/rx7": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style anime soigné, RX-7 FD très reconnaissable et belle palette crépusculaire sans texte",
+    "fix": ""
+  },
+  "cars/impreza": {
+    "ok": true,
+    "score": 9,
+    "issue": "Photo d'action rallye réaliste, Impreza GC8 fidèle avec écope et jantes dorées sans sponsor",
+    "fix": ""
+  },
+  "cars/cosworth": {
+    "ok": true,
+    "score": 9,
+    "issue": "Prise de vue rallye dynamique, aileron whale-tail emblématique et proportions bien respectés",
+    "fix": ""
+  },
+  "cars/quattro": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ambiance rallye vintage authentique, ailes carrées de la Quattro bien définies et sans logo",
+    "fix": ""
+  },
+  "cars/m3e30": {
+    "ok": true,
+    "score": 9,
+    "issue": "Rendu studio très propre, ailes galbées spécifiques et jantes à rayons fidèles",
+    "fix": ""
+  },
+  "cars/evo2": {
+    "ok": true,
+    "score": 9,
+    "issue": "Kit carrosserie Evo II, aileron imposant et couleur bleu-noir parfaitement restitués",
+    "fix": ""
+  },
+  "cars/golf2": {
+    "ok": true,
+    "score": 10,
+    "issue": "Esthétique synthwave néon spectaculaire, calandre à liseré rouge et silhouette Golf 2 impeccables",
+    "fix": ""
+  },
+  "cars/r32": {
+    "ok": true,
+    "score": 9,
+    "issue": "Esthétique anime urbaine nocturne très efficace, carrosserie Gun Grey et aileron R32 conformes",
+    "fix": ""
+  },
+  "cars/celica": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style photo de rallye d'époque très réussi, Celica GT-Four fidèle sans texte ni sponsor.",
+    "fix": ""
+  },
+  "cars/camaro": {
+    "ok": true,
+    "score": 9,
+    "issue": "Très belle illustration rétro au coucher de soleil, Camaro 1969 fidèle et sans texte.",
+    "fix": ""
+  },
+  "cars/mustang67": {
+    "ok": true,
+    "score": 9,
+    "issue": "Style peinture rétro chaleureux, Mustang Fastback fidèle et bien lisible sans logo.",
+    "fix": ""
+  },
+  "cars/charger": {
+    "ok": true,
+    "score": 10,
+    "issue": "Esthétique synthwave parfaite, Charger R/T plum crazy très fidèle et sans texte.",
+    "fix": ""
+  },
+  "cars/eleanor": {
+    "ok": true,
+    "score": 10,
+    "issue": "Style affiche d'action cinématographique saisissant, Eleanor parfaitement reproduite et sans texte.",
+    "fix": ""
+  },
+  "cars/domcharger": {
+    "ok": true,
+    "score": 10,
+    "issue": "Synthwave néon nocturne impeccable, Charger de Dom reconnaissable immédiatement et sans logo.",
+    "fix": ""
+  },
+  "cars/countach": {
+    "ok": true,
+    "score": 10,
+    "issue": "LP400 narrow-body parfaitement reconnaissable en jaune vif, esthétique synthwave exemplaire et aucun texte.",
+    "fix": ""
+  },
+  "cars/testarossa": {
+    "ok": true,
+    "score": 9,
+    "issue": "Superbe composition synthwave ; présence de deux rétroviseurs basiques au lieu du monospecchio surélevé d'origine.",
+    "fix": ""
+  },
+  "cars/jpjeep": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente illustration dynamique style affiche aventure, Jeep YJ fidèle et sans texte parasite",
+    "fix": ""
+  },
+  "cars/interceptor": {
+    "ok": true,
+    "score": 10,
+    "issue": "Rendu parfait de la Ford Falcon XB Interceptor dans une ambiance crépusculaire sans texte",
+    "fix": ""
   }
 }

@@ -1,10 +1,21 @@
 // Règles de préparation et de course en secteurs. Fonctions pures, sans état d'interface.
 import {
-  partById, rivalById, sectorStat, vehicleById,
+  partById, rivalById, sectorLabels, sectorStat, statLabels, vehicleById,
   type Condition, type Effect, type Part, type Rival, type Sector, type StatKey, type Stats, type Vehicle,
 } from './data'
 
-export interface Prep { stage: number; parts: string[] }
+export interface Prep { stage: number; parts: string[]; upgrades?: Partial<Record<StatKey, number>> }
+
+export const upgrades = {
+  man: { label: 'Pneus et suspension', art: 'pneus-route', families: ['pneus', 'suspension'] },
+  acc: { label: 'Transmission et nitro', art: 'boite-courte', families: ['transmission', 'special'] },
+  vit: { label: 'Moteur et turbo', art: 'admission', families: ['moteur', 'suralim'] },
+  end: { label: 'Freins et châssis', art: 'freins-endurance', families: ['freins', 'chassis'] },
+} satisfies Record<StatKey, { label: string; art: string; families: string[] }>
+export const upgradeKeys = Object.keys(upgrades) as StatKey[]
+export const upgradePrices = [10, 15]
+export const partUnlockLevel = upgradePrices.length
+export const upgradeForFamily = (family: string) => upgradeKeys.find(key => upgrades[key].families.includes(family))
 
 export const STAT_CAP = 12
 export const SECTORS_PER_RACE = 5
@@ -38,6 +49,7 @@ export function bestStat(v: Vehicle): StatKey {
 export function statsOf(v: Vehicle, prep: Prep): Stats {
   const out = { ...v.stats }
   if (prep.stage >= 2) out[bestStat(v)]++
+  for (const key of upgradeKeys) out[key] += prep.upgrades?.[key] ?? 0
   for (const part of installed(prep)) for (const [key, value] of Object.entries(part.stats ?? {})) out[key as StatKey] += value
   for (const key of Object.keys(out) as StatKey[]) out[key] = Math.max(1, Math.min(STAT_CAP, out[key]))
   return out
@@ -45,6 +57,20 @@ export function statsOf(v: Vehicle, prep: Prep): Stats {
 
 export function engagements(v: Vehicle, prep: Prep) {
   return 1 + Math.floor(statsOf(v, prep).end / 4) + sum(effectsOf(v, prep), 'stamina')
+}
+
+export const statUse: Record<StatKey, string> = {
+  acc: 'Détermine ton score au départ.',
+  man: 'Détermine ton score dans les virages.',
+  vit: 'Détermine ton score en ligne droite.',
+  end: 'Compte dans les secteurs d’endurance. À 4, 8 et 12, la voiture gagne un secteur avant surchauffe.',
+}
+
+export function circuitPriorities(circuit: Rival['circuit']) {
+  const count = new Map<Sector, number>()
+  for (const sector of circuit.sectors) count.set(sector, (count.get(sector) ?? 0) + 1)
+  return [...count].map(([sector, times]) => ({ sector, stat: sectorStat[sector], times }))
+    .sort((a, b) => b.times - a.times)
 }
 
 export interface Racer { id: string; vehicle: Vehicle; prep: Prep; stats: Stats; effects: Effect[]; uses: number }
@@ -83,7 +109,7 @@ function terrain(v: Vehicle, condition: Condition): ScoreLine[] {
 
 export function score(r: Racer, ctx: ScoreContext): { total: number; lines: ScoreLine[] } {
   const stat = sectorStat[ctx.sector]
-  const lines: ScoreLine[] = [{ label: `${stat.toUpperCase()} de base préparée`, value: r.stats[stat] }, ...terrain(r.vehicle, ctx.condition)]
+  const lines: ScoreLine[] = [{ label: statLabels[stat], value: r.stats[stat] }, ...terrain(r.vehicle, ctx.condition)]
   for (const effect of r.effects) {
     if (effect.type === 'boost') {
       if (effect.sectors && !effect.sectors.includes(ctx.sector)) continue
@@ -101,6 +127,16 @@ export function score(r: Racer, ctx: ScoreContext): { total: number; lines: Scor
   if (ctx.nitro) lines.push({ label: 'Nitro', value: 2 + sum(r.effects, 'nitroPower') })
   if (ctx.overheated) lines.push({ label: 'Surchauffe', value: -OVERHEAT })
   return { total: lines.reduce((n, l) => n + l.value, 0), lines }
+}
+
+export function circuitScores(r: Racer, circuit: Rival['circuit']) {
+  const conditions = Object.entries(circuit.conditions) as [Condition, number][]
+  const weight = conditions.reduce((total, [, chance]) => total + chance, 0)
+  return circuitPriorities(circuit).map(({ sector, stat, times }) => ({ stat, times, sector, label: sectorLabels[sector],
+    average: conditions.reduce((total, [condition, chance]) => total + chance * score(r, {
+      sector, condition, lineup: [r], behind: false, nitro: false, overheated: false,
+    }).total, 0) / weight,
+  }))
 }
 
 // ——— Duel en cinq secteurs ———

@@ -1,4 +1,4 @@
-import type { EditionStyle } from './data'
+import { defaultStyle, type EditionStyle } from './data'
 
 const url = (files: Record<string, string>, folder: string) =>
   Object.fromEntries(Object.entries(files).map(([path, href]) => [path.slice(folder.length).replace(/\.webp$/, ''), href]))
@@ -18,7 +18,9 @@ const legacyArt: Record<string, Partial<Record<EditionStyle, Edition>>> = {
   brian: { Classic: { style: 'Classic', art: legacy.brian, drift: { backdrop: legacy['drift-bg'], car: legacy['drift-car'] } } },
 }
 
-export function edition(id: string, style: EditionStyle = 'Synthwave'): Edition {
+export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edition {
+  const primary = defaultStyle(id)
+  if (style === primary && primary !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
   return legacyArt[id]?.[style] ?? { style: 'Synthwave', art: carArt[id] }
 }
 export const art = {

@@ -92,7 +92,7 @@ try {
       assert.ok(owned >= 3, 'Garage de départ incomplet')
       await capture('garage')
       await page.locator('.garage-grid .card-tile').first().tap()
-      await page.getByRole('dialog', { name: 'Détail de la carte' }).waitFor()
+      await page.locator('dialog[open]').waitFor()
       await capture('fiche')
       await page.locator('.sheet-modal .close-modal').tap()
       await tab('Course')
@@ -115,7 +115,11 @@ try {
       for (const step of flow) {
         if (step.reset) { await page.evaluate(() => localStorage.clear()); await page.reload() }
         else if (step.tab) await tab(step.tab)
-        else if (step.tap) await page.getByRole('button', { name: step.tap }).first().tap()
+        else if (step.tap) {
+          // Une commande peut être un bouton, un onglet, une case ou un choix exclusif.
+          const roles = ['button', 'tab', 'checkbox', 'radio', 'link'] as const
+          await roles.map(role => page.getByRole(role, { name: step.tap })).reduce((all, one) => all.or(one)).first().tap()
+        }
         else if (step.expect) {
           // L'élément attendu est amené à l'écran pour que la capture suivante le montre.
           const target = page.getByText(step.expect).first()

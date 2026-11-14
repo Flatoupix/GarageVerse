@@ -643,5 +643,405 @@
     "tokens": 21748,
     "prompt": "e5b1717d5b",
     "at": "2026-11-14T02:21:55.960Z"
+  },
+  "cars/saxo": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 42247,
+    "prompt": "1bf0f32ed5",
+    "at": "2026-11-14T12:26:52.122Z"
+  },
+  "cars/r4l": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 13439,
+    "prompt": "53aa0710e5",
+    "at": "2026-11-14T12:26:53.626Z"
+  },
+  "cars/p206": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 21469,
+    "prompt": "5f3abe4a76",
+    "at": "2026-11-14T12:27:39.830Z"
+  },
+  "cars/p106": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 17267,
+    "prompt": "982be11b5f",
+    "at": "2026-11-14T12:27:56.272Z"
+  },
+  "cars/uno": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 16727,
+    "prompt": "09708975bd",
+    "at": "2026-11-14T12:28:25.271Z"
+  },
+  "cars/golf4": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 40,
+    "tokens": 16164,
+    "prompt": "b1994feb11",
+    "at": "2026-11-14T12:28:36.113Z"
+  },
+  "cars/corsa": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 16679,
+    "prompt": "a8e3592eaf",
+    "at": "2026-11-14T12:29:12.465Z"
+  },
+  "cars/fiesta": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 21002,
+    "prompt": "ffa876d820",
+    "at": "2026-11-14T12:29:23.790Z"
+  },
+  "cars/espace": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 18190,
+    "prompt": "a0956d9fb4",
+    "at": "2026-11-14T12:30:05.104Z"
+  },
+  "cars/ax": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 24186,
+    "prompt": "6d8e527993",
+    "at": "2026-11-14T12:30:26.238Z"
+  },
+  "cars/kangoo": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 17003,
+    "prompt": "595ffe320e",
+    "at": "2026-11-14T12:30:49.143Z"
+  },
+  "cars/civiceg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 29796,
+    "prompt": "0b5d53adbc",
+    "at": "2026-11-14T12:31:14.501Z"
+  },
+  "cars/micra": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 17274,
+    "prompt": "7898570ee7",
+    "at": "2026-11-14T12:31:51.142Z"
+  },
+  "cars/swift": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 13430,
+    "prompt": "f63174f36a",
+    "at": "2026-11-14T12:32:01.373Z"
+  },
+  "cars/niva": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 16435,
+    "prompt": "b2822a5b97",
+    "at": "2026-11-14T12:32:53.277Z"
+  },
+  "cars/duster": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 13104,
+    "prompt": "d74050fbcc",
+    "at": "2026-11-14T12:33:04.093Z"
+  },
+  "cars/volvo240": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 29793,
+    "prompt": "74677c3ccd",
+    "at": "2026-11-14T12:33:56.932Z"
+  },
+  "cars/mini65": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 16805,
+    "prompt": "62932a3da2",
+    "at": "2026-11-14T12:34:11.444Z"
+  },
+  "cars/fiat500": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 16707,
+    "prompt": "5876ec3321",
+    "at": "2026-11-14T12:34:40.931Z"
+  },
+  "cars/twizy": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 21386,
+    "prompt": "690c495ef1",
+    "at": "2026-11-14T12:34:53.196Z"
+  },
+  "cars/mehari": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 27505,
+    "prompt": "1409968093",
+    "at": "2026-11-14T12:35:35.969Z"
+  },
+  "cars/smart": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 25998,
+    "prompt": "81b20e5c2c",
+    "at": "2026-11-14T12:35:41.038Z"
+  },
+  "cars/defender": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 41,
+    "tokens": 16986,
+    "prompt": "94cd515885",
+    "at": "2026-11-14T12:36:16.519Z"
+  },
+  "cars/wrangler": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 19637,
+    "prompt": "c92b58c40a",
+    "at": "2026-11-14T12:36:25.745Z"
+  },
+  "cars/explorer": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 21194,
+    "prompt": "53c9867e0c",
+    "at": "2026-11-14T12:37:02.965Z"
+  },
+  "cars/combi": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 22229,
+    "prompt": "34bb5a66c2",
+    "at": "2026-11-14T12:37:11.597Z"
+  },
+  "cars/hilux": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 38,
+    "tokens": 21563,
+    "prompt": "af456b621a",
+    "at": "2026-11-14T12:37:41.092Z"
+  },
+  "cars/p504": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 38940,
+    "prompt": "0755270c5a",
+    "at": "2026-11-14T12:38:11.150Z"
+  },
+  "cars/simca": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 20903,
+    "prompt": "82d804f70f",
+    "at": "2026-11-14T12:38:48.209Z"
+  },
+  "cars/transit": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 21639,
+    "prompt": "9bf51473b1",
+    "at": "2026-11-14T12:38:56.167Z"
+  },
+  "cars/r5gt": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 17010,
+    "prompt": "4f326bf1b8",
+    "at": "2026-11-14T12:39:35.910Z"
+  },
+  "cars/ae86": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 17611,
+    "prompt": "5ddb418676",
+    "at": "2026-11-14T12:39:42.007Z"
+  },
+  "cars/rx7": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 15532,
+    "prompt": "8f5b78017f",
+    "at": "2026-11-14T12:40:22.298Z"
+  },
+  "cars/impreza": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 21964,
+    "prompt": "b37ef75cda",
+    "at": "2026-11-14T12:40:32.037Z"
+  },
+  "cars/cosworth": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 13380,
+    "prompt": "a0b38d60ff",
+    "at": "2026-11-14T12:41:08.705Z"
+  },
+  "cars/quattro": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 12104,
+    "prompt": "abf88b3462",
+    "at": "2026-11-14T12:41:36.860Z"
+  },
+  "cars/m3e30": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 17887,
+    "prompt": "6419589e87",
+    "at": "2026-11-14T12:41:53.250Z"
+  },
+  "cars/evo2": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 21233,
+    "prompt": "255d5efa5f",
+    "at": "2026-11-14T12:42:35.339Z"
+  },
+  "cars/golf2": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 30532,
+    "prompt": "f027353967",
+    "at": "2026-11-14T12:42:47.554Z"
+  },
+  "cars/r32": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 17750,
+    "prompt": "ceee749c3c",
+    "at": "2026-11-14T12:43:35.957Z"
+  },
+  "cars/celica": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 19541,
+    "prompt": "4276ada7ab",
+    "at": "2026-11-14T12:43:52.080Z"
+  },
+  "cars/camaro": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 20950,
+    "prompt": "677c86a26f",
+    "at": "2026-11-14T12:44:21.881Z"
+  },
+  "cars/mustang67": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 16377,
+    "prompt": "5362ece0c7",
+    "at": "2026-11-14T12:44:36.451Z"
+  },
+  "cars/charger": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 40,
+    "tokens": 29500,
+    "prompt": "62f6728b58",
+    "at": "2026-11-14T12:45:02.299Z"
+  },
+  "cars/eleanor": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 34700,
+    "prompt": "f70ed0b146",
+    "at": "2026-11-14T12:45:24.580Z"
+  },
+  "cars/domcharger": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 17311,
+    "prompt": "e69835663e",
+    "at": "2026-11-14T12:45:47.115Z"
+  },
+  "cars/countach": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 59,
+    "tokens": 16209,
+    "prompt": "ef661efc39",
+    "at": "2026-11-14T12:58:18.339Z"
+  },
+  "cars/testarossa": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 17733,
+    "prompt": "0895538c0d",
+    "at": "2026-11-14T12:46:40.582Z"
+  },
+  "cars/jpjeep": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 21723,
+    "prompt": "63b38383db",
+    "at": "2026-11-14T12:46:58.880Z"
+  },
+  "cars/interceptor": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 13275,
+    "prompt": "fc7471bc43",
+    "at": "2026-11-14T12:47:27.153Z"
   }
 }

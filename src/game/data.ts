@@ -17,7 +17,7 @@ export interface Vehicle {
   rarity: Rarity; cost: number; stats: Stats; drive: string; engine: string; tags: string[]; spec?: string
   signature: { name: string; text: string; effects: Effect[] }
   culture?: { work: string; base?: string; aura: string[] }
-  evolvesFrom?: string; craft?: { stage: number; credits: number }
+  evolvesFrom?: string; craft?: { stage: number; credits: number }; look?: string
 }
 
 export interface Part {
@@ -65,9 +65,21 @@ export const sectorIcons: Record<Sector, string> = { depart: '⇧', virage: '↝
 export const conditionLabels: Record<Condition, string> = { sec: 'Sec', pluie: 'Pluie', nuit: 'Nuit', terre: 'Terre', ville: 'Ville' }
 export const conditionIcons: Record<Condition, string> = { sec: '☀', pluie: '☂', nuit: '☾', terre: '⛰', ville: '▦' }
 
-// Éditions artistiques : Synthwave pour tout le roster, Classic et Pixel Art hérités du prototype.
-export type EditionStyle = 'Synthwave' | 'Classic' | 'Pixel Art'
+export type EditionStyle = 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique'
+const defaultStyles: Record<string, EditionStyle> = { clio: 'Photo', twingo: 'Gouache', panda: 'Rallye argentique' }
+export const defaultStyle = (id: string): EditionStyle => defaultStyles[id] ?? 'Synthwave'
+// Nom affiché du style d'illustration d'une carte qui n'a qu'une édition (champ look du roster).
+const lookLabels: Record<string, string> = {
+  poster: 'Affiche', rally: 'Rallye argentique', comic: 'Bande dessinée', anime: 'Anime', magazine: 'Magazine',
+  watercolor: 'Aquarelle', pulp: 'Pulp',
+}
+export const styleLabel = (v: Vehicle, style: EditionStyle) => style === 'Synthwave' && v.look ? lookLabels[v.look] ?? style : style
 const altStyles: Record<string, EditionStyle[]> = {
   clio: ['Classic'], elise: ['Classic'], r34: ['Classic'], venom: ['Classic', 'Pixel Art'], brian: ['Classic'],
 }
-export const stylesOf = (id: string): EditionStyle[] => ['Synthwave', ...(altStyles[id] ?? [])]
+export function stylesOf(id: string): EditionStyle[] {
+  const primary = defaultStyle(id)
+  const styles: EditionStyle[] = [primary]
+  if (primary !== 'Synthwave') styles.push('Synthwave')
+  return styles.concat(altStyles[id] ?? [])
+}

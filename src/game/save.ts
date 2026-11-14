@@ -1,15 +1,16 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
-  boosterById, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
-  type Booster, type EditionStyle, type Rarity,
+  boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
+  type Booster, type EditionStyle, type Rarity, type StatKey,
 } from './data'
-import { compatibility, createRace, rivalLineup, createDuel, lineupCost, potential, prepUsed, racer, type Duel, type Prep, type Rng } from './rules'
+import { compatibility, createRace, rivalLineup, createDuel, lineupCost, partUnlockLevel, potential, prepUsed, racer,
+  upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
 
 export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
 
-export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle }
+export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number> }
 export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean } | { kind: 'part'; id: string; isNew: boolean }
 export interface Opening { booster: string; pulls: Pull[]; revealed: number; view: 'back' | 'face' | 'recap'; collected: boolean }
 export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean }
@@ -35,13 +36,13 @@ export function newSave(): Save {
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true },
   }
-  for (const id of start.vehicles) addCar(save, id, 'Synthwave')
+  for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
   return save
 }
 
 function addCar(save: Save, id: string, style: EditionStyle) {
-  const car = save.cars[id] ??= { copies: 0, stage: 0, parts: [], editions: [], shown: style }
+  const car = save.cars[id] ??= { copies: 0, stage: 0, parts: [], editions: [], shown: style, favorite: false, upgrades: { acc: 0, vit: 0, man: 0, end: 0 } }
   car.copies++
   if (!car.editions.includes(style)) car.editions.push(style)
 }
@@ -86,15 +87,21 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const v = vehicleById.get(id)
     if (!v || !car) continue
     const styles = stylesOf(id)
-    const editions = (car.editions ?? []).filter(s => styles.includes(s))
+    const editions = Array.isArray(car.editions) ? car.editions.filter(s => styles.includes(s)) : []
+    const primary = defaultStyle(id)
+    const usesOldDefault = primary !== 'Synthwave' && !editions.includes(primary) && editions.includes('Synthwave')
+    if (!editions.length || usesOldDefault) editions.unshift(primary)
     const stage = int(car.stage, 0, 3, 0)
     const installed: string[] = []
     for (const partId of car.parts ?? []) {
       const part = partById.get(partId)
       if (part && !compatibility(part, v) && !installed.some(p => partById.get(p)?.family === part.family)) installed.push(partId)
     }
-    save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions: editions.length ? editions : ['Synthwave'],
-      shown: editions.includes(car.shown) ? car.shown : editions[0] ?? 'Synthwave' }
+    const levels = { acc: 0, vit: 0, man: 0, end: 0 }
+    for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
+    save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
+      shown: usesOldDefault && car.shown === 'Synthwave' ? primary : editions.includes(car.shown) ? car.shown : editions[0],
+      favorite: car.favorite === true, upgrades: levels }
   }
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
@@ -146,9 +153,11 @@ const owned = (save: Save, pull: { kind: 'car' | 'part'; id: string }) =>
 
 export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
   const seen = new Set<string>()
+  let drewPart = false
   return booster.slots.map(slot => {
-    const rarity = weighted(rarities.filter(r => slot[r]), r => slot[r] ?? 0, rng)
-    const isPart = rng() < slot.partChance
+    const isPart = !drewPart && rng() < slot.partChance
+    const spawnable = rarities.filter(r => slot[r] && (!isPart || parts.some(p => p.rarity === r)))
+    const rarity = weighted(spawnable.length ? spawnable : rarities.filter(r => slot[r]), r => slot[r] ?? 0, rng)
     const nearest = <T extends { rarity: Rarity }>(pool: T[]): T[] => {
       for (let d = 0; d < rarities.length; d++) {
         const i = rarities.indexOf(rarity)
@@ -158,20 +167,22 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
       return pool
     }
     if (isPart) {
+      drewPart = true
       const part = weighted(nearest(parts), () => 1, rng)
       const pull: Pull = { kind: 'part', id: part.id, isNew: !owned(save, { kind: 'part', id: part.id }) && !seen.has(`part:${part.id}`) }
       seen.add(`part:${part.id}`)
       return pull
     }
     const pool = nearest(vehicles.filter(v => !v.craft))
+    const unseen = pool.filter(v => !seen.has(`car:${v.id}`))
     const favor = (v: (typeof vehicles)[number]) =>
       booster.favorTags?.some(tag => v.tags.includes(tag) || v.culture?.aura.includes(tag)) ? booster.favorWeight ?? 1 : 1
-    const v = weighted(pool, favor, rng)
-    const alts = stylesOf(v.id).filter(s => s !== 'Synthwave')
-    const style = alts.length && rng() < booster.altChance ? weighted(alts, () => 1, rng) : 'Synthwave'
-    const key = `car:${v.id}:${style}`
-    const pull: Pull = { kind: 'car', id: v.id, style, isNew: !save.cars[v.id]?.editions.includes(style) && !seen.has(key) }
-    seen.add(key)
+    const v = weighted(unseen.length ? unseen : pool, favor, rng)
+    const [primary, ...alts] = stylesOf(v.id)
+    const style = alts.length && rng() < booster.altChance ? weighted(alts, () => 1, rng) : primary
+    const pull: Pull = { kind: 'car', id: v.id, style, isNew: !save.cars[v.id]?.editions.includes(style) && !seen.has(`edition:${v.id}:${style}`) }
+    seen.add(`car:${v.id}`)
+    seen.add(`edition:${v.id}:${style}`)
     return pull
   })
 }
@@ -196,9 +207,30 @@ export function collect(save: Save) {
 
 // ——— Garage ———
 
-export const prepOf = (save: Save, id: string): Prep => ({ stage: save.cars[id]?.stage ?? 0, parts: save.cars[id]?.parts ?? [] })
+export const prepOf = (save: Save, id: string): Prep => {
+  const car = save.cars[id]
+  return { stage: car?.stage ?? 0, parts: [...(car?.parts ?? [])], upgrades: { ...car?.upgrades } }
+}
 export const installedCount = (save: Save, partId: string) => Object.values(save.cars).filter(c => c.parts.includes(partId)).length
 export const freeParts = (save: Save, partId: string) => (save.parts[partId] ?? 0) - installedCount(save, partId)
+
+export function upgradeCheck(save: Save, id: string, key: StatKey): string | undefined {
+  const car = save.cars[id]
+  if (!car) return 'Voiture absente du garage'
+  const level = car.upgrades[key]
+  const price = upgradePrices[level]
+  if (price === undefined) return 'Niveau maximal atteint'
+  if (save.credits < price) return `Il manque ${price - save.credits} crédits`
+}
+
+export function upgradeStat(save: Save, id: string, key: StatKey): string | undefined {
+  const problem = upgradeCheck(save, id, key)
+  if (problem) return problem
+  const levels = save.cars[id].upgrades
+  const level = levels[key]
+  save.credits -= upgradePrices[level]
+  levels[key] = level + 1
+}
 
 export function stageCost(save: Save, id: string) {
   const car = save.cars[id]
@@ -221,6 +253,10 @@ export function installCheck(save: Save, carId: string, partId: string): string 
   const reason = compatibility(part, v)
   if (reason) return reason
   if (car.parts.includes(partId)) return 'Déjà installée'
+  const key = upgradeForFamily(part.family)
+  if (key && car.upgrades[key] < partUnlockLevel && !car.parts.some(id => partById.get(id)?.family === part.family)) {
+    return `${upgrades[key].label} · niveau ${partUnlockLevel} requis`
+  }
   if (freeParts(save, partId) <= 0) return 'Aucun exemplaire libre'
   const replaced = car.parts.filter(p => partById.get(p)?.family !== part.family)
   if (prepUsed({ stage: car.stage, parts: replaced }) + part.cost > potential(v, car.stage)) return 'Potentiel de préparation insuffisant'
@@ -253,7 +289,7 @@ export function craft(save: Save, id: string): string | undefined {
   const problem = craftCheck(save, id)
   if (problem) return problem
   save.credits -= vehicleById.get(id)!.craft!.credits
-  addCar(save, id, 'Synthwave')
+  addCar(save, id, defaultStyle(id))
 }
 
 export function scrapCar(save: Save, id: string): string | undefined {

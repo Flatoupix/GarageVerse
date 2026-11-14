@@ -3,15 +3,16 @@ import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
 import { constraintCap, constraintText } from '../game/daily'
 import { art, edition } from '../game/art'
 import {
-  conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statShort, vehicleById, vehicles,
+  conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
+  type Condition, type Rival, type StatKey,
 } from '../game/data'
 import { confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween } from '../game/fx'
-import { evaluate, lineupCost, overheated, playRound, rivalLineup, statsOf, type Round } from '../game/rules'
+import { circuitPriorities, circuitScores, evaluate, lineupCost, overheated, playRound, racer, rivalLineup, type Round } from '../game/rules'
 import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import CarCard from '../components/CarCard.vue'
 
-const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string]; go: [screen: 'garage' | 'shop'] }>()
+const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
 const chosen = ref<string | null>(save.duel?.rivalId ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
 dailySelected.value = false
 const challenge = computed(() => todayChallenge(save, chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
@@ -24,7 +25,32 @@ const lineup = computed({ get: () => isDaily.value ? save.dailyLineup ?? [] : sa
 const cap = computed(() => isDaily.value ? constraintCap(challenge.value.constraint) : league.value?.cap ?? 9)
 const cost = computed(() => lineupCost(lineup.value))
 const problem = computed(() => isDaily.value ? dailyLineupCheck(save) : rival.value ? lineupCheck(save, save.lineup, rival.value.id) : undefined)
-const garageCars = computed(() => vehicles.filter(v => save.cars[v.id]).sort((a, b) => a.cost - b.cost))
+const priorities = computed(() => rival.value ? circuitPriorities(rival.value.circuit) : [])
+const conditions = computed(() => {
+  const entries = Object.entries(rival.value?.circuit.conditions ?? {}) as [Condition, number][]
+  const total = entries.reduce((sum, [, weight]) => sum + weight, 0)
+  return entries.filter(([, weight]) => weight > 0).sort((a, b) => b[1] - a[1])
+    .map(([key, weight]) => ({ key, chance: Math.round(weight / total * 100) }))
+})
+const garageCars = computed(() => {
+  if (!rival.value) return []
+  const circuit = rival.value.circuit
+  return vehicles.filter(v => save.cars[v.id]).map(v => {
+    const car = racer(v.id, prepOf(save, v.id))
+    const scores = circuitScores(car, circuit)
+    const average = scores.reduce((total, s) => total + s.average * s.times, 0) / circuit.sectors.length
+    return { v, car, scores, average }
+  }).sort((a, b) => Number(lineup.value.includes(b.v.id)) - Number(lineup.value.includes(a.v.id)) ||
+    Number(save.cars[b.v.id].favorite) - Number(save.cars[a.v.id].favorite) || b.average - a.average || a.v.cost - b.v.cost)
+})
+const recommendedCars = computed(() => priorities.value.map(priority => {
+  const candidates = garageCars.value.filter(({ v }) => lineup.value.includes(v.id)).map(({ v, scores }) => ({
+    id: v.id, name: v.name, score: scores.find(s => s.sector === priority.sector)?.average ?? 0,
+  }))
+  const best = candidates.sort((a, b) => b.score - a.score)[0]
+  return { ...priority, best }
+}))
+const pointsText = (value: number) => value.toFixed(1).replace('.', ',')
 
 function toggle(id: string) {
   act(() => {
@@ -208,7 +234,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       </section>
 
       <section v-else class="engage">
-        <p class="engage-brief">Secteur {{ index + 1 }}/5 · <b>{{ sectorLabels[duel.sectors[index]] }}</b> ({{ statShort[sectorStat[duel.sectors[index]]] }})
+        <p class="engage-brief">Secteur {{ index + 1 }}/{{ duel.sectors.length }} · <b>{{ sectorLabels[duel.sectors[index]] }}</b> ({{ statLabels[sectorStat[duel.sectors[index]]] }})
           · {{ conditionIcons[duel.conditions[index]] }} {{ conditionLabels[duel.conditions[index]] }}</p>
         <div class="engage-cars" role="radiogroup" aria-label="Voiture engagée">
           <button v-for="(r, car) in duel.player.lineup" :key="car" type="button" role="radio" :aria-checked="picked === car"
@@ -239,30 +265,48 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="page-heading">
         <button type="button" class="back-link" @click="chosen = null"><span aria-hidden="true">←</span> Rivaux</button>
         <span class="eyebrow">{{ league.name }} · plafond {{ cap }}</span>
-        <h1 tabindex="-1">Écurie contre {{ rival.name }}</h1>
-        <p>{{ rival.circuit.name }} : {{ rival.circuit.sectors.map(s => sectorLabels[s]).join(' · ') }}. Conditions fréquentes :
-          {{ Object.keys(rival.circuit.conditions).slice(0, 2).map(c => conditionLabels[c as keyof typeof conditionLabels]).join(', ') }}.</p>
+        <h1 tabindex="-1">{{ rival.circuit.name }}</h1>
+        <p>Contre {{ rival.name }}</p>
       </div>
       <section v-if="isDaily" class="daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
       <div class="cap-meter" :class="{ over: cost > cap }">
         <span>Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
       </div>
-      <button type="button" class="button primary wide" :disabled="Boolean(problem)" @click="start">{{ isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem" aria-hidden="true">⟶</span></button>
+      <button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem" aria-hidden="true">⟶</span></button>
+      <section class="race-briefing" aria-labelledby="briefing-title">
+        <div class="section-row"><h2 id="briefing-title">Préparer ta course</h2><span v-if="!isDaily && rival.league === 'neon'" class="race-intro-badge">Accessible d’origine</span></div>
+        <ol class="race-sector-order" aria-label="Ordre des secteurs">
+          <li v-for="(sector, i) in rival.circuit.sectors" :key="i"><span aria-hidden="true">{{ sectorIcons[sector] }}</span>{{ sectorLabels[sector] }}</li>
+        </ol>
+        <div class="race-conditions" aria-label="Conditions possibles">
+          <span v-for="c in conditions" :key="c.key"><span aria-hidden="true">{{ conditionIcons[c.key] }}</span> {{ conditionLabels[c.key] }} {{ c.chance }} %</span>
+        </div>
+        <ul class="race-priorities">
+          <li v-for="p in recommendedCars" :key="p.sector">
+            <div><b>{{ statLabels[p.stat] }}</b><small>{{ p.times }} {{ p.times > 1 ? 'secteurs' : 'secteur' }} · {{ sectorLabels[p.sector] }}</small></div>
+            <button v-if="p.best" class="race-prepare" type="button" :aria-label="`Préparer ${p.best.name} · ${statLabels[p.stat]}`"
+              @click="emit('inspect', 'car', p.best.id, rival.circuit, p.stat)">
+              <b>{{ p.best.name }}</b><small>{{ pointsText(p.best.score) }} pts estimés <span aria-hidden="true">↗</span></small>
+            </button>
+          </li>
+        </ul>
+        <p v-if="lineup.length" class="hint">Scores moyens estimés selon le terrain, hors nitro et bonus liés à l’adversaire ou à l’écurie. Touche une voiture pour ouvrir l’atelier.</p>
+      </section>
       <div class="lineup-slots">
-        <button v-for="n in 3" :key="n" type="button" class="lineup-slot" @click="lineup[n - 1] && emit('inspect', 'car', lineup[n - 1])">
+        <button v-for="n in 3" :key="n" type="button" class="lineup-slot" :disabled="!lineup[n - 1]" @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">
           <CarCard v-if="lineup[n - 1]" :id="lineup[n - 1]" :style-name="save.cars[lineup[n - 1]]?.shown" :prep="prepOf(save, lineup[n - 1])" compact />
           <span v-else class="slot-placeholder">Place {{ n }}</span>
         </button>
       </div>
-      <p class="rival-preview">En face : {{ rivalLineup(rival).map(e => `${name(e.id)} (Stage ${e.prep.stage})`).join(' · ') }}</p>
+      <p class="rival-preview">Écurie adverse · {{ rivalLineup(rival).map(e => name(e.id)).join(' · ') }}</p>
 
       <h2 class="list-title">Ton garage</h2>
       <ul class="pick-list">
-        <li v-for="v in garageCars" :key="v.id">
+        <li v-for="{ v, car, scores } in garageCars" :key="v.id">
           <button type="button" :aria-pressed="lineup.includes(v.id)" @click="toggle(v.id)">
             <span class="pick-cost">{{ v.cost }}</span>
-            <span class="pick-name"><b>{{ v.name }}</b><small>{{ v.version }} · Stage {{ save.cars[v.id].stage }}</small></span>
-            <span class="pick-stats">{{ (['acc', 'vit', 'man', 'end'] as const).map(k => `${statShort[k]} ${statsOf(v, prepOf(save, v.id))[k]}`).join(' ') }}</span>
+            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" aria-label="Favori">★ </span>{{ v.name }}</b><small>{{ v.version }} · {{ car.uses }} secteurs avant surchauffe</small></span>
+            <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ s.label }} {{ pointsText(s.average) }} pts</span></span>
           </button>
         </li>
       </ul>

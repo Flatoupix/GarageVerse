@@ -26,7 +26,7 @@ const nextRival = computed(() => {
       <div class="hero-content">
         <span class="eyebrow"><span></span> Collection 001 · Neon Drive</span>
         <h1 id="home-title" tabindex="-1">GARAGE<em>VERSE</em></h1>
-        <p>Collectionne 50 voitures, prépare-les pièce par pièce et bats les rivaux de la nuit en cinq secteurs.</p>
+        <p>Collectionne 100 voitures, prépare-les pièce par pièce et bats les rivaux de la nuit en cinq secteurs.</p>
         <button v-if="save.duel" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la course <span aria-hidden="true">⟶</span></button>
         <button v-else-if="pending" type="button" class="button primary" @click="emit('go', 'booster')">Reprendre le booster <span aria-hidden="true">↗</span></button>
         <button v-else-if="tickets.length" type="button" class="button primary" @click="emit('go', 'shop')">
@@ -75,7 +75,7 @@ const nextRival = computed(() => {
       <h2 id="how-title">La boucle</h2>
       <ol>
         <li><b>Collectionne.</b> Chaque booster contient cinq cartes Voiture ou Mécanique.</li>
-        <li><b>Prépare.</b> Une voiture modeste a plus de potentiel : installe des pièces, monte en Stage, débloque ses évolutions.</li>
+        <li><b>Prépare.</b> Améliore chaque voiture avec des crédits et monte des pièces à partir du niveau 2.</li>
         <li><b>Cours.</b> Trois voitures sous le plafond de ta ligue, cinq secteurs, une voiture engagée en secret à chaque secteur.</li>
         <li><b>Réinvestis.</b> Crédits, tickets et doublons alimentent le garage.</li>
       </ol>
