@@ -33,6 +33,23 @@ function inspect(kind: 'car' | 'part', id: string) {
   sheet.value?.scrollTo(0, 0)
 }
 
+// Plein écran : API Fullscreen (Android, ordinateur) ; sur iPhone, seule l'app ajoutée à l'écran d'accueil s'ouvre sans barre.
+const installed = matchMedia('(display-mode: fullscreen), (display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true
+const canFullscreen = document.fullscreenEnabled
+const fullscreen = ref(Boolean(document.fullscreenElement))
+document.addEventListener('fullscreenchange', () => { fullscreen.value = Boolean(document.fullscreenElement) })
+
+async function toggleFullscreen() {
+  if (!canFullscreen) { settings.value?.showModal(); return }
+  try {
+    if (document.fullscreenElement) return await document.exitFullscreen()
+    await document.documentElement.requestFullscreen({ navigationUI: 'hide' })
+    await (window.screen.orientation as { lock?: (o: string) => Promise<void> }).lock?.('portrait').catch(() => {})
+  } catch {
+    // Le navigateur peut refuser sans geste utilisateur valide : on reste en fenêtre.
+  }
+}
+
 function toggleSetting(key: Setting) {
   save.preferences[key] = !save.preferences[key]
   persist()
@@ -48,6 +65,12 @@ function toggleSetting(key: Setting) {
       </button>
       <div class="wallet">
         <span class="credits" aria-label="Crédits"><span aria-hidden="true">₡</span> {{ save.credits }}</span>
+        <button v-if="!installed" type="button" class="settings-button" :aria-label="fullscreen ? 'Quitter le plein écran' : 'Plein écran'"
+          :aria-pressed="fullscreen" @click="toggleFullscreen">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+            <path v-if="fullscreen" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/><path v-else d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+          </svg>
+        </button>
         <button type="button" class="settings-button" aria-label="Réglages" @click="settings?.showModal()">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 3v6m8 0v6m-6 0v6"/></svg>
         </button>
@@ -79,6 +102,8 @@ function toggleSetting(key: Setting) {
       <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
       <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>
       <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
+      <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
+      <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
     </dialog>
 
     <dialog ref="sheet" class="modal sheet-modal" aria-label="Détail de la carte" @close="inspected = null">

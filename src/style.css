@@ -430,6 +430,7 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--cyan), va
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 @media (max-width: 359px) { .brand > span:last-child { display: none; } }
+@media (max-width: 399px) { .topbar { padding-inline: 12px; } .wallet { gap: 6px; } .settings-button { width: 40px; height: 40px; } }
 @media (min-width: 650px) {
   main { padding-top: 26px; }
   .hero { min-height: 460px; }
