@@ -49,6 +49,7 @@ onMounted(() => {
 })
 
 function go(destination: Screen) {
+  toast.value = null
   screen.value = destination
   window.scrollTo(0, 0)
   void nextTick(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))

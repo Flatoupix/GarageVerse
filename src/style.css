@@ -598,3 +598,15 @@ button.card-back { animation: back-bob 2.6s ease-in-out infinite; }
 .daily-panel p { overflow-wrap: anywhere; }
 .daily-panel .button { white-space: normal; overflow-wrap: anywhere; height: auto; min-height: 48px; }
 .daily-panel .button + .button { margin-top: 12px; }
+.home > .daily-panel { margin-top: 0; margin-bottom: 16px; }
+.daily-race > .button.primary { white-space: normal; padding-block: 12px; overflow-wrap: anywhere; }
+.daily-race .daily-panel { margin-block: 8px; padding: 12px; }
+.daily-race .lineup-slots { margin-top: 12px; }
+/* Une notification ne doit jamais intercepter une commande de course. */
+.toast { pointer-events: none; top: calc(76px + env(safe-area-inset-top)); bottom: auto; }
+@media (max-width: 649px) {
+  .home .hero { min-height: 300px; }
+  .home .hero-content { padding: 20px 16px; }
+  .daily-race .page-heading h1 { font-size: 1.5rem; }
+  .daily-race .page-heading p { font-size: .8rem; }
+}

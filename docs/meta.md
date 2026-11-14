@@ -110,3 +110,12 @@ l’accueil affiche « Reviens demain ». La date, la réussite, la récupérati
 série et la dernière victoire sont conservées dans garageverse:v2, avec des valeurs
 par défaut pour les anciennes sauvegardes. Au changement de date, réussite et
 récupération sont réinitialisées ; une course de la veille ne donne plus de gain.
+
+Les contraintes de catégorie et de rareté conservent le plafond Néon de 9 ;
+le plafond réduit est tiré entre 7 et 8. La jauge indique toujours le plafond
+réel du défi. L’écurie quotidienne est indépendante de l’écurie des rivaux et
+est préremplie à chaque ouverture. Si aucun trio possédé n’est admissible, le
+lancement reste désactivé avec sa raison, sans effacer l’écurie habituelle.
+La météo affichée sur l’accueil correspond aux conditions des cinq secteurs.
+Rejouer le défi reproduit ces conditions, tandis que les choix de l’adversaire
+pendant les secteurs continuent d’utiliser le hasard habituel du moteur.

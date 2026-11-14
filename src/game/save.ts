@@ -22,6 +22,7 @@ export interface Save {
   parts: Record<string, number>
   sealed: string | null
   opening: Opening | null
+  dailyLineup?: string[]
   lineup: string[]
   record: Record<string, { wins: number; losses: number }>
   duel: Duel | null
@@ -340,17 +341,17 @@ export function claimDailyBooster(save: Save) {
   save.tickets.neon = (save.tickets.neon ?? 0) + 1
 }
 export function dailyLineupCheck(save: Save) {
-  if (save.lineup.some(id => !save.cars[id])) return 'Voiture absente du garage'
-  return constraintCheck(save.lineup, dailyChallenge().constraint)
+  if ((save.dailyLineup ?? []).some(id => !save.cars[id])) return 'Voiture absente du garage'
+  return constraintCheck(save.dailyLineup ?? [], dailyChallenge().constraint)
 }
 export function prepareDaily(save: Save) {
   refreshDaily(save)
-  save.lineup = validDailyLineup(Object.keys(save.cars), dailyChallenge().constraint) ?? []
+  save.dailyLineup = validDailyLineup(Object.keys(save.cars), dailyChallenge().constraint) ?? []
 }
 export function startDaily(save: Save) {
   refreshDaily(save)
   const problem = dailyLineupCheck(save)
   if (problem) return problem
   const challenge = dailyChallenge()
-  save.duel = createRace(challenge.rival.id, challenge.rival.circuit, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(challenge.rival), dailyRng(challenge.date))
+  save.duel = createRace(challenge.rival.id, challenge.rival.circuit, (save.dailyLineup ?? []).map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(challenge.rival), dailyRng(challenge.date))
 }
