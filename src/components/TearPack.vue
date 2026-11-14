@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { BoosterId } from '../catalog'
 import PackArt from './PackArt.vue'
 
-defineProps<{ booster: BoosterId; torn: boolean; reduced: boolean }>()
+defineProps<{ booster: string; torn: boolean; reduced: boolean }>()
 const emit = defineEmits<{ tear: [] }>()
 
 const progress = ref(0)

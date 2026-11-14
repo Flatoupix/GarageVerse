@@ -1,0 +1,302 @@
+{
+  "cars/clio": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette Clio III fidèle et bon éclairage néon sans logo ni texte.",
+    "fix": ""
+  },
+  "cars/venom": {
+    "ok": true,
+    "score": 8,
+    "issue": "Proportions d'hypercar et pack aéro conformes, optiques avant légèrement stylisées mais lisibilité et ambiance au top.",
+    "fix": ""
+  },
+  "cars/kitt": {
+    "ok": true,
+    "score": 10,
+    "issue": "KITT très fidèle avec son scanner frontal rouge emblématique et une superbe composition néon rétro.",
+    "fix": ""
+  },
+  "cars/ecto1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Cadillac Ecto-1 reconnaissable au premier coup d'œil avec ses ailerons et son rack de toit, bon éclairage néon.",
+    "fix": ""
+  },
+  "cars/twingo": {
+    "ok": true,
+    "score": 9,
+    "issue": "Twingo I turquoise très reconnaissable avec une superbe ambiance rétro.",
+    "fix": ""
+  },
+  "cars/p205": {
+    "ok": true,
+    "score": 10,
+    "issue": "205 GTI 1.9 exemplaire avec jantes Speedline et liseré rouge.",
+    "fix": ""
+  },
+  "cars/deuch": {
+    "ok": true,
+    "score": 9,
+    "issue": "2CV6 pastel immédiatement identifiable dans un beau décor montagnard néon.",
+    "fix": ""
+  },
+  "cars/golf1": {
+    "ok": true,
+    "score": 10,
+    "issue": "Golf 1 GTI parfaite avec le liseré rouge de calandre et un style synthwave pur.",
+    "fix": ""
+  },
+  "cars/panda": {
+    "ok": true,
+    "score": 10,
+    "issue": "Panda 4x4 Série 1 très authentique avec calandre asymétrique et garde au sol haute.",
+    "fix": ""
+  },
+  "cars/c4zr1": {
+    "ok": true,
+    "score": 10,
+    "issue": "Corvette C4 ZR-1 fidèle avec jantes sawblade et décor néon désertique percutant.",
+    "fix": ""
+  },
+  "cars/f40": {
+    "ok": true,
+    "score": 10,
+    "issue": "Lignes de la F40 fidèles et reconnaissables, sans logo ni texte, esthétique synthwave très réussie et excellente lisibilité.",
+    "fix": ""
+  },
+  "cars/p930": {
+    "ok": true,
+    "score": 10,
+    "issue": "Silhouette de 930 Turbo parfaite avec son aileron whale-tail, palette synthwave et grille au sol impeccables.",
+    "fix": ""
+  },
+  "cars/supra": {
+    "ok": true,
+    "score": 9,
+    "issue": "Lignes de la Supra Mk4 très fidèles, teinte orange bonbon éclatante et reflets néons urbains réussis.",
+    "fix": ""
+  },
+  "cars/r34": {
+    "ok": true,
+    "score": 9,
+    "issue": "Skyline R34 Bayside Blue immédiatement reconnaissable, plaque d'immatriculation vierge et décor outrun soigné.",
+    "fix": ""
+  },
+  "cars/mx5nb": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente MX-5 NB découvrable, phares fixes et calandre souriante bien restitués avec un vert profond.",
+    "fix": ""
+  },
+  "cars/scirocco": {
+    "ok": true,
+    "score": 9,
+    "issue": "Scirocco GT24 fidèle avec arceau et kit large, livrée de course sans logos et superbe piste nocturne.",
+    "fix": ""
+  },
+  "cars/s15": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silvia S15 bien proportionnée avec ses optiques étirées, beau violet nacré et reflets néon cohérents.",
+    "fix": ""
+  },
+  "cars/elise": {
+    "ok": true,
+    "score": 10,
+    "issue": "Face avant à double optiques et profil de l'Elise S1 parfaitement identifiables, superbe col de montagne au soleil couchant.",
+    "fix": ""
+  },
+  "cars/mf1": {
+    "ok": true,
+    "score": 10,
+    "issue": "Excellente fidélité à la McLaren F1, poste central visible, aucun texte",
+    "fix": ""
+  },
+  "cars/stratos": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette cunéiforme et livrée tricolore très fidèles sans logos",
+    "fix": ""
+  },
+  "cars/dmc": {
+    "ok": true,
+    "score": 10,
+    "issue": "DeLorean en inox brossé iconique sur grille synthwave classique",
+    "fix": ""
+  },
+  "cars/firebird": {
+    "ok": true,
+    "score": 9,
+    "issue": "Face avant 1977, shaker hood et liserés dorés parfaitement respectés",
+    "fix": ""
+  },
+  "cars/beetle": {
+    "ok": true,
+    "score": 9,
+    "issue": "Coccinelle 1303 bleu clair bien proportionnée, très propre",
+    "fix": ""
+  },
+  "cars/esprit": {
+    "ok": true,
+    "score": 10,
+    "issue": "Lignes cunéiformes Giugiaro et robe blanche impeccables pour l'Esprit S1",
+    "fix": ""
+  },
+  "cars/elise111s": {
+    "ok": true,
+    "score": 9,
+    "issue": "Elise S1 découvrable bien reconnaissable en vert anglais métallisé",
+    "fix": ""
+  },
+  "cars/elise190": {
+    "ok": true,
+    "score": 9,
+    "issue": "Version Sport 190 orange bien identifiée avec son aileron et son hardtop",
+    "fix": ""
+  },
+  "cars/bttf": {
+    "ok": true,
+    "score": 10,
+    "issue": "DeLorean temporelle parfaitement reconnaissable, câbles et réacteurs fidèles, excellente palette synthwave.",
+    "fix": ""
+  },
+  "cars/brian": {
+    "ok": true,
+    "score": 9,
+    "issue": "Skyline R34 immédiatement identifiable avec sa livrée bleue et son kit carrosserie, très bonne lisibilité.",
+    "fix": ""
+  },
+  "cars/herbie": {
+    "ok": true,
+    "score": 10,
+    "issue": "Coccinelle Choupette iconique, bandes tricolores et numéro 53 nets, ambiance coucher de soleil synthwave réussie.",
+    "fix": ""
+  },
+  "cars/bond": {
+    "ok": true,
+    "score": 10,
+    "issue": "Lotus Esprit en mode sous-marin parfaitement exécutée, ailerons bien placés et gerbes d'eau néon éclatantes.",
+    "fix": ""
+  },
+  "cars/taxi": {
+    "ok": true,
+    "score": 9,
+    "issue": "Taxi volant de Korben Dallas très bien caractérisé, réacteurs de sustentation et damiers impeccables.",
+    "fix": ""
+  },
+  "cars/batmobile": {
+    "ok": true,
+    "score": 10,
+    "issue": "Batmobile 1989 sculpturale, turbine frontale et ailerons gothiques très lisibles avec de superbes reflets néon.",
+    "fix": ""
+  },
+  "cars/abarth": {
+    "ok": true,
+    "score": 9,
+    "issue": "Modèle et livrée fidèles, calandre bien débadgée, palette néon percutante.",
+    "fix": ""
+  },
+  "cars/logan": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette de berline 2004 très fidèle, calandre sans logo, bonne lisibilité.",
+    "fix": ""
+  },
+  "cars/ek9": {
+    "ok": true,
+    "score": 9,
+    "issue": "Championship White et baquets rouges fidèles, aileron Type R net, aucun logo.",
+    "fix": ""
+  },
+  "cars/mx5na": {
+    "ok": true,
+    "score": 10,
+    "issue": "Phares escamotables levés, grille néon au sol typique et excellente lisibilité.",
+    "fix": ""
+  },
+  "cars/m3e46": {
+    "ok": true,
+    "score": 9,
+    "issue": "Teinte Laguna Seca et galbe M3 parfaits, bossage de capot net, emblème lisse.",
+    "fix": ""
+  },
+  "cars/delta": {
+    "ok": true,
+    "score": 9,
+    "issue": "Ailes blister et face avant Evo fidèles, décor de col alpin rétro très cohérent.",
+    "fix": ""
+  },
+  "cars/evo8": {
+    "ok": true,
+    "score": 9,
+    "issue": "Proue caractéristique de l'Evo VIII avec aileron et écope, rendu touge synthwave réussi.",
+    "fix": ""
+  },
+  "cars/a110": {
+    "ok": true,
+    "score": 9,
+    "issue": "Berlinette classique très reconnaissable avec ses 4 optiques, sans aucun lettrage.",
+    "fix": ""
+  },
+  "cars/nsx": {
+    "ok": true,
+    "score": 9,
+    "issue": "Excellente fidélité à la NSX NA1 avec toit noir contrasté et superbe ambiance piste rétro-néon.",
+    "fix": ""
+  },
+  "cars/tesla": {
+    "ok": true,
+    "score": 9,
+    "issue": "Lignes et proportions fidèles à la Model S Plaid, grille outrun et ciel étoilé très réussis.",
+    "fix": ""
+  },
+  "cars/gt500": {
+    "ok": true,
+    "score": 9,
+    "issue": "Face avant agressive et livrée bleue à bandes blanches conformes à la Shelby GT500 2020.",
+    "fix": ""
+  },
+  "cars/demon": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette menaçante avec prise d'air Demon fidèle, noir mat et liserés rouges très percutants.",
+    "fix": ""
+  },
+  "cars/ruf": {
+    "ok": true,
+    "score": 9,
+    "issue": "CTR Yellowbird emblématique immédiatement reconnaissable sur route de montagne synthwave.",
+    "fix": ""
+  },
+  "cars/cgt": {
+    "ok": true,
+    "score": 9,
+    "issue": "Profil targa, écopes latérales et dosserets aérodynamiques caractéristiques de la Carrera GT respectés.",
+    "fix": ""
+  },
+  "cars/zonda": {
+    "ok": true,
+    "score": 10,
+    "issue": "Texture carbone apparent et appendices aéro de la Zonda R impressionnants, parfaite lisibilité.",
+    "fix": ""
+  },
+  "cars/agera": {
+    "ok": true,
+    "score": 9,
+    "issue": "Canopée cockpit distinctive et livrée blanc/orange fidèles à l'Agera R sur autoroute néon.",
+    "fix": ""
+  },
+  "cars/veyron": {
+    "ok": true,
+    "score": 9,
+    "issue": "Modèle fidèle et bien proportionné, reflets métallisés et palette synthwave parfaits sans texte ni logo parasite.",
+    "fix": ""
+  },
+  "cars/h1": {
+    "ok": true,
+    "score": 9,
+    "issue": "Silhouette carrée et détails caractéristiques très fidèles, teinte sable du Hummer bien intégrée à l'ambiance néon.",
+    "fix": ""
+  }
+}

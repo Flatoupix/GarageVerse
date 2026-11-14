@@ -206,23 +206,23 @@ corepack yarn dev
 
 Ouvrir l’adresse affichée par Vite. Sur un téléphone connecté au même Wi-Fi privé, lancer `corepack yarn dev --host 0.0.0.0` et ouvrir l’adresse **Network** affichée par Vite. Pour vérifier le typage et produire le build, lancer `corepack yarn build`.
 
-Le premier sachet est **Collection 001**. Le deuxième, **After Hours**, est aussi accessible depuis l’accueil. Pour rejouer l’essai à zéro, utiliser une nouvelle fenêtre de navigation privée ou effacer les données du site. La sauvegarde est propre au navigateur et à l’adresse utilisée.
+La version **Neon Drive** est jouable de bout en bout : 50 voitures, 24 cartes Mécanique, trois boosters, un garage de préparation et six rivaux en course en secteurs. Les règles et la direction synthwave sont décrites dans [docs/meta.md](docs/meta.md). La sauvegarde (`garageverse:v2`) est propre au navigateur. Les cartes collectées dans le prototype précédent sont reprises automatiquement. Pour rejouer à zéro, utiliser une fenêtre privée ou effacer les données du site.
 
 ### Premier essai joueur
 
-1. Ouvrir l’accueil et laisser la personne découvrir seule le sachet. Observer où elle pose le doigt, si elle trouve le bon geste et à quel moment elle passe au bouton.
-2. La laisser retourner les cartes à son rythme, consulter le récapitulatif et rejoindre le garage. Observer si elle lance spontanément un deuxième booster et à quel moment elle en a eu envie.
-3. Après le deuxième lot, lui demander quelle révélation lui est restée en tête et si elle retrouve les deux éditions de la Venom et l’aura de la Skyline de Brian dans le garage.
+1. Laisser la personne ouvrir seule ses deux tickets Neon Drive. Observer le geste de déchirure et le moment où elle passe au bouton.
+2. La laisser préparer une voiture au garage (Stage 1, une pièce) sans explication, puis défier Lola Minitel.
+3. Lui demander pourquoi elle a engagé chaque voiture sur chaque secteur, puis si elle a envie de rouvrir un booster ou de retourner au garage.
 
-### Visuels de démonstration
+### Production des contenus
 
-Les illustrations WebP dans `src/assets/` sont remplaçables. L’affiche Pixel Art fournie sert d’illustration à l’édition alternative de la Venom. Les illustrations Classic, le décor de nuit et le calque de la Skyline sont générés pour le prototype privé. Le catalogue relie les visuels aux cartes dans `src/catalog.ts`.
+| Commande | Rôle |
+| --- | --- |
+| `corepack yarn art` | Génère les illustrations manquantes (voitures, pièces, rivaux, boosters, accueil). Codex d’abord, Antigravity en relais. |
+| `corepack yarn art:review` | Revue artistique par Antigravity dans `pipeline/art-review.json`. `node pipeline/art.mjs --redo` régénère les refus. |
+| `corepack yarn balance` | Simulation d’équilibrage dans `pipeline/balance-report.json`. Ajouter `--review` pour l’avis d’Antigravity. |
 
-### Progression de collection dans la démo
-
-Les deux boosters permettent de découvrir six éditions et d’obtenir dix exemplaires. Le garage indique la progression, affiche les manquantes à la demande et permet de comparer les versions Classic et Pixel Art de la Venom sur une même fiche. Le cadre indique la rareté de collection. Le profil et la capacité signature expriment le rôle envisagé pour les futurs duels. L’aura de la Skyline de Brian conserve son propre emplacement.
-
-Pour le premier essai, vérifier sur téléphone si les cartes restent lisibles, si les finitions donnent envie d’inspecter un tirage, et si le garage donne envie d’ouvrir le second booster. Les premiers choix de méta à prototyper ensuite sont le rôle d’une voiture par secteur, le coût de préparation et l’usage des doublons. La rareté, la finition et l’aura gardent des fonctions distinctes.
+Les images sont dans `src/assets/<cars|parts|rivals|packs|ui>/<id>.webp`. Une illustration absente est remplacée par un visuel de repli et ne bloque pas le jeu. Les éditions Classic et Pixel Art du prototype restent collectionnables comme variantes rares.
 
 ### Orchestrateur local
 

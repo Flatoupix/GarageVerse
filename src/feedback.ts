@@ -1,4 +1,4 @@
-type Cue = 'tear' | 'flip' | 'drift' | 'collect'
+export type Cue = 'tear' | 'flip' | 'drift' | 'collect' | 'legend' | 'win' | 'lose' | 'nitro' | 'upgrade'
 
 let audio: AudioContext | undefined
 
@@ -26,15 +26,19 @@ export function playCue(cue: Cue) {
       return
     }
 
-    const notes = cue === 'drift' ? [82, 123, 329] : cue === 'collect' ? [330, 440, 660] : [440, 660]
+    const notes = {
+      drift: [82, 123, 329], collect: [330, 440, 660], flip: [440, 660], legend: [262, 392, 523, 784],
+      win: [392, 494, 587, 784], lose: [330, 262, 196], nitro: [110, 220, 440], upgrade: [523, 659, 784],
+    }[cue]
+    const sweep = cue === 'drift' || cue === 'nitro'
     for (const [i, note] of notes.entries()) {
       const oscillator = audio.createOscillator()
       const volume = audio.createGain()
-      const at = now + i * (cue === 'drift' ? 0.10 : 0.035)
-      const duration = cue === 'drift' ? 0.55 : 0.15
-      oscillator.type = cue === 'drift' && i < 2 ? 'triangle' : 'sine'
+      const at = now + i * (sweep ? 0.10 : cue === 'flip' ? 0.035 : 0.09)
+      const duration = sweep ? 0.55 : cue === 'flip' ? 0.15 : 0.3
+      oscillator.type = sweep && i < 2 ? 'triangle' : cue === 'legend' || cue === 'win' ? 'sawtooth' : 'sine'
       oscillator.frequency.setValueAtTime(note, at)
-      if (cue === 'drift' && i === 0) oscillator.frequency.exponentialRampToValueAtTime(54, at + duration)
+      if (sweep && i === 0) oscillator.frequency.exponentialRampToValueAtTime(cue === 'nitro' ? 880 : 54, at + duration)
       volume.gain.setValueAtTime(0.001, at)
       volume.gain.exponentialRampToValueAtTime(0.075, at + 0.022)
       volume.gain.exponentialRampToValueAtTime(0.001, at + duration)

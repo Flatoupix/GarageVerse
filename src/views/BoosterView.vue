@@ -1,0 +1,138 @@
+<script setup lang="ts">
+import { computed, nextTick, onUnmounted, ref } from 'vue'
+import { edition } from '../game/art'
+import { boosterById, vehicleById } from '../game/data'
+import { collect, tear } from '../game/save'
+import { buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
+import PullCard from '../components/PullCard.vue'
+import RevealStack from '../components/RevealStack.vue'
+import TearPack from '../components/TearPack.vue'
+
+const emit = defineEmits<{ garage: []; shop: []; inspect: [kind: 'car' | 'part', id: string] }>()
+
+const boosterId = computed(() => save.opening?.collected === false ? save.opening.booster : save.sealed ?? save.opening?.booster)
+const booster = computed(() => boosterId.value ? boosterById.get(boosterId.value) : undefined)
+const opening = computed(() => save.opening ?? undefined)
+const faceUp = computed(() => opening.value?.view === 'face')
+const recap = computed(() => opening.value?.view === 'recap')
+const tearing = ref(false)
+const stackEntering = ref(false)
+const flipping = ref(false)
+const cinematic = ref(false)
+let tearTimer: ReturnType<typeof setTimeout> | undefined
+let stackTimer: ReturnType<typeof setTimeout> | undefined
+onUnmounted(() => { clearTimeout(tearTimer); clearTimeout(stackTimer) })
+
+// Une carte légendaire ou une édition animée reçoit la mise en scène exceptionnelle.
+function special(index: number) {
+  const pull = opening.value?.pulls[index]
+  if (pull?.kind !== 'car') return false
+  return vehicleById.get(pull.id)!.rarity === 'Légendaire' || Boolean(edition(pull.id, pull.style).drift)
+}
+
+function focusRevealAction() {
+  void nextTick(() => document.querySelector<HTMLButtonElement>('.stack-actions .primary')?.focus({ preventScroll: true }))
+}
+
+function openPack() {
+  if (!save.sealed) return
+  tear(save, Math.random)
+  persist()
+  sound('tear')
+  buzz(25)
+  for (const pull of save.opening!.pulls) if (pull.kind === 'car') {
+    const look = edition(pull.id, pull.style)
+    for (const url of [look.art, look.drift?.backdrop, look.drift?.car]) if (url) new Image().src = url
+  }
+  if (reduced.value) { focusRevealAction(); return }
+  tearing.value = true
+  tearTimer = setTimeout(() => {
+    tearing.value = false
+    stackEntering.value = true
+    focusRevealAction()
+    stackTimer = setTimeout(() => { stackEntering.value = false }, 420)
+  }, 405)
+}
+
+function flipCard() {
+  const current = opening.value
+  if (!current || faceUp.value || current.revealed >= current.pulls.length) return
+  const big = special(current.revealed)
+  const pull = current.pulls[current.revealed]
+  current.revealed++
+  current.view = 'face'
+  flipping.value = !reduced.value
+  cinematic.value = big && !reduced.value
+  persist()
+  focusRevealAction()
+  sound(!big ? 'flip' : pull.kind === 'car' && edition(pull.id, pull.style).drift ? 'drift' : 'legend')
+  if (big) buzz([22, 45, 35])
+}
+
+function nextCard() {
+  const current = opening.value
+  if (!current || current.view !== 'face') return
+  current.view = current.revealed === current.pulls.length ? 'recap' : 'back'
+  flipping.value = false
+  cinematic.value = false
+  persist()
+  if (current.view === 'recap') finish()
+  else focusRevealAction()
+}
+
+function quickReveal() {
+  const current = opening.value
+  if (!current) return
+  current.revealed = current.pulls.length
+  current.view = 'recap'
+  flipping.value = false
+  cinematic.value = false
+  finish()
+}
+
+// Les cartes rejoignent le garage dès le récapitulatif : un rechargement ne peut pas les attribuer deux fois.
+function finish() {
+  if (opening.value && !opening.value.collected) {
+    collect(save)
+    sound('collect')
+  }
+  persist()
+}
+const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length ?? 0)
+</script>
+
+<template>
+  <main v-if="booster" class="play">
+    <div class="play-heading">
+      <span class="eyebrow">{{ booster.tagline }}</span>
+      <h1 tabindex="-1">{{ recap ? 'Tes cinq cartes' : booster.name }}</h1>
+    </div>
+    <div v-if="!opening || tearing" class="sealed-stage" :class="`stage-${booster.id}`">
+      <div class="pack-spotlight"></div>
+      <TearPack :key="booster.id" :booster="booster.id" :torn="tearing" :reduced="reduced" @tear="openPack" />
+      <div class="sealed-actions" :class="{ 'actions-hidden': tearing }">
+        <p>Glisse le doigt le long du bord supérieur.</p>
+        <button type="button" class="button primary" :disabled="tearing" @click="openPack">Ouvrir le sachet <span aria-hidden="true">↗</span></button>
+      </div>
+    </div>
+    <div v-else-if="recap" class="recap">
+      <p class="recap-progress">{{ newCount }} {{ newCount === 1 ? 'nouvelle carte' : 'nouvelles cartes' }} dans ton garage</p>
+      <div class="recap-grid">
+        <button v-for="(pull, index) in opening.pulls" :key="index" type="button" class="card-tile" @click="emit('inspect', pull.kind, pull.id)">
+          <PullCard :pull="pull" compact />
+          <span v-if="pull.isNew" class="tile-tag">Nouveau</span>
+        </button>
+      </div>
+      <div class="recap-actions">
+        <button type="button" class="button primary" @click="emit('garage')">Voir le garage <span aria-hidden="true">→</span></button>
+        <button type="button" class="button quiet" @click="emit('shop')">Autre booster</button>
+      </div>
+    </div>
+    <RevealStack v-else :opening="opening" :face-up="faceUp" :flipping="flipping && !reduced" :entering="stackEntering"
+      :cinematic="cinematic && !reduced" @flip="flipCard" @next="nextCard" @quick="quickReveal" />
+  </main>
+  <main v-else class="play empty-state">
+    <h1 tabindex="-1">Aucun booster en cours</h1>
+    <button type="button" class="button primary" @click="emit('shop')">Choisir un booster <span aria-hidden="true">↗</span></button>
+  </main>
+</template>

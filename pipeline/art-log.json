@@ -1,0 +1,647 @@
+{
+  "cars/twingo": {
+    "status": "ok",
+    "seconds": 49,
+    "tokens": 19580,
+    "prompt": "63bad30dfe",
+    "at": "2026-11-14T01:31:09.012Z"
+  },
+  "cars/golf1": {
+    "status": "ok",
+    "seconds": 45,
+    "tokens": 17002,
+    "prompt": "e857341309",
+    "at": "2026-11-14T01:45:48.049Z"
+  },
+  "cars/clio": {
+    "status": "ok",
+    "seconds": 49,
+    "tokens": 17218,
+    "prompt": "77e52dc5a6",
+    "at": "2026-11-14T01:45:51.853Z"
+  },
+  "cars/deuch": {
+    "status": "ok",
+    "seconds": 52,
+    "tokens": 18011,
+    "prompt": "8764c9aae0",
+    "at": "2026-11-14T01:45:54.576Z"
+  },
+  "cars/p205": {
+    "status": "ok",
+    "seconds": 54,
+    "tokens": 26305,
+    "prompt": "cfacae529e",
+    "at": "2026-11-14T01:45:56.778Z"
+  },
+  "cars/panda": {
+    "status": "ok",
+    "seconds": 63,
+    "tokens": 21867,
+    "prompt": "16ded81c01",
+    "at": "2026-11-14T01:46:05.488Z"
+  },
+  "cars/c4zr1": {
+    "status": "ok",
+    "seconds": 45,
+    "tokens": 21392,
+    "prompt": "813cb9669b",
+    "at": "2026-11-14T01:46:32.727Z"
+  },
+  "cars/p930": {
+    "status": "ok",
+    "seconds": 52,
+    "tokens": 47720,
+    "prompt": "b6c93fcd1b",
+    "at": "2026-11-14T01:46:46.722Z"
+  },
+  "cars/f40": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 21947,
+    "prompt": "040d4a5655",
+    "at": "2026-11-14T02:26:56.867Z"
+  },
+  "cars/r34": {
+    "status": "ok",
+    "seconds": 49,
+    "tokens": 17577,
+    "prompt": "ab1687b826",
+    "at": "2026-11-14T01:46:54.397Z"
+  },
+  "cars/supra": {
+    "status": "ok",
+    "seconds": 63,
+    "tokens": 29901,
+    "prompt": "4f5e3c0d6b",
+    "at": "2026-11-14T01:46:59.666Z"
+  },
+  "cars/venom": {
+    "status": "ok",
+    "seconds": 44,
+    "tokens": 21700,
+    "prompt": "2c1b652381",
+    "at": "2026-11-14T01:47:16.823Z"
+  },
+  "cars/mx5nb": {
+    "status": "ok",
+    "seconds": 49,
+    "tokens": 21537,
+    "prompt": "8a295074ed",
+    "at": "2026-11-14T01:47:35.824Z"
+  },
+  "cars/scirocco": {
+    "status": "ok",
+    "seconds": 50,
+    "tokens": 21469,
+    "prompt": "e1ba287895",
+    "at": "2026-11-14T01:47:39.199Z"
+  },
+  "cars/s15": {
+    "status": "ok",
+    "seconds": 53,
+    "tokens": 19654,
+    "prompt": "79d9d551ef",
+    "at": "2026-11-14T01:47:47.122Z"
+  },
+  "cars/elise": {
+    "status": "ok",
+    "seconds": 52,
+    "tokens": 22681,
+    "prompt": "ad85aaf1a2",
+    "at": "2026-11-14T01:47:51.441Z"
+  },
+  "cars/mf1": {
+    "status": "ok",
+    "seconds": 60,
+    "tokens": 18828,
+    "prompt": "88f222c5f7",
+    "at": "2026-11-14T01:48:16.713Z"
+  },
+  "cars/esprit": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 21262,
+    "prompt": "ef5457d95f",
+    "at": "2026-11-14T02:10:06.434Z"
+  },
+  "cars/elise111s": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 136,
+    "prompt": "1f250dccab",
+    "at": "2026-11-14T01:56:41.442Z"
+  },
+  "cars/dmc": {
+    "status": "ok",
+    "seconds": 46,
+    "tokens": 16155,
+    "prompt": "30d3e25d85",
+    "at": "2026-11-14T01:48:25.211Z"
+  },
+  "cars/firebird": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 29724,
+    "prompt": "e572c828b4",
+    "at": "2026-11-14T02:10:04.480Z"
+  },
+  "cars/stratos": {
+    "status": "ok",
+    "seconds": 51,
+    "tokens": 22168,
+    "prompt": "04d17f5388",
+    "at": "2026-11-14T01:48:26.495Z"
+  },
+  "cars/elise190": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 107,
+    "prompt": "7248e95bf6",
+    "at": "2026-11-14T01:56:14.060Z"
+  },
+  "cars/bttf": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 108,
+    "prompt": "76599ebad5",
+    "at": "2026-11-14T01:56:15.702Z"
+  },
+  "cars/kitt": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 94,
+    "prompt": "90719c2382",
+    "at": "2026-11-14T01:56:02.737Z"
+  },
+  "cars/brian": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 107,
+    "prompt": "554d480a16",
+    "at": "2026-11-14T01:57:50.085Z"
+  },
+  "cars/herbie": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 140,
+    "prompt": "8ecdfe033e",
+    "at": "2026-11-14T01:58:34.272Z"
+  },
+  "cars/bond": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 107,
+    "prompt": "facd2f81df",
+    "at": "2026-11-14T01:58:02.798Z"
+  },
+  "cars/taxi": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 136,
+    "prompt": "6c3c28495c",
+    "at": "2026-11-14T01:58:57.644Z"
+  },
+  "cars/ecto1": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 19778,
+    "prompt": "31650d67f0",
+    "at": "2026-11-14T02:10:05.300Z"
+  },
+  "cars/abarth": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 35015,
+    "prompt": "dd3011e3fb",
+    "at": "2026-11-14T02:10:55.169Z"
+  },
+  "cars/batmobile": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 17370,
+    "prompt": "8f2cf56af3",
+    "at": "2026-11-14T02:10:51.517Z"
+  },
+  "cars/logan": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 56,
+    "tokens": 21437,
+    "prompt": "8ce07a9762",
+    "at": "2026-11-14T02:11:01.233Z"
+  },
+  "cars/ek9": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 43677,
+    "prompt": "75261bb7d8",
+    "at": "2026-11-14T02:11:07.379Z"
+  },
+  "cars/mx5na": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 21515,
+    "prompt": "d34d4b78b9",
+    "at": "2026-11-14T02:11:49.967Z"
+  },
+  "cars/m3e46": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 20144,
+    "prompt": "5758a831d9",
+    "at": "2026-11-14T02:11:55.378Z"
+  },
+  "cars/delta": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 21112,
+    "prompt": "3068f106bb",
+    "at": "2026-11-14T02:12:04.397Z"
+  },
+  "cars/evo8": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 24565,
+    "prompt": "8c0bdf259d",
+    "at": "2026-11-14T02:11:49.491Z"
+  },
+  "cars/tesla": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 16908,
+    "prompt": "4c3006ef70",
+    "at": "2026-11-14T02:12:46.467Z"
+  },
+  "cars/nsx": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 27994,
+    "prompt": "5a610ed1b6",
+    "at": "2026-11-14T02:12:50.212Z"
+  },
+  "cars/gt500": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 21871,
+    "prompt": "1ab5e1462d",
+    "at": "2026-11-14T02:13:04.610Z"
+  },
+  "cars/a110": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 21708,
+    "prompt": "08669d6487",
+    "at": "2026-11-14T02:12:38.757Z"
+  },
+  "cars/demon": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 14209,
+    "prompt": "cd4a0ca532",
+    "at": "2026-11-14T02:13:32.506Z"
+  },
+  "cars/ruf": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 71,
+    "tokens": 30517,
+    "prompt": "3443aa8a1b",
+    "at": "2026-11-14T02:13:57.716Z"
+  },
+  "cars/cgt": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 26881,
+    "prompt": "0e6e896f63",
+    "at": "2026-11-14T02:13:47.763Z"
+  },
+  "cars/zonda": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 17327,
+    "prompt": "67b8b4ba00",
+    "at": "2026-11-14T02:13:51.945Z"
+  },
+  "cars/beetle": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 16497,
+    "prompt": "b7b85ddef2",
+    "at": "2026-11-14T02:09:57.663Z"
+  },
+  "cars/agera": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 23598,
+    "prompt": "e9c893df37",
+    "at": "2026-11-14T02:14:26.144Z"
+  },
+  "cars/veyron": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 12552,
+    "prompt": "d5e551518b",
+    "at": "2026-11-14T02:14:35.336Z"
+  },
+  "cars/h1": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 29668,
+    "prompt": "514ad5a7d7",
+    "at": "2026-11-14T02:14:43.964Z"
+  },
+  "parts/pneus-route": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 20834,
+    "prompt": "8da113defe",
+    "at": "2026-11-14T02:14:42.192Z"
+  },
+  "parts/pneus-semi": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 21358,
+    "prompt": "b3e9c344f9",
+    "at": "2026-11-14T02:15:25.019Z"
+  },
+  "parts/pneus-pluie": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 28629,
+    "prompt": "6fdaf7231b",
+    "at": "2026-11-14T02:15:20.643Z"
+  },
+  "parts/susp-filetes": {
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 106,
+    "prompt": "2d20d1a2f9",
+    "at": "2026-11-14T01:54:12.331Z"
+  },
+  "parts/pneus-terre": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 21049,
+    "prompt": "24e748adcc",
+    "at": "2026-11-14T02:15:26.052Z"
+  },
+  "parts/susp-drift": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 13184,
+    "prompt": "49d1e9640b",
+    "at": "2026-11-14T02:15:41.211Z"
+  },
+  "parts/susp-rallye": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 17920,
+    "prompt": "f656ad2950",
+    "at": "2026-11-14T02:16:15.060Z"
+  },
+  "parts/freins-endurance": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 34601,
+    "prompt": "c8baef1169",
+    "at": "2026-11-14T02:16:22.375Z"
+  },
+  "parts/boite-courte": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 21178,
+    "prompt": "1e4e0c60dc",
+    "at": "2026-11-14T02:16:31.404Z"
+  },
+  "parts/boite-seq": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 26735,
+    "prompt": "5b57bad95b",
+    "at": "2026-11-14T02:17:09.297Z"
+  },
+  "parts/freins-carbone": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 56,
+    "tokens": 30783,
+    "prompt": "df8d0318b7",
+    "at": "2026-11-14T02:16:22.219Z"
+  },
+  "parts/autobloquant": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 21360,
+    "prompt": "1b3915b40a",
+    "at": "2026-11-14T02:17:19.139Z"
+  },
+  "parts/kit-turbo": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 18514,
+    "prompt": "d7a189fe3b",
+    "at": "2026-11-14T02:17:22.667Z"
+  },
+  "parts/turbo-hybride": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 21255,
+    "prompt": "0afba0b9a2",
+    "at": "2026-11-14T02:17:28.121Z"
+  },
+  "parts/admission": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 21954,
+    "prompt": "ea2d009330",
+    "at": "2026-11-14T02:18:05.147Z"
+  },
+  "parts/compresseur": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 17146,
+    "prompt": "a441a4d17c",
+    "at": "2026-11-14T02:18:05.826Z"
+  },
+  "parts/stage1": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 21242,
+    "prompt": "d3bcc75d72",
+    "at": "2026-11-14T02:18:09.983Z"
+  },
+  "parts/eco-croisiere": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 18078,
+    "prompt": "60ea2bf055",
+    "at": "2026-11-14T02:19:03.354Z"
+  },
+  "parts/batterie": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 33859,
+    "prompt": "c9df7a6b87",
+    "at": "2026-11-14T02:18:49.474Z"
+  },
+  "parts/allegement": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 14145,
+    "prompt": "2a411f3bfd",
+    "at": "2026-11-14T02:19:01.748Z"
+  },
+  "parts/k9k": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 34288,
+    "prompt": "9bf3934459",
+    "at": "2026-11-14T02:18:15.312Z"
+  },
+  "parts/aileron": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 13764,
+    "prompt": "a582ac9ae6",
+    "at": "2026-11-14T02:19:06.105Z"
+  },
+  "parts/underglow": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 20884,
+    "prompt": "74c4ed5c6e",
+    "at": "2026-11-14T02:19:55.139Z"
+  },
+  "rivals/lola": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 21297,
+    "prompt": "3303b160d9",
+    "at": "2026-11-14T02:19:57.990Z"
+  },
+  "parts/nitro": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 17284,
+    "prompt": "aef6025257",
+    "at": "2026-11-14T02:19:34.907Z"
+  },
+  "rivals/kenji": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 17533,
+    "prompt": "de1e752cfa",
+    "at": "2026-11-14T02:20:20.439Z"
+  },
+  "rivals/roxy": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 21452,
+    "prompt": "5463aa3937",
+    "at": "2026-11-14T02:20:42.005Z"
+  },
+  "rivals/cassette": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 34773,
+    "prompt": "e5d4e5c77e",
+    "at": "2026-11-14T02:19:59.104Z"
+  },
+  "rivals/baron": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 17522,
+    "prompt": "1cc0e0c3d8",
+    "at": "2026-11-14T02:20:46.415Z"
+  },
+  "rivals/nyx": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 17188,
+    "prompt": "897d08b10a",
+    "at": "2026-11-14T02:20:56.263Z"
+  },
+  "packs/neon": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 26298,
+    "prompt": "443b3c49f6",
+    "at": "2026-11-14T02:21:08.316Z"
+  },
+  "packs/night": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 21130,
+    "prompt": "7153122b46",
+    "at": "2026-11-14T02:21:32.836Z"
+  },
+  "packs/overdrive": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 21262,
+    "prompt": "5f27f0c8ec",
+    "at": "2026-11-14T02:21:33.841Z"
+  },
+  "ui/hero": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 21748,
+    "prompt": "e5b1717d5b",
+    "at": "2026-11-14T02:21:55.960Z"
+  }
+}

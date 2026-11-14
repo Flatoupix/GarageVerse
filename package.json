@@ -7,7 +7,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "art": "node pipeline/art.mjs",
+    "art:review": "node pipeline/art.mjs --review",
+    "balance": "node pipeline/balance.mjs"
   },
   "dependencies": {
     "vue": "3.5.41"
