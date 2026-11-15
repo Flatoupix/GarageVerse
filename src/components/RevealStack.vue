@@ -3,6 +3,7 @@ import { computed, onUnmounted, ref, watch } from 'vue'
 import { partById, vehicleById } from '../game/data'
 import { reducedMotion } from '../game/store'
 import type { Opening } from '../game/save'
+import CardBackFace from './CardBackFace.vue'
 import PullCard from './PullCard.vue'
 
 const props = defineProps<{ opening: Opening; faceUp: boolean; flipping: boolean; entering: boolean; cinematic: boolean; tell?: string; glow?: string }>()
@@ -96,13 +97,11 @@ function pointerCancel(event: PointerEvent) {
         <div v-if="slot < total - 1" class="stack-edge" aria-hidden="true"></div>
         <div class="swipe-card">
           <div :key="slot" class="flip-card" :class="{ 'is-flipping': flipping }">
-            <button v-if="!faceUp" type="button" class="card-back" :class="tell && `tell-${tell}`" :aria-label="`Retourner la carte ${slot + 1}`" @click="$emit('flip')">
-              <span class="back-inset"></span><span class="back-sun"></span><span class="back-monogram">GV</span>
-              <span class="back-caption">GARAGEVERSE</span>
+            <button v-if="!faceUp" type="button" class="card-back has-art" :class="tell && `tell-${tell}`" :aria-label="`Retourner la carte ${slot + 1}`" @click="$emit('flip')">
+              <CardBackFace />
             </button>
-            <div v-else class="card-back back-decoration" aria-hidden="true">
-              <span class="back-inset"></span><span class="back-sun"></span><span class="back-monogram">GV</span>
-              <span class="back-caption">GARAGEVERSE</span>
+            <div v-else class="card-back has-art back-decoration" aria-hidden="true">
+              <CardBackFace />
             </div>
             <div v-if="faceUp" class="flip-front">
               <div><PullCard :pull="pull" :cinematic="cinematic" /></div>

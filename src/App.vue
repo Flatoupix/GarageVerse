@@ -5,6 +5,8 @@ import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themeGroups, themes, unlocked, type Theme } from './game/theme'
+import { cardBackOf, cardBacks } from './game/cardback'
+import type { CardBackId } from './game/save'
 import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
@@ -231,6 +233,14 @@ function chooseTheme(id: Theme) {
   persist()
 }
 
+// Dos des cartes : quatre au choix, l'Autoroute par défaut.
+const currentBack = computed(() => cardBackOf(save.preferences.cardBack).id)
+function chooseCardBack(id: CardBackId) {
+  if (id === currentBack.value) return
+  save.preferences.cardBack = id
+  persist()
+}
+
 function toggleSetting(key: Setting) {
   save.preferences[key] = !save.preferences[key]
   if (save.preferences[key] && (key === 'music' || key === 'sound')) onAudioGesture()
@@ -328,6 +338,14 @@ function toggleSetting(key: Setting) {
             </span>
           </label>
         </div>
+      </fieldset>
+      <fieldset class="back-picker">
+        <legend>Dos des cartes</legend>
+        <label v-for="b in cardBacks" :key="b.id" class="back-option" :class="{ chosen: currentBack === b.id }">
+          <input type="radio" name="cardback" :value="b.id" :checked="currentBack === b.id" @change="chooseCardBack(b.id)" />
+          <span class="back-thumb" :style="{ backgroundImage: `url(${b.art})` }" aria-hidden="true"></span>
+          <span>{{ b.name }}</span>
+        </label>
       </fieldset>
       <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
       <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>

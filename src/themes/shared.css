@@ -551,6 +551,29 @@
 .car-sheet-aside { min-width: 0; }
 .garage-search-group { display: grid; gap: 9px; min-width: 0; }
 
+/* Dos de carte illustré : fond plein cadre et nom du jeu sur une bannière (composant CardBackFace). */
+.card-back.has-art { background: #0b0420; }
+.card-back.has-art::after { display: none; }
+.back-face { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
+.back-art { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.back-banner { position: absolute; left: 23%; width: 54%; top: 50%; height: 11.5%; transform: translateY(-50%); display: grid; place-items: center;
+  background: linear-gradient(90deg, #0b042000, #0b0420e8 14%, #0b0420e8 86%, #0b042000); }
+.back-banner::before, .back-banner::after { content: ''; position: absolute; left: 0; right: 0; height: 1.5px; background: linear-gradient(90deg, transparent, var(--back-a1), var(--back-a2), transparent); }
+.back-banner::before { top: 0; }
+.back-banner::after { bottom: 0; }
+.back-word { width: 66%; height: auto; overflow: visible; }
+
+/* Réglage « Dos des cartes » : quatre vignettes au choix. */
+.back-picker { border: 0; padding: 0; margin: 6px 0 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; min-width: 0; }
+.back-picker legend { grid-column: 1 / -1; padding: 0; margin-bottom: 8px; color: var(--muted); font: 700 .78rem var(--body); text-transform: uppercase; letter-spacing: .12em; }
+.back-option { position: relative; display: grid; gap: 5px; justify-items: center; cursor: pointer; }
+.back-option input { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
+.back-thumb { width: 100%; aspect-ratio: 2 / 3; border-radius: 8px; background-size: cover; background-position: center; border: 2px solid var(--line, #ffffff33); }
+.back-option.chosen .back-thumb { border-color: var(--accent, #2de2ff); box-shadow: 0 0 0 2px var(--accent, #2de2ff); }
+.back-option > span:last-child { font-size: .72rem; color: var(--muted); }
+.back-option.chosen > span:last-child { color: inherit; font-weight: 700; }
+.back-option:has(input:focus-visible) .back-thumb { outline: 2px solid var(--accent, #2de2ff); outline-offset: 2px; }
+
 /* Choix des voitures : une couleur par coût d'écurie (1 vert menthe → 10 jaune vif), texte sombre pour rester lisible. */
 .pick-cost[data-cost] { color: #14082a; }
 .pick-cost[data-cost="1"] { background: #6dffb0; }

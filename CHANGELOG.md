@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier.
 
+## [0.3.2] — 2026-11-15
+
+### Ajouté
+
+- **Dos des cartes au choix.** Dans les Réglages, quatre dos illustrés : Blason, Carbone, Autoroute et Motif. Le nom du jeu y est écrit en petit sur deux lignes, GARAGE puis VERSE, en chrome stylisé aux couleurs du dos choisi. Il remplace le monogramme « GV ». L’Autoroute est le dos par défaut, et ton choix est gardé.
+
 ## [0.3.1] — 2026-11-15
 
 ### Modifié

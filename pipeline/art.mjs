@@ -51,6 +51,15 @@ const EDITION_LOOKS = {
     'ivy and weeds growing through it, shafts of golden light through the broken roof, floating dust. ' +
     'Style: moody cinematic illustrated painting, muted earthy palette with the faded paint still recognisable, melancholic and nostalgic, not photorealistic.',
 }
+// --set cardback [--only cardback-a,cardback-b] : propositions de dos de carte, src/assets/ui/cardback-<lettre>.webp (portrait, sans texte).
+const CARDBACK_BASE = 'Back of a collectible car trading card, portrait 2:3, full-bleed artwork filling the whole image with perfect left-right mirror symmetry, ' +
+  'no frame, no border and no card edge, a calm empty round area at the exact centre where a monogram will be added later, rich detail near the edges.'
+const CARDBACKS = {
+  a: 'Art-deco chrome and gold crest: radiating sunburst rays on deep violet, fine gold line pattern, a polished chrome medallion shaped like a steering wheel with stylised wings at the centre. Premium, elegant, collectible.',
+  b: 'Black carbon-fibre weave with two bold symmetrical diagonal racing stripes in hot magenta and electric cyan, brushed-metal corner plates with rivets, a round blank brushed-metal badge plate at the centre. Sporty and modern.',
+  c: 'A symmetrical neon one-point-perspective highway vanishing toward a huge striped sunset sun, glowing laser-grid floor, mirrored mountains and palm silhouettes, a glowing ring at the centre of the sun. Synthwave outrun poster style.',
+  d: 'A seamless repeating pattern of tiny pistons, wheels, lightning bolts and stars in magenta and cyan outline on deep midnight violet, framed by an ornate wide circular medallion at the centre. Playful retro trading-card style.',
+}
 // Styles alternatifs : une carte peut sortir du synthwave (champ look du roster) avec son propre décor (champ setting).
 // Décor de course par condition de piste (clés de `conditions` dans garage.json).
 // Couvertures de boosters : une scène par collection, et une variante légendaire annoncée quand le sachet en contient une.
@@ -111,6 +120,10 @@ function jobs() {
         `centered in the lower two thirds, slight low camera angle, wheels on the ground. ${EDITION_LOOKS[style]} ${NO_TEXT}` })
     }
     return list
+  }
+  if (set === 'cardback') {
+    return Object.entries(CARDBACKS).map(([key, look]) => ({ kind: 'ui', id: `cardback-${key}`, size: [640, 960], prompt: `${CARDBACK_BASE} ${look} ${NO_TEXT}` }))
+      .filter(job => !only || only.includes(job.id))
   }
   if (kinds.includes('cars')) for (const v of roster.vehicles) {
     const subject = v.culture

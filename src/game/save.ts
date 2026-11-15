@@ -17,7 +17,10 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; touchHelp?: boolean }
+// Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
+export const cardBackIds = ['a', 'b', 'c', 'd'] as const
+export type CardBackId = (typeof cardBackIds)[number]
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; touchHelp?: boolean; cardBack?: CardBackId }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -192,6 +195,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     theme: themeIds.find(id => id === input.preferences?.theme) ?? 'neon',
     ...(typeof input.preferences?.garageSort === 'string' && ['number', 'rarity', 'power', 'name', 'copies', 'stage', 'cost', 'cost-desc', 'acc', 'vit', 'man', 'end', 'year'].includes(input.preferences.garageSort) ? { garageSort: input.preferences.garageSort } : {}),
     ...(input.preferences?.garageRarity && rarities.includes(input.preferences.garageRarity) ? { garageRarity: input.preferences.garageRarity } : {}),
+    ...(cardBackIds.includes(input.preferences?.cardBack as CardBackId) ? { cardBack: input.preferences!.cardBack } : {}),
     ...(Number.isInteger(input.preferences?.garageCols) ? { garageCols: int(input.preferences?.garageCols, 0, 6, 0) } : {}),
   }
   return save
