@@ -17,11 +17,12 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; touchHelp?: boolean }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
 export interface Save {
+  seenCars?: string[]
   nightRecord: number
   night: Night | null
   nightLineup: string[]
@@ -50,10 +51,11 @@ export function newSave(): Save {
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon' },
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
+  save.seenCars = Object.keys(save.cars)
   return save
 }
 
@@ -92,7 +94,12 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   const save = newSave()
   let input: Partial<Save> | null = null
   try { input = JSON.parse(raw ?? 'null') } catch { input = null }
-  if (input?.version !== 2) { migrate(legacy, save); return save }
+  if (input?.version !== 2) {
+    migrate(legacy, save)
+    if (legacy) save.preferences.touchHelp = true
+    save.seenCars = Object.keys(save.cars)
+    return save
+  }
 
   save.series = series.filter(s => Array.isArray(input.series) && input.series.includes(s.id)).map(s => s.id)
   if (input.daily) save.daily = {
@@ -125,6 +132,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       shown: editions.includes(car.shown) ? car.shown : editions[0],
       favorite: car.favorite === true, upgrades: levels }
   }
+  save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
   if (save.sealed && Array.isArray(input.sealedPulls) && input.sealedPulls.length === 5 &&
@@ -173,6 +181,8 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   }
   else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {
+    // Les anciennes parties conservent l’aide tactile ; les nouvelles la désactivent.
+    touchHelp: input.preferences?.touchHelp !== false,
     sound: input.preferences?.sound !== false,
     music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,
@@ -318,7 +328,7 @@ export function upgradeCheck(save: Save, id: string, key: StatKey): string | und
   const level = car.upgrades[key]
   const price = upgradePrices[level]
   if (price === undefined) return 'Niveau maximal atteint'
-  if (save.credits < price) return `Il manque ${price - save.credits} crédits`
+  if (save.credits < price) return `Il te manque ${price - save.credits} crédits`
 }
 
 export function upgradeStat(save: Save, id: string, key: StatKey): string | undefined {
@@ -380,7 +390,7 @@ export function craftCheck(save: Save, id: string): string | undefined {
   const base = save.cars[v.evolvesFrom]
   if (!base) return `Il faut posséder ${vehicleById.get(v.evolvesFrom)!.name} ${vehicleById.get(v.evolvesFrom)!.version}`
   if (base.stage < v.craft.stage) return `Préparer la version de base au Stage ${v.craft.stage}`
-  if (save.credits < v.craft.credits) return `Il manque ${v.craft.credits - save.credits} crédits`
+  if (save.credits < v.craft.credits) return `Il te manque ${v.craft.credits - save.credits} crédits`
 }
 
 export function craft(save: Save, id: string): string | undefined {
@@ -452,7 +462,7 @@ export function unlockEditionCheck(save: Save, id: string, style: EditionStyle):
   if (!stylesOf(id).includes(style)) return 'Style indisponible pour cette voiture'
   if (car.editions.includes(style)) return 'Style déjà débloqué'
   const price = editionPrice(id)
-  if (save.credits < price) return `Il manque ${price - save.credits} crédits`
+  if (save.credits < price) return `Il te manque ${price - save.credits} crédits`
 }
 
 export function unlockEdition(save: Save, id: string, style: EditionStyle): string | undefined {

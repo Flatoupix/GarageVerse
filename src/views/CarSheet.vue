@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
 import { art, edition } from '../game/art'
 import { families, partById, parts, progression, statLabels, styleLabel, stylesOf, vehicleById, vehicles, type EditionStyle, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
-import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionPrice, freeParts, install, installCheck, prepOf, scrapCar,
+import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionPrice, freeParts, install, installCheck, prepOf,
   selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, upgrade, upgradeCheck, upgradeStat } from '../game/save'
+import { recycle, undoRecycle, type RecycleReceipt } from '../game/recycle'
 import { act, buzz, save } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
@@ -18,6 +19,31 @@ const v = computed(() => vehicleById.get(props.id)!)
 const car = computed(() => save.cars[props.id])
 const panel = ref<'overview' | 'workshop' | 'card'>(props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview')
 const confirmingSale = ref(false)
+const confirmingRecycle = ref(false)
+const receipt = shallowRef<RecycleReceipt>()
+let recycleTimer: ReturnType<typeof setTimeout> | undefined
+function clearRecycle() {
+  clearTimeout(recycleTimer)
+  receipt.value = undefined
+  confirmingRecycle.value = false
+}
+watch(() => props.id, id => {
+  clearRecycle()
+  if (save.cars[id] && !save.seenCars?.includes(id)) act(s => { (s.seenCars ??= []).push(id) })
+}, { immediate: true })
+onBeforeUnmount(clearRecycle)
+function confirmRecycle() {
+  const result = recycle(save, props.id)
+  if (!result) { confirmingRecycle.value = false; return }
+  clearRecycle()
+  receipt.value = result
+  act(() => {}, undefined, 'collect')
+  sparks('.car-sheet-portrait', palettes.cyan, 18, 0.6)
+  recycleTimer = setTimeout(clearRecycle, 6000)
+}
+function cancelRecycle() {
+  if (receipt.value && act(s => undoRecycle(s, receipt.value!, props.id), 'Doublon restitué', 'flip')) clearRecycle()
+}
 const salePrice = computed(() => sellPrice(save, props.id))
 const saleProblem = computed(() => sellCheck(save, props.id))
 watch(() => props.id, () => { confirmingSale.value = false })
@@ -31,8 +57,12 @@ const image = computed(() => edition(props.id, car.value?.shown).art)
 const next = computed(() => stageCost(save, props.id))
 const stageProblem = computed(() => {
   if (!car.value || !next.value) return 'Préparation maximale atteinte'
-  if (save.credits < next.value.credits) return `Il manque ${next.value.credits - save.credits} crédits`
-  if (car.value.copies - 1 < next.value.duplicates) return `Il faut ${next.value.duplicates} doublon${next.value.duplicates > 1 ? 's' : ''}`
+  const missing = []
+  const credits = next.value.credits - save.credits
+  const duplicates = next.value.duplicates - (car.value.copies - 1)
+  if (credits > 0) missing.push(`Il te manque ${credits} crédits`)
+  if (duplicates > 0) missing.push(`Il te manque ${duplicates} doublon${duplicates > 1 ? 's' : ''}`)
+  return missing.length ? missing.join(' · ') : undefined
 })
 const evolutions = computed(() => vehicles.filter(e => e.evolvesFrom === props.id))
 const base = computed(() => vehicleById.get(v.value.evolvesFrom ?? v.value.culture?.base ?? ''))
@@ -154,6 +184,17 @@ function workshop(key?: StatKey) {
       </aside>
 
       <div class="car-sheet-main">
+        <section v-if="confirmingRecycle" class="sheet-section" role="status">
+          <p>Recycler ce doublon pour +{{ progression.scrap[v.rarity] }} crédits ?</p>
+          <div class="car-sale-actions">
+            <button type="button" class="button primary" @click="confirmRecycle">Confirmer</button>
+            <button type="button" class="button ghost" @click="confirmingRecycle = false">Annuler</button>
+          </div>
+        </section>
+        <section v-if="receipt" class="sheet-section" role="status">
+          <p>Doublon recyclé · +{{ receipt.credits }} crédits</p>
+          <button type="button" class="button ghost" @click="cancelRecycle">Annuler</button>
+        </section>
         <section v-if="car && panel !== 'card'" class="sheet-section auto-upgrade-box">
           <div class="section-row">
             <h3>Amélioration automatique</h3>
@@ -236,7 +277,7 @@ function workshop(key?: StatKey) {
             <p v-if="next && stageProblem" class="hint">{{ stageProblem }}</p>
             <template v-if="car.copies > 1">
               <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
-              <button type="button" class="button small quiet" @click="act(s => scrapCar(s, id), `+${progression.scrap[v.rarity]} crédits`)">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+              <button type="button" class="button small quiet" @click="confirmingRecycle = true">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
             </template>
           </section>
         </template>
@@ -258,8 +299,9 @@ function workshop(key?: StatKey) {
                   <p v-if="module.nextValue > stats[module.key]" class="upgrade-preview">{{ statLabels[module.key] }} {{ stats[module.key] }} → {{ module.nextValue }}</p>
                   <p v-else class="hint">{{ statLabels[module.key] }} atteint déjà {{ STAT_CAP }} avec cette préparation.</p>
                   <button type="button" class="button primary wide" :disabled="Boolean(module.problem)" @click="improve(module.key)">
-                    {{ module.problem ?? `Passer au niveau ${module.level + 1} · ${module.price} crédits` }}
+                    {{ `Passer au niveau ${module.level + 1} · ${module.price} crédits` }}
                   </button>
+                  <p v-if="module.problem" class="hint">{{ module.problem }}</p>
                 </template>
                 <div v-if="module.installed.length || module.available.length || module.level === partUnlockLevel" class="module-parts">
                   <div class="section-row">
@@ -307,6 +349,7 @@ function workshop(key?: StatKey) {
             <button v-if="v.craft" type="button" class="button primary" :disabled="Boolean(craftCheck(save, id))" @click="unlock(id, true)">
               {{ craftCheck(save, id) ?? `Débloquer · ${v.craft.credits} crédits` }}
             </button>
+            <p v-if="craftCheck(save, id)" class="hint">{{ craftCheck(save, id) }}</p>
           </section>
           <section v-else class="sheet-section">
             <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3</h3>
@@ -317,7 +360,7 @@ function workshop(key?: StatKey) {
             <p v-if="next" class="hint">{{ stageProblem ?? next.text }}</p>
             <template v-if="car.copies > 1">
               <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
-              <button type="button" class="button small quiet" @click="act(s => scrapCar(s, id), `+${progression.scrap[v.rarity]} crédits`)">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+              <button type="button" class="button small quiet" @click="confirmingRecycle = true">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
             </template>
           </section>
           <section v-if="car && evolutions.length" class="sheet-section">
@@ -328,6 +371,7 @@ function workshop(key?: StatKey) {
               <button v-else type="button" class="button small primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
                 {{ craftCheck(save, e.id) ?? `Débloquer · ${e.craft!.credits} cr.` }}
               </button>
+              <p v-if="!save.cars[e.id] && craftCheck(save, e.id)" class="hint">{{ craftCheck(save, e.id) }}</p>
             </div>
           </section>
           <section class="sheet-section spec">

@@ -186,3 +186,11 @@ En production, `src/main.ts` enregistre `./sw.js`. Le service worker sans dépen
 Le cache versionné est déclaré en tête de `public/sw.js` : changer son nom à chaque publication. Une version en attente s’active quand les anciennes fenêtres du jeu sont fermées, au prochain lancement ; l’activation supprime les anciens caches. Les réglages affichent « Disponible hors ligne » quand le worker contrôle la page. En développement ou sans service worker, le jeu fonctionne comme avant.
 
 Dans les réglages, « Exporter la sauvegarde » télécharge la partie courante au format JSON dans un fichier daté. « Importer une sauvegarde » vérifie le format GarageVerse v2 puis utilise `readSave` pour normaliser les données. Une confirmation précède le remplacement et la persistance ; annuler ou choisir un fichier invalide conserve la partie actuelle. Exporte ta partie avant de la remplacer pour en garder une copie.
+
+
+### Actions du garage et aide
+
+- Pour recycler un doublon, touche « Recycler un doublon », puis confirme le montant. Tu peux ensuite toucher « Annuler » dans le bandeau pendant environ 6 secondes : tu retrouves ton exemplaire et les crédits du recyclage sont repris. Une nouvelle opération remplace le bandeau précédent. Cette possibilité reste en mémoire uniquement : elle disparaît si tu changes de voiture ou recharges la page.
+- Un bouton grisé indique une action indisponible. Sous les boutons de Stage, tu retrouves les crédits et les doublons exacts qui te manquent ; l’atelier et les évolutions indiquent leurs conditions.
+- Le badge « Nouveau » signale une voiture reçue dont tu n’as jamais ouvert la fiche. Le champ optionnel `seenCars` garde les fiches déjà ouvertes. Les voitures de départ et celles de tes anciennes sauvegardes sont considérées comme déjà vues.
+- Dans les Réglages, tu peux activer « Aide en touchant les mots soulignés ». Cette préférence optionnelle `touchHelp` est désactivée pour une partie neuve pour éviter les touchers involontaires. Une ancienne sauvegarde sans cette préférence garde l’aide activée pour conserver ton comportement habituel. Tu peux toujours ouvrir le lexique avec « ? », même si l’aide tactile est désactivée.

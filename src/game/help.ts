@@ -1,4 +1,4 @@
-import { ref, type Directive } from 'vue'
+import { ref, watch, type Directive } from 'vue'
 import { OVERHEAT } from './rules'
 import { NIGHT_CAP, nightReward } from './endless'
 
@@ -6,6 +6,10 @@ import { NIGHT_CAP, nightReward } from './endless'
 export interface HelpEntry { term: string; text: string }
 
 export const glossary = {
+  nouveau: { term: 'Nouveau', text: 'Une voiture reçue porte ce badge jusqu’à ta première ouverture de sa fiche.' },
+  recycle: { term: 'Annulation du recyclage', text: 'Confirme le recyclage d’un doublon, puis tu peux l’annuler pendant six secondes. Changer de voiture ou recharger ferme cette possibilité.' },
+  disabled: { term: 'Bouton grisé', text: 'Cette action est indisponible. Lis la condition indiquée pour savoir ce qu’il te manque.' },
+  touchHelp: { term: 'Aide tactile', text: 'Active « Aide en touchant les mots soulignés » dans les Réglages pour ouvrir une explication au toucher. Le bouton « ? » ouvre toujours le lexique.' },
   legendaryPack: { term: 'Sachet légendaire', text: 'Un sachet doré avec le ruban « Édition légendaire » contient au moins une carte Légendaire. Tes cinq cartes sont tirées dès l’achat ou l’utilisation du ticket : tu retrouves le même lot après un rechargement. La boutique montre toujours la couverture normale.' },
   offline: { term: 'Mode hors ligne', text: 'Après une première visite connectée, le jeu garde sa page et ses ressources sur ton appareil. Relance-le sans réseau ; les images déjà chargées restent disponibles. Une nouvelle version arrive au prochain lancement connecté.' },
   exportSave: { term: 'Export de sauvegarde', text: 'Télécharge un fichier JSON daté contenant ta partie. Garde-le pour retrouver ton garage sur un autre navigateur ou appareil.' },
@@ -58,6 +62,7 @@ export type HelpKey = keyof typeof glossary
 
 // Sections du lexique ouvert par le bouton « ? ».
 export const glossarySections: { title: string; keys: HelpKey[] }[] = [
+  { title: 'Repères du garage', keys: ['nouveau', 'recycle', 'disabled', 'touchHelp'] },
   { title: 'Sauvegarde et connexion', keys: ['offline', 'exportSave', 'importSave'] },
   { title: 'Les quatre statistiques', keys: ['acc', 'man', 'vit', 'end'] },
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },
@@ -95,17 +100,32 @@ function show(el: HTMLElement) {
   openHelp.value = openHelp.value?.key === key ? null : { key, x: box.left + box.width / 2, y: above ? box.top : box.bottom, above, from: el }
 }
 
-// v-help="'acc'" : l'élément devient touchable (souligné en pointillé) et ouvre la bulle correspondante.
+// Préférence partagée sans dépendance circulaire avec le store.
+export const touchHelpEnabled = ref(false)
+const cleanup = new WeakMap<HTMLElement, () => void>()
 export const vHelp: Directive<HTMLElement, HelpKey | undefined> = {
   mounted(el, { value }) {
     if (!value) return
     el.dataset.help = value
-    el.classList.add('has-help')
-    el.tabIndex = 0
-    el.setAttribute('role', 'button')
-    // Dans une étiquette de case à cocher, le toucher explique sans cocher.
-    el.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); show(el) })
-    el.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); show(el) } })
+    const click = (event: Event) => { event.preventDefault(); event.stopPropagation(); show(el) }
+    const keydown = (event: KeyboardEvent) => { if (event.key === 'Enter' || event.key === ' ') click(event) }
+    const stop = watch(touchHelpEnabled, enabled => {
+      el.classList.toggle('has-help', enabled)
+      if (enabled) {
+        el.tabIndex = 0
+        el.setAttribute('role', 'button')
+        el.addEventListener('click', click)
+        el.addEventListener('keydown', keydown)
+      } else {
+        el.removeAttribute('tabindex')
+        el.removeAttribute('role')
+        el.removeEventListener('click', click)
+        el.removeEventListener('keydown', keydown)
+        if (openHelp.value?.from === el) openHelp.value = null
+      }
+    }, { immediate: true })
+    cleanup.set(el, () => { stop(); el.removeEventListener('click', click); el.removeEventListener('keydown', keydown) })
   },
   updated(el, { value }) { if (value) el.dataset.help = value },
+  unmounted(el) { cleanup.get(el)?.(); cleanup.delete(el); if (openHelp.value?.from === el) openHelp.value = null },
 }

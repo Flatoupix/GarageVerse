@@ -1,4 +1,5 @@
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
+import { touchHelpEnabled } from './help'
 import { playCue, type Cue } from '../feedback'
 import { series, vehicles } from './data'
 import { seriesComplete, LEGACY_KEY, refreshDaily, readSave, SAVE_KEY, type Save } from './save'
@@ -9,6 +10,7 @@ function load(): Save {
 
 export const storageWarning = ref(false)
 export const save = reactive(load()) as Save
+watch(() => save.preferences.touchHelp, value => { touchHelpEnabled.value = value !== false }, { immediate: true })
 export const toast = ref<{ text: string; tone: 'info' | 'error' } | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | undefined
 

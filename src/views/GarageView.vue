@@ -191,6 +191,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
         <div v-for="v in carList" :key="v.id" class="garage-tile">
           <template v-if="save.cars[v.id]">
             <button type="button" class="card-tile" :aria-label="`Voir ${v.name} ${v.version}`" @click="emit('inspect', 'car', v.id)">
+              <span v-if="!save.seenCars?.includes(v.id)" class="new-car-badge">Nouveau</span>
               <CarCard :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" :compact="cols !== 1" />
               <span v-if="save.cars[v.id].copies > 1" class="copy-count">×{{ save.cars[v.id].copies }}</span>
               <span v-if="save.lineup.includes(v.id)" class="tile-tag lineup-tag">Écurie</span>
@@ -236,6 +237,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
           <button v-for="v in seriesCars(entry.vehicles)" :key="v.id" type="button" class="series-car" :aria-label="`Voir ${v.name} ${v.version}${save.cars[v.id] ? '' : ' · manquante'}`" @click="emit('inspect', 'car', v.id)">
             <img v-if="save.cars[v.id]" :src="edition(v.id, save.cars[v.id].shown).art" alt="" />
             <svg v-else class="series-silhouette" viewBox="0 0 120 90" aria-hidden="true"><path d="M10 55 17 43 35 39 48 25H79L96 41 110 47V65H99a12 12 0 0 1-24 0H44a12 12 0 0 1-24 0H10Z" /></svg>
+            <span v-if="save.cars[v.id] && !save.seenCars?.includes(v.id)" class="new-car-badge">Nouveau</span>
             <strong>{{ v.name }}</strong><span>{{ v.version }}</span>
             <small>{{ save.cars[v.id] ? save.cars[v.id].shown : 'Manquante' }}</small>
           </button>

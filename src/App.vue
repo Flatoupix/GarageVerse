@@ -21,7 +21,7 @@ import { offlineReady } from './game/offline'
 import { readSave, SAVE_KEY } from './game/save'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
-type Setting = 'sound' | 'music' | 'reducedMotion' | 'vibration'
+type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 const screen = ref<Screen>(save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
@@ -326,6 +326,7 @@ function toggleSetting(key: Setting) {
       <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
       <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
       <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>
+      <label class="setting"><span>Aide en touchant les mots soulignés</span><input type="checkbox" :checked="save.preferences.touchHelp !== false" @change="toggleSetting('touchHelp')" /></label>
       <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
       <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
       <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>

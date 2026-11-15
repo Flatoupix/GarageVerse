@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { helpSettingTip } from '../game/tutorial'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { save } from '../game/store'
 import { discover, discovery, nextTutorial, skipTutorial, understoodDiscovery } from '../game/tutorial'
@@ -15,7 +16,7 @@ const steps = [
   ['.nitro-toggle', 'Active la nitro pour gagner des points sur ce secteur. Tes charges sont limitées pour toute la course.'],
   ['.round-result, .race-end', 'Compare les scores et leurs bonus. Chaque secteur gagné rapporte un point. Remporte le plus de secteurs pour battre ton rival.'],
   ['dialog[open] .workshop-intro, .garage', 'Au garage, ouvre une fiche puis l’atelier. Dépense des crédits pour améliorer une statistique de ta voiture.'],
-  ['.topbar', 'Besoin d’un rappel ? Le bouton « ? » ouvre le lexique. Touche les mots soulignés pour une aide rapide.'],
+  ['.topbar', helpSettingTip],
 ] as const
 const extras = {
   series: ['.series-list, .home-tiles, .garage', 'Tu as complété ta première série ! Ouvre Séries au garage pour récupérer ta récompense. Chaque série te récompense une seule fois.'],
