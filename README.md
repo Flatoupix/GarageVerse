@@ -1,6 +1,6 @@
 # GarageVerse
 
-## Bible de conception · v0.1
+## Bible de conception · v0.2.0
 
 GarageVerse est un jeu mobile de cartes automobiles à collectionner, avec une progression RPG et des duels tactiques. Une Clio III diesel peut devenir la voiture à laquelle on tient le plus dans un garage qui contient aussi une Venom F5. On la collectionne pour ce qu’elle représente, on la prépare pour le rôle qu’on veut lui donner et on la joue quand ses qualités font la différence.
 

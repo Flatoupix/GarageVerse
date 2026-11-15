@@ -1,11 +1,11 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
-  series, boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
-  type Booster, type EditionStyle, type Rarity, type StatKey,
+  series, boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
+  type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
-import { compatibility, createRace, rivalLineup, createDuel, lineupCost, partUnlockLevel, potential, prepUsed, racer,
-  upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
+import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, lineupCost, partUnlockLevel, potential, prepUsed, racer,
+  STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
 
 export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
@@ -16,7 +16,7 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
-export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -44,7 +44,7 @@ export function newSave(): Save {
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true, theme: 'neon' },
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon' },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
@@ -72,7 +72,10 @@ function migrate(raw: string | null, save: Save) {
       for (const key of opening.editions ?? []) if (legacyEditions[key]) addCar(save, ...legacyEditions[key])
     }
     if (Object.keys(old.record ?? {}).length) save.tutorial.status = 'done'
-    if (old.preferences) save.preferences = { ...save.preferences, ...old.preferences }
+    if (old.preferences) {
+      save.preferences = { ...save.preferences, ...old.preferences }
+      save.preferences.music = old.preferences.music ?? (old.preferences.sound !== false)
+    }
   } catch { /* ancienne sauvegarde illisible : on repart du garage de départ */ }
 }
 
@@ -146,9 +149,11 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {
     sound: input.preferences?.sound !== false,
+    music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,
     vibration: input.preferences?.vibration !== false,
     theme: themeIds.find(id => id === input.preferences?.theme) ?? 'neon',
+    ...(Number.isInteger(input.preferences?.garageCols) ? { garageCols: int(input.preferences?.garageCols, 0, 6, 0) } : {}),
   }
   return save
 }
@@ -383,6 +388,218 @@ export function scrapPart(save: Save, id: string): string | undefined {
   if (!part || freeParts(save, id) <= 0) return 'Aucun exemplaire libre'
   save.parts[id]--
   save.credits += Math.round(progression.scrap[part.rarity] / 2)
+}
+
+// ——— Styles & Éditions ———
+
+export const editionPrices: Record<Rarity, number> = { Courante: 40, Rare: 75, Épique: 120, Légendaire: 200 }
+export const editionPrice = (id: string) => {
+  const v = vehicleById.get(id)
+  return v ? editionPrices[v.rarity] : 60
+}
+
+export function selectEdition(save: Save, id: string, style: EditionStyle): string | undefined {
+  const car = save.cars[id]
+  if (!car) return 'Voiture absente du garage'
+  if (!car.editions.includes(style)) return 'Style non débloqué'
+  car.shown = style
+}
+
+export function unlockEditionCheck(save: Save, id: string, style: EditionStyle): string | undefined {
+  const car = save.cars[id], v = vehicleById.get(id)
+  if (!car || !v) return 'Voiture absente du garage'
+  if (!stylesOf(id).includes(style)) return 'Style indisponible pour cette voiture'
+  if (car.editions.includes(style)) return 'Style déjà débloqué'
+  const price = editionPrice(id)
+  if (save.credits < price) return `Il manque ${price - save.credits} crédits`
+}
+
+export function unlockEdition(save: Save, id: string, style: EditionStyle): string | undefined {
+  const problem = unlockEditionCheck(save, id, style)
+  if (problem) return problem
+  const car = save.cars[id]
+  save.credits -= editionPrice(id)
+  car.editions.push(style)
+  car.shown = style
+}
+
+// ——— Amélioration automatique ———
+
+export interface AutoUpgradePlan {
+  credits: number
+  duplicates: number
+  steps: string[]
+  statChanges: { key: StatKey; label: string; before: number; after: number }[]
+  staminaBefore: number
+  staminaAfter: number
+  potentialBefore: number
+  potentialAfter: number
+  installedParts: string[]
+  stageAfter: number
+  upgradesAfter: Record<StatKey, number>
+  partsAfter: string[]
+  summary: string
+  blockedReason?: string
+}
+
+const partScore = (p: Part, priority: StatKey[]) => {
+  const statBonus = Object.entries(p.stats ?? {}).reduce((sum, [k, val]) => {
+    const rank = Math.max(0, 4 - priority.indexOf(k as StatKey))
+    return sum + (val ?? 0) * (1 + rank * 0.15)
+  }, 0)
+  const effectBonus = (p.effects ?? []).reduce((sum, e) => sum + e.value * 0.9, 0)
+  return statBonus + effectBonus + rarities.indexOf(p.rarity) * 0.2
+}
+
+function statPriority(id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey): StatKey[] {
+  const v = vehicleById.get(id)!
+  const circuitOrder = circuit ? circuitPriorities(circuit).map(p => p.stat) : []
+  return [...upgradeKeys].sort((a, b) => {
+    if (suggestedStat && (a === suggestedStat) !== (b === suggestedStat)) return a === suggestedStat ? -1 : 1
+    const ca = circuitOrder.indexOf(a), cb = circuitOrder.indexOf(b)
+    if (ca !== -1 || cb !== -1) {
+      if (ca === -1) return 1
+      if (cb === -1) return -1
+      if (ca !== cb) return ca - cb
+    }
+    return v.stats[b] - v.stats[a]
+  })
+}
+
+export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey): AutoUpgradePlan | undefined {
+  const v = vehicleById.get(id), car = save.cars[id]
+  if (!v || !car) return
+  const priority = statPriority(id, circuit, suggestedStat)
+  const beforePrep = prepOf(save, id)
+  const beforeStats = statsOf(v, beforePrep)
+  const staminaBefore = engagements(v, beforePrep)
+  const potentialBefore = potential(v, car.stage)
+
+  // Clone léger de la sauvegarde pour simuler les actions réelles dans l'ordre le plus rentable.
+  const sim: Save = {
+    ...save,
+    credits: save.credits,
+    cars: Object.fromEntries(Object.entries(save.cars).map(([k, c]) => [k, { ...c, parts: [...c.parts], editions: [...c.editions], upgrades: { ...c.upgrades } }])),
+    parts: { ...save.parts },
+  }
+  const simCar = sim.cars[id]
+  const steps: string[] = []
+  const installedNames: string[] = []
+
+  const fitBestParts = () => {
+    for (const key of priority) {
+      for (const family of upgrades[key].families) {
+        const candidates = parts
+          .filter(p => p.family === family && !compatibility(p, v) && (freeParts(sim, p.id) > 0 || simCar.parts.includes(p.id)))
+          .sort((a, b) => partScore(b, priority) - partScore(a, priority))
+        const current = simCar.parts.map(pid => partById.get(pid)!).find(p => p?.family === family)
+        for (const candidate of candidates) {
+          if (current && (candidate.id === current.id || partScore(candidate, priority) <= partScore(current, priority))) break
+          if (!install(sim, id, candidate.id)) {
+            installedNames.push(candidate.name)
+            steps.push(`Monter ${candidate.name} (${candidate.text})`)
+            break
+          }
+        }
+      }
+    }
+  }
+
+  // 1. Monter d'abord les pièces compatibles déjà débloquées gratuitement.
+  fitBestParts()
+
+  // 2. Privilégier les groupes d'atelier où une pièce compatible est en stock, puis les statistiques prioritaires.
+  const orderedKeys = [...priority].sort((a, b) => {
+    const hasPart = (key: StatKey) => parts.some(p => upgrades[key].families.includes(p.family) && !compatibility(p, v) && freeParts(sim, p.id) > 0 && !simCar.parts.includes(p.id))
+    return Number(hasPart(b)) - Number(hasPart(a))
+  })
+
+  for (const key of orderedKeys) {
+    const startLevel = simCar.upgrades[key]
+    while (simCar.upgrades[key] < partUnlockLevel) {
+      const currentStats = statsOf(v, prepOf(sim, id))
+      const hasCompatibleFree = parts.some(p => upgrades[key].families.includes(p.family) && !compatibility(p, v) && freeParts(sim, p.id) > 0 && !simCar.parts.includes(p.id))
+      if (currentStats[key] >= STAT_CAP && !hasCompatibleFree) break
+      if (upgradeStat(sim, id, key)) break
+    }
+    if (simCar.upgrades[key] > startLevel) {
+      steps.push(`${upgrades[key].label} → niv. ${simCar.upgrades[key]}`)
+      fitBestParts()
+    }
+  }
+
+  // 3. Si une pièce en stock manque de potentiel ou si les groupes utiles sont montés, tenter un passage de Stage.
+  const needsPotentialForStock = parts.some(p => {
+    const key = upgradeForFamily(p.family)
+    return !compatibility(p, v) && freeParts(sim, p.id) > 0 && !simCar.parts.includes(p.id)
+      && key && simCar.upgrades[key] >= partUnlockLevel
+      && installCheck(sim, id, p.id) === 'Potentiel de préparation insuffisant'
+  })
+  const allWorkshopMaxed = upgradeKeys.every(k => simCar.upgrades[k] >= partUnlockLevel || statsOf(v, prepOf(sim, id))[k] >= STAT_CAP)
+  if ((needsPotentialForStock || allWorkshopMaxed || !steps.length) && !upgrade(sim, id)) {
+    steps.push(`Passer au Stage ${simCar.stage}`)
+    fitBestParts()
+  }
+
+  const afterPrep = prepOf(sim, id)
+  const afterStats = statsOf(v, afterPrep)
+  const staminaAfter = engagements(v, afterPrep)
+  const potentialAfter = potential(v, simCar.stage)
+  const statChanges = upgradeKeys
+    .filter(k => afterStats[k] !== beforeStats[k])
+    .map(k => ({ key: k, label: statLabels[k], before: beforeStats[k], after: afterStats[k] }))
+
+  const credits = save.credits - sim.credits
+  const duplicates = car.copies - simCar.copies
+
+  // Si aucune étape n'a pu être financée, expliquer clairement la prochaine amélioration bloquée.
+  let blockedReason: string | undefined
+  if (!steps.length) {
+    const nextWorkshop = orderedKeys.find(k => car.upgrades[k] < partUnlockLevel && beforeStats[k] < STAT_CAP)
+    if (nextWorkshop) {
+      const price = upgradePrices[car.upgrades[nextWorkshop]]
+      blockedReason = `Prochaine étape : ${upgrades[nextWorkshop].label} niv. ${car.upgrades[nextWorkshop] + 1} (+1 ${statLabels[nextWorkshop]}) · il manque ${price - save.credits} crédits`
+    } else {
+      const nextStage = stageCost(save, id)
+      if (nextStage) {
+        const problem = upgrade(sim, id)
+        blockedReason = `Prochaine étape : Stage ${nextStage.stage} (${nextStage.text}) · ${problem}`
+      } else {
+        blockedReason = 'Voiture déjà préparée au maximum avec les pièces de ton stock.'
+      }
+    }
+  }
+
+  const summaryParts = [...steps]
+  if (staminaAfter > staminaBefore) summaryParts.push(`+${staminaAfter - staminaBefore} secteur avant surchauffe`)
+  return {
+    credits,
+    duplicates,
+    steps,
+    statChanges,
+    staminaBefore,
+    staminaAfter,
+    potentialBefore,
+    potentialAfter,
+    installedParts: installedNames,
+    stageAfter: simCar.stage,
+    upgradesAfter: simCar.upgrades,
+    partsAfter: simCar.parts,
+    summary: summaryParts.join(' · '),
+    blockedReason,
+  }
+}
+
+export function applyAutoUpgrade(save: Save, id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey): string | undefined {
+  const plan = autoUpgradePlan(save, id, circuit, suggestedStat)
+  if (!plan) return 'Voiture absente du garage'
+  if (!plan.steps.length) return plan.blockedReason ?? 'Aucune amélioration disponible'
+  const car = save.cars[id]
+  save.credits -= plan.credits
+  car.copies -= plan.duplicates
+  car.stage = plan.stageAfter
+  car.upgrades = { ...plan.upgradesAfter }
+  car.parts = [...plan.partsAfter]
 }
 
 // ——— Duels ———

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
 import { art, edition } from '../game/art'
-import { families, partById, parts, progression, statLabels, styleLabel, vehicleById, vehicles, type Rival, type StatKey } from '../game/data'
+import { families, partById, parts, progression, statLabels, styleLabel, stylesOf, vehicleById, vehicles, type EditionStyle, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
-import { craft, craftCheck, freeParts, install, installCheck, prepOf, scrapCar, sellCar, sellCheck, sellPrice, stageCost, uninstall, upgrade, upgradeCheck, upgradeStat } from '../game/save'
+import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionPrice, freeParts, install, installCheck, prepOf, scrapCar,
+  selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, upgrade, upgradeCheck, upgradeStat } from '../game/save'
 import { act, buzz, save } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
@@ -28,12 +29,26 @@ const prep = computed(() => prepOf(save, props.id))
 const stats = computed(() => statsOf(v.value, prep.value))
 const image = computed(() => edition(props.id, car.value?.shown).art)
 const next = computed(() => stageCost(save, props.id))
+const stageProblem = computed(() => {
+  if (!car.value || !next.value) return 'Préparation maximale atteinte'
+  if (save.credits < next.value.credits) return `Il manque ${next.value.credits - save.credits} crédits`
+  if (car.value.copies - 1 < next.value.duplicates) return `Il faut ${next.value.duplicates} doublon${next.value.duplicates > 1 ? 's' : ''}`
+})
 const evolutions = computed(() => vehicles.filter(e => e.evolvesFrom === props.id))
 const base = computed(() => vehicleById.get(v.value.evolvesFrom ?? v.value.culture?.base ?? ''))
 const variants = computed(() => vehicles.filter(e => e.culture?.base === props.id))
 const inLineup = computed(() => save.lineup.includes(props.id))
 const courseScores = computed(() => props.circuit ? circuitScores(racer(props.id, prep.value), props.circuit) : [])
 const readiness = computed(() => [...courseScores.value].sort((a, b) => b.average - a.average))
+const autoPlan = computed(() => autoUpgradePlan(save, props.id, props.circuit, selected.value ?? props.suggestedStat))
+const allStyles = computed(() => stylesOf(props.id).map(style => ({
+  style,
+  label: styleLabel(v.value, style),
+  owned: Boolean(car.value?.editions.includes(style)),
+  shown: car.value?.shown === style,
+  price: editionPrice(props.id),
+  problem: unlockEditionCheck(save, props.id, style),
+})))
 
 const modules = computed(() => upgradeKeys.map(key => {
   const config = upgrades[key]
@@ -60,6 +75,24 @@ function improve(key: StatKey) {
   tutorialAction(10, 11)
   buzz(18)
   sparks('.car-sheet-portrait', palettes.cyan, 22, 0.8)
+}
+function autoImprove() {
+  const summary = autoPlan.value?.summary || 'Préparation automatique appliquée'
+  if (!act(s => applyAutoUpgrade(s, props.id, props.circuit, selected.value ?? props.suggestedStat), summary, 'upgrade')) return
+  tutorialAction(10, 11)
+  buzz([18, 25, 35])
+  flash(tone.cyan, 0.22)
+  sparks('.car-sheet-portrait', palettes.cyan, 34, 1)
+}
+function chooseStyle(style: EditionStyle) {
+  const label = styleLabel(v.value, style)
+  if (car.value?.editions.includes(style)) {
+    act(s => selectEdition(s, props.id, style), `Style ${label} appliqué`, 'flip')
+    return
+  }
+  if (!act(s => unlockEdition(s, props.id, style), `Style ${label} débloqué`, 'rare')) return
+  buzz([15, 30, 20])
+  sparks('.car-sheet-portrait', palettes.pink, 28, 1)
 }
 function stageUp() {
   const stage = (car.value?.stage ?? 0) + 1
@@ -113,145 +146,224 @@ function workshop(key?: StatKey) {
       <button type="button" :aria-pressed="panel === 'card'" @click="panel = 'card'">Carte</button>
     </div>
 
-    <section v-if="car" class="sheet-section car-sale">
-      <template v-if="confirmingSale">
-        <p>Vendre {{ v.name }} ? Elle quittera ta collection.</p>
-        <div class="car-sale-actions">
-          <button type="button" class="button primary" :disabled="Boolean(saleProblem)" @click="sell">Confirmer la vente</button>
-          <button type="button" class="button ghost" @click="confirmingSale = false">Annuler</button>
+    <div class="car-sheet-layout" :class="{ 'has-car': Boolean(car) }">
+      <aside class="car-sheet-aside" :class="{ 'mobile-hidden': car && panel !== 'card' }">
+        <div class="sheet-card">
+          <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
         </div>
-      </template>
-      <button v-else type="button" class="button ghost" :disabled="Boolean(saleProblem)" @click="confirmingSale = true">Vendre · {{ salePrice }} crédits</button>
-      <p v-if="saleProblem" class="hint" role="status">{{ saleProblem }}</p>
-    </section>
+      </aside>
 
-    <template v-if="car && panel === 'overview'">
-      <section v-if="circuit" class="sheet-section">
-        <h3>Sur {{ circuit.name }}</h3>
-        <p v-if="readiness.length" class="hint">Meilleur secteur estimé · {{ readiness[0].label }} ({{ readiness[0].average.toFixed(1).replace('.', ',') }} pts)</p>
-        <p class="hint">Les estimations incluent le terrain et les bonus propres à la voiture.</p>
-        <button type="button" class="button small ghost" @click="workshop(courseScores[0]?.stat)">Préparer pour ce circuit</button>
-      </section>
-
-      <section class="sheet-section">
-        <h3>Statistiques</h3>
-        <ul class="car-stats">
-          <li v-for="key in upgradeKeys" :key="key">
-            <b v-help="key">{{ statLabels[key] }}</b><strong>{{ stats[key] }}<small>/{{ STAT_CAP }}</small></strong>
-            <span class="stat-track" aria-hidden="true"><span :style="{ width: `${stats[key] / STAT_CAP * 100}%` }"></span></span>
-            <p>{{ statUse[key] }}</p>
-          </li>
-        </ul>
-        <p class="hint">{{ engagements(v, prep) }} secteurs avant surchauffe avec cette préparation.</p>
-      </section>
-      <section class="sheet-section">
-        <h3>{{ v.signature.name }}</h3>
-        <p class="hint">{{ v.signature.text }}</p>
-        <button type="button" class="button small ghost" @click="toggleLineup">{{ inLineup ? 'Retirer de l’écurie' : 'Ajouter à l’écurie' }}</button>
-      </section>
-    </template>
-
-    <template v-else-if="car && panel === 'workshop'">
-      <p class="hint workshop-intro">Les niveaux restent acquis à cette voiture. Au niveau {{ partUnlockLevel }}, tu peux monter les pièces compatibles de ton stock.</p>
-      <ul class="workshop-list">
-        <li v-for="module in modules" :key="module.key" class="workshop-module" :class="{ 'module-selected': selected === module.key }">
-          <button type="button" class="module-trigger" :aria-expanded="selected === module.key" :aria-controls="`module-${module.key}`"
-            @click="selected = selected === module.key ? undefined : module.key">
-            <img :src="art.part(module.config.art)" alt="" />
-            <span><b>{{ module.config.label }}</b><small>{{ statLabels[module.key] }} {{ stats[module.key] }}/{{ STAT_CAP }}</small></span>
-            <span class="module-level">Niv. {{ module.level }}/{{ partUnlockLevel }}</span>
-            <span aria-hidden="true">{{ selected === module.key ? '−' : '+' }}</span>
-          </button>
-          <div v-show="selected === module.key" :id="`module-${module.key}`" class="module-content">
-            <p class="hint">{{ statUse[module.key] }}</p>
-            <template v-if="module.price !== undefined">
-              <p v-if="module.nextValue > stats[module.key]" class="upgrade-preview">{{ statLabels[module.key] }} {{ stats[module.key] }} → {{ module.nextValue }}</p>
-              <p v-else class="hint">{{ statLabels[module.key] }} atteint déjà {{ STAT_CAP }} avec cette préparation.</p>
-              <button type="button" class="button primary wide" :disabled="Boolean(module.problem)" @click="improve(module.key)">
-                {{ module.problem ?? `Passer au niveau ${module.level + 1} · ${module.price} crédits` }}
-              </button>
-            </template>
-            <div v-if="module.installed.length || module.available.length || module.level === partUnlockLevel" class="module-parts">
-              <div class="section-row">
-                <h3>Cartes Mécanique</h3>
-                <span class="hint">Potentiel {{ prepUsed(prep) }}/{{ potential(v, car.stage) }}</span>
-              </div>
-              <article v-for="part in module.installed" :key="part.id" class="workshop-part fitted">
-                <img :src="art.part(part.id)" alt="" />
-                <div><small>{{ families[part.family] }} · Installée</small><b>{{ part.name }}</b><p>{{ part.text }}</p>
-                  <button type="button" class="button small quiet" @click="act(s => uninstall(s, id, part.id), 'Pièce rendue au stock')">Retirer</button>
-                </div>
-              </article>
-              <article v-for="o in module.available" :key="o.part.id" class="workshop-part">
-                <img :src="art.part(o.part.id)" alt="" />
-                <div><small>{{ families[o.part.family] }} · {{ o.part.rarity }} · {{ freeParts(save, o.part.id) }} libre(s)</small><b>{{ o.part.name }}</b>
-                  <p>{{ o.part.text }} · {{ o.part.cost }} de potentiel</p>
-                  <p v-if="o.replaced">Remplace {{ o.replaced.name }} (rendue au stock).</p>
-                  <p v-if="o.changes.length" class="upgrade-preview">{{ o.changes.join(' · ') }}</p>
-                  <p v-if="o.problem" class="hint">{{ o.problem }}</p>
-                  <button type="button" class="button small ghost" :disabled="Boolean(o.problem)" :aria-label="`Installer ${o.part.name}`" @click="fit(o.part.id, o.part.name)">Installer</button>
-                </div>
-              </article>
-              <p v-if="!module.installed.length && !module.available.length" class="hint">
-                {{ module.hasCompatiblePart ? 'Aucune pièce compatible en stock. Tu peux en trouver dans les boosters.' : 'Aucune carte Mécanique de cette famille ne convient à cette voiture.' }}
-              </p>
-            </div>
+      <div class="car-sheet-main">
+        <section v-if="car && panel !== 'card'" class="sheet-section auto-upgrade-box">
+          <div class="section-row">
+            <h3>Amélioration automatique</h3>
+            <span class="hint">Potentiel {{ prepUsed(prep) }}/{{ potential(v, car.stage) }} · Stage {{ car.stage }}/3</span>
           </div>
-        </li>
-      </ul>
-    </template>
+          <template v-if="autoPlan && autoPlan.steps.length">
+            <p class="hint">Ce que l’amélioration va faire :</p>
+            <ul class="auto-upgrade-steps">
+              <li v-for="(stepText, i) in autoPlan.steps" :key="i">{{ stepText }}</li>
+            </ul>
+            <p v-if="autoPlan.statChanges.length || autoPlan.staminaAfter > autoPlan.staminaBefore" class="upgrade-preview">
+              {{ [
+                ...autoPlan.statChanges.map(c => `${c.label} ${c.before} → ${c.after}`),
+                ...(autoPlan.staminaAfter > autoPlan.staminaBefore ? [`Secteurs avant surchauffe ${autoPlan.staminaBefore} → ${autoPlan.staminaAfter}`] : []),
+              ].join(' · ') }}
+            </p>
+            <button type="button" class="button primary wide" @click="autoImprove">
+              Améliorer automatiquement · {{ autoPlan.credits ? `${autoPlan.credits} crédits` : 'Gratuit (pièces en stock)' }}<template v-if="autoPlan.duplicates"> + {{ autoPlan.duplicates }} doublon{{ autoPlan.duplicates > 1 ? 's' : '' }}</template>
+            </button>
+          </template>
+          <template v-else>
+            <p class="hint">{{ autoPlan?.blockedReason ?? 'Voiture déjà préparée au maximum avec ton stock actuel.' }}</p>
+            <button type="button" class="button ghost wide" disabled>Améliorer automatiquement</button>
+          </template>
+        </section>
 
-    <template v-else>
-      <div class="sheet-card">
-        <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
-      </div>
-      <p v-if="car" class="hint">Éditions : {{ car.editions.map(style => styleLabel(v, style)).join(', ') }}</p>
-      <section v-if="!car" class="sheet-section">
-        <h3>Pas encore dans ton garage</h3>
-        <p v-if="v.craft" class="hint">Évolution de {{ base?.name }} {{ base?.version }}. Prépare-la au Stage {{ v.craft.stage }}, puis débloque-la pour {{ v.craft.credits }} crédits.</p>
-        <p v-else class="hint">Disponible dans les boosters.</p>
-        <button v-if="v.craft" type="button" class="button primary" :disabled="Boolean(craftCheck(save, id))" @click="unlock(id, true)">
-          {{ craftCheck(save, id) ?? `Débloquer · ${v.craft.credits} crédits` }}
-        </button>
-      </section>
-      <section v-else class="sheet-section">
-        <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3</h3>
-        <p class="hint">Les stages augmentent le potentiel pour monter des cartes Mécanique. Ils donnent accès aux évolutions lorsqu’il y en a.</p>
-        <button v-if="next" type="button" class="button ghost" @click="stageUp">
-          Passer au Stage {{ next.stage }} · {{ next.credits }} crédits<template v-if="next.duplicates"> + {{ next.duplicates }} doublon{{ next.duplicates > 1 ? 's' : '' }}</template>
-        </button>
-        <p v-if="next" class="hint">{{ next.text }}</p>
-        <template v-if="car.copies > 1">
-          <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
-          <button type="button" class="button small quiet" @click="act(s => scrapCar(s, id), `+${progression.scrap[v.rarity]} crédits`)">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+        <section v-if="car && (panel === 'overview' || panel === 'card')" class="sheet-section edition-section">
+          <div class="section-row">
+            <h3><span v-help="'edition'">Styles & Éditions</span></h3>
+            <small class="hint">{{ car.editions.length }}/{{ allStyles.length }} débloqué{{ car.editions.length > 1 ? 's' : '' }}</small>
+          </div>
+          <p class="hint">Change l’apparence de ta carte ou paie en crédits pour débloquer un autre style créé pour cette voiture (Synthwave, Pixel 16 bits, Classic…).</p>
+          <div class="edition-picker">
+            <button v-for="item in allStyles" :key="item.style" type="button"
+              :class="{ 'is-locked': !item.owned }"
+              :aria-pressed="item.shown"
+              :disabled="!item.owned && Boolean(item.problem)"
+              @click="chooseStyle(item.style)">
+              <b>{{ item.label }}</b>
+              <small v-if="item.shown">✓ Affiché</small>
+              <small v-else-if="item.owned">Appliquer</small>
+              <small v-else>Débloquer · {{ item.price }} ₡</small>
+            </button>
+          </div>
+          <p class="hint">Éditions possédées : {{ car.editions.map(style => styleLabel(v, style)).join(', ') }}</p>
+        </section>
+
+        <template v-if="car && panel === 'overview'">
+          <section v-if="circuit" class="sheet-section">
+            <h3>Sur {{ circuit.name }}</h3>
+            <p v-if="readiness.length" class="hint">Meilleur secteur estimé · {{ readiness[0].label }} ({{ readiness[0].average.toFixed(1).replace('.', ',') }} pts)</p>
+            <p class="hint">Les estimations incluent le terrain et les bonus propres à la voiture.</p>
+            <button type="button" class="button small ghost" @click="workshop(courseScores[0]?.stat)">Préparer pour ce circuit</button>
+          </section>
+
+          <section class="sheet-section">
+            <h3>Statistiques</h3>
+            <ul class="car-stats">
+              <li v-for="key in upgradeKeys" :key="key">
+                <b v-help="key">{{ statLabels[key] }}</b><strong>{{ stats[key] }}<small>/{{ STAT_CAP }}</small></strong>
+                <span class="stat-track" aria-hidden="true"><span :style="{ width: `${stats[key] / STAT_CAP * 100}%` }"></span></span>
+                <p>{{ statUse[key] }}</p>
+              </li>
+            </ul>
+            <p class="hint">{{ engagements(v, prep) }} secteurs avant surchauffe avec cette préparation.</p>
+          </section>
+
+          <section class="sheet-section">
+            <h3>{{ v.signature.name }}</h3>
+            <p class="hint">{{ v.signature.text }}</p>
+            <button type="button" class="button small ghost" @click="toggleLineup">{{ inLineup ? 'Retirer de l’écurie' : 'Ajouter à l’écurie' }}</button>
+          </section>
+
+          <section class="sheet-section">
+            <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3 & Doublons</h3>
+            <p class="hint">{{ next ? next.text : 'Stage maximal atteint.' }}</p>
+            <button v-if="next" type="button" class="button ghost" :disabled="Boolean(stageProblem)" @click="stageUp">
+              Passer au Stage {{ next.stage }} · {{ next.credits }} crédits<template v-if="next.duplicates"> + {{ next.duplicates }} doublon{{ next.duplicates > 1 ? 's' : '' }}</template>
+            </button>
+            <p v-if="next && stageProblem" class="hint">{{ stageProblem }}</p>
+            <template v-if="car.copies > 1">
+              <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
+              <button type="button" class="button small quiet" @click="act(s => scrapCar(s, id), `+${progression.scrap[v.rarity]} crédits`)">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+            </template>
+          </section>
         </template>
-      </section>
-      <section v-if="car && evolutions.length" class="sheet-section">
-        <h3>Évolutions</h3>
-        <div v-for="e in evolutions" :key="e.id" class="evolution">
-          <span><b>{{ e.name }} {{ e.version }}</b><small>{{ e.signature.name }} · {{ e.signature.text }}</small></span>
-          <button v-if="save.cars[e.id]" type="button" class="button small ghost" @click="emit('open', e.id)">Voir</button>
-          <button v-else type="button" class="button small primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
-            {{ craftCheck(save, e.id) ?? `Débloquer · ${e.craft!.credits} cr.` }}
-          </button>
-        </div>
-      </section>
-      <section class="sheet-section spec">
-        <h3>Caractéristiques</h3>
-        <dl>
-          <div><dt>Année</dt><dd>{{ v.year }}</dd></div>
-          <div><dt>Origine</dt><dd>{{ v.origin }}</dd></div>
-          <div><dt>Transmission</dt><dd>{{ v.drive }}</dd></div>
-          <div><dt>Moteur</dt><dd>{{ v.engine }}</dd></div>
-          <div><dt>Catégories</dt><dd>{{ v.tags.join(', ') }}</dd></div>
-          <div v-if="v.culture"><dt>Œuvre</dt><dd>{{ v.culture.work }} · aura {{ v.culture.aura.join(', ') }}</dd></div>
-          <div v-if="base"><dt>Version de base</dt><dd><button type="button" class="link" @click="emit('open', base.id)">{{ base.name }} {{ base.version }}</button></dd></div>
-          <div v-if="variants.length"><dt>Éditions culturelles</dt><dd>
-            <button v-for="x in variants" :key="x.id" type="button" class="link" @click="emit('open', x.id)">{{ x.name }}</button>
-          </dd></div>
-          <div v-if="v.spec"><dt>Donnée réelle</dt><dd>{{ v.spec }} <small>(à vérifier)</small></dd></div>
-        </dl>
-      </section>
-    </template>
+
+        <template v-else-if="car && panel === 'workshop'">
+          <p class="hint workshop-intro">Les niveaux restent acquis à cette voiture. Au niveau {{ partUnlockLevel }}, tu peux monter les pièces compatibles de ton stock.</p>
+          <ul class="workshop-list">
+            <li v-for="module in modules" :key="module.key" class="workshop-module" :class="{ 'module-selected': selected === module.key }">
+              <button type="button" class="module-trigger" :aria-expanded="selected === module.key" :aria-controls="`module-${module.key}`"
+                @click="selected = selected === module.key ? undefined : module.key">
+                <img :src="art.part(module.config.art)" alt="" />
+                <span><b>{{ module.config.label }}</b><small>{{ statLabels[module.key] }} {{ stats[module.key] }}/{{ STAT_CAP }}</small></span>
+                <span class="module-level">Niv. {{ module.level }}/{{ partUnlockLevel }}</span>
+                <span aria-hidden="true">{{ selected === module.key ? '−' : '+' }}</span>
+              </button>
+              <div v-show="selected === module.key" :id="`module-${module.key}`" class="module-content">
+                <p class="hint">{{ statUse[module.key] }}</p>
+                <template v-if="module.price !== undefined">
+                  <p v-if="module.nextValue > stats[module.key]" class="upgrade-preview">{{ statLabels[module.key] }} {{ stats[module.key] }} → {{ module.nextValue }}</p>
+                  <p v-else class="hint">{{ statLabels[module.key] }} atteint déjà {{ STAT_CAP }} avec cette préparation.</p>
+                  <button type="button" class="button primary wide" :disabled="Boolean(module.problem)" @click="improve(module.key)">
+                    {{ module.problem ?? `Passer au niveau ${module.level + 1} · ${module.price} crédits` }}
+                  </button>
+                </template>
+                <div v-if="module.installed.length || module.available.length || module.level === partUnlockLevel" class="module-parts">
+                  <div class="section-row">
+                    <h3>Cartes Mécanique</h3>
+                    <span class="hint">Potentiel {{ prepUsed(prep) }}/{{ potential(v, car.stage) }}</span>
+                  </div>
+                  <article v-for="part in module.installed" :key="part.id" class="workshop-part fitted">
+                    <img :src="art.part(part.id)" alt="" />
+                    <div><small>{{ families[part.family] }} · Installée</small><b>{{ part.name }}</b><p>{{ part.text }}</p>
+                      <button type="button" class="button small quiet" @click="act(s => uninstall(s, id, part.id), 'Pièce rendue au stock')">Retirer</button>
+                    </div>
+                  </article>
+                  <article v-for="o in module.available" :key="o.part.id" class="workshop-part">
+                    <img :src="art.part(o.part.id)" alt="" />
+                    <div><small>{{ families[o.part.family] }} · {{ o.part.rarity }} · {{ freeParts(save, o.part.id) }} libre(s)</small><b>{{ o.part.name }}</b>
+                      <p>{{ o.part.text }} · {{ o.part.cost }} de potentiel</p>
+                      <p v-if="o.replaced">Remplace {{ o.replaced.name }} (rendue au stock).</p>
+                      <p v-if="o.changes.length" class="upgrade-preview">{{ o.changes.join(' · ') }}</p>
+                      <p v-if="o.problem" class="hint">{{ o.problem }}</p>
+                      <button type="button" class="button small ghost" :disabled="Boolean(o.problem)" :aria-label="`Installer ${o.part.name}`" @click="fit(o.part.id, o.part.name)">Installer</button>
+                    </div>
+                  </article>
+                  <p v-if="!module.installed.length && !module.available.length" class="hint">
+                    {{ module.hasCompatiblePart ? 'Aucune pièce compatible en stock. Tu peux en trouver dans les boosters.' : 'Aucune carte Mécanique de cette famille ne convient à cette voiture.' }}
+                  </p>
+                </div>
+              </div>
+            </li>
+          </ul>
+          <section class="sheet-section">
+            <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3</h3>
+            <p class="hint">Les stages augmentent le potentiel pour monter des cartes Mécanique. Ils donnent accès aux évolutions lorsqu’il y en a.</p>
+            <button v-if="next" type="button" class="button ghost" :disabled="Boolean(stageProblem)" @click="stageUp">
+              Passer au Stage {{ next.stage }} · {{ next.credits }} crédits<template v-if="next.duplicates"> + {{ next.duplicates }} doublon{{ next.duplicates > 1 ? 's' : '' }}</template>
+            </button>
+            <p v-if="next" class="hint">{{ stageProblem ?? next.text }}</p>
+          </section>
+        </template>
+
+        <template v-else>
+          <section v-if="!car" class="sheet-section">
+            <h3>Pas encore dans ton garage</h3>
+            <p v-if="v.craft" class="hint">Évolution de {{ base?.name }} {{ base?.version }}. Prépare-la au Stage {{ v.craft.stage }}, puis débloque-la pour {{ v.craft.credits }} crédits.</p>
+            <p v-else class="hint">Disponible dans les boosters.</p>
+            <button v-if="v.craft" type="button" class="button primary" :disabled="Boolean(craftCheck(save, id))" @click="unlock(id, true)">
+              {{ craftCheck(save, id) ?? `Débloquer · ${v.craft.credits} crédits` }}
+            </button>
+          </section>
+          <section v-else class="sheet-section">
+            <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3</h3>
+            <p class="hint">Les stages augmentent le potentiel pour monter des cartes Mécanique. Ils donnent accès aux évolutions lorsqu’il y en a.</p>
+            <button v-if="next" type="button" class="button ghost" :disabled="Boolean(stageProblem)" @click="stageUp">
+              Passer au Stage {{ next.stage }} · {{ next.credits }} crédits<template v-if="next.duplicates"> + {{ next.duplicates }} doublon{{ next.duplicates > 1 ? 's' : '' }}</template>
+            </button>
+            <p v-if="next" class="hint">{{ stageProblem ?? next.text }}</p>
+            <template v-if="car.copies > 1">
+              <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
+              <button type="button" class="button small quiet" @click="act(s => scrapCar(s, id), `+${progression.scrap[v.rarity]} crédits`)">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+            </template>
+          </section>
+          <section v-if="car && evolutions.length" class="sheet-section">
+            <h3>Évolutions</h3>
+            <div v-for="e in evolutions" :key="e.id" class="evolution">
+              <span><b>{{ e.name }} {{ e.version }}</b><small>{{ e.signature.name }} · {{ e.signature.text }}</small></span>
+              <button v-if="save.cars[e.id]" type="button" class="button small ghost" @click="emit('open', e.id)">Voir</button>
+              <button v-else type="button" class="button small primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
+                {{ craftCheck(save, e.id) ?? `Débloquer · ${e.craft!.credits} cr.` }}
+              </button>
+            </div>
+          </section>
+          <section class="sheet-section spec">
+            <h3>Caractéristiques</h3>
+            <dl>
+              <div><dt>Année</dt><dd>{{ v.year }}</dd></div>
+              <div><dt>Origine</dt><dd>{{ v.origin }}</dd></div>
+              <div><dt>Transmission</dt><dd>{{ v.drive }}</dd></div>
+              <div><dt>Moteur</dt><dd>{{ v.engine }}</dd></div>
+              <div><dt>Catégories</dt><dd>{{ v.tags.join(', ') }}</dd></div>
+              <div v-if="v.culture"><dt>Œuvre</dt><dd>{{ v.culture.work }} · aura {{ v.culture.aura.join(', ') }}</dd></div>
+              <div v-if="base"><dt>Version de base</dt><dd><button type="button" class="link" @click="emit('open', base.id)">{{ base.name }} {{ base.version }}</button></dd></div>
+              <div v-if="variants.length"><dt>Éditions culturelles</dt><dd>
+                <button v-for="x in variants" :key="x.id" type="button" class="link" @click="emit('open', x.id)">{{ x.name }}</button>
+              </dd></div>
+              <div v-if="v.spec"><dt>Donnée réelle</dt><dd>{{ v.spec }} <small>(à vérifier)</small></dd></div>
+            </dl>
+          </section>
+        </template>
+
+        <section v-if="car" class="sheet-section car-sale">
+          <div class="section-row">
+            <h3><span v-help="'vente'">Revente</span></h3>
+            <span v-if="car.copies > 1" class="hint">{{ car.copies }} exemplaires</span>
+          </div>
+          <template v-if="confirmingSale">
+            <p>Vendre {{ v.name }} ? Elle quittera ta collection.</p>
+            <div class="car-sale-actions">
+              <button type="button" class="button primary" :disabled="Boolean(saleProblem)" @click="sell">Confirmer la vente</button>
+              <button type="button" class="button ghost" @click="confirmingSale = false">Annuler</button>
+            </div>
+          </template>
+          <button v-else type="button" class="button ghost" :disabled="Boolean(saleProblem)" @click="confirmingSale = true">Vendre · {{ salePrice }} crédits</button>
+          <p v-if="saleProblem" class="hint" role="status">{{ saleProblem }}</p>
+        </section>
+      </div>
+    </div>
   </div>
 </template>

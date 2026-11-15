@@ -80,14 +80,14 @@ main { max-width: 1120px; margin-inline: auto; padding: 18px 16px 28px; }
 .button > span { font-size: 1.1rem; }
 
 /* Accueil */
-.hero { position: relative; overflow: hidden; isolation: isolate; border-radius: 18px; min-height: 520px; display: grid; align-items: end;
+.hero { position: relative; overflow: hidden; isolation: isolate; border-radius: 18px; min-height: 240px; display: grid; align-items: center;
   border: 1px solid #ff2a8a55; background: linear-gradient(180deg, #1a0638, #3b0d52 60%, #ff5e3a33); box-shadow: 0 0 40px #ff2a8a33; }
-.hero-picture { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; }
-.hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, #0b042000 30%, #0b0420cc 72%, #0b0420 100%); }
+.hero-picture { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; object-position: center 78%; }
+.hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, #0b04208c 0%, #0b0420bf 52%, #0b0420f2 100%); }
 .hero-sun { position: absolute; z-index: -1; width: 62%; aspect-ratio: 1; left: 19%; top: 8%; border-radius: 50%; opacity: 0;
   background: repeating-linear-gradient(180deg, transparent 0 60%, #0b042080 60% 64%), linear-gradient(180deg, var(--sun), var(--magenta)); }
 .hero:not(:has(.hero-picture)) .hero-sun { opacity: .9; }
-.hero-content { padding: 0 20px 26px; }
+.hero-content { padding: 20px 20px 22px; }
 .hero h1 { font: 900 clamp(2.6rem, 15vw, 5rem)/.95 var(--display); letter-spacing: .02em; margin: 8px 0 10px;
   background: linear-gradient(180deg, #ffffff 0%, #bff4ff 42%, #ff5fd2 50%, #ffb347 100%); -webkit-background-clip: text; background-clip: text; color: transparent;
   filter: drop-shadow(0 2px 0 #3b0d52) drop-shadow(0 0 18px #ff2a8a88); }
@@ -643,9 +643,9 @@ button.card-back { animation: back-bob 2.6s ease-in-out infinite; }
 @media (max-width: 359px) { .brand > span:last-child { display: none; } }
 @media (max-width: 399px) { .topbar { padding-inline: 12px; } .wallet { gap: 6px; } .settings-button { width: 40px; height: 40px; } }
 @media (min-width: 650px) {
-  main { padding-top: 26px; }
-  .hero { min-height: 460px; }
-  .hero-content { padding: 0 36px 40px; }
+  main { padding-top: 22px; }
+  .hero { min-height: 280px; }
+  .hero-content { padding: 26px 32px 28px; }
   .home-tiles { max-width: 720px; }
   .shop-grid { grid-template-columns: repeat(3, 1fr); }
   .shop-item { grid-template-columns: 1fr; justify-items: center; text-align: center; }

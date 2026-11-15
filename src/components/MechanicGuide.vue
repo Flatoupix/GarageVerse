@@ -55,7 +55,8 @@ function refresh() {
       if (!row) break
       anchor = parent
     }
-    anchor.before(host.value)
+    if (anchor.matches('.hero')) anchor.after(host.value)
+    else anchor.before(host.value)
   }
 }
 function schedule() { cancelAnimationFrame(frame); frame = requestAnimationFrame(refresh) }

@@ -37,10 +37,10 @@ export const glossary = {
   plafond: { term: 'Plafond de coût', text: 'Somme maximale des coûts des trois voitures que tu engages dans une course de cette ligue.' },
   rarete: { term: 'Rareté', text: 'Courante, Rare, Épique ou Légendaire : les plus rares sont plus fortes et plus difficiles à tirer.' },
   stage: { term: 'Stage', text: 'Niveau de préparation d’une voiture (0 à 3). Chaque Stage augmente la place disponible pour monter des pièces ; au Stage 2, sa meilleure statistique gagne aussi 1 point.' },
-  atelier: { term: 'Atelier', text: 'Dépense des crédits pour monter d’un niveau un groupe de statistiques d’une voiture (2 niveaux par groupe). Au niveau 2, tu peux y monter une pièce de ta collection.' },
+  atelier: { term: 'Atelier', text: 'Dépense des crédits pour monter d’un niveau un groupe de statistiques d’une voiture (2 niveaux par groupe) ou utilise l’amélioration automatique qui prépare les meilleurs niveaux et pièces disponibles. Au niveau 2, tu peux y monter une pièce de ta collection.' },
   piece: { term: 'Pièce', text: 'Carte Mécanique à monter sur une voiture : elle ajoute un bonus, parfois seulement sur un secteur ou une météo.' },
   vente: { term: 'Vente', text: 'Vends une voiture entière depuis sa fiche : elle quitte ta collection et ses pièces redeviennent libres. Tu reçois deux fois son prix de recyclage selon sa rareté, plus 10 crédits par Stage, la moitié des crédits dépensés à l’atelier (arrondie à l’entier inférieur) et le prix de recyclage de chaque doublon. Retire-la d’abord de tes écuries, y compris celle du défi du jour. Tu ne peux pas la vendre pendant une course qui l’engage, ni garder moins de trois voitures.' },
-  edition: { term: 'Édition', text: 'Style d’illustration d’une carte (pixel, synthwave…). Au tirage d’une voiture déjà possédée, tu peux afficher l’édition tirée ou garder l’apparence actuelle. Une nouvelle voiture prend l’édition tirée. La fiche liste tes éditions en lecture seule. Elles ne changent pas les statistiques.' },
+  edition: { term: 'Édition', text: 'Style d’illustration d’une carte (Pixel 16 bits, Synthwave, Classic…). Depuis la fiche d’une voiture possédée, tu peux basculer librement entre tes éditions ou payer en crédits pour débloquer un autre style existant. Elles ne changent pas les statistiques.' },
   ecurie: { term: 'Écurie', text: 'Les trois voitures que tu engages en course. À chaque secteur, tu choisis en secret laquelle court.' },
 } satisfies Record<string, HelpEntry>
 export type HelpKey = keyof typeof glossary

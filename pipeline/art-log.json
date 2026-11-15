@@ -2360,5 +2360,45 @@
     "tokens": 17125,
     "prompt": "bdc325d628",
     "at": "2026-11-14T18:48:31.481Z"
+  },
+  "pixel/anim/track-pluie-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 40,
+    "tokens": 17391,
+    "prompt": "eb0de6ec99",
+    "at": "2026-11-15T10:07:55.877Z"
+  },
+  "pixel/anim/track-sec-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 41,
+    "tokens": 16634,
+    "prompt": "3b8f7241cd",
+    "at": "2026-11-15T10:07:55.986Z"
+  },
+  "pixel/anim/track-terre-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 17333,
+    "prompt": "7a9e8dc631",
+    "at": "2026-11-15T10:08:38.177Z"
+  },
+  "pixel/anim/track-nuit-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 21257,
+    "prompt": "203acc3526",
+    "at": "2026-11-15T10:08:47.955Z"
+  },
+  "pixel/anim/track-ville-bg": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 17354,
+    "prompt": "e61e5fe5f0",
+    "at": "2026-11-15T10:09:31.365Z"
   }
 }

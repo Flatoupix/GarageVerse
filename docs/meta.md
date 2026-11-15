@@ -1,4 +1,4 @@
-# GarageVerse · Méta « Neon Drive » v0.2
+# GarageVerse · Méta « Neon Drive » v0.2.0
 
 Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et §9) pour la version jouable. Les valeurs vivent dans `src/data/roster.json` et `src/data/garage.json`, les règles dans `src/game/rules.ts`. La simulation `node pipeline/balance.mjs` vérifie les ordres de grandeur.
 
@@ -27,19 +27,21 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 
 | Action | Effet |
 | --- | --- |
+| Amélioration automatique | Prépare la voiture en un toucher après avoir détaillé les étapes prévues (pièces libres compatibles en stock, niveaux d’atelier, passage de Stage) et l’aperçu des statistiques avant/après. |
 | Atelier · niveau 1 puis niveau 2 | 10 puis 15 crédits par niveau. Chaque niveau ajoute 1 point à la statistique du groupe choisi, dans la limite de 12. |
 | Monter une carte Mécanique | Le niveau 2 du groupe ouvre le montage. La pièce occupe un exemplaire en stock et le retrait le libère. |
 | Stage 1 · 80 crédits | +1 potentiel |
 | Stage 2 · 200 crédits et 1 doublon | +1 potentiel, +1 à la meilleure statistique d’origine |
 | Stage 3 · 450 crédits et 2 doublons | +1 potentiel, débloque les évolutions |
+| Débloquer / changer un style | Bascule gratuitement entre les éditions déjà possédées ou débloque un style artistique disponible (Synthwave, Pixel 16 bits, Classic, Photo, Gouache, Rallye argentique…) contre 40, 75, 120 ou 200 crédits selon la rareté. |
 | Vendre une voiture | Retire tous ses exemplaires de la collection et libère ses pièces. Prix : 2 × progression.scrap[rareté] + 10 × Stage + ⌊crédits d’atelier dépensés / 2⌋ + progression.scrap[rareté] × (exemplaires − 1). Refus si engagée dans une écurie (défi du jour compris), dans une course en cours, ou si le garage passerait sous trois voitures différentes. Les évolutions peuvent aussi être vendues. |
 | Recycler un doublon | 10, 30, 80 ou 200 crédits selon la rareté. Moitié prix pour une pièce libre. |
 
 Les doublons alimentent la progression, comme le demande la bible. Le garage de départ contient la Clio III, la Twingo I et la Panda 4×4, trois pièces, 300 crédits et deux tickets Neon Drive.
 
-**Emplacements d’amélioration sur la carte.** Sous les statistiques, la carte d’une voiture possédée montre un emplacement par groupe d’atelier, dans l’ordre des statistiques : éteint d’origine, à moitié allumé au niveau 1, pleinement allumé au niveau 2. Deux voyants signalent les pièces montées, colorés selon leur rareté. Les styles communs à tous les thèmes vivent dans `src/themes/shared.css`.
+**Écussons d’amélioration sur la carte.** Sur le flanc gauche de l’illustration, la carte d’une voiture possédée affiche quatre petits écussons en colonne (un par groupe d’atelier, dans l’ordre des statistiques) : éteint d’origine, à moitié allumé au niveau 1, pleinement allumé au niveau 2. Deux voyants signalent les pièces montées, colorés selon leur rareté. Les styles communs à tous les thèmes vivent dans `src/themes/shared.css`.
 
-Le garage propose une recherche, des filtres et un accès aux favoris et à l’écurie. L’atelier associe les pneus et la suspension à la maniabilité, la transmission et le nitro à l’accélération, le moteur et le turbo à la vitesse, et les freins et le châssis à l’endurance.
+Le garage propose une recherche, un filtre par rareté et par catégorie, un tri multi-critères (collection, rareté, puissance totale, niveau d’amélioration, coût d’écurie, statistiques, doublons, année, nom) et un sélecteur du nombre de voitures affichées par ligne (`Auto`, `1` à `6`). L’atelier associe les pneus et la suspension à la maniabilité, la transmission et le nitro à l’accélération, le moteur et le turbo à la vitesse, et les freins et le châssis à l’endurance.
 
 ## 5. Course en secteurs
 

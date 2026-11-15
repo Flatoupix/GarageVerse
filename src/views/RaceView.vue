@@ -129,26 +129,33 @@ const carArt = (who: 'player' | 'rival', car: number) => {
 // Une ligne du détail de score par étape, pour les deux voitures à la fois.
 function advance(round: Round, to: number) {
   step.value = to
-  sound('tick')
+  let boost = false
   for (const who of ['player', 'rival'] as const) {
     const lines = round[who].lines.slice(0, to), line = round[who].lines[to - 1]
     counts[who] = lines.reduce((sum, l) => sum + l.value, 0)
     if (!line || to === 1) continue
-    if (line.label === 'Nitro') { sound('nitro'); flash(tone.gold, 0.22); streaks(palettes.fire, 40, who === 'player' ? 1 : -1) }
+    if (line.label === 'Nitro') {
+      boost = true
+      flash(tone.gold, 0.22)
+      streaks(palettes.fire, 40, who === 'player' ? 1 : -1)
+    }
     else if (to === round[who].lines.length && round[who].luck === 'incident') { shake(2); if (who === 'player') buzz([40, 30, 40]) }
   }
+  sound(boost ? 'nitro' : 'tick')
 }
 function skipRun() { if (shown.value && !settled.value) { clear(); settle(shown.value) } }
 
-function settle(round: Round) {
+function settle(round: Round, immediateBoost = false) {
   settled.value = true
   step.value = Math.max(round.player.lines.length, round.rival.lines.length) + 1
   counts.player = round.player.score
   counts.rival = round.rival.score
-  sound('slam')
+  sound(immediateBoost ? 'nitro' : 'slam')
   buzz(round.winner === 'player' ? [20, 30, 20] : 15)
   shake(round.winner === 'player' ? 2 : 1)
-  timers.push(setTimeout(() => sound(round.winner === 'player' ? 'collect' : round.winner === 'rival' ? 'lose' : 'flip'), 160))
+  const verdict = round.player.luck === 'perfect' ? 'legend'
+    : round.winner === 'player' ? 'collect' : round.winner === 'rival' ? 'lose' : 'flip'
+  timers.push(setTimeout(() => sound(verdict), immediateBoost ? STEP_MS : 160))
   void nextTick(() => {
     const score = `.duel-col.${round.winner} .duel-score`
     if (round.winner === 'player') { sparks(score, palettes.cyan, 42, 1.1); ring(score, tone.cyan); flash(tone.cyan, 0.18); pop(score, 1.4) }
@@ -156,7 +163,7 @@ function settle(round: Round) {
     pop('.scoreboard', 1.25)
     for (const who of ['player', 'rival'] as const) {
       const at = `.duel-col.${who} .duel-score`, luck = round[who].luck
-      if (luck === 'perfect') { floatText(at, 'Parfait !', tone.gold, 20); sparks(at, palettes.gold, 36, 1.2); if (who === 'player') { sound('legend'); flash(tone.gold, 0.25) } }
+      if (luck === 'perfect') { floatText(at, 'Parfait !', tone.gold, 20); sparks(at, palettes.gold, 36, 1.2); if (who === 'player') flash(tone.gold, 0.25) }
       if (luck === 'incident') { floatText(at, round[who].lines.at(-1)!.label, tone.rose, 16); shake(2); if (who === 'player') buzz([40, 30, 40]) }
     }
   })
@@ -169,7 +176,7 @@ function pick(car: number, event: Event) {
 }
 function armNitro() {
   if (!nitro.value) return
-  sound('nitro'); buzz([10, 20, 30]); streaks(palettes.fire, 14)
+  buzz([10, 20, 30]); streaks(palettes.fire, 14)
 }
 const projections = computed(() => duel.value && index.value < duel.value.sectors.length
   ? duel.value.player.lineup.map((_, car) => evaluate(duel.value!, 'player', car, nitro.value).score) : [])
@@ -185,7 +192,7 @@ function engage() {
   nitro.value = false
   persist()
   clear()
-  if (reducedMotion.value) settle(round)
+  if (reducedMotion.value) settle(round, round.player.nitro || round.rival.nitro)
   else {
     settled.value = false
     counts.player = counts.rival = 0
@@ -217,11 +224,7 @@ function proceed() {
       confetti(); flash(tone.gold, 0.32); buzz([40, 60, 40, 60, 80])
       timers.push(setTimeout(() => confetti(palettes.gold, 60), 650))
     } else shake(1)
-    let ticked = 0
-    stops.push(tween(0, reward.value?.credits ?? 0, 900, value => {
-      if (performance.now() - ticked > 70) { ticked = performance.now(); sound('tick') }
-      rewardShown.value = value
-    }))
+    stops.push(tween(0, reward.value?.credits ?? 0, 900, value => { rewardShown.value = value }))
   }
 }
 const lastWinner = ref<'player' | 'other'>('other')

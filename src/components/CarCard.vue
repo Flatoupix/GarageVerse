@@ -62,6 +62,20 @@ const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: secto
         <img :src="look.drift.car" alt="" class="drift-car" />
         <div class="drift-flare"></div>
       </div>
+      <ul v-if="mods" class="mod-row mod-rail" aria-label="Améliorations">
+        <li v-for="mod in mods" :key="mod.key" class="mod-slot mod-crest" :class="[`level-${mod.level}`, { 'has-part': mod.fitted.length > 0 }]" :title="mod.label">
+          <span class="visually-hidden">{{ mod.label }}</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <g v-if="mod.key === 'man'"><circle cx="8" cy="8" r="5.6" /><circle cx="8" cy="8" r="2" /><path d="M3 8h3M10 8h3M8 10v3.5" /></g>
+            <path v-else-if="mod.key === 'acc'" d="M4.2 3.5v9M8 3.5v9M11.8 3.5v4.5M4.2 8h7.6" />
+            <path v-else-if="mod.key === 'vit'" d="M8.8 2.2 4.2 8.8h3.5l-.8 5L11.8 7H8.3z" />
+            <g v-else><circle cx="7.2" cy="8" r="5.2" /><circle cx="7.2" cy="8" r="1.5" /><path class="mod-caliper" d="M11.8 4.8a5.8 5.8 0 0 1 0 6.4" /></g>
+          </svg>
+          <span v-if="mod.fitted.length" class="mod-lamps" aria-hidden="true">
+            <i v-for="part in mod.fitted" :key="part!.id" :class="`fitted rarity-${rarityClass[part!.rarity]}`"></i>
+          </span>
+        </li>
+      </ul>
     </div>
     <div class="car-card-details">
       <div class="car-metadata">
@@ -76,20 +90,6 @@ const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: secto
             <span class="bar" :style="{ '--fill': stats[key] / STAT_CAP }" aria-hidden="true"></span></dd>
         </div>
       </dl>
-      <ul v-if="mods" class="mod-row" aria-label="Améliorations">
-        <li v-for="mod in mods" :key="mod.key" class="mod-slot" :class="`level-${mod.level}`" :title="mod.label">
-          <span class="visually-hidden">{{ mod.label }}</span>
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <g v-if="mod.key === 'man'"><circle cx="8" cy="8" r="6" /><circle cx="8" cy="8" r="2.4" /></g>
-            <path v-else-if="mod.key === 'acc'" d="M4 3v10M8 3v10M12 3v5M4 8h8" />
-            <path v-else-if="mod.key === 'vit'" d="M4 2.5h8v6H4zM4 5.5h8M8 8.5V12M6.2 13.2h3.6" />
-            <g v-else><circle cx="7" cy="8" r="5.5" /><circle cx="7" cy="8" r="1.4" /><path class="mod-caliper" d="M12.2 4.6a6.4 6.4 0 0 1 0 6.8" /></g>
-          </svg>
-          <span class="mod-lamps" aria-hidden="true">
-            <i v-for="n in 2" :key="n" :class="mod.fitted[n - 1] ? `fitted rarity-${rarityClass[mod.fitted[n - 1]!.rarity]}` : ''"></i>
-          </span>
-        </li>
-      </ul>
       <div v-if="!compact" class="signature">
         <span class="signature-mark" aria-hidden="true">✦</span>
         <div><b>{{ v.signature.name }}</b><span>{{ v.signature.text }}</span></div>

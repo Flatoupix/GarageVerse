@@ -1,7 +1,7 @@
-export type Cue = 'tear' | 'flip' | 'drift' | 'collect' | 'legend' | 'win' | 'lose' | 'nitro' | 'upgrade'
-  | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh'
+import { audioContext, duckMusic, effectsOutput, playSample } from './audio'
 
-let audio: AudioContext | undefined
+export type Cue = 'tear' | 'flip' | 'drift' | 'collect' | 'legend' | 'revealLegend' | 'win' | 'lose' | 'nitro' | 'upgrade'
+  | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh'
 
 function tone(ctx: AudioContext, at: number, freq: number, duration: number, type: OscillatorType = 'sine', gain = 0.075, slideTo?: number) {
   const oscillator = ctx.createOscillator()
@@ -12,7 +12,7 @@ function tone(ctx: AudioContext, at: number, freq: number, duration: number, typ
   volume.gain.setValueAtTime(0.001, at)
   volume.gain.exponentialRampToValueAtTime(gain, at + Math.min(0.022, duration / 3))
   volume.gain.exponentialRampToValueAtTime(0.001, at + duration)
-  oscillator.connect(volume).connect(ctx.destination)
+  oscillator.connect(volume).connect(effectsOutput())
   oscillator.start(at)
   oscillator.stop(at + duration)
 }
@@ -30,12 +30,12 @@ function noise(ctx: AudioContext, at: number, duration: number, kind: BiquadFilt
   filter.frequency.setValueAtTime(from, at)
   filter.frequency.exponentialRampToValueAtTime(to, at + duration * 0.8)
   volume.gain.value = gain
-  source.connect(filter).connect(volume).connect(ctx.destination)
+  source.connect(filter).connect(volume).connect(effectsOutput())
   source.start(at)
 }
 
-// Chaque son est synthétisé : aucune ressource audio à charger.
-const cues: Record<Cue, (c: AudioContext, t: number) => void> = {
+// Les effets synthétisés restent disponibles pendant le chargement ou en l’absence d’un fichier.
+const cues: Record<Exclude<Cue, 'revealLegend'>, (c: AudioContext, t: number) => void> = {
   tear: (c, t) => noise(c, t, 0.22, 'bandpass', 2200, 650, 0.30),
   whoosh: (c, t) => noise(c, t, 0.26, 'bandpass', 500, 3200, 0.12),
   tap: (c, t) => tone(c, t, 880, 0.05, 'sine', 0.035, 620),
@@ -71,9 +71,10 @@ const cues: Record<Cue, (c: AudioContext, t: number) => void> = {
 
 export function playCue(cue: Cue) {
   try {
-    audio ??= new AudioContext()
-    if (audio.state === 'suspended') void audio.resume().catch(() => {})
-    cues[cue](audio, audio.currentTime)
+    const audio = audioContext()
+    if (cue === 'revealLegend' || cue === 'legend' || cue === 'win' || cue === 'drift') duckMusic(0.9)
+    else if (cue === 'tear' || cue === 'nitro') duckMusic(0.42)
+    if (!playSample(cue, audio)) cues[cue === 'revealLegend' ? 'legend' : cue](audio, audio.currentTime)
   } catch {
     // The opening remains playable on browsers without Web Audio.
   }

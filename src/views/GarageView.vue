@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { boosterById, families, parts, rarities, series, vehicleById, vehicles } from '../game/data'
+import { boosterById, families, parts, rarities, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
+import { statsOf } from '../game/rules'
 import { claimSeries, seriesComplete, seriesProgress, freeParts, prepOf } from '../game/save'
 import { act, ownedCount, reducedMotion, save } from '../game/store'
 import { edition } from '../game/art'
@@ -17,27 +18,69 @@ const garageFilters = [
 ] as const
 const query = ref('')
 const category = ref('')
+const rarityFilter = ref<'' | Rarity>('')
 const family = ref('')
 const showMissing = ref(false)
 const sort = ref('number')
+const colOptions = [
+  { value: 0, label: 'Auto' },
+  { value: 1, label: '1' },
+  { value: 2, label: '2' },
+  { value: 3, label: '3' },
+  { value: 4, label: '4' },
+  { value: 5, label: '5' },
+  { value: 6, label: '6' },
+] as const
+const cols = computed(() => save.preferences.garageCols ?? 0)
 const categories = [...new Set(vehicles.flatMap(v => [...v.tags, ...(v.culture?.aura ?? [])]))].sort((a, b) => a.localeCompare(b, 'fr'))
 const normalize = (name: string) => name.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
 const search = computed(() => normalize(query.value.trim()))
+
+function carStats(v: Vehicle) {
+  return statsOf(v, prepOf(save, v.id))
+}
+
+function totalPower(v: Vehicle) {
+  const s = carStats(v)
+  return s.acc + s.vit + s.man + s.end
+}
+
+function prepScore(v: Vehicle) {
+  if (!save.cars[v.id]) return -1
+  const p = prepOf(save, v.id)
+  const levels = Object.values(p.upgrades ?? {}).reduce<number>((sum, lvl) => sum + (lvl ?? 0), 0)
+  return p.stage * 100 + levels * 10 + p.parts.length
+}
+
+function setCols(value: number) {
+  act(s => { s.preferences.garageCols = value })
+}
+
 const carList = computed(() => vehicles.filter(v => {
   const car = save.cars[v.id]
   if (garageFilter.value !== 'collection' && !car) return false
-  if (garageFilter.value === 'favorites' && !car.favorite) return false
+  if (garageFilter.value === 'favorites' && !car?.favorite) return false
   if (garageFilter.value === 'lineup' && !save.lineup.includes(v.id)) return false
+  if (rarityFilter.value && v.rarity !== rarityFilter.value) return false
   if (category.value && !v.tags.includes(category.value) && !v.culture?.aura.includes(category.value)) return false
-  return normalize(`${v.name} ${v.version}`).includes(search.value)
+  return normalize(`${v.name} ${v.version} ${v.year}`).includes(search.value)
 }).sort((a, b) => {
-  if (garageFilter.value === 'owned') {
-    const favorite = Number(save.cars[b.id].favorite) - Number(save.cars[a.id].favorite)
+  if (garageFilter.value === 'owned' && sort.value === 'number') {
+    const favorite = Number(Boolean(save.cars[b.id]?.favorite)) - Number(Boolean(save.cars[a.id]?.favorite))
     if (favorite) return favorite
   }
   if (sort.value === 'name') return a.name.localeCompare(b.name, 'fr') || a.number.localeCompare(b.number)
   if (sort.value === 'cost') return a.cost - b.cost || a.number.localeCompare(b.number)
+  if (sort.value === 'cost-desc') return b.cost - a.cost || a.number.localeCompare(b.number)
   if (sort.value === 'rarity') return rarities.indexOf(b.rarity) - rarities.indexOf(a.rarity) || a.number.localeCompare(b.number)
+  if (sort.value === 'power') return totalPower(b) - totalPower(a) || a.number.localeCompare(b.number)
+  if (sort.value === 'stage') return prepScore(b) - prepScore(a) || totalPower(b) - totalPower(a) || a.number.localeCompare(b.number)
+  if (sort.value === 'acc') return carStats(b).acc - carStats(a).acc || a.number.localeCompare(b.number)
+  if (sort.value === 'vit') return carStats(b).vit - carStats(a).vit || a.number.localeCompare(b.number)
+  if (sort.value === 'man') return carStats(b).man - carStats(a).man || a.number.localeCompare(b.number)
+  if (sort.value === 'end') return carStats(b).end - carStats(a).end || a.number.localeCompare(b.number)
+  if (sort.value === 'copies') return (save.cars[b.id]?.copies ?? 0) - (save.cars[a.id]?.copies ?? 0) || a.number.localeCompare(b.number)
+  if (sort.value === 'year') return b.year - a.year || a.number.localeCompare(b.number)
   return a.number.localeCompare(b.number)
 }))
 const ownedParts = computed(() => parts.filter(p => (save.parts[p.id] ?? 0) > 0))
@@ -71,28 +114,84 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
       <div v-if="tab === 'cars'" class="chips garage-filters" aria-label="Afficher les voitures">
         <button v-for="f in garageFilters" :key="f.id" type="button" :aria-pressed="garageFilter === f.id" @click="garageFilter = f.id">{{ f.label }}</button>
       </div>
-      <label class="garage-search">
-        <span class="visually-hidden">Rechercher {{ tab === 'cars' ? 'une voiture' : 'une pièce' }}</span>
-        <input v-model="query" type="search" :placeholder="tab === 'cars' ? 'Rechercher une voiture' : 'Rechercher une pièce'" />
-      </label>
-      <div class="garage-selects">
-        <template v-if="tab === 'cars'">
-          <label><span>Catégorie</span><select v-model="category"><option value="">Toutes</option><option v-for="name in categories" :key="name">{{ name }}</option></select></label>
-          <label><span>Tri</span><select v-model="sort"><option value="number">Collection</option><option value="name">Nom</option><option value="cost">Coût d’écurie</option><option value="rarity">Rareté</option></select></label>
-        </template>
-        <template v-else>
-          <label><span>Famille</span><select v-model="family"><option value="">Toutes</option><option v-for="(label, id) in families" :key="id" :value="id">{{ label }}</option></select></label>
-          <label class="missing-toggle"><input v-model="showMissing" type="checkbox" /> Pièces manquantes</label>
-        </template>
+      <div class="garage-toolbar-main">
+        <label class="garage-search">
+          <span class="visually-hidden">Rechercher {{ tab === 'cars' ? 'une voiture' : 'une pièce' }}</span>
+          <input v-model="query" type="search" :placeholder="tab === 'cars' ? 'Rechercher une voiture (nom, année…)' : 'Rechercher une pièce'" />
+        </label>
+        <div class="garage-selects" :class="{ 'cars-selects': tab === 'cars' }">
+          <template v-if="tab === 'cars'">
+            <label>
+              <span>Rareté</span>
+              <select v-model="rarityFilter">
+                <option value="">Toutes</option>
+                <option v-for="r in rarities" :key="r" :value="r">{{ r }}</option>
+              </select>
+            </label>
+            <label>
+              <span>Catégorie</span>
+              <select v-model="category">
+                <option value="">Toutes</option>
+                <option v-for="name in categories" :key="name">{{ name }}</option>
+              </select>
+            </label>
+            <label>
+              <span>Tri</span>
+              <select v-model="sort">
+                <option value="number">Collection (n°)</option>
+                <option value="rarity">Rareté</option>
+                <option value="power">Puissance totale</option>
+                <option value="stage">Niveau d’amélioration</option>
+                <option value="cost">Coût d’écurie (croissant)</option>
+                <option value="cost-desc">Coût d’écurie (décroissant)</option>
+                <option value="acc">Accélération</option>
+                <option value="vit">Vitesse</option>
+                <option value="man">Maniabilité</option>
+                <option value="end">Endurance</option>
+                <option value="copies">Exemplaires / doublons</option>
+                <option value="year">Année</option>
+                <option value="name">Nom (A-Z)</option>
+              </select>
+            </label>
+          </template>
+          <template v-else>
+            <label><span>Famille</span><select v-model="family"><option value="">Toutes</option><option v-for="(label, id) in families" :key="id" :value="id">{{ label }}</option></select></label>
+            <label class="missing-toggle"><input v-model="showMissing" type="checkbox" /> Pièces manquantes</label>
+          </template>
+        </div>
+      </div>
+      <div v-if="tab === 'cars'" class="garage-density-bar">
+        <span class="garage-count">{{ carList.length }} voiture{{ carList.length > 1 ? 's' : '' }}</span>
+        <div class="garage-density" role="group" aria-label="Nombre de voitures par ligne">
+          <span class="density-label">Par ligne</span>
+          <div class="chips density-chips">
+            <button
+              v-for="opt in colOptions"
+              :key="opt.value"
+              type="button"
+              :class="`col-opt-${opt.value}`"
+              :aria-pressed="cols === opt.value"
+              :aria-label="opt.value === 0 ? 'Nombre de colonnes automatique' : `${opt.value} voiture${opt.value > 1 ? 's' : ''} par ligne`"
+              @click="setCols(opt.value)"
+            >
+              {{ opt.label }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
     <template v-if="tab === 'cars'">
-      <div v-if="carList.length" class="garage-grid">
+      <div
+        v-if="carList.length"
+        class="garage-grid"
+        :class="{ 'grid-custom': cols > 0, 'grid-single': cols === 1, 'grid-dense': cols >= 4 }"
+        :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined"
+      >
         <div v-for="v in carList" :key="v.id" class="garage-tile">
           <template v-if="save.cars[v.id]">
             <button type="button" class="card-tile" :aria-label="`Voir ${v.name} ${v.version}`" @click="emit('inspect', 'car', v.id)">
-              <CarCard :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" compact />
+              <CarCard :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" :compact="cols !== 1" />
               <span v-if="save.cars[v.id].copies > 1" class="copy-count">×{{ save.cars[v.id].copies }}</span>
               <span v-if="save.lineup.includes(v.id)" class="tile-tag lineup-tag">Écurie</span>
             </button>
@@ -106,7 +205,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
           </button>
         </div>
       </div>
-      <p v-else class="garage-empty">{{ garageFilter === 'favorites' && !search && !category ? 'Touche l’étoile d’une voiture pour la retrouver ici.' : 'Aucune voiture pour ces filtres.' }}</p>
+      <p v-else class="garage-empty">{{ garageFilter === 'favorites' && !search && !category && !rarityFilter ? 'Touche l’étoile d’une voiture pour la retrouver ici.' : 'Aucune voiture pour ces filtres.' }}</p>
     </template>
 
     <template v-else-if="tab === 'parts'">

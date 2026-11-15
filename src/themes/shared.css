@@ -66,22 +66,93 @@
 .engage-pick { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 700 .72rem/1.2 var(--body); text-transform: none; letter-spacing: 0; }
 @media (min-width: 700px) { .engage-actions { bottom: 92px; } }
 
-/* ——— Emplacements d'amélioration sur la carte : éteint, à moitié allumé, pleinement allumé ——— */
-.mod-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: .9cqw; margin: 0; padding: 0; list-style: none; }
-.mod-slot { position: relative; display: flex; align-items: center; justify-content: center; gap: 1.4cqw; padding: .7cqw 0;
-  border: 1px dashed color-mix(in srgb, var(--text) 22%, transparent); border-radius: var(--radius, .9cqw);
-  color: color-mix(in srgb, var(--text) 30%, transparent); }
-.mod-slot svg { width: 5.2cqw; height: 5.2cqw; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-.mod-slot .mod-caliper { stroke-width: 3; }
-.mod-slot.level-1 { border-style: solid; border-color: color-mix(in srgb, var(--glow) 45%, transparent); color: color-mix(in srgb, var(--glow) 65%, var(--ink)); }
-.mod-slot.level-2 { border-style: solid; border-color: var(--glow); color: var(--glow); background: color-mix(in srgb, var(--glow) 14%, transparent); }
-.mod-slot.level-2 svg { filter: drop-shadow(0 0 1.2cqw var(--glow)); }
-.mod-lamps { display: grid; gap: .7cqw; }
-.mod-lamps i { width: 1.7cqw; height: 1.7cqw; border-radius: 50%; border: 1px solid currentColor; opacity: .6; }
-.mod-lamps i.fitted { --lamp: #dfe7f5; opacity: 1; border-color: var(--lamp); background: var(--lamp); box-shadow: 0 0 1.6cqw var(--lamp); }
-.mod-lamps i.rarity-rare { --lamp: #4aa8ff; } .mod-lamps i.rarity-epic { --lamp: #ff5fd2; } .mod-lamps i.rarity-legendary { --lamp: #ffc64a; }
-.car-card.compact .mod-slot svg { width: 8cqw; height: 8cqw; }
-.car-card.compact .mod-lamps i { width: 2.6cqw; height: 2.6cqw; }
+/* ——— Écussons d'amélioration en colonne sur le flanc de l'illustration ——— */
+.mod-row.mod-rail {
+  position: absolute;
+  z-index: 3;
+  left: 2cqw;
+  top: 50%;
+  translate: 0 -50%;
+  display: flex;
+  flex-direction: column;
+  gap: 1cqw;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  pointer-events: none;
+}
+.mod-slot.mod-crest {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .55cqw;
+  width: 7.4cqw;
+  height: 7.8cqw;
+  padding: .45cqw .3cqw .55cqw;
+  border: 1px dashed color-mix(in srgb, var(--text) 28%, transparent);
+  border-radius: 1.6cqw 1.6cqw 3.8cqw 3.8cqw;
+  background: color-mix(in srgb, var(--night) 82%, transparent);
+  backdrop-filter: blur(3px);
+  color: color-mix(in srgb, var(--text) 42%, transparent);
+  box-shadow: 0 1px 4px #0009;
+}
+.mod-slot.mod-crest svg {
+  width: 4.1cqw;
+  height: 4.1cqw;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mod-slot.mod-crest .mod-caliper { stroke-width: 3; }
+.mod-slot.mod-crest.level-1 {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--glow) 68%, transparent);
+  background: color-mix(in srgb, var(--night) 86%, var(--glow));
+  color: color-mix(in srgb, var(--glow) 82%, #fff);
+}
+.mod-slot.mod-crest.level-2 {
+  border-style: solid;
+  border-color: var(--glow);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--glow) 30%, var(--night)), color-mix(in srgb, var(--night) 92%, #000));
+  color: var(--glow);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--glow) 52%, transparent), 0 1px 4px #000b;
+}
+.mod-slot.mod-crest.level-2 svg { filter: drop-shadow(0 0 1cqw var(--glow)); }
+.mod-slot.mod-crest .mod-lamps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .75cqw;
+}
+.mod-slot.mod-crest .mod-lamps i {
+  width: 1.45cqw;
+  height: 1.45cqw;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: .55;
+}
+.mod-slot.mod-crest .mod-lamps i.fitted {
+  --lamp: #dfe7f5;
+  opacity: 1;
+  border-color: var(--lamp);
+  background: var(--lamp);
+  box-shadow: 0 0 1.5cqw var(--lamp);
+}
+.mod-slot.mod-crest .mod-lamps i.rarity-rare { --lamp: #4aa8ff; }
+.mod-slot.mod-crest .mod-lamps i.rarity-epic { --lamp: #ff5fd2; }
+.mod-slot.mod-crest .mod-lamps i.rarity-legendary { --lamp: #ffc64a; }
+.car-card.compact .mod-slot.mod-crest {
+  width: 8.6cqw;
+  height: 9cqw;
+  border-radius: 1.9cqw 1.9cqw 4.4cqw 4.4cqw;
+}
+.car-card.compact .mod-slot.mod-crest svg { width: 4.8cqw; height: 4.8cqw; }
+.car-card.compact .mod-slot.mod-crest .mod-lamps i { width: 1.7cqw; height: 1.7cqw; }
+.garage-tile .tile-tag.lineup-tag { left: 12.5cqw; bottom: 33%; }
 
 /* Séries : mêmes composants et couleurs de thème dans les huit interfaces. */
 .garage-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -100,3 +171,217 @@
 .series-silhouette { width: 100%; aspect-ratio: 4 / 3; fill: var(--muted); background: var(--night); }
 .series-card > .button { max-width: 100%; white-space: normal; }
 @media (max-width: 350px) { .series-cars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* ——— Fiche voiture : amélioration automatique, styles/éditions et mise en page ——— */
+.car-sheet-aside.mobile-hidden { display: none; }
+.car-sheet-main { display: grid; gap: 12px; min-width: 0; }
+.auto-upgrade-box { border-color: color-mix(in srgb, var(--cyan) 50%, var(--line)); }
+.auto-upgrade-steps {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: .82rem;
+  line-height: 1.35;
+  color: var(--text);
+}
+.edition-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.edition-picker button {
+  flex: 1 1 128px;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  min-height: 48px;
+  padding: 6px 10px;
+  text-align: center;
+}
+.edition-picker button b { font-size: .82rem; line-height: 1.15; }
+.edition-picker button small { font-size: .7rem; color: var(--muted); line-height: 1.15; }
+.edition-picker button[aria-pressed="true"] small { color: var(--cyan); font-weight: 700; }
+.edition-picker button.is-locked { border-style: dashed; }
+.edition-picker button.is-locked small { color: var(--sun); font-weight: 700; }
+
+/* ——— Garage : filtres enrichis, tri et sélecteur de voitures par ligne ——— */
+.garage-toolbar-main { display: grid; gap: 9px; }
+.garage-selects.cars-selects {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.garage-selects.cars-selects > label:last-child {
+  grid-column: 1 / -1;
+}
+.garage-density-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+}
+.garage-count {
+  font: 700 .76rem var(--mono);
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+.garage-density {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+.density-label {
+  font-size: .76rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.density-chips { padding-bottom: 0; }
+.density-chips button {
+  min-height: 32px;
+  padding: 0 10px;
+  font: 700 .75rem var(--mono);
+}
+@media (max-width: 649px) {
+  .density-chips .col-opt-4,
+  .density-chips .col-opt-5,
+  .density-chips .col-opt-6 { display: none; }
+}
+@media (min-width: 650px) and (max-width: 959px) {
+  .density-chips .col-opt-5,
+  .density-chips .col-opt-6 { display: none; }
+}
+.garage-grid.grid-custom {
+  grid-template-columns: repeat(var(--garage-cols, 2), minmax(0, 1fr)) !important;
+}
+.garage-grid.grid-single {
+  max-width: 400px;
+  margin-inline: auto;
+}
+.garage-grid.grid-dense { gap: 8px; }
+.garage-grid[style*="--garage-cols: 3"] .favorite-button,
+.garage-grid.grid-dense .favorite-button {
+  inline-size: 32px;
+  block-size: 32px;
+  font-size: 1.05rem;
+}
+.garage-grid[style*="--garage-cols: 3"] .tile-tag,
+.garage-grid.grid-dense .tile-tag {
+  font-size: .55rem;
+  padding: 2px 5px;
+}
+
+/* ——— Version tablette & desktop solide ——— */
+@media (min-width: 580px) {
+  .garage-selects.cars-selects {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .garage-selects.cars-selects > label:last-child {
+    grid-column: auto;
+  }
+}
+
+@media (min-width: 650px) {
+  .app-shell { padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  .home-tiles {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+  }
+}
+
+@media (min-width: 820px) {
+  main { max-width: 1200px; padding: 24px 24px 44px; }
+  .topbar { padding-inline: 24px; }
+
+  /* Accueil desktop : bannière et défi du jour côte à côte, raccourcis et guide en pleine largeur */
+  .home {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+  .home > .hero {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 290px;
+  }
+  .home > .daily-panel {
+    grid-column: 2;
+    grid-row: 1;
+    margin-top: 0;
+    align-content: space-between;
+  }
+  .home > :not(.hero):not(.daily-panel) {
+    grid-column: 1 / -1;
+  }
+  .home .mechanic-guide {
+    max-width: none;
+    margin: 0;
+  }
+  .home > .home-tiles {
+    margin-top: 0;
+    gap: 14px;
+  }
+  .home > .how { margin-top: 0; }
+  .how ol {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  /* Barre d'outils du garage sur une seule ligne */
+  .garage-toolbar-main {
+    grid-template-columns: minmax(220px, 1.1fr) minmax(0, 2fr);
+    align-items: end;
+    gap: 12px;
+  }
+  .series-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Fiche voiture en 2 colonnes sur desktop : carte interactive collée à gauche, atelier/infos à droite */
+  .modal.sheet-modal {
+    width: min(92vw, 880px);
+    max-height: 90svh;
+    padding: 22px;
+  }
+  .car-sheet-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .car-sheet-aside,
+  .car-sheet-aside.mobile-hidden {
+    display: block;
+    position: sticky;
+    top: 0;
+  }
+  .car-sheet-aside .sheet-card {
+    width: 100%;
+    margin: 0;
+  }
+
+  /* Course et sélection d'écurie adaptées aux grands écrans */
+  .lineup-slots {
+    max-width: 780px;
+    margin-inline: auto;
+    gap: 14px;
+  }
+  .engage-cars .engage-car {
+    aspect-ratio: 1.45;
+    max-height: 190px;
+  }
+  .pick-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .rival-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .engage-actions {
+    max-width: 680px;
+    margin-inline: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius, 12px);
+  }
+}
