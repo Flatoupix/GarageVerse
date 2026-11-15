@@ -4,7 +4,7 @@ import type { Play, Round } from '../game/rules'
 
 // Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
-const props = defineProps<{ round: Round; step: number; running: boolean; arts: { player?: string; rival?: string } }>()
+const props = defineProps<{ round: Round; step: number; running: boolean; arts: { player?: string; rival?: string }; backdrop?: string }>()
 const emit = defineEmits<{ skip: [] }>()
 const sides = ['player', 'rival'] as const
 
@@ -35,6 +35,7 @@ const lanes = computed(() => sides.map(who => {
 
 <template>
   <div class="sector-run" :class="[`run-${round.condition}`, { running }]" aria-hidden="true" @click="running && emit('skip')">
+    <div v-if="backdrop" class="run-scenery" :style="{ backgroundImage: `url(${backdrop})` }"></div>
     <div v-for="lane in lanes" :key="lane.who" class="run-lane" :class="lane.who">
       <div class="run-mover" :class="{ far: lane.position > .5 }" :style="{ '--p': lane.position }">
         <div :key="`${step}${lane.kind}`" class="run-car" :class="lane.kind">

@@ -36,6 +36,14 @@ const NO_TEXT = 'Strictly no text, no letters, no numbers, no logos, no brand ba
 const STYLE = 'Style: premium 1980s synthwave / outrun poster illustration, clean crisp shapes, glossy reflections and chrome highlights, ' +
   'palette of hot magenta, electric cyan, deep violet and sunset orange, subtle film grain. Cohesive with a retro trading-card game.'
 // Styles alternatifs : une carte peut sortir du synthwave (champ look du roster) avec son propre décor (champ setting).
+// Décor de course par condition de piste (clés de `conditions` dans garage.json).
+const TRACKS = {
+  sec: 'a sunny country road with plane trees, vineyards, a stone village on a hill and a clear blue sky',
+  pluie: 'a country road under heavy dark rain clouds, falling rain, wet shiny asphalt with puddles, dripping trees and misty hills',
+  nuit: 'a city ring road at night with glowing neon signs without text, street lamps and a lit skyline under a violet sky',
+  terre: 'a gravel rally stage through a pine forest with rocks, hay bales, dust and wooden fences',
+  ville: 'a European city boulevard in daytime with stone apartment buildings, café awnings, plane trees and parked scooters',
+}
 const LOOKS = {
   poster: 'Style: hand-painted 1970s-80s movie poster illustration, visible gouache brushwork, dramatic rim lighting, rich warm palette, cinematic composition.',
   rally: 'Style: gritty 1980s rally photograph on Kodachrome film, natural daylight, dust and mud spray, slight motion blur, authentic film grain.',
@@ -86,6 +94,11 @@ function jobs() {
       (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${STYLE} ${NO_TEXT}`) })
   }
   if (anim) {
+    // Décors de course, un par condition : `--set anim --kind tracks`.
+    if (kinds.includes('tracks')) for (const [id, setting] of Object.entries(TRACKS)) list.push({ kind: 'anim', id: `track-${id}-bg`, size: [240, 120], post: 'strip', prompt:
+      `Pixel art side-scrolling game background, wide landscape 2:1, seen from the side like a 1990s racing game level. ` +
+      `Scene: ${setting}. A flat road runs horizontally across the bottom fifth of the image, from edge to edge. ` +
+      `No vehicles, no people in the foreground. ${PIXEL_STYLE} ${NO_TEXT}` })
     for (const v of roster.vehicles.filter(v => v.anim)) {
       const subject = v.culture
         ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`

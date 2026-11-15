@@ -4,6 +4,13 @@
 .sector-run { --car: 78px; position: relative; display: grid; gap: 4px; margin-bottom: 12px; padding: 6px 0; overflow: hidden;
   border: 1px solid var(--line); border-radius: var(--radius, 12px); background: var(--night); }
 .sector-run.running { cursor: pointer; }
+/* Décor de la condition : on ne montre que le ciel et le paysage, la route de l'image reste sous les deux voies. */
+.sector-run:has(.run-scenery) { padding-top: 0; }
+.run-scenery { height: 68px; background: 0 0 / auto 125% repeat-x; image-rendering: pixelated; border-bottom: 2px solid var(--night); }
+.running .run-scenery { animation: run-scenery 9s linear infinite; }
+@keyframes run-scenery { to { background-position-x: -340px; } }
+.run-scenery ~ .run-finish { top: 68px; }
+.run-pluie .run-scenery { filter: saturate(.45) brightness(.62); }
 .run-lane { position: relative; height: 54px;
   background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--text) 22%, transparent) 0 18px, transparent 18px 44px) 0 100% / 44px 2px repeat-x; }
 .running .run-lane { animation: run-road 420ms linear infinite; }
@@ -36,7 +43,7 @@
 @keyframes run-tag { from { opacity: 0; scale: .7; } }
 .run-finish { position: absolute; inset: 0 8px 0 auto; width: 8px; opacity: .7;
   background: repeating-conic-gradient(var(--text) 0 25%, transparent 0 50%) 0 0 / 8px 8px; }
-.run-skip { position: absolute; left: 8px; top: 2px; color: var(--muted); font: .6rem var(--body); opacity: .8; }
+.run-skip { position: absolute; left: 8px; bottom: 1px; color: var(--muted); font: .6rem var(--body); opacity: .8; }
 /* Ambiance du terrain, sans illustration : teinte de la piste, pluie en hachures. */
 .run-nuit { background: color-mix(in srgb, var(--night) 80%, #000); }
 .run-terre { background: color-mix(in srgb, var(--night) 72%, #a8642a); }

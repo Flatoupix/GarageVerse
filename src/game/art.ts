@@ -1,4 +1,4 @@
-import { defaultStyle, formerStyle, PIXEL, vehicleById, type EditionStyle } from './data'
+import { defaultStyle, formerStyle, PIXEL, vehicleById, type Condition, type EditionStyle } from './data'
 import { theme } from './theme'
 
 const url = (files: Record<string, string>, folder: string) =>
@@ -28,6 +28,11 @@ function sceneOf(id: string): Scene | undefined {
   if (!fx || !bg || !car) return
   return { bg, car, chaser: fx.includes('trex') ? pixelAnim[`${id}-trex`] : undefined, fx }
 }
+// Décor qui défile pendant un secteur, un par condition. Tant que le décor dédié (track-<condition>-bg, produit par
+// `yarn art --set anim --kind tracks`) n'existe pas, la course emprunte celui d'une légendaire animée.
+const trackStandIn: Record<Condition, string> = { sec: 'venom', pluie: 'elise190', nuit: 'mf1', terre: 'jpjeep', ville: 'bttf' }
+export const trackBackdrop = (condition: Condition): string | undefined =>
+  pixelAnim[`track-${condition}-bg`] ?? pixelAnim[`${trackStandIn[condition]}-bg`]
 const legacyArt: Record<string, Partial<Record<EditionStyle, Edition>>> = {
   clio: { Classic: { style: 'Classic', art: legacy.clio } },
   elise: { Classic: { style: 'Classic', art: legacy.elise } },

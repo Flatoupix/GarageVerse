@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
 import { constraintCap, constraintText } from '../game/daily'
-import { art, edition } from '../game/art'
+import { art, edition, trackBackdrop } from '../game/art'
 import {
   boosterById, conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
   type Condition, type Rival, type StatKey,
@@ -270,7 +270,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <section v-if="shown" class="round-result" :class="settled ? shown.winner : 'pending'">
         <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? 'Secteur gagné' : shown.winner === 'rival' ? 'Secteur perdu' : 'Égalité parfaite' }}</h2>
         <h2 v-else>{{ sectorLabels[shown.sector] }} · {{ conditionLabels[shown.condition] }}</h2>
-        <SectorRun :round="shown" :step="step" :running="!settled" :arts="runArts" @skip="skipRun" />
+        <SectorRun :round="shown" :step="step" :running="!settled" :arts="runArts" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
         <p v-if="settled && tieBreak" class="tie-note">{{ tieBreak }}</p>
         <div class="duel-columns">
           <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col"
