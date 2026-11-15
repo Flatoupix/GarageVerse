@@ -497,13 +497,12 @@
 .shop-item .shop-info .button { max-width: 100%; white-space: normal; }
 @media (max-width: 420px) { .shop-grid .shop-item { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 16px; } .shop-item .shop-pack { width: 168px; max-width: 100%; } .shop-item .shop-info { width: 100%; } }
 
-/* Gris neutre commun : contraste supérieur à 10:1, sans opacité sur le texte. */
-button:disabled, .button:disabled, .ghost:disabled, .quiet:disabled, .small:disabled,
-button:disabled:hover, button:disabled:active {
-  background: #dedede !important; color: #303030 !important; border-color: #777 !important;
-  opacity: 1 !important; cursor: not-allowed !important; box-shadow: none !important;
-  text-shadow: none !important; transform: none !important; translate: none !important;
-  filter: none !important; animation: none !important;
+/* Bouton indisponible : même grisé dans tous les thèmes, qui gardent leurs couleurs. */
+.button:disabled, .ghost:disabled, .quiet:disabled, .small:disabled,
+.button:disabled:hover, .button:disabled:active {
+  opacity: .5 !important; filter: grayscale(1) !important; cursor: not-allowed !important;
+  box-shadow: none !important; text-shadow: none !important; transform: none !important;
+  translate: none !important; animation: none !important;
 }
 .new-car-badge { display: inline-block; padding: 3px 7px; border-radius: var(--radius, 6px);
   background: var(--text); color: var(--night); font: 700 .75rem/1.4 var(--body); }

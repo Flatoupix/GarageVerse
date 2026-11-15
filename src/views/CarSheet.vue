@@ -184,13 +184,6 @@ function workshop(key?: StatKey) {
       </aside>
 
       <div class="car-sheet-main">
-        <section v-if="confirmingRecycle" class="sheet-section" role="status">
-          <p>Recycler ce doublon pour +{{ progression.scrap[v.rarity] }} crédits ?</p>
-          <div class="car-sale-actions">
-            <button type="button" class="button primary" @click="confirmRecycle">Confirmer</button>
-            <button type="button" class="button ghost" @click="confirmingRecycle = false">Annuler</button>
-          </div>
-        </section>
         <section v-if="receipt" class="sheet-section" role="status">
           <p>Doublon recyclé · +{{ receipt.credits }} crédits</p>
           <button type="button" class="button ghost" @click="cancelRecycle">Annuler</button>
@@ -277,7 +270,14 @@ function workshop(key?: StatKey) {
             <p v-if="next && stageProblem" class="hint">{{ stageProblem }}</p>
             <template v-if="car.copies > 1">
               <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
-              <button type="button" class="button small quiet" @click="confirmingRecycle = true">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+              <template v-if="confirmingRecycle">
+                <p role="status">Recycler ce doublon pour +{{ progression.scrap[v.rarity] }} crédits ?</p>
+                <div class="car-sale-actions">
+                  <button type="button" class="button primary" @click="confirmRecycle">Confirmer</button>
+                  <button type="button" class="button ghost" @click="confirmingRecycle = false">Annuler</button>
+                </div>
+              </template>
+              <button v-else type="button" class="button small quiet" @click="confirmingRecycle = true">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
             </template>
           </section>
         </template>
@@ -347,7 +347,7 @@ function workshop(key?: StatKey) {
             <p v-if="v.craft" class="hint">Évolution de {{ base?.name }} {{ base?.version }}. Prépare-la au Stage {{ v.craft.stage }}, puis débloque-la pour {{ v.craft.credits }} crédits.</p>
             <p v-else class="hint">Disponible dans les boosters.</p>
             <button v-if="v.craft" type="button" class="button primary" :disabled="Boolean(craftCheck(save, id))" @click="unlock(id, true)">
-              {{ craftCheck(save, id) ?? `Débloquer · ${v.craft.credits} crédits` }}
+              {{ `Débloquer · ${v.craft.credits} crédits` }}
             </button>
             <p v-if="craftCheck(save, id)" class="hint">{{ craftCheck(save, id) }}</p>
           </section>
@@ -360,7 +360,14 @@ function workshop(key?: StatKey) {
             <p v-if="next" class="hint">{{ stageProblem ?? next.text }}</p>
             <template v-if="car.copies > 1">
               <p class="hint">{{ car.copies - 1 }} doublon(s) en stock.</p>
-              <button type="button" class="button small quiet" @click="confirmingRecycle = true">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
+              <template v-if="confirmingRecycle">
+                <p role="status">Recycler ce doublon pour +{{ progression.scrap[v.rarity] }} crédits ?</p>
+                <div class="car-sale-actions">
+                  <button type="button" class="button primary" @click="confirmRecycle">Confirmer</button>
+                  <button type="button" class="button ghost" @click="confirmingRecycle = false">Annuler</button>
+                </div>
+              </template>
+              <button v-else type="button" class="button small quiet" @click="confirmingRecycle = true">Recycler un doublon · +{{ progression.scrap[v.rarity] }} crédits</button>
             </template>
           </section>
           <section v-if="car && evolutions.length" class="sheet-section">
@@ -369,7 +376,7 @@ function workshop(key?: StatKey) {
               <span><b>{{ e.name }} {{ e.version }}</b><small>{{ e.signature.name }} · {{ e.signature.text }}</small></span>
               <button v-if="save.cars[e.id]" type="button" class="button small ghost" @click="emit('open', e.id)">Voir</button>
               <button v-else type="button" class="button small primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
-                {{ craftCheck(save, e.id) ?? `Débloquer · ${e.craft!.credits} cr.` }}
+                {{ `Débloquer · ${e.craft!.credits} cr.` }}
               </button>
               <p v-if="!save.cars[e.id] && craftCheck(save, e.id)" class="hint">{{ craftCheck(save, e.id) }}</p>
             </div>

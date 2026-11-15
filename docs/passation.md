@@ -30,10 +30,23 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - L’intégration automatique d’une étape (`--integrate`) est refusée quand le clone a des fichiers non suivis (3 PNG de cartes à la racine et `.codex-attachments/`, qui sont à l’utilisateur) : récupérer alors le commit à la main (`git fetch ../<cycle>/checkout orchestrator/<cycle>:refs/cycle/x`, puis `cherry-pick`).
 - Quotas : Codex et Antigravity s’épuisent en cours de lot. Si l’un est à court, relancer la même commande avec l’autre moteur ; le pipeline ne régénère que le manquant. Quota d’image d’Antigravity (`gemini-3.1-flash-image`) : retour annoncé vers 21 h 10 le 15 novembre.
 
-## À faire
+## Plan validé avec le joueur (15 novembre, soir)
 
-1. **8 voitures vues de côté manquantes** (`*-car.px.webp` dans `src/assets/pixel/anim/`) : cosworth, m3e30, golf2, celica, mustang67, eleanor, countach, multipla. Relancer `--set anim --kind sprites`.
-2. **Contrôler les 94 voitures détourées** (fond magenta retiré, liseré violet résiduel sous la Batmobile, la Zonda et l’Agera) sur des planches, régénérer les ratés, puis **commiter et publier** : ces fichiers sont dans le dossier de travail mais pas encore dans git.
+Les 102 voitures de côté sont publiées (`b4eb00c`). Liseré magenta nettoyé sauf S15 et Charger (carrosserie violette, laissées telles quelles) ; Zonda : reste du violet entre les montants de l’aileron ; Batmobile, Zonda et Agera ont reçu une seconde passe non commitée. Ordre d’attaque :
+
+1. **Correctifs rapides** : confirmation **et annulation de quelques secondes** du recyclage de doublon (`CarSheet.vue` lignes ~239 et ~320 : l’action est directe, alors que la vente demande déjà confirmation) ; boutons d’amélioration (Stage 1, etc.) **grisés** quand on ne peut pas payer, avec la raison exacte (« il te manque 30 crédits ») ; badge « Nouveau » sur les voitures fraîchement tirées ; réglage « aide en touchant les mots soulignés », désactivé par défaut (le « ? » reste), à signaler dans le tutoriel.
+2. **Garage** : un appui sur une voiture ouvre la **carte** (performances dans un onglet ou un bouton), avec **zoom et déplacement** au doigt, l’inclinaison holographique restant active même zoomé ; couleur par **rareté** au lieu du bleu partout ; **tri et filtres** rapides.
+3. **Image de l’Agera** à régénérer (la voiture « vole » sur la carte), puis tour des autres cartes douteuses.
+4. **Thèmes et plein écran** : trop de thèmes (8) et la plupart sont jugés moches par le joueur, qui garde Synthwave ; Galaad n’aime pas Synthwave. À réduire (garder Synthwave, Rétro pixel, Sobre et au plus un ou deux à débloquer, à choisir sur une planche de captures). Plein écran : inviter à installer le jeu (manifeste `display`) et bouton plein écran là où c’est possible ; iPhone/Safari n’a pas d’API plein écran.
+5. **Éditions** : débloquer/changer un style contre **2 doublons + crédits selon la voiture** (aujourd’hui 40/75/120/200 crédits sans doublons). Le « Solarpunk » du joueur est probablement la gouache (à vérifier dans le pipeline) ; « voiture abandonnée » n’existe pas : à **tester sur 5 cartes** avant toute généralisation.
+6. **Démontage de voiture** à l’atelier (récupérer des pièces). Pas de kits d’amélioration.
+7. **Séries spéciales** : 4 séries, une par secteur (départ/accélération, virage/maniabilité, ligne droite/vitesse, endurance), plusieurs paliers de difficulté et gains croissants ; passer `balance.mjs` pour l’inflation de crédits. Puis **exhibition** : concours à critères tournants (juges qui aiment le rétro, le tuning, la rareté…) pour qu’une Fiat 500 puisse battre une Mazda tunée selon le concours. À spécifier avec le joueur avant de coder.
+8. **Plus tard, à cadrer** : **mode multijoueur** ; **version Android** (le joueur veut y mettre son splash screen de studio « Crazy Popping Cats », fait sous Construct, à récupérer sur son PC).
+
+## À faire (reliquat de la session précédente)
+
+1. ~~8 voitures de côté manquantes~~ : faites.
+2. ~~Contrôle des détourages~~ : fait, voir ci-dessus.
 3. **Séries spéciales de courses** (endurance, vitesse, aura…, de plus en plus difficiles) : idée brute du joueur, fiche `orchestrator/backlog/series-speciales.json` marquée « à challenger, ne pas lancer ». En discuter avant toute spécification.
 4. **Faire tester Galaad** sur une partie neuve : tutoriel, aide rapide, difficulté et hasard.
 5. Idées possibles : rivaux d’Overdrive, test de la déchirure du sachet légendaire à la main (son et effets dorés non vérifiés), liseré violet des voitures.

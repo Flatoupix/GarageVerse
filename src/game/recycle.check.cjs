@@ -23,6 +23,12 @@ assert.equal(JSON.stringify(save), before)
 assert.equal(undoRecycle(save, receipt, id, 6999), 'Annulation expirée')
 const first = recycle(save, id, 1000)
 const second = recycle(save, id, 1001)
+const spent = save.credits
+save.credits = 0
+assert.match(undoRecycle(save, second, id, 1002), /^Il te manque \d+ crédits pour annuler$/)
+assert.equal(save.credits, 0)
+assert.equal(second.used, false)
+save.credits = spent
 assert.equal(undoRecycle(save, second, id, 1002), undefined)
 assert.equal(save.cars[id].copies, 3)
 assert.ok(!JSON.stringify(save).includes('expires'))
