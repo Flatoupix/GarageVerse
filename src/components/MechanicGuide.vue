@@ -10,7 +10,7 @@ const steps = [
   ['.cap-meter, .rival-list', 'Défie Lola Minitel. Choisis trois voitures : leur coût total doit respecter le plafond de l’écurie.'],
   ['.engage-brief', 'Lis la statistique du secteur et sa météo. Choisis une voiture adaptée au terrain.'],
   ['.engage-cars[role="radiogroup"]', 'Sous tes voitures, la fourchette estime ton score. La forme du jour peut changer le résultat.'],
-  ['.engage-rivals', 'Observe les voitures adverses. Touche-les pour consulter leurs statistiques et anticiper le choix du rival.'],
+  ['.engage-rivals', 'Observe les voitures adverses : leur fourchette de score sur ce secteur est affichée. Devine laquelle le rival va engager.'],
   ['.engage-cars[role="radiogroup"]', 'Surveille les secteurs restants de chaque voiture. À zéro, elle surchauffe : son score perd trois points.'],
   ['.nitro-toggle', 'Active la nitro pour gagner des points sur ce secteur. Tes charges sont limitées pour toute la course.'],
   ['.round-result, .race-end', 'Compare les scores et leurs bonus. Chaque secteur gagné rapporte un point. Remporte le plus de secteurs pour battre ton rival.'],

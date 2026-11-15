@@ -25,8 +25,11 @@ const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
 const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
-  { id: 'home', label: 'Accueil', icon: '◐' }, { id: 'shop', label: 'Boosters', icon: '▱' },
-  { id: 'garage', label: 'Garage', icon: '▦' }, { id: 'race', label: 'Course', icon: '⟶' },
+  // Tracés 24 × 24 : maison, sachet de cartes, porte de garage, drapeau à damier.
+  { id: 'home', label: 'Accueil', icon: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5' },
+  { id: 'shop', label: 'Boosters', icon: 'M6 3.5h12v17H6zM6 7h12M6 17h12M12 9.8l.9 1.8 2 .3-1.5 1.4.4 2-1.8-.9-1.8.9.4-2-1.5-1.4 2-.3z' },
+  { id: 'garage', label: 'Garage', icon: 'M3 20V9.5L12 4l9 5.5V20M6.5 20v-8h11v8M6.5 14.7h11M6.5 17.4h11' },
+  { id: 'race', label: 'Course', icon: 'M5 21V3.5M5 4.5h14v9H5M9.7 4.5v9M14.3 4.5v9M5 9h14' },
 ]
 
 watch(() => save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
@@ -193,7 +196,7 @@ function toggleSetting(key: Setting) {
     <nav class="tabbar" aria-label="Navigation principale">
       <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
         @click="go(tab.id)">
-        <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>{{ tab.label }}
+        <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="tab.icon" /></svg></span>{{ tab.label }}
         <span v-if="tab.id === 'race' && save.duel" class="tab-dot" aria-label="course en cours"></span>
       </button>
     </nav>

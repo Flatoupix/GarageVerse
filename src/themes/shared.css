@@ -82,3 +82,21 @@
 .mod-lamps i.rarity-rare { --lamp: #4aa8ff; } .mod-lamps i.rarity-epic { --lamp: #ff5fd2; } .mod-lamps i.rarity-legendary { --lamp: #ffc64a; }
 .car-card.compact .mod-slot svg { width: 8cqw; height: 8cqw; }
 .car-card.compact .mod-lamps i { width: 2.6cqw; height: 2.6cqw; }
+
+/* ——— Onglets : pictogrammes tracés, à la couleur du texte ——— */
+.tab-icon svg { display: block; width: 1.35em; height: 1.35em; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ——— Choix du secteur : fourchette adverse, rappel de la nitro du rival ——— */
+.engage-rival .engage-score { color: var(--pink); text-shadow: none; animation: none; }
+.engage-rival-title small { margin-left: 6px; color: var(--muted); font: 400 .75rem var(--body); }
+
+/* ——— Résumé des secteurs à l'arrivée ——— */
+.race-recap { display: grid; gap: 4px; width: min(100%, 380px); margin: 6px 0 0; padding: 0; list-style: none; text-align: left; }
+.race-recap li { display: grid; grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 5px 8px;
+  border-left: 3px solid var(--line); background: color-mix(in srgb, var(--night) 70%, transparent); font-size: .8rem;
+  animation: deal-in 320ms backwards; animation-delay: calc(var(--i) * 70ms + 500ms); }
+.race-recap li.player { border-color: var(--cyan); } .race-recap li.rival { border-color: var(--pink); }
+.race-recap .recap-car { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); }
+.race-recap .recap-car:last-child { text-align: right; }
+.race-recap li.player .recap-car:nth-child(2), .race-recap li.rival .recap-car:last-child { color: var(--text); font-weight: 700; }
+.race-recap b { font-family: var(--display); white-space: nowrap; }
