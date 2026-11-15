@@ -3,9 +3,9 @@ import { computed } from 'vue'
 import { discover } from '../game/tutorial'
 import { art } from '../game/art'
 import { constraintText } from '../game/daily'
-import { boosterById, conditionIcons, conditionLabels, rivalById, vehicles } from '../game/data'
+import { boosterById, conditionIcons, conditionLabels, rivalById, series, vehicles } from '../game/data'
 import { claimDailyBooster, prepareDaily, todayChallenge, unlockedRivals } from '../game/save'
-import { act, dailySelected, ownedCount, save } from '../game/store'
+import { act, completedSeries, dailySelected, ownedCount, save } from '../game/store'
 
 const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race'] }>()
 const challenge = computed(() => todayChallenge(save))
@@ -58,6 +58,7 @@ const nextRival = computed(() => {
       <button type="button" class="tile deal" style="--i: 1" @click="emit('go', 'garage')">
         <span class="tile-label">Garage</span>
         <strong>{{ ownedCount }} / {{ vehicles.length }}</strong>
+        <small><span v-help="'series'">Séries complétées</span> : {{ completedSeries.length }} / {{ series.length }}</small>
         <progress :value="ownedCount" :max="vehicles.length" aria-label="Voitures découvertes"></progress>
       </button>
       <button type="button" class="tile deal" style="--i: 2" @click="emit('go', 'race')">

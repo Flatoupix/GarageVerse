@@ -1,7 +1,7 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
-  boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
+  series, boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Rarity, type StatKey,
 } from './data'
 import { compatibility, createRace, rivalLineup, createDuel, lineupCost, partUnlockLevel, potential, prepUsed, racer,
@@ -17,10 +17,11 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
 export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId }
-export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect'
+export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
 export interface Save {
+  series: string[]
   tutorial: Tutorial
   version: 2
   daily: { date: string; won: boolean; booster: boolean; streak: number; lastWin: string }
@@ -40,6 +41,7 @@ export interface Save {
 export function newSave(): Save {
   const start = progression.start
   const save: Save = {
+    series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true, theme: 'neon' },
@@ -83,6 +85,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   try { input = JSON.parse(raw ?? 'null') } catch { input = null }
   if (input?.version !== 2) { migrate(legacy, save); return save }
 
+  save.series = series.filter(s => Array.isArray(input.series) && input.series.includes(s.id)).map(s => s.id)
   if (input.daily) save.daily = {
     date: typeof input.daily.date === 'string' ? input.daily.date : localDate(),
     won: input.daily.won === true, booster: input.daily.booster === true,
@@ -138,7 +141,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   if (tutorial) save.tutorial = {
     step: int(tutorial.step, 0, tutorialSteps - 1, 0),
     status: tutorial.status === 'done' || tutorial.status === 'skipped' ? tutorial.status : 'active',
-    seen: (['nitro', 'heat', 'daily', 'perfect'] as const).filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
+    seen: (['nitro', 'heat', 'daily', 'perfect', 'series'] as const).filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
   }
   else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {
@@ -477,4 +480,17 @@ export function startDaily(save: Save) {
   if (problem) return problem
   const challenge = todayChallenge(save)
   save.duel = createRace(challenge.rival.id, challenge.rival.circuit, (save.dailyLineup ?? []).map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(challenge.rival), dailyRng(challenge.date))
+}
+
+// Les récompenses restent acquises même si une voiture est vendue ensuite.
+export const seriesProgress = (save: Save, entry: (typeof series)[number]) => entry.vehicles.filter(id => Boolean(save.cars[id])).length
+export const seriesComplete = (save: Save, entry: (typeof series)[number]) => seriesProgress(save, entry) === entry.vehicles.length
+export function claimSeries(save: Save, id: string): string | undefined {
+  const entry = series.find(s => s.id === id)
+  if (!entry) return 'Série inconnue'
+  if (save.series.includes(id)) return 'Récompense déjà récupérée'
+  if (!seriesComplete(save, entry)) return 'Réunis toutes les voitures de cette série'
+  save.series.push(id)
+  save.credits += entry.reward.credits
+  if (entry.reward.ticket) save.tickets[entry.reward.ticket] = (save.tickets[entry.reward.ticket] ?? 0) + 1
 }

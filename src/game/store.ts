@@ -1,7 +1,7 @@
 import { computed, reactive, ref } from 'vue'
 import { playCue, type Cue } from '../feedback'
-import { vehicles } from './data'
-import { LEGACY_KEY, refreshDaily, readSave, SAVE_KEY, type Save } from './save'
+import { series, vehicles } from './data'
+import { seriesComplete, LEGACY_KEY, refreshDaily, readSave, SAVE_KEY, type Save } from './save'
 
 function load(): Save {
   try { return readSave(localStorage.getItem(SAVE_KEY), localStorage.getItem(LEGACY_KEY)) } catch { storageWarning.value = true; return readSave(null) }
@@ -51,3 +51,6 @@ export const dailySelected = ref(false)
 // Passage de minuit : le défi et le booster du jour se renouvellent sans recharger la page.
 setInterval(() => { const before = save.daily.date; refreshDaily(save); if (before !== save.daily.date) persist() }, 30_000)
 window.addEventListener('focus', () => { refreshDaily(save); persist() })
+
+export const completedSeries = computed(() => series.filter(entry => seriesComplete(save, entry)))
+export const pendingSeries = computed(() => completedSeries.value.filter(entry => !save.series.includes(entry.id)))

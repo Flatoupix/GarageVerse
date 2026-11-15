@@ -121,5 +121,14 @@
       "circuit": { "name": "Périphérique Infini", "sectors": ["depart", "ligne", "virage", "endurance", "ligne"], "conditions": { "nuit": 5, "pluie": 2, "ville": 2, "sec": 1 } },
       "lineup": [{ "id": "venom", "stage": 3, "parts": ["nitro"], "upgrades": { "vit": 2, "acc": 2 } }, { "id": "batmobile", "stage": 3, "parts": ["underglow", "freins-endurance"], "upgrades": { "end": 2, "man": 1 } }, { "id": "mx5na", "stage": 3, "parts": ["susp-drift", "underglow", "boite-courte", "allegement"], "upgrades": { "man": 2, "acc": 2 } }],
       "art": "a mysterious woman with violet hair, a black leather racing suit and visor glowing magenta, synthwave portrait" }
+  ],
+  "series": [
+    {"id": "depart", "name": "Premiers tours de roue", "description": "Commence ta collection avec tes trois premières voitures.", "vehicles": ["clio", "twingo", "panda"], "reward": {"credits": 150}},
+    {"id": "cinema", "name": "Stars de cinéma", "description": "Réunis les vedettes de tes films cultes.", "vehicles": ["bttf", "kitt", "ecto1", "batmobile", "taxi", "herbie"], "reward": {"credits": 600, "ticket": "overdrive"}},
+    {"id": "rallye", "name": "Reines du rallye", "description": "Retrouve les championnes des routes sinueuses.", "vehicles": ["stratos", "delta", "evo8", "impreza"], "reward": {"credits": 350}},
+    {"id": "lotus", "name": "La lignée Lotus", "description": "Explore la famille des sportives légères.", "vehicles": ["elise", "elise111s", "elise190", "esprit", "bond"], "reward": {"credits": 500, "ticket": "night"}},
+    {"id": "records", "name": "Hypercars de record", "description": "Repousse tes limites avec ces bolides.", "vehicles": ["venom", "veyron", "agera", "mf1"], "reward": {"credits": 700, "ticket": "overdrive"}},
+    {"id": "muscle", "name": "Muscle cars", "description": "Fais rugir les grands moteurs américains.", "vehicles": ["firebird", "gt500", "demon", "c4zr1"], "reward": {"credits": 400}},
+    {"id": "japon", "name": "Japonaises de légende", "description": "Rassemble tes icônes des routes japonaises.", "vehicles": ["supra", "r34", "nsx", "s15", "ek9", "mx5na"], "reward": {"credits": 500, "ticket": "night"}}
   ]
 }

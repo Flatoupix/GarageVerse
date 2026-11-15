@@ -145,3 +145,21 @@ La fiche voiture liste les éditions possédées en lecture seule. Au tirage d�
 
 ### Le mécano
 Une sauvegarde neuve reçoit un tutoriel en 12 étapes, dans l’interface existante. Les actions font aussi avancer les bulles, sans les valider. « Passer le tutoriel » ferme le parcours ; « Revoir le tutoriel » dans les Réglages le relance sans changer la partie. La progression est sauvegardée. Après le parcours, des bulles uniques expliquent la nitro, la surchauffe, le défi du jour et la victoire parfaite.
+
+
+## Séries de collection
+
+L’onglet Garage propose Voitures, Mécaniques et Séries. Sept ensembles définis dans
+`src/data/garage.json` donnent des objectifs de trois à six voitures. « Premiers tours
+de roue » réunit exactement la Clio III, la Twingo I et la Panda 4×4 du départ.
+Chaque série montre sa progression, ses voitures possédées dans leur édition affichée
+et les silhouettes nommées des voitures manquantes. Toutes ouvrent leur fiche.
+
+Posséder toutes les voitures permet de récupérer une seule fois les crédits indiqués,
+et parfois un ticket de booster. Les identifiants récupérés sont conservés dans
+`series` dans la sauvegarde `garageverse:v2`, même après une vente. Les anciennes
+sauvegardes initialisent cette liste vide. L’accueil compte les séries complètes et
+une pastille Garage signale les récompenses disponibles. La première complétion
+est annoncée par le mécano après le tutoriel. La récupération utilise les confettis
+et le son existants ; les confettis respectent le mouvement réduit. Les composants
+communs utilisent les variables des huit thèmes dans `shared.css`.

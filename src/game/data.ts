@@ -36,6 +36,9 @@ export interface Rival {
   circuit: { name: string; sectors: Sector[]; conditions: Partial<Record<Condition, number>> }
   lineup: LineupEntry[]
 }
+export interface CollectionSeries { id: string; name: string; description: string; vehicles: string[]; reward: { credits: number; ticket?: string } }
+export const series = garageJson.series as CollectionSeries[]
+
 export interface League { id: string; name: string; cap: number; reward: number }
 
 export const vehicles = rosterJson.vehicles as Vehicle[]

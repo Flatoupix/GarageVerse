@@ -18,6 +18,7 @@ const steps = [
   ['.topbar', 'Besoin d’un rappel ? Le bouton « ? » ouvre le lexique. Touche les mots soulignés pour une aide rapide.'],
 ] as const
 const extras = {
+  series: ['.series-list, .home-tiles, .garage', 'Tu as complété ta première série ! Ouvre Séries au garage pour récupérer ta récompense. Chaque série te récompense une seule fois.'],
   nitro: ['.nitro-toggle', 'La nitro ajoute des points à ton score. Garde tes charges pour les secteurs serrés.'],
   heat: ['.engage-cars[role="radiogroup"]', 'Cette voiture surchauffe : elle perd trois points. Alterne tes voitures pour préserver leurs secteurs disponibles.'],
   daily: ['.daily-panel, .daily-race', 'Le défi du jour impose une écurie spéciale. Gagne pour recevoir ses crédits, une fois par jour.'],

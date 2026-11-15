@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { families, parts, rarities, vehicles } from '../game/data'
-import { freeParts, prepOf } from '../game/save'
-import { act, ownedCount, save } from '../game/store'
+import { boosterById, families, parts, rarities, series, vehicleById, vehicles } from '../game/data'
+import { claimSeries, seriesComplete, seriesProgress, freeParts, prepOf } from '../game/save'
+import { act, ownedCount, reducedMotion, save } from '../game/store'
+import { edition } from '../game/art'
+import { confetti, palettes } from '../game/fx'
 import CarCard from '../components/CarCard.vue'
 import PartCard from '../components/PartCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string] }>()
-const tab = ref<'cars' | 'parts'>('cars')
+const tab = ref<'cars' | 'parts' | 'series'>('cars')
 const garageFilter = ref<'owned' | 'favorites' | 'lineup' | 'collection'>('owned')
 const garageFilters = [
   { id: 'owned', label: 'Mes voitures' }, { id: 'favorites', label: '★ Favoris' },
@@ -49,6 +51,10 @@ function selectTab(next: typeof tab.value) {
   tab.value = next
   query.value = ''
 }
+function collectSeries(id: string) {
+  if (act(s => claimSeries(s, id), 'Récompense récupérée', 'collect') && !reducedMotion.value) confetti(palettes.gold)
+}
+const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
 </script>
 
 <template>
@@ -56,11 +62,12 @@ function selectTab(next: typeof tab.value) {
     <div class="page-heading">
       <h1 tabindex="-1">Mon garage</h1>
     </div>
-    <div class="tabs" aria-label="Inventaire">
+    <div class="tabs garage-tabs" aria-label="Inventaire">
       <button type="button" :aria-pressed="tab === 'cars'" @click="selectTab('cars')">Voitures <span>{{ ownedCount }}/{{ vehicles.length }}</span></button>
-      <button type="button" :aria-pressed="tab === 'parts'" @click="selectTab('parts')">Pièces <span>{{ ownedParts.length }}/{{ parts.length }}</span></button>
+      <button type="button" :aria-pressed="tab === 'parts'" @click="selectTab('parts')">Mécaniques <span>{{ ownedParts.length }}/{{ parts.length }}</span></button>
+      <button type="button" :aria-pressed="tab === 'series'" @click="selectTab('series')">Séries <span v-help="'series'" aria-label="Aide sur les séries">?</span></button>
     </div>
-    <div class="garage-tools">
+    <div v-if="tab !== 'series'" class="garage-tools">
       <div v-if="tab === 'cars'" class="chips garage-filters" aria-label="Afficher les voitures">
         <button v-for="f in garageFilters" :key="f.id" type="button" :aria-pressed="garageFilter === f.id" @click="garageFilter = f.id">{{ f.label }}</button>
       </div>
@@ -102,7 +109,7 @@ function selectTab(next: typeof tab.value) {
       <p v-else class="garage-empty">{{ garageFilter === 'favorites' && !search && !category ? 'Touche l’étoile d’une voiture pour la retrouver ici.' : 'Aucune voiture pour ces filtres.' }}</p>
     </template>
 
-    <template v-else>
+    <template v-else-if="tab === 'parts'">
       <section v-for="group in partGroups" :key="group.id" class="garage-part-group">
         <h2>{{ group.label }}</h2>
         <div class="garage-grid parts-grid">
@@ -117,5 +124,26 @@ function selectTab(next: typeof tab.value) {
       </section>
       <p v-if="!partGroups.length" class="garage-empty">Aucune pièce pour ces filtres.</p>
     </template>
+    <div v-else class="series-list">
+      <section v-for="entry in series" :key="entry.id" class="series-card" :aria-labelledby="`series-${entry.id}`">
+        <h2 :id="`series-${entry.id}`">{{ entry.name }}</h2>
+        <p>{{ entry.description }}</p>
+        <p><span v-help="'seriesReward'">Récompense de série</span> : {{ entry.reward.credits }} crédits<template v-if="entry.reward.ticket"> + 1 ticket {{ boosterById.get(entry.reward.ticket)!.name }}</template></p>
+        <div class="series-progress" role="progressbar" :aria-label="entry.name" :aria-valuenow="seriesProgress(save, entry)" :aria-valuemax="entry.vehicles.length" :aria-valuemin="0">
+          <span :style="{ width: `${seriesProgress(save, entry) / entry.vehicles.length * 100}%` }"></span>
+        </div>
+        <p>{{ seriesProgress(save, entry) }} / {{ entry.vehicles.length }}<template v-if="seriesComplete(save, entry)"> · Série complète</template></p>
+        <div class="series-cars">
+          <button v-for="v in seriesCars(entry.vehicles)" :key="v.id" type="button" class="series-car" :aria-label="`Voir ${v.name} ${v.version}${save.cars[v.id] ? '' : ' · manquante'}`" @click="emit('inspect', 'car', v.id)">
+            <img v-if="save.cars[v.id]" :src="edition(v.id, save.cars[v.id].shown).art" alt="" />
+            <svg v-else class="series-silhouette" viewBox="0 0 120 90" aria-hidden="true"><path d="M10 55 17 43 35 39 48 25H79L96 41 110 47V65H99a12 12 0 0 1-24 0H44a12 12 0 0 1-24 0H10Z" /></svg>
+            <strong>{{ v.name }}</strong><span>{{ v.version }}</span>
+            <small>{{ save.cars[v.id] ? save.cars[v.id].shown : 'Manquante' }}</small>
+          </button>
+        </div>
+        <p v-if="save.series.includes(entry.id)" role="status">Récompense récupérée</p>
+        <button v-else-if="seriesComplete(save, entry)" class="button primary" type="button" @click="collectSeries(entry.id)">Récupérer la récompense</button>
+      </section>
+    </div>
   </main>
 </template>

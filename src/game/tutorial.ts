@@ -1,5 +1,5 @@
-import { ref } from 'vue'
-import { persist, save } from './store'
+import { ref, watch } from 'vue'
+import { completedSeries, persist, save } from './store'
 import { tutorialSteps, type Discovery } from './save'
 
 export const discovery = ref<Discovery | null>(null)
@@ -34,3 +34,7 @@ export function replayTutorial() {
   discovery.value = null
   persist()
 }
+
+watch(() => [completedSeries.value.length, save.tutorial.status, discovery.value], () => {
+  if (completedSeries.value.length) discover('series')
+}, { immediate: true })

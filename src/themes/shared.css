@@ -82,3 +82,21 @@
 .mod-lamps i.rarity-rare { --lamp: #4aa8ff; } .mod-lamps i.rarity-epic { --lamp: #ff5fd2; } .mod-lamps i.rarity-legendary { --lamp: #ffc64a; }
 .car-card.compact .mod-slot svg { width: 8cqw; height: 8cqw; }
 .car-card.compact .mod-lamps i { width: 2.6cqw; height: 2.6cqw; }
+
+/* Séries : mêmes composants et couleurs de thème dans les huit interfaces. */
+.garage-tabs { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.garage-tabs button { min-width: 0; overflow-wrap: anywhere; padding-inline: 2px; }
+.garage-tabs button > span { display: block; }
+.series-list { display: grid; gap: 18px; }
+.series-card { min-width: 0; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); color: var(--text); overflow-wrap: anywhere; }
+.series-card h2 { margin: 0 0 8px; }
+.series-card p { margin: 10px 0; }
+.series-progress { height: 10px; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--night); }
+.series-progress > span { display: block; height: 100%; background: var(--cyan); }
+.series-cars { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 14px 0; }
+.series-car { min-width: 0; padding: 5px; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--night); color: var(--text); text-align: left; font: inherit; overflow-wrap: anywhere; }
+.series-car img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius); }
+.series-car strong, .series-car span, .series-car small { max-width: 100%; font-size: .75rem; }
+.series-silhouette { width: 100%; aspect-ratio: 4 / 3; fill: var(--muted); background: var(--night); }
+.series-card > .button { max-width: 100%; white-space: normal; }
+@media (max-width: 350px) { .series-cars { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

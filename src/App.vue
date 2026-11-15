@@ -2,7 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
-import { buzz, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
+import { buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themes, unlocked, type Theme } from './game/theme'
 import { glossary, glossaryOpen, glossarySections, openHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
@@ -194,6 +194,7 @@ function toggleSetting(key: Setting) {
       <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
         @click="go(tab.id)">
         <span class="tab-icon" aria-hidden="true">{{ tab.icon }}</span>{{ tab.label }}
+        <span v-if="tab.id === 'garage' && pendingSeries.length" class="tab-dot" aria-label="Récompense de série à récupérer"></span>
         <span v-if="tab.id === 'race' && save.duel" class="tab-dot" aria-label="course en cours"></span>
       </button>
     </nav>

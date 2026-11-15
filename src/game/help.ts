@@ -5,6 +5,8 @@ import { OVERHEAT } from './rules'
 export interface HelpEntry { term: string; text: string }
 
 export const glossary = {
+  series: { term: 'Série', text: 'Réunis toutes les voitures d’un ensemble nommé pour compléter ta série. Une voiture peut compter dans plusieurs séries.' },
+  seriesReward: { term: 'Récompense de série', text: 'Récupère les crédits et parfois un ticket de booster au garage quand tu possèdes toutes les voitures de la série. Tu ne peux recevoir cette récompense qu’une fois, même après une vente.' },
   acc: { term: 'Accélération', text: 'Compte sur les secteurs de Départ : plus elle est haute, plus ta voiture marque de points au démarrage.' },
   man: { term: 'Maniabilité', text: 'Compte dans les Virages : une voiture agile y marque plus de points.' },
   vit: { term: 'Vitesse', text: 'Compte en Ligne droite : la vitesse de pointe fait le score.' },
@@ -50,7 +52,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },
   { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
-  { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition', 'vente'] },
+  { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition', 'vente', 'series', 'seriesReward'] },
 ]
 
 // Retrouve l'explication d'une ligne du détail de score (« Pluie · intégrale », « Faux départ »…).
