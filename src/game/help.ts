@@ -6,6 +6,9 @@ import { NIGHT_CAP, nightReward } from './endless'
 export interface HelpEntry { term: string; text: string }
 
 export const glossary = {
+  offline: { term: 'Mode hors ligne', text: 'Après une première visite connectée, le jeu garde sa page et ses ressources sur ton appareil. Relance-le sans réseau ; les images déjà chargées restent disponibles. Une nouvelle version arrive au prochain lancement connecté.' },
+  exportSave: { term: 'Export de sauvegarde', text: 'Télécharge un fichier JSON daté contenant ta partie. Garde-le pour retrouver ton garage sur un autre navigateur ou appareil.' },
+  importSave: { term: 'Import de sauvegarde', text: 'Choisis un fichier GarageVerse exporté. Après ta confirmation, il remplace toute ta partie actuelle. Exporte-la d’abord si tu veux la garder.' },
   endless: { term: 'Nuit sans fin', text: 'Enchaîne les courses contre trois voitures générées, de plus en plus fortes. La première défaite ou un abandon termine ta nuit. Tu peux aussi rentrer entre deux manches.' },
   nightRound: { term: 'Manche', text: 'Une course en cinq secteurs de ta Nuit sans fin. Gagne-la pour accéder à la suivante ; une égalité termine aussi la nuit.' },
   nightRecord: { term: 'Record de nuit', text: 'Ton meilleur nombre de manches gagnées pendant une seule nuit. Il est conservé dès que tu le bats.' },
@@ -54,6 +57,7 @@ export type HelpKey = keyof typeof glossary
 
 // Sections du lexique ouvert par le bouton « ? ».
 export const glossarySections: { title: string; keys: HelpKey[] }[] = [
+  { title: 'Sauvegarde et connexion', keys: ['offline', 'exportSave', 'importSave'] },
   { title: 'Les quatre statistiques', keys: ['acc', 'man', 'vit', 'end'] },
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },

@@ -1,3 +1,4 @@
+import { registerOffline } from './game/offline'
 import { createApp } from 'vue'
 import App from './App.vue'
 import { save } from './game/store'
@@ -9,3 +10,5 @@ applyTheme(save.preferences.theme)
 themeFx(save.preferences.theme)
 
 createApp(App).mount('#app')
+
+registerOffline()

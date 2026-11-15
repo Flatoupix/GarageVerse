@@ -434,3 +434,8 @@
 .night-panel .recap-actions .button { flex: 1 1 180px; white-space: normal; min-width: 0; }
 .night-race .page-heading, .night-race .race-head > div { min-width: 0; }
 .night-race h1, .night-race h2, .night-race .rival-preview { overflow-wrap: anywhere; }
+
+/* Sauvegarde : disposition commune aux huit thèmes. */
+.save-transfer { display: grid; gap: 10px; min-width: 0; margin-block: 16px; color: var(--text); }
+.save-transfer p { margin: 0; overflow-wrap: anywhere; line-height: 1.5; }
+.save-transfer .button { width: 100%; min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }

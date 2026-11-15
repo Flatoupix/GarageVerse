@@ -5,7 +5,7 @@ import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themes, unlocked, type Theme } from './game/theme'
-import { glossary, glossaryOpen, glossarySections, openHelp } from './game/help'
+import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
@@ -16,11 +16,60 @@ import PartSheet from './views/PartSheet.vue'
 import RaceView from './views/RaceView.vue'
 import ShopView from './views/ShopView.vue'
 
+import { offlineReady } from './game/offline'
+import { readSave, SAVE_KEY } from './game/save'
+
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
 type Setting = 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 const screen = ref<Screen>(save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
+const saveFile = ref<HTMLInputElement>()
+const transferMessage = ref('')
+function transferFeedback(text: string, error = false) {
+  transferMessage.value = text
+  sound(error ? 'error' : 'collect')
+  const box = settings.value?.getBoundingClientRect()
+  if (box) floatText({ x: box.left + box.width / 2, y: box.top + 70 }, error ? 'Échec' : 'Sauvegarde', error ? tone.rose : tone.cyan, 16)
+}
+function exportSave() {
+  let url: string | undefined
+  try {
+    url = URL.createObjectURL(new Blob([JSON.stringify(save, null, 2)], { type: 'application/json' }))
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `garageverse-${new Date().toISOString().slice(0, 10)}.json`
+    document.body.append(link)
+    link.click()
+    link.remove()
+    transferFeedback('Ta sauvegarde a été exportée.')
+  } catch { transferFeedback('Impossible d’exporter ta sauvegarde. Réessaie.', true) }
+  finally { if (url) setTimeout(() => URL.revokeObjectURL(url!), 1000) }
+}
+async function importSave(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+  try {
+    const raw = await file.text()
+    const data = JSON.parse(raw)
+    const object = (value: unknown) => value !== null && typeof value === 'object' && !Array.isArray(value)
+    if (!object(data) || data.version !== 2 || !object(data.cars) || !object(data.parts) ||
+        !object(data.tickets) || !object(data.preferences) || !Array.isArray(data.lineup) ||
+        !Number.isFinite(data.credits)) throw new Error('format')
+    const restored = readSave(raw)
+    if (!window.confirm('Importer cette sauvegarde ? Tu vas remplacer ta partie actuelle.')) return
+    // Écrire avant de remplacer la partie : un stockage indisponible laisse le garage intact.
+    localStorage.setItem(SAVE_KEY, JSON.stringify(restored))
+    Object.assign(save, restored)
+    applyTheme(save.preferences.theme)
+    themeFx(save.preferences.theme)
+    inspected.value = null
+    screen.value = save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home'
+    transferFeedback('Ta sauvegarde a été importée.')
+  } catch { transferFeedback('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.', true) }
+}
 const lexicon = ref<HTMLDialogElement>()
 const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
@@ -253,6 +302,14 @@ function toggleSetting(key: Setting) {
       <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>
       <h2>Réglages</h2>
       <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">Revoir le tutoriel</button>
+      <section class="save-transfer" aria-label="Sauvegarde">
+        <p v-if="offlineReady"><span v-help="'offline'">Disponible hors ligne</span></p>
+        <p><span v-help="'exportSave'">Export de sauvegarde</span> · <span v-help="'importSave'">Import de sauvegarde</span></p>
+        <button type="button" class="button ghost" @click="exportSave">Exporter la sauvegarde</button>
+        <button type="button" class="button ghost" @click="saveFile?.click()">Importer une sauvegarde</button>
+        <input ref="saveFile" type="file" accept=".json,application/json" hidden @change="importSave" />
+        <p v-if="transferMessage" role="status">{{ transferMessage }}</p>
+      </section>
       <fieldset class="theme-picker">
         <legend>Thème</legend>
         <label v-for="t in themes" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
