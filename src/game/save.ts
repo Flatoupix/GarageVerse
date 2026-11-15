@@ -448,6 +448,8 @@ export function scrapPart(save: Save, id: string): string | undefined {
 // ——— Styles & Éditions ———
 
 export const editionPrices: Record<Rarity, number> = { Courante: 40, Rare: 75, Épique: 120, Légendaire: 200 }
+// Débloquer une édition coûte aussi deux doublons de la carte (un exemplaire reste toujours).
+export const editionDuplicates = 2
 export const editionPrice = (id: string) => {
   const v = vehicleById.get(id)
   return v ? editionPrices[v.rarity] : 60
@@ -465,8 +467,12 @@ export function unlockEditionCheck(save: Save, id: string, style: EditionStyle):
   if (!car || !v) return 'Voiture absente du garage'
   if (!stylesOf(id).includes(style)) return 'Style indisponible pour cette voiture'
   if (car.editions.includes(style)) return 'Style déjà débloqué'
-  const price = editionPrice(id)
-  if (save.credits < price) return `Il te manque ${price - save.credits} crédits`
+  const missing: string[] = []
+  const credits = editionPrice(id) - save.credits
+  const duplicates = editionDuplicates - (car.copies - 1)
+  if (credits > 0) missing.push(`Il te manque ${credits} crédits`)
+  if (duplicates > 0) missing.push(`Il te manque ${duplicates} doublon${duplicates > 1 ? 's' : ''}`)
+  if (missing.length) return missing.join(' · ')
 }
 
 export function unlockEdition(save: Save, id: string, style: EditionStyle): string | undefined {
@@ -474,6 +480,7 @@ export function unlockEdition(save: Save, id: string, style: EditionStyle): stri
   if (problem) return problem
   const car = save.cars[id]
   save.credits -= editionPrice(id)
+  car.copies -= editionDuplicates
   car.editions.push(style)
   car.shown = style
 }

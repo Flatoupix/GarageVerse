@@ -41,6 +41,16 @@ const LEGEND_STYLE = 'Style: over-the-top stylized synthwave outrun poster, a bo
   'exaggerated low-angle perspective and a dramatic oversized car, a gigantic striped sun, chrome reflections, laser-grid ground, ' +
   'light streaks and energy bursts, a heroic poster composition. Palette of hot magenta, electric cyan, deep violet and sunset orange. ' +
   'Looks like a legendary trading-card hero shot, instantly striking, never like a photograph or a 3D render.'
+// --set edition [--only id,id] [--styles solarpunk,abandonnee] : éditions artistiques supplémentaires, une image par voiture et par style,
+// dans src/assets/cars/<id>-<style>.webp. Ce jeu ne touche pas aux autres illustrations.
+const EDITION_LOOKS = {
+  solarpunk: 'Scene: a bright optimistic solarpunk future, a sunlit green city of terraced gardens, trees growing from white curved buildings, ' +
+    'wind turbines and solar panels, clear blue sky, warm golden light, lush plants and flowers beside the road. ' +
+    'Style: vibrant hand-illustrated digital painting with soft gouache-like colour, art-nouveau curves, hopeful and joyful mood, not photorealistic.',
+  abandonnee: 'Scene: an abandoned barn find, the same car left for decades in a collapsed wooden barn, covered in dust and light rust, flat tyres, ' +
+    'ivy and weeds growing through it, shafts of golden light through the broken roof, floating dust. ' +
+    'Style: moody cinematic illustrated painting, muted earthy palette with the faded paint still recognisable, melancholic and nostalgic, not photorealistic.',
+}
 // Styles alternatifs : une carte peut sortir du synthwave (champ look du roster) avec son propre décor (champ setting).
 // Décor de course par condition de piste (clés de `conditions` dans garage.json).
 // Couvertures de boosters : une scène par collection, et une variante légendaire annoncée quand le sachet en contient une.
@@ -90,6 +100,18 @@ const SCENES = {
 
 function jobs() {
   const list = []
+  if (set === 'edition') {
+    const styles = (option('styles') ?? Object.keys(EDITION_LOOKS)).toString().split(',')
+    for (const v of roster.vehicles.filter(v => !only || only.includes(v.id))) {
+      const subject = v.culture
+        ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
+        : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
+      for (const style of styles) list.push({ kind: 'cars', id: `${v.id}-${style}`, size: [640, 960], prompt:
+        `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
+        `centered in the lower two thirds, slight low camera angle, wheels on the ground. ${EDITION_LOOKS[style]} ${NO_TEXT}` })
+    }
+    return list
+  }
   if (kinds.includes('cars')) for (const v of roster.vehicles) {
     const subject = v.culture
       ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`

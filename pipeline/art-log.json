@@ -3135,5 +3135,85 @@
     "tokens": 12966,
     "prompt": "0398bf1bf7",
     "at": "2026-11-15T17:26:46.835Z"
+  },
+  "cars/clio-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 42559,
+    "prompt": "3be49e5d99",
+    "at": "2026-11-15T21:20:52.166Z"
+  },
+  "cars/p205-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 59,
+    "tokens": 21719,
+    "prompt": "8a728f1e70",
+    "at": "2026-11-15T21:20:59.455Z"
+  },
+  "cars/p205-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 73,
+    "tokens": 17344,
+    "prompt": "37ee969da8",
+    "at": "2026-11-15T21:21:13.150Z"
+  },
+  "cars/clio-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 81,
+    "tokens": 21313,
+    "prompt": "d8225b0379",
+    "at": "2026-11-15T21:21:21.055Z"
+  },
+  "cars/f40-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 17675,
+    "prompt": "ed3ac64c0a",
+    "at": "2026-11-15T21:21:47.244Z"
+  },
+  "cars/f40-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 16711,
+    "prompt": "3b4b5dd1df",
+    "at": "2026-11-15T21:21:53.624Z"
+  },
+  "cars/supra-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 32684,
+    "prompt": "4c87d31ae9",
+    "at": "2026-11-15T21:22:10.085Z"
+  },
+  "cars/supra-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 16887,
+    "prompt": "1ba4a17e5a",
+    "at": "2026-11-15T21:22:19.135Z"
+  },
+  "cars/mx5nb-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 12715,
+    "prompt": "513a30fd8b",
+    "at": "2026-11-15T21:22:35.448Z"
+  },
+  "cars/mx5nb-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 76,
+    "tokens": 21123,
+    "prompt": "a910d453c8",
+    "at": "2026-11-15T21:23:09.866Z"
   }
 }

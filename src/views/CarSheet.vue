@@ -6,7 +6,7 @@ import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTi
 import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
-import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionPrice, freeParts, install, installCheck, prepOf,
+import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionDuplicates, editionPrice, freeParts, install, installCheck, prepOf,
   selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, upgrade, upgradeCheck, upgradeStat } from '../game/save'
 import { recycle, undoRecycle, type RecycleReceipt } from '../game/recycle'
 import { boundZoom, toggleZoom } from '../game/zoom'
@@ -145,6 +145,8 @@ const allStyles = computed(() => stylesOf(props.id).map(style => ({
   price: editionPrice(props.id),
   problem: unlockEditionCheck(save, props.id, style),
 })))
+// Les crédits et doublons demandés sont les mêmes pour tous les styles d'une voiture : une seule raison est écrite.
+const lockedProblem = computed(() => allStyles.value.find(item => !item.owned && item.problem)?.problem)
 
 const modules = computed(() => upgradeKeys.map(key => {
   const config = upgrades[key]
@@ -291,7 +293,7 @@ function workshop(key?: StatKey) {
             <h3><span v-help="'edition'">Styles & Éditions</span></h3>
             <small class="hint">{{ car.editions.length }}/{{ allStyles.length }} débloqué{{ car.editions.length > 1 ? 's' : '' }}</small>
           </div>
-          <p class="hint">Change l’apparence de ta carte ou paie en crédits pour débloquer un autre style créé pour cette voiture (Synthwave, Pixel 16 bits, Classic…).</p>
+          <p class="hint">Change l’apparence de ta carte ou débloque un autre style créé pour cette voiture avec des crédits et {{ editionDuplicates }} doublons.</p>
           <div class="edition-picker">
             <button v-for="item in allStyles" :key="item.style" type="button"
               :class="{ 'is-locked': !item.owned }"
@@ -301,9 +303,10 @@ function workshop(key?: StatKey) {
               <b>{{ item.label }}</b>
               <small v-if="item.shown">✓ Affiché</small>
               <small v-else-if="item.owned">Appliquer</small>
-              <small v-else>Débloquer · {{ item.price }} ₡</small>
+              <small v-else>Débloquer · {{ item.price }} ₡ + {{ editionDuplicates }} doublons</small>
             </button>
           </div>
+          <p v-if="lockedProblem" class="hint">{{ lockedProblem }}</p>
           <p class="hint">Éditions possédées : {{ car.editions.map(style => styleLabel(v, style)).join(', ') }}</p>
         </section>
 

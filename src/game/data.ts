@@ -72,7 +72,7 @@ export const sectorIcons: Record<Sector, string> = { depart: '⇧', virage: '↝
 export const conditionLabels: Record<Condition, string> = { sec: 'Sec', pluie: 'Pluie', nuit: 'Nuit', terre: 'Terre', ville: 'Ville' }
 export const conditionIcons: Record<Condition, string> = { sec: '☀', pluie: '☂', nuit: '☾', terre: '⛰', ville: '▦' }
 
-export type EditionStyle = 'Pixel 16 bits' | 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique'
+export type EditionStyle = 'Pixel 16 bits' | 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique' | 'Solarpunk' | 'Abandonnée'
 // Le pixel art 16 bits est l'édition par défaut de toutes les cartes ; l'illustration précédente devient une édition à collectionner.
 export const PIXEL: EditionStyle = 'Pixel 16 bits'
 const formerStyles: Record<string, EditionStyle> = { clio: 'Photo', twingo: 'Gouache', panda: 'Rallye argentique' }
@@ -88,9 +88,12 @@ export const styleLabel = (v: Vehicle, style: EditionStyle) => style === 'Synthw
 const altStyles: Record<string, EditionStyle[]> = {
   clio: ['Classic'], elise: ['Classic'], r34: ['Classic'], venom: ['Classic', 'Pixel Art'], brian: ['Classic'],
 }
+// Éditions Solarpunk et Abandonnée : à l'essai sur cinq cartes avant d'être étendues (images `pipeline/art.mjs --set edition`).
+const trialStyles: EditionStyle[] = ['Solarpunk', 'Abandonnée']
+const trialCars = ['clio', 'p205', 'supra', 'mx5nb', 'f40']
 export function stylesOf(id: string): EditionStyle[] {
   const former = formerStyle(id)
   const styles: EditionStyle[] = [PIXEL, former]
   if (former !== 'Synthwave') styles.push('Synthwave')
-  return styles.concat(altStyles[id] ?? [])
+  return styles.concat(altStyles[id] ?? [], trialCars.includes(id) ? trialStyles : [])
 }

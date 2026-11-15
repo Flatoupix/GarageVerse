@@ -41,6 +41,9 @@ const legacyArt: Record<string, Partial<Record<EditionStyle, Edition>>> = {
 export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edition {
   // Tant que l'image pixel d'une carte manque, son édition par défaut montre l'illustration précédente.
   if (style === PIXEL) return pixelCar[id] ? { style, art: pixelCar[id] } : { ...edition(id, formerStyle(id)), style }
+  // Éditions supplémentaires : fichiers src/assets/cars/<id>-solarpunk.webp et <id>-abandonnee.webp.
+  if (style === 'Solarpunk') return { style, art: carArt[`${id}-solarpunk`] }
+  if (style === 'Abandonnée') return { style, art: carArt[`${id}-abandonnee`] }
   const former = formerStyle(id)
   if (style === former && former !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
   return legacyArt[id]?.[style] ?? { style: 'Synthwave', art: carArt[id] }
