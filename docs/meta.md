@@ -216,38 +216,18 @@ Bats tous les rivaux de la Ligue Néon au moins une fois pour ouvrir Départ, Vi
 
 Une défaite ou une égalité ne paie rien. La victoire parfaite double seulement le premier gain, sans ticket parfait de ligue. Le rejeu reste à 20 %, même parfait. La première victoire en Légende donne un ticket Overdrive, une seule fois par spéciale, y compris après rechargement.
 
-### Compositions initiales à affiner
+### Équilibrage des paliers
 
-Les coûts ne comptent que les voitures, comme dans les ligues. Les voitures privilégient la statistique dominante dans chaque budget ; les stages et les niveaux d’atelier renforcent la progression. Le score de force contrôlé est la somme des statistiques préparées, strictement croissante. Le réglage fin des probabilités de victoire reste à faire avec `pipeline/balance.mjs`, sans modification du pipeline ici.
+Les écuries adverses (`specials[].tiers[].lineup` dans `src/data/garage.json`) ont été choisies par recherche : pour chaque palier, des centaines d’écuries candidates sous le plafond, au stage du palier (0, 1, 2, 3, 3) avec leurs meilleures pièces, mesurées contre 150 écuries de joueurs préparées au stage attendu. On garde celle qui donne la courbe visée pour un joueur « prêt » (écurie aléatoire sous le plafond, stage 1, 1, 2, 3, 3) : environ **88 %, 72 %, 60 %, 50 % puis 40 %** de victoires. Trois règles tiennent : la **puissance totale** (somme des statistiques préparées) augmente strictement à chaque palier (`src/game/specials.check.cjs`) ; une écurie **spécialiste** de la statistique du secteur bat au moins aussi souvent qu’une écurie généraliste ; une écurie de départ sans préparation ne gagne presque jamais (0 % presque partout, 27 % au mieux au premier palier d’Endurance).
 
-**Départ**
+Taux de victoire du joueur mesurés par `node pipeline/balance.mjs` (prêt / spécialiste, en %, 200 parties par case) :
 
-- Bronze : Lancia Stratos — Stage 0, pièces aucune, atelier accélération niveau 0 ; Citroën Saxo VTS — Stage 0, pièces aucune, atelier accélération niveau 0 ; 1000tipla — Stage 0, pièces aucune, atelier accélération niveau 0. Budget 12/12. Base sans pièce pour apprendre la spécialisation.
-- Argent : Lotus Elise — Stage 1, pièces boite-courte, atelier accélération niveau 1 ; Tesla Model S — Stage 1, pièces boite-courte, atelier accélération niveau 1 ; 1000tipla — Stage 1, pièces boite-courte, atelier accélération niveau 1. Budget 15/15. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Or : Tesla Model S — Stage 2, pièces boite-courte, atelier accélération niveau 2 ; Dodge Charger de Dom — Stage 2, pièces boite-courte, atelier accélération niveau 2 ; 1000tipla — Stage 2, pièces boite-courte, atelier accélération niveau 2. Budget 18/18. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Platine : Tesla Model S — Stage 3, pièces boite-courte, atelier accélération niveau 2 ; Pagani Zonda R — Stage 3, pièces boite-courte, atelier accélération niveau 2 ; 1000tipla — Stage 3, pièces boite-courte, atelier accélération niveau 2. Budget 20/21. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Légende : Hennessey Venom F5 — Stage 3, pièces boite-courte, atelier accélération niveau 2 ; Pagani Zonda R — Stage 3, pièces boite-courte, atelier accélération niveau 2 ; 1000tipla — Stage 3, pièces boite-courte, atelier accélération niveau 2. Budget 24/24. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
+| Spéciale | Bronze | Argent | Or | Platine | Légende |
+|---|---:|---:|---:|---:|---:|
+| Départ | 81 / 97 | 83 / 90 | 61 / 72 | 42 / 56 | 41 / 47 |
+| Virages | 83 / 89 | 67 / 71 | 60 / 64 | 55 / 70 | 37 / 41 |
+| Ligne droite | 91 / 96 | 70 / 94 | 55 / 82 | 51 / 66 | 30 / 54 |
+| Endurance | 86 / 100 | 71 / 94 | 63 / 85 | 56 / 72 | 48 / 68 |
 
-**Virages**
+Les écarts de quelques points d’une case à l’autre (Départ Bronze et Argent, Virages Platine) sont dans le bruit de la simulation. Pour régler à nouveau : modifier les écuries, relancer `node pipeline/balance.mjs`, et garder la puissance croissante.
 
-- Bronze : Lotus Elise — Stage 0, pièces aucune, atelier maniabilité niveau 0 ; Pagani Zonda R — Stage 0, pièces aucune, atelier maniabilité niveau 0 ; Renault Twizy — Stage 0, pièces aucune, atelier maniabilité niveau 0. Budget 12/12. Base sans pièce pour apprendre la spécialisation.
-- Argent : Nissan Silvia S15 — Stage 1, pièces susp-filetes, atelier maniabilité niveau 1 ; Lotus Elise — Stage 1, pièces susp-filetes, atelier maniabilité niveau 1 ; Pagani Zonda R — Stage 1, pièces susp-filetes, atelier maniabilité niveau 1. Budget 15/15. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Or : Lotus Elise — Stage 2, pièces susp-filetes, atelier maniabilité niveau 2 ; Pagani Zonda R — Stage 2, pièces susp-filetes, atelier maniabilité niveau 2 ; Lamborghini Countach LP400 — Stage 2, pièces susp-filetes, atelier maniabilité niveau 2. Budget 18/18. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Platine : Nissan Silvia S15 — Stage 3, pièces susp-filetes, atelier maniabilité niveau 2 ; Porsche Carrera GT — Stage 3, pièces susp-filetes, atelier maniabilité niveau 2 ; Pagani Zonda R — Stage 3, pièces susp-filetes, atelier maniabilité niveau 2. Budget 20/21. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Légende : Skyline de Brian — Stage 3, pièces susp-filetes, atelier maniabilité niveau 2 ; Porsche Carrera GT — Stage 3, pièces susp-filetes, atelier maniabilité niveau 2 ; Pagani Zonda R — Stage 3, pièces susp-filetes, atelier maniabilité niveau 2. Budget 24/24. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-
-**Ligne droite**
-
-- Bronze : Abarth 500 — Stage 0, pièces aucune, atelier vitesse niveau 0 ; Mazda RX-7 FD — Stage 0, pièces aucune, atelier vitesse niveau 0 ; Ferrari Testarossa — Stage 0, pièces aucune, atelier vitesse niveau 0. Budget 12/12. Base sans pièce pour apprendre la spécialisation.
-- Argent : Mazda RX-7 FD — Stage 1, pièces admission, atelier vitesse niveau 1 ; Dodge Charger R/T 1970 — Stage 1, pièces admission, atelier vitesse niveau 1 ; Ferrari Testarossa — Stage 1, pièces admission, atelier vitesse niveau 1. Budget 15/15. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Or : Pagani Zonda R — Stage 2, pièces admission, atelier vitesse niveau 2 ; Mazda RX-7 FD — Stage 2, pièces admission, atelier vitesse niveau 2 ; Ferrari Testarossa — Stage 2, pièces admission, atelier vitesse niveau 2. Budget 18/18. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Platine : Pagani Zonda R — Stage 3, pièces admission, atelier vitesse niveau 2 ; Lamborghini Countach LP400 — Stage 3, pièces admission, atelier vitesse niveau 2 ; Ferrari Testarossa — Stage 3, pièces admission, atelier vitesse niveau 2. Budget 21/21. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Légende : Hennessey Venom F5 — Stage 3, pièces admission, atelier vitesse niveau 2 ; Pagani Zonda R — Stage 3, pièces admission, atelier vitesse niveau 2 ; Ferrari Testarossa — Stage 3, pièces admission, atelier vitesse niveau 2. Budget 24/24. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-
-**Endurance**
-
-- Bronze : Renault 4L GTL — Stage 0, pièces aucune, atelier endurance niveau 0 ; Dodge Charger de Dom — Stage 0, pièces aucune, atelier endurance niveau 0 ; Jeep Jurassic Park — Stage 0, pièces aucune, atelier endurance niveau 0. Budget 12/12. Base sans pièce pour apprendre la spécialisation.
-- Argent : Land Rover Defender 90 — Stage 1, pièces freins-endurance, atelier endurance niveau 1 ; Dodge Charger de Dom — Stage 1, pièces freins-endurance, atelier endurance niveau 1 ; Jeep Jurassic Park — Stage 1, pièces freins-endurance, atelier endurance niveau 1. Budget 13/15. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Or : Dodge Charger de Dom — Stage 2, pièces freins-endurance, atelier endurance niveau 2 ; Jeep Jurassic Park — Stage 2, pièces freins-endurance, atelier endurance niveau 2 ; V8 Interceptor — Stage 2, pièces freins-endurance, atelier endurance niveau 2. Budget 17/18. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Platine : Bugatti Veyron — Stage 3, pièces freins-endurance, atelier endurance niveau 2 ; Dodge Charger de Dom — Stage 3, pièces freins-endurance, atelier endurance niveau 2 ; Jeep Jurassic Park — Stage 3, pièces freins-endurance, atelier endurance niveau 2. Budget 21/21. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.
-- Légende : Bugatti Veyron — Stage 3, pièces freins-endurance, susp-rallye, atelier endurance niveau 2, accélération niveau 1 ; Dodge Charger de Dom — Stage 3, pièces freins-endurance, susp-rallye, atelier endurance niveau 2, accélération niveau 1 ; Jeep Jurassic Park — Stage 3, pièces freins-endurance, susp-rallye, atelier endurance niveau 2, accélération niveau 1. Budget 21/24. Préparation et budget supérieurs pour renforcer la statistique spécialisée et les secteurs secondaires.

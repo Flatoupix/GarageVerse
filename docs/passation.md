@@ -30,18 +30,28 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - L’intégration automatique d’une étape (`--integrate`) est refusée quand le clone a des fichiers non suivis (3 PNG de cartes à la racine et `.codex-attachments/`, qui sont à l’utilisateur) : récupérer alors le commit à la main (`git fetch ../<cycle>/checkout orchestrator/<cycle>:refs/cycle/x`, puis `cherry-pick`).
 - Quotas : Codex et Antigravity s’épuisent en cours de lot. Si l’un est à court, relancer la même commande avec l’autre moteur ; le pipeline ne régénère que le manquant. Quota d’image d’Antigravity (`gemini-3.1-flash-image`) : retour annoncé vers 21 h 10 le 15 novembre.
 
-## Plan validé avec le joueur (15 novembre, soir)
+## État du plan validé avec le joueur (15 novembre, soir)
 
-Les 102 voitures de côté sont publiées (`b4eb00c`). Liseré magenta nettoyé sauf S15 et Charger (carrosserie violette, laissées telles quelles) ; Zonda : reste du violet entre les montants de l’aileron ; Batmobile, Zonda et Agera ont reçu une seconde passe non commitée. Ordre d’attaque :
+Dernier commit publié : `d5dd0be` sur `prototype/mobile-tcg`. Fait et publié :
 
-1. **Correctifs rapides** : confirmation **et annulation de quelques secondes** du recyclage de doublon (`CarSheet.vue` lignes ~239 et ~320 : l’action est directe, alors que la vente demande déjà confirmation) ; boutons d’amélioration (Stage 1, etc.) **grisés** quand on ne peut pas payer, avec la raison exacte (« il te manque 30 crédits ») ; badge « Nouveau » sur les voitures fraîchement tirées ; réglage « aide en touchant les mots soulignés », désactivé par défaut (le « ? » reste), à signaler dans le tutoriel.
-2. **Garage** : un appui sur une voiture ouvre la **carte** (performances dans un onglet ou un bouton), avec **zoom et déplacement** au doigt, l’inclinaison holographique restant active même zoomé ; couleur par **rareté** au lieu du bleu partout ; **tri et filtres** rapides.
-3. **Image de l’Agera** à régénérer (la voiture « vole » sur la carte), puis tour des autres cartes douteuses.
-4. **Thèmes et plein écran** : trop de thèmes (8) et la plupart sont jugés moches par le joueur, qui garde Synthwave ; Galaad n’aime pas Synthwave. À réduire (garder Synthwave, Rétro pixel, Sobre et au plus un ou deux à débloquer, à choisir sur une planche de captures). Plein écran : inviter à installer le jeu (manifeste `display`) et bouton plein écran là où c’est possible ; iPhone/Safari n’a pas d’API plein écran.
-5. **Éditions** : débloquer/changer un style contre **2 doublons + crédits selon la voiture** (aujourd’hui 40/75/120/200 crédits sans doublons). Le « Solarpunk » du joueur est probablement la gouache (à vérifier dans le pipeline) ; « voiture abandonnée » n’existe pas : à **tester sur 5 cartes** avant toute généralisation.
-6. **Démontage de voiture** à l’atelier (récupérer des pièces). Pas de kits d’amélioration.
-7. **Séries spéciales** : 4 séries, une par secteur (départ/accélération, virage/maniabilité, ligne droite/vitesse, endurance), plusieurs paliers de difficulté et gains croissants ; passer `balance.mjs` pour l’inflation de crédits. Puis **exhibition** : concours à critères tournants (juges qui aiment le rétro, le tuning, la rareté…) pour qu’une Fiat 500 puisse battre une Mazda tunée selon le concours. À spécifier avec le joueur avant de coder.
-8. **Plus tard, à cadrer** : **mode multijoueur** ; **version Android** (le joueur veut y mettre son splash screen de studio « Crazy Popping Cats », fait sous Construct, à récupérer sur son PC).
+1. **Correctifs rapides** : recyclage confirmé puis annulable 6 s (refusé si les crédits sont dépensés), boutons grisés avec la raison chiffrée, badge « Nouveau », réglage « aide en touchant les mots soulignés » (désactivé pour une partie neuve).
+2. **Garage** : un appui ouvre la carte ; zoom et déplacement **au geste seulement** (le joueur a refusé les boutons de zoom) avec l’inclinaison holo conservée ; couleurs de rareté ; puces de rareté et de tri.
+3. **Légendaires en image fixe** : l’animation de carte est abandonnée. Onze en Synthwave stylisé (`LEGEND_STYLE` dans `pipeline/art.mjs`), Jeep, Interceptor et 1000tipla gardent leur style propre. Les calques animés ne servent plus qu’à la mini-course. Les ~31 règles CSS `.pixel-scene`/`.scene-*` de chaque feuille sont devenues inutiles (nettoyage à faire).
+4. **Thèmes** : les 8 sont gardés et rangés en trois groupes (Ambiances, Univers, À gagner). Le thème par défaut reste Synthwave (Galaad ne l’aime pas : le choix au premier lancement n’a pas été décidé).
+5. **Éditions** : débloquer une édition coûte les crédits (40/75/120/200) **et 2 doublons**, pour toutes les éditions ; Solarpunk et Abandonnée sont **à l’essai sur 5 cartes** (Clio III, 205 GTI, Supra, MX-5 NB, F40). À étendre aux autres cartes seulement si le joueur valide l’essai (~200 images).
+
+**Prochain : séries spéciales de courses.** 4 séries, une par secteur (départ/accélération, virage/maniabilité, ligne droite/vitesse, endurance), plusieurs paliers de difficulté et gains croissants ; passer `balance.mjs` pour l’inflation de crédits. Puis **exhibition** : concours à critères tournants (juges qui aiment le rétro, le tuning, la rareté…) pour qu’une Fiat 500 puisse battre une Mazda tunée selon le concours. À spécifier avec le joueur avant de coder.
+
+## À voir plus tard (rien à faire sans l’accord du joueur)
+
+- **Démontage de voiture** à l’atelier, pour récupérer des pièces. Mis de côté : le joueur veut en reparler. Pas de kits d’amélioration.
+- **Mode multijoueur** (le site est statique sur GitHub Pages, sans serveur : duels asynchrones plus simples que le temps réel).
+- **Version Android**, avec son écran de lancement de studio « Crazy Popping Cats » (fait sous Construct, fichiers à récupérer sur son PC). Une publication sur le Play Store rouvre la question des marques et des voitures de films : prévoir un nom générique par voiture et une version sans marques, séparée et sans code secret.
+- **Étendre Solarpunk et Abandonnée** aux autres cartes, et éventuellement d’autres styles.
+- **Choix du thème au premier lancement** pour un joueur neuf.
+- **Nettoyage du CSS de scène** devenu inutilisé.
+
+**Règle apprise** : ne jamais ajouter de bouton ou de contrôle que le joueur n’a pas demandé (voir les boutons de zoom retirés).
 
 ## À faire (reliquat de la session précédente)
 

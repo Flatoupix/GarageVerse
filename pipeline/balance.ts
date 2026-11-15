@@ -1,7 +1,7 @@
 // Simulation d'équilibrage : node pipeline/balance.mjs (compile ce fichier avec esbuild puis l'exécute).
 // Fait courir des écuries tirées au hasard l'une contre l'autre avec l'IA des deux côtés.
 import { writeFileSync } from 'node:fs'
-import { leagues, parts, progression, rivals, vehicles, type Rival } from '../src/game/data'
+import { leagues, parts, progression, rivals, specials, vehicles, type Rival, type StatKey } from '../src/game/data'
 import { aiChoice, compatibility, createRace, partUnlockLevel, playRound, potential, rivalLineup, statsOf, upgradeForFamily, type Prep } from '../src/game/rules'
 
 let seed = 20261114
@@ -66,6 +66,20 @@ for (const r of rivals) {
     if (new Set(fitted.map(p => p.family)).size !== fitted.length) problems.push(`${r.id} : deux pièces de même famille sur ${v.id}`)
     const used = fitted.reduce((n, p) => n + p.cost, 0)
     if (used > potential(v, e.stage)) problems.push(`${r.id} : ${v.id} préparée ${used} pour un potentiel ${potential(v, e.stage)}`)
+  }
+}
+// Les paliers des spéciales suivent les mêmes règles de contenu, avec le plafond propre à chaque palier.
+for (const s of specials) for (const r of s.tiers) {
+  const cost = r.lineup.reduce((n, e) => n + vehicles.find(v => v.id === e.id)!.cost, 0)
+  if (cost > (r.cap ?? 0)) problems.push(`${r.id} : écurie ${cost} au-dessus du plafond ${r.cap}`)
+  const dominant = r.circuit.sectors.filter(x => x === s.sector).length
+  if (dominant < 3) problems.push(`${r.id} : seulement ${dominant} secteur(s) ${s.sector}`)
+  for (const e of r.lineup) {
+    const v = vehicles.find(x => x.id === e.id)!
+    const fitted = e.parts.map(id => parts.find(p => p.id === id)!)
+    for (const p of fitted) if (compatibility(p, v)) problems.push(`${r.id} : ${p.id} incompatible avec ${v.id}`)
+    if (new Set(fitted.map(p => p.family)).size !== fitted.length) problems.push(`${r.id} : deux pièces de même famille sur ${v.id}`)
+    if (fitted.reduce((n, p) => n + p.cost, 0) > potential(v, e.stage)) problems.push(`${r.id} : ${v.id} dépasse son potentiel`)
   }
 }
 if (problems.length) { console.error(`Données incohérentes :\n- ${problems.join('\n- ')}`); process.exit(1) }
@@ -139,6 +153,42 @@ report.clioVsVenom = (['depart', 'virage', 'ligne', 'endurance'] as const).map(s
 })
 report.clioPrep = prepared('clio', 3)
 
+// 5. Spéciales : chaque palier contre trois profils de joueur. « Départ » = écurie d'origine sans préparation ; « prêt » = écurie
+// aléatoire sous le plafond du palier, préparée au stage attendu à ce stade ; « spécialiste » = la meilleure sur 60 tirages pour la
+// statistique du secteur de la spéciale. On attend une difficulté croissante, et un spécialiste meilleur que le généraliste.
+const sectorStat = { depart: 'acc', virage: 'man', ligne: 'vit', endurance: 'end' } as const
+const readyStage = [1, 1, 2, 3, 3]
+const SPECIAL_GAMES = 200
+function specialistLineup(cap: number, stage: number, key: StatKey) {
+  let best: ReturnType<typeof randomLineup>, bestScore = -1
+  for (let i = 0; i < 60; i++) {
+    const lineup = randomLineup(cap, stage)
+    if (!lineup) continue
+    const score = lineup.reduce((n, e) => n + statsOf(vehicles.find(v => v.id === e.id)!, e.prep)[key], 0)
+    if (score > bestScore) { best = lineup; bestScore = score }
+  }
+  return best
+}
+const starterLineup = starter.map(id => ({ id, prep: { stage: 0, parts: [] } as Prep }))
+report.specials = specials.map(s => ({
+  id: s.id,
+  sector: s.sector,
+  tiers: s.tiers.map((r, i) => {
+    const key = sectorStat[s.sector] as StatKey
+    let starterWins = 0, readyWins = 0, specialistWins = 0, games = 0
+    for (let n = 0; n < SPECIAL_GAMES; n++) {
+      if (race(r.circuit, starterLineup, rivalLineup(r), r.id).winner === 'player') starterWins++
+      const general = randomLineup(r.cap!, readyStage[i]), specialist = specialistLineup(r.cap!, readyStage[i], key)
+      if (!general || !specialist) continue
+      games++
+      if (race(r.circuit, general, rivalLineup(r), r.id).winner === 'player') readyWins++
+      if (race(r.circuit, specialist, rivalLineup(r), r.id).winner === 'player') specialistWins++
+    }
+    return { id: r.id, tier: r.title, cap: r.cap, reward: r.reward, starter: +(starterWins / SPECIAL_GAMES).toFixed(3),
+      ready: +(readyWins / games).toFixed(3), specialist: +(specialistWins / games).toFixed(3) }
+  }),
+}))
+
 writeFileSync(new URL('./balance-report.json', import.meta.url), JSON.stringify(report, null, 2))
 const top = carRates.slice(0, 6).map(c => `${c.name} ${Math.round(c.winRate * 100)}%`).join(', ')
 const bottom = carRates.slice(-6).map(c => `${c.name} ${Math.round(c.winRate * 100)}%`).join(', ')
@@ -147,3 +197,8 @@ console.log('Rivaux (victoires joueur) :', (report.rivals as { id: string; playe
 console.log(`Départ contre Lola : ${Math.round((report.starterNoPrep as number) * 100)}% sans préparation, ` +
   `${Math.round((report.starterBeginner as number) * 100)}% en débutant, ${Math.round((report.starterPrepared as number) * 100)}% préparé`)
 console.log('Clio Stage 3 contre Venom d’origine :', JSON.stringify(report.clioVsVenom))
+type SpecialRow = { id: string; tiers: { tier: string; starter: number; ready: number; specialist: number }[] }
+for (const s of report.specials as SpecialRow[]) {
+  console.log(`Spéciale ${s.id} (départ / prêt / spécialiste) : ` +
+    s.tiers.map(t => `${t.tier} ${Math.round(t.starter * 100)}/${Math.round(t.ready * 100)}/${Math.round(t.specialist * 100)}`).join(' · '))
+}

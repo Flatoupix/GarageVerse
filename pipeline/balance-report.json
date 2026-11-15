@@ -904,5 +904,211 @@
       "end": 2,
       "man": 2
     }
-  }
+  },
+  "specials": [
+    {
+      "id": "depart",
+      "sector": "depart",
+      "tiers": [
+        {
+          "id": "special-depart-1",
+          "tier": "Bronze",
+          "cap": 12,
+          "reward": 50,
+          "starter": 0,
+          "ready": 0.81,
+          "specialist": 0.97
+        },
+        {
+          "id": "special-depart-2",
+          "tier": "Argent",
+          "cap": 15,
+          "reward": 100,
+          "starter": 0,
+          "ready": 0.825,
+          "specialist": 0.895
+        },
+        {
+          "id": "special-depart-3",
+          "tier": "Or",
+          "cap": 18,
+          "reward": 160,
+          "starter": 0,
+          "ready": 0.605,
+          "specialist": 0.715
+        },
+        {
+          "id": "special-depart-4",
+          "tier": "Platine",
+          "cap": 21,
+          "reward": 250,
+          "starter": 0,
+          "ready": 0.415,
+          "specialist": 0.555
+        },
+        {
+          "id": "special-depart-5",
+          "tier": "Légende",
+          "cap": 24,
+          "reward": 400,
+          "starter": 0,
+          "ready": 0.405,
+          "specialist": 0.47
+        }
+      ]
+    },
+    {
+      "id": "virage",
+      "sector": "virage",
+      "tiers": [
+        {
+          "id": "special-virage-1",
+          "tier": "Bronze",
+          "cap": 12,
+          "reward": 50,
+          "starter": 0,
+          "ready": 0.825,
+          "specialist": 0.89
+        },
+        {
+          "id": "special-virage-2",
+          "tier": "Argent",
+          "cap": 15,
+          "reward": 100,
+          "starter": 0,
+          "ready": 0.67,
+          "specialist": 0.71
+        },
+        {
+          "id": "special-virage-3",
+          "tier": "Or",
+          "cap": 18,
+          "reward": 160,
+          "starter": 0,
+          "ready": 0.595,
+          "specialist": 0.64
+        },
+        {
+          "id": "special-virage-4",
+          "tier": "Platine",
+          "cap": 21,
+          "reward": 250,
+          "starter": 0,
+          "ready": 0.545,
+          "specialist": 0.7
+        },
+        {
+          "id": "special-virage-5",
+          "tier": "Légende",
+          "cap": 24,
+          "reward": 400,
+          "starter": 0,
+          "ready": 0.365,
+          "specialist": 0.41
+        }
+      ]
+    },
+    {
+      "id": "ligne",
+      "sector": "ligne",
+      "tiers": [
+        {
+          "id": "special-ligne-1",
+          "tier": "Bronze",
+          "cap": 12,
+          "reward": 50,
+          "starter": 0,
+          "ready": 0.905,
+          "specialist": 0.955
+        },
+        {
+          "id": "special-ligne-2",
+          "tier": "Argent",
+          "cap": 15,
+          "reward": 100,
+          "starter": 0,
+          "ready": 0.695,
+          "specialist": 0.94
+        },
+        {
+          "id": "special-ligne-3",
+          "tier": "Or",
+          "cap": 18,
+          "reward": 160,
+          "starter": 0,
+          "ready": 0.545,
+          "specialist": 0.82
+        },
+        {
+          "id": "special-ligne-4",
+          "tier": "Platine",
+          "cap": 21,
+          "reward": 250,
+          "starter": 0,
+          "ready": 0.51,
+          "specialist": 0.66
+        },
+        {
+          "id": "special-ligne-5",
+          "tier": "Légende",
+          "cap": 24,
+          "reward": 400,
+          "starter": 0,
+          "ready": 0.3,
+          "specialist": 0.54
+        }
+      ]
+    },
+    {
+      "id": "endurance",
+      "sector": "endurance",
+      "tiers": [
+        {
+          "id": "special-endurance-1",
+          "tier": "Bronze",
+          "cap": 12,
+          "reward": 50,
+          "starter": 0.27,
+          "ready": 0.86,
+          "specialist": 0.995
+        },
+        {
+          "id": "special-endurance-2",
+          "tier": "Argent",
+          "cap": 15,
+          "reward": 100,
+          "starter": 0.115,
+          "ready": 0.71,
+          "specialist": 0.935
+        },
+        {
+          "id": "special-endurance-3",
+          "tier": "Or",
+          "cap": 18,
+          "reward": 160,
+          "starter": 0.055,
+          "ready": 0.625,
+          "specialist": 0.845
+        },
+        {
+          "id": "special-endurance-4",
+          "tier": "Platine",
+          "cap": 21,
+          "reward": 250,
+          "starter": 0.035,
+          "ready": 0.555,
+          "specialist": 0.715
+        },
+        {
+          "id": "special-endurance-5",
+          "tier": "Légende",
+          "cap": 24,
+          "reward": 400,
+          "starter": 0.025,
+          "ready": 0.475,
+          "specialist": 0.68
+        }
+      ]
+    }
+  ]
 }

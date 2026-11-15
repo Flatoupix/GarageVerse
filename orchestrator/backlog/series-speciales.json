@@ -1,10 +1,33 @@
 {
   "id": "series-speciales",
-  "title": "[À CHALLENGER AVEC LE JOUEUR — NE PAS LANCER] Séries de courses spéciales de plus en plus difficiles",
-  "brief": "IDÉE BRUTE DU JOUEUR, NON SPÉCIFIÉE : créer des séries de courses spéciales (spéciale endurance, spéciale vitesse, une spéciale aura, etc.) qui soient de plus en plus difficiles. À challenger avec le joueur avant toute spécification : le périmètre, la forme des séries, les paliers, les récompenses et le lien avec les rivaux, le défi du jour et la Nuit sans fin ne sont pas décidés. Ne pas lancer cette étape dans l’orchestrateur tant que cette fiche n’a pas été reprise et validée.",
+  "title": "Spéciales de courses : quatre séries de cinq paliers, une par secteur, de plus en plus difficiles",
+  "brief": "Ajouter des séries de courses spéciales, validées avec le joueur. Il y en a quatre, une par secteur : Départ (accélération), Virages (maniabilité), Ligne droite (vitesse) et Endurance. Chacune compte cinq paliers : Bronze, Argent, Or, Platine, Légende. Un palier est un duel contre un adversaire, comme un rival de ligue : même moteur de course, même écran de duel, même mécanique de sauvegarde. Le circuit d’un palier a cinq secteurs dont trois ou quatre du type de la spéciale (le secteur est réutilisable, comme les deux virages du circuit de Lola dans src/data/garage.json), pour que la statistique du secteur compte et que chaque spéciale demande des voitures différentes. L’adversaire (trois voitures, avec stage et pièces) monte en force à chaque palier. Plafonds de coût d’écurie par palier : Bronze 12, Argent 15, Or 18, Platine 21, Légende 24. Gain à la première victoire d’un palier : 50, 100, 160, 250 et 400 crédits. Si on rejoue un palier déjà gagné : environ 20 % de ce gain (10, 20, 32, 50, 80). Une défaite ou une égalité ne rapporte rien dans une spéciale. Quand le palier Légende d’une spéciale est battu pour la première fois, le joueur reçoit une fois une pièce mécanique ou un ticket de booster. Déblocage : les spéciales s’ouvrent quand tous les rivaux de la Ligue Néon ont été battus au moins une fois. Dans une spéciale, le palier suivant s’ouvre en gagnant le précédent. Points de départ dans le code : src/data/garage.json (`leagues`, `rivals`, chaque rival a `circuit` et `lineup`) ; src/game/data.ts (`Rival`, `League`, `rivalById`, `leagueById`) ; src/game/save.ts (`startDuel`, `settleDuel` qui paie aujourd’hui `league.reward` à chaque victoire et un ticket à la première, l’ordre d’ouverture des rivaux autour de la ligne `order.filter`, `save.record` indexé par id de rival et filtré par `rivalById.has` dans `readSave`) ; src/views/RaceView.vue (liste des rivaux par ligue et lancement du duel) . L’équilibrage (pipeline/balance.mjs) est hors de ton périmètre et sera mis à jour après toi : ne modifie pas pipeline/. Les paliers doivent pouvoir réutiliser `Rival` et `save.record` pour que la sauvegarde, le duel et les parties existantes restent valides ; tout nouveau champ est optionnel. Ils ne doivent pas apparaître dans la liste des ligues existantes (Néon, Chrome, Overdrive), ni modifier leurs gains, leurs rivaux ou leur équilibrage. Ne pas toucher à l’exhibition ni à une spéciale « aura » : ils viendront après. Le joueur a refusé tout bouton ou contrôle qu’il n’a pas demandé : ne rien ajouter à l’interface au-delà de ce qui est décrit. Les règles propres à un thème vont dans src/themes/base.css et src/themes/neon.css (deux feuilles complètes, à garder synchronisées), les styles communs dans src/themes/shared.css ; les huit thèmes de src/game/theme.ts doivent rester lisibles. Ajouter au lexique de src/game/help.ts une entrée pour chaque nouvelle notion. Tout le texte est en français, tutoiement. IMPORTANT : le bac à sable interdit d’ouvrir un port (listen EPERM) et de lancer un navigateur. Ne tente aucune validation navigateur et ne rends pas le statut « blocked » pour cette raison : vérifie avec vue-tsc, les scripts .check.cjs et le build Vite (`--configLoader runner` vers /tmp), puis rends le statut « pass » en notant dans les constats que les captures sont laissées à l’étape de tests de l’orchestrateur.",
   "requirements": [
-    "À définir avec le joueur avant toute implémentation."
+    "Le jeu contient quatre spéciales (Départ, Virages, Ligne droite, Endurance) de cinq paliers chacune (Bronze, Argent, Or, Platine, Légende), définies dans les données (src/data/garage.json) et non codées en dur dans les vues. Chaque palier a un adversaire de trois voitures valides du roster (stage et pièces autorisés), un circuit de cinq secteurs dont trois ou quatre du type de la spéciale, un plafond de coût d’écurie (12, 15, 18, 21, 24) respecté par l’adversaire, et un gain (50, 100, 160, 250, 400).",
+    "Un palier se joue comme un rival existant : même choix d’écurie, même duel, même mise en scène et même sauvegarde (`save.record`). Gagner un palier pour la première fois paie son gain complet ; le rejouer ensuite paie environ 20 % ; une défaite ou une égalité ne paie rien. Une victoire parfaite suit la règle déjà en place pour les rivaux si elle s’applique, sans doubler le gain d’un palier rejoué. Battre pour la première fois le palier Légende d’une spéciale donne une fois une pièce mécanique ou un ticket de booster, jamais deux fois.",
+    "Les spéciales sont fermées tant que tous les rivaux de la Ligue Néon n’ont pas été battus au moins une fois : l’écran le dit simplement (par exemple « Bats toute la Ligue Néon pour les ouvrir »). Une fois ouvertes, seul le premier palier de chaque spéciale est jouable ; chaque palier suivant s’ouvre en gagnant le précédent. Les parties existantes qui ont déjà battu la Ligue Néon voient les spéciales ouvertes au chargement, sans perdre de progression.",
+    "L’onglet Course affiche une rubrique « Spéciales » : quatre cartes (une par spéciale) avec leur progression (par exemple « 3/5 ») ; toucher un palier montre son adversaire, son circuit, son gain et le lancement du duel, avec le même composant ou le même écran que pour un rival. Les spéciales n’apparaissent pas dans la liste des ligues Néon, Chrome et Overdrive. Aucun autre bouton ou contrôle n’est ajouté.",
+    "Un script .check.cjs (sur le modèle de src/game/recycle.check.cjs) vérifie : quatre spéciales de cinq paliers, chaque lineup valide et sous son plafond, le type de secteur dominant, le déblocage après la Ligue Néon puis palier par palier, le gain complet à la première victoire, environ 20 % au rejeu, rien en cas de défaite, la récompense de fin de spéciale donnée une seule fois, et la lecture d’une ancienne sauvegarde sans spéciale.",
+    "L’équilibrage n’est pas modifié dans ce périmètre (pipeline/ est interdit) : choisis des adversaires dont la force monte réellement d’un palier à l’autre (stage, pièces et voitures de plus en plus fortes, dans le plafond de coût) et décris dans les constats, pour chaque palier, la composition choisie et pourquoi, afin que le réglage final puisse se faire avec pipeline/balance.mjs. Aucun gain ni rival existant n’est modifié.",
+    "À 320 et 390 px, la rubrique Spéciales et la fiche d’un palier n’ont aucun débordement horizontal et restent lisibles dans au moins Synthwave et Rétro pixel. Aucune erreur dans la console. docs/meta.md décrit les spéciales, leurs paliers, plafonds, gains, le déblocage et l’équilibrage."
   ],
-  "paths": ["docs/"],
-  "browser": "neon"
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tab": "Course"
+    },
+    {
+      "expect": "Spéciales"
+    },
+    {
+      "capture": "speciales"
+    }
+  ]
 }

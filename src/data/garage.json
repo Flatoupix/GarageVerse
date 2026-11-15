@@ -161,27 +161,61 @@
         },
         "lineup": [
           {
-            "id": "stratos",
+            "id": "r4l",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
             "upgrades": {
-              "acc": 0
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "saxo",
+            "id": "elise",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo"
+            ],
             "upgrades": {
-              "acc": 0
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "1000tipla",
+            "id": "mehari",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
             "upgrades": {
-              "acc": 0
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -209,33 +243,59 @@
         },
         "lineup": [
           {
-            "id": "elise",
+            "id": "volvo240",
             "stage": 1,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "acc": 1
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "tesla",
+            "id": "countach",
             "stage": 1,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "pneus-route"
             ],
             "upgrades": {
-              "acc": 1
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "1000tipla",
+            "id": "transit",
             "stage": 1,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "acc": 1
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -263,32 +323,54 @@
         },
         "lineup": [
           {
-            "id": "tesla",
+            "id": "agera",
             "stage": 2,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "allegement",
+              "susp-drift"
             ],
             "upgrades": {
-              "acc": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "domcharger",
+            "id": "evo8",
             "stage": 2,
             "parts": [
-              "boite-courte"
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
             ],
             "upgrades": {
-              "acc": 2
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           },
           {
-            "id": "1000tipla",
+            "id": "defender",
             "stage": 2,
             "parts": [
-              "boite-courte"
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "nitro"
             ],
             "upgrades": {
+              "vit": 2,
+              "end": 2,
+              "man": 2,
               "acc": 2
             }
           }
@@ -317,33 +399,55 @@
         },
         "lineup": [
           {
-            "id": "tesla",
+            "id": "f40",
             "stage": 3,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
-              "acc": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "ruf",
             "stage": 3,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
             ],
             "upgrades": {
-              "acc": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "1000tipla",
+            "id": "r34",
             "stage": 3,
             "parts": [
-              "boite-courte"
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
             ],
             "upgrades": {
-              "acc": 2
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           }
         ]
@@ -375,30 +479,50 @@
             "id": "venom",
             "stage": 3,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "compresseur",
+              "allegement"
             ],
             "upgrades": {
-              "acc": 2
+              "acc": 2,
+              "vit": 2,
+              "end": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "r34",
             "stage": 3,
             "parts": [
-              "boite-courte"
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
             ],
             "upgrades": {
-              "acc": 2
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           },
           {
-            "id": "1000tipla",
+            "id": "interceptor",
             "stage": 3,
             "parts": [
-              "boite-courte"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
-              "acc": 2
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           }
         ]
@@ -433,27 +557,60 @@
         },
         "lineup": [
           {
-            "id": "elise",
+            "id": "duster",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "nitro"
+            ],
             "upgrades": {
-              "man": 0
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "ecto1",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
             "upgrades": {
-              "man": 0
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "twizy",
+            "id": "h1",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "underglow"
+            ],
             "upgrades": {
-              "man": 0
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
             }
           }
         ]
@@ -481,33 +638,57 @@
         },
         "lineup": [
           {
-            "id": "s15",
+            "id": "mini65",
             "stage": 1,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "man": 1
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "elise",
+            "id": "cgt",
             "stage": 1,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "compresseur",
+              "allegement"
             ],
             "upgrades": {
-              "man": 1
+              "acc": 2,
+              "vit": 2,
+              "end": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "panda",
             "stage": 1,
             "parts": [
-              "susp-filetes"
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "man": 1
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           }
         ]
@@ -535,33 +716,56 @@
         },
         "lineup": [
           {
-            "id": "elise",
+            "id": "agera",
             "stage": 2,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "allegement",
+              "susp-drift"
             ],
             "upgrades": {
+              "acc": 2,
+              "end": 2,
               "man": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "twizy",
             "stage": 2,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "eco-croisiere",
+              "batterie",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "underglow"
             ],
             "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "vit": 2,
               "man": 2
             }
           },
           {
-            "id": "countach",
+            "id": "p205",
             "stage": 2,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "man": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -589,32 +793,58 @@
         },
         "lineup": [
           {
-            "id": "s15",
+            "id": "p205",
             "stage": 3,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "man": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "cgt",
+            "id": "impreza",
             "stage": 3,
             "parts": [
-              "susp-filetes"
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "man": 2
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           },
           {
             "id": "zonda",
             "stage": 3,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift"
             ],
             "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
               "man": 2
             }
           }
@@ -644,32 +874,56 @@
         },
         "lineup": [
           {
-            "id": "brian",
+            "id": "charger",
             "stage": 3,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
             ],
             "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
               "man": 2
             }
           },
           {
-            "id": "cgt",
+            "id": "demon",
             "stage": 3,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route"
             ],
             "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
               "man": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "interceptor",
             "stage": 3,
             "parts": [
-              "susp-filetes"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
               "man": 2
             }
           }
@@ -705,27 +959,56 @@
         },
         "lineup": [
           {
-            "id": "abarth",
+            "id": "twizy",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "batterie",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "underglow"
+            ],
             "upgrades": {
-              "vit": 0
+              "acc": 2,
+              "end": 2,
+              "vit": 2,
+              "man": 2
             }
           },
           {
-            "id": "rx7",
+            "id": "ruf",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift"
+            ],
             "upgrades": {
-              "vit": 0
+              "acc": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "testarossa",
+            "id": "hilux",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "underglow"
+            ],
             "upgrades": {
-              "vit": 0
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
             }
           }
         ]
@@ -753,33 +1036,57 @@
         },
         "lineup": [
           {
-            "id": "rx7",
+            "id": "zonda",
             "stage": 1,
             "parts": [
-              "admission"
+              "autobloquant",
+              "compresseur",
+              "allegement"
             ],
             "upgrades": {
-              "vit": 1
+              "acc": 2,
+              "vit": 2,
+              "end": 2
             }
           },
           {
-            "id": "charger",
+            "id": "volvo240",
             "stage": 1,
             "parts": [
-              "admission"
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "vit": 1
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "testarossa",
+            "id": "p504",
             "stage": 1,
             "parts": [
-              "admission"
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "vit": 1
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -807,32 +1114,56 @@
         },
         "lineup": [
           {
-            "id": "zonda",
+            "id": "beetle",
             "stage": 2,
             "parts": [
-              "admission"
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
               "vit": 2
             }
           },
           {
-            "id": "rx7",
+            "id": "demon",
             "stage": 2,
             "parts": [
-              "admission"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift"
             ],
             "upgrades": {
-              "vit": 2
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "testarossa",
+            "id": "evo8",
             "stage": 2,
             "parts": [
-              "admission"
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
             ],
             "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
               "vit": 2
             }
           }
@@ -861,33 +1192,56 @@
         },
         "lineup": [
           {
-            "id": "zonda",
+            "id": "batmobile",
             "stage": 3,
             "parts": [
-              "admission"
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
-              "vit": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "countach",
+            "id": "domcharger",
             "stage": 3,
             "parts": [
-              "admission"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
-              "vit": 2
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "testarossa",
+            "id": "taxi",
             "stage": 3,
             "parts": [
-              "admission"
+              "batterie",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "underglow"
             ],
             "upgrades": {
-              "vit": 2
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
             }
           }
         ]
@@ -916,33 +1270,55 @@
         },
         "lineup": [
           {
-            "id": "venom",
+            "id": "brian",
             "stage": 3,
             "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
               "admission"
             ],
             "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
               "vit": 2
             }
           },
           {
-            "id": "zonda",
+            "id": "eleanor",
             "stage": 3,
             "parts": [
-              "admission"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
-              "vit": 2
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "testarossa",
+            "id": "batmobile",
             "stage": 3,
             "parts": [
-              "admission"
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
             ],
             "upgrades": {
-              "vit": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2
             }
           }
         ]
@@ -977,27 +1353,57 @@
         },
         "lineup": [
           {
-            "id": "r4l",
+            "id": "eleanor",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "pneus-route"
+            ],
             "upgrades": {
-              "end": 0
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "domcharger",
+            "id": "rx7",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
+            ],
             "upgrades": {
-              "end": 0
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "jpjeep",
+            "id": "p106",
             "stage": 0,
-            "parts": [],
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
             "upgrades": {
-              "end": 0
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -1025,33 +1431,57 @@
         },
         "lineup": [
           {
-            "id": "defender",
+            "id": "firebird",
             "stage": 1,
             "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
               "freins-endurance"
             ],
             "upgrades": {
-              "end": 1
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
             "id": "domcharger",
             "stage": 1,
             "parts": [
-              "freins-endurance"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift"
             ],
             "upgrades": {
-              "end": 1
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "jpjeep",
+            "id": "ek9",
             "stage": 1,
             "parts": [
-              "freins-endurance"
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
             ],
             "upgrades": {
-              "end": 1
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -1079,33 +1509,62 @@
         },
         "lineup": [
           {
-            "id": "domcharger",
-            "stage": 2,
-            "parts": [
-              "freins-endurance"
-            ],
-            "upgrades": {
-              "end": 2
-            }
-          },
-          {
             "id": "jpjeep",
             "stage": 2,
             "parts": [
-              "freins-endurance"
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "admission"
             ],
             "upgrades": {
-              "end": 2
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           },
           {
-            "id": "interceptor",
+            "id": "a110",
             "stage": 2,
             "parts": [
-              "freins-endurance"
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "underglow"
             ],
             "upgrades": {
-              "end": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "ae86",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -1133,33 +1592,58 @@
         },
         "lineup": [
           {
-            "id": "veyron",
+            "id": "brian",
             "stage": 3,
             "parts": [
-              "freins-endurance"
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "admission"
             ],
             "upgrades": {
-              "end": 2
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           },
           {
-            "id": "domcharger",
+            "id": "countach",
             "stage": 3,
             "parts": [
-              "freins-endurance"
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route"
             ],
             "upgrades": {
-              "end": 2
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
             }
           },
           {
-            "id": "jpjeep",
+            "id": "scirocco",
             "stage": 3,
             "parts": [
-              "freins-endurance"
+              "autobloquant",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "turbo-hybride",
+              "admission",
+              "underglow"
             ],
             "upgrades": {
-              "end": 2
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
             }
           }
         ]
@@ -1188,39 +1672,59 @@
         },
         "lineup": [
           {
-            "id": "veyron",
+            "id": "scirocco",
             "stage": 3,
             "parts": [
+              "autobloquant",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
               "freins-endurance",
-              "susp-rallye"
+              "turbo-hybride",
+              "admission",
+              "underglow"
             ],
             "upgrades": {
+              "acc": 2,
               "end": 2,
-              "acc": 1
+              "man": 2,
+              "vit": 2
             }
           },
           {
-            "id": "domcharger",
+            "id": "r34",
             "stage": 3,
             "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
               "freins-endurance",
-              "susp-rallye"
+              "boite-courte",
+              "turbo-hybride"
             ],
             "upgrades": {
               "end": 2,
-              "acc": 1
+              "man": 2,
+              "acc": 2,
+              "vit": 2
             }
           },
           {
-            "id": "jpjeep",
+            "id": "p930",
             "stage": 3,
             "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
               "freins-endurance",
-              "susp-rallye"
+              "admission"
             ],
             "upgrades": {
+              "acc": 2,
               "end": 2,
-              "acc": 1
+              "man": 2,
+              "vit": 2
             }
           }
         ]
