@@ -379,9 +379,21 @@ async function cycle(directory: string, resume: boolean) {
           if (stage === 'plan' && report.status !== 'pass') throw new Error('Plan incomplet')
           if (stage === 'implement' && report.status !== 'pass') throw new Error('Proposition Codex incomplète')
           if (stage === 'implement' && patch.trim()) {
-            if (/\b(?:old mode|new mode|new file mode|deleted file mode) (?!100644\b)/.test(patch) ||
-                /(?:^|\n)(?:GIT binary patch|rename (?:from|to)|copy (?:from|to))/.test(patch) ||
-                redact(patch) !== patch) throw new Error('Patch refusé : mode de fichier, renommage, binaire ou secret potentiel')
+            const refusals: string[] = []
+            if (/\b(?:old mode|new mode|new file mode|deleted file mode) (?!100644\b)/.test(patch)) refusals.push('mode de fichier')
+            if (/(?:^|\n)(?:GIT binary patch|rename (?:from|to)|copy (?:from|to))/.test(patch)) refusals.push('renommage, copie ou binaire')
+            const masked = redact(patch)
+            if (masked !== patch) {
+              const before = patch.split('\n'), after = masked.split('\n')
+              const lines = before.map((line, i) => (after[i] !== line ? i + 1 : 0)).filter(Boolean)
+              refusals.push('secret potentiel aux lignes du patch : ' + (after.length === before.length ? lines.slice(0, 20).join(', ') : 'décalage de lignes'))
+            }
+            if (refusals.length) {
+              // Diagnostic : le patch refusé et la cause sont gardés (le contenu des lignes n’est pas recopié dans la cause).
+              await writeFile(join(step, 'rejected.patch'), patch, { mode: 0o600 })
+              await writeFile(join(step, 'rejected.reason.txt'), refusals.join('\n') + '\n', { mode: 0o600 })
+              throw new Error('Patch refusé (' + refusals.join(' ; ') + ') : voir rejected.patch dans ' + step)
+            }
             const input = patch.endsWith('\n') ? patch : patch + '\n'
             const paths = parsePatchPaths(must(await git(['apply', '--numstat', '-z', '-'], checkout, input), 'Lire le patch'), state.task.paths)
             const index = join(step, 'patch.index')
