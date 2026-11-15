@@ -35,6 +35,8 @@ export interface Rival {
   id: string; name: string; title: string; league: string
   circuit: { name: string; sectors: Sector[]; conditions: Partial<Record<Condition, number>> }
   lineup: LineupEntry[]
+  // Pilotage simple : ce rival n'utilise ni l'attaque ni la gestion.
+  simple?: boolean
 }
 export interface CollectionSeries { id: string; name: string; description: string; vehicles: string[]; reward: { credits: number; ticket?: string } }
 export const series = garageJson.series as CollectionSeries[]

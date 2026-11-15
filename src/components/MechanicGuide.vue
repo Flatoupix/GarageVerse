@@ -10,7 +10,7 @@ const steps = [
   ['.cap-meter, .rival-list', 'Défie Lola Minitel. Choisis trois voitures : leur coût total doit respecter le plafond de l’écurie.'],
   ['.engage-brief', 'Lis la statistique du secteur et sa météo. Choisis une voiture adaptée au terrain.'],
   ['.engage-cars[role="radiogroup"]', 'Sous tes voitures, la fourchette estime ton score. La forme du jour peut changer le résultat.'],
-  ['.engage-rivals', 'Observe les voitures adverses. Touche-les pour consulter leurs statistiques et anticiper le choix du rival.'],
+  ['.engage-rivals', 'Observe les voitures adverses : leur fourchette de score sur ce secteur est affichée. Devine laquelle le rival va engager.'],
   ['.engage-cars[role="radiogroup"]', 'Surveille les secteurs restants de chaque voiture. À zéro, elle surchauffe : son score perd trois points.'],
   ['.nitro-toggle', 'Active la nitro pour gagner des points sur ce secteur. Tes charges sont limitées pour toute la course.'],
   ['.round-result, .race-end', 'Compare les scores et leurs bonus. Chaque secteur gagné rapporte un point. Remporte le plus de secteurs pour battre ton rival.'],
@@ -22,6 +22,7 @@ const extras = {
   nitro: ['.nitro-toggle', 'La nitro ajoute des points à ton score. Garde tes charges pour les secteurs serrés.'],
   heat: ['.engage-cars[role="radiogroup"]', 'Cette voiture surchauffe : elle perd trois points. Alterne tes voitures pour préserver leurs secteurs disponibles.'],
   daily: ['.daily-panel, .daily-race', 'Le défi du jour impose une écurie spéciale. Gagne pour recevoir ses crédits, une fois par jour.'],
+  stance: ['.stance-toggle', 'L’attaque ajoute 2 points, mais brûle deux secteurs d’endurance et double le risque d’incident. La gestion retire 2 points sans brûler de secteur.'],
   perfect: ['.race-end', 'Tu as gagné tous les secteurs ! Cette victoire parfaite double tes crédits et peut offrir un ticket bonus.'],
 } as const
 const entry = computed(() => save.tutorial.status === 'active' ? steps[save.tutorial.step] : discovery.value ? extras[discovery.value] : null)
@@ -36,6 +37,7 @@ function refresh() {
     if (document.querySelector('.perfect-banner')) discover('perfect')
     if (document.querySelector('.engage-car.hot')) discover('heat')
     if (document.querySelector('.nitro-toggle.armed')) discover('nitro')
+    if (document.querySelector('.stance-toggle.set')) discover('stance')
     if (document.querySelector('.daily-race')) discover('daily')
   }
   const found = entry.value ? [...document.querySelectorAll<HTMLElement>(entry.value[0])].find(el => el.getClientRects().length && (!modal || modal.contains(el))) ?? null : null

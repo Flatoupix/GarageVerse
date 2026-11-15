@@ -40,8 +40,8 @@ function randomLineup(cap: number, stage: number, forced?: string) {
   }
 }
 
-function race(circuit: Rival['circuit'], a: { id: string; prep: Prep }[], b: { id: string; prep: Prep }[]) {
-  const duel = createRace('sim', circuit, a, b, rng)
+function race(circuit: Rival['circuit'], a: { id: string; prep: Prep }[], b: { id: string; prep: Prep }[], rivalId = 'sim') {
+  const duel = createRace(rivalId, circuit, a, b, rng)
   while (!duel.winner) playRound(duel, aiChoice(duel, 'player', rng), rng)
   return duel
 }
@@ -103,7 +103,7 @@ report.rivals = rivals.map(r => {
     const a = randomLineup(cap, 1)
     if (!a) continue
     games++
-    if (race(r.circuit, a, rivalLineup(r)).winner === 'player') wins++
+    if (race(r.circuit, a, rivalLineup(r), r.id).winner === 'player') wins++
   }
   return { id: r.id, league: r.league, playerWinRate: +(wins / games).toFixed(3) }
 })
@@ -119,7 +119,7 @@ const starterResults = Object.fromEntries(rivals.filter(r => r.league === 'neon'
   const rates = Object.fromEntries([['starterNoPrep', 0], ['starterBeginner', 1], ['starterPrepared', 2]].map(([label, level]) => {
     const lineup = starter.map(id => ({ id, prep: level === 0 ? { stage: 0, parts: [] } : level === 1 ? beginner[id] : prepared(id, 2) }))
     let wins = 0
-    for (let i = 0; i < 1500; i++) if (race(rival.circuit, lineup, rivalLineup(rival)).winner === 'player') wins++
+    for (let i = 0; i < 1500; i++) if (race(rival.circuit, lineup, rivalLineup(rival), rival.id).winner === 'player') wins++
     return [label, +(wins / 1500).toFixed(3)]
   }))
   return [rival.id, rates]

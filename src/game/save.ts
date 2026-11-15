@@ -17,7 +17,7 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
 export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number }
-export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series'
+export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
 export interface Save {
@@ -144,7 +144,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   if (tutorial) save.tutorial = {
     step: int(tutorial.step, 0, tutorialSteps - 1, 0),
     status: tutorial.status === 'done' || tutorial.status === 'skipped' ? tutorial.status : 'active',
-    seen: (['nitro', 'heat', 'daily', 'perfect', 'series'] as const).filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
+    seen: (['nitro', 'heat', 'daily', 'perfect', 'series', 'stance'] as const).filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
   }
   else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {

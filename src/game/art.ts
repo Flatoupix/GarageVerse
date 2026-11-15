@@ -33,6 +33,9 @@ function sceneOf(id: string): Scene | undefined {
 const trackStandIn: Record<Condition, string> = { sec: 'venom', pluie: 'elise190', nuit: 'mf1', terre: 'jpjeep', ville: 'bttf' }
 export const trackBackdrop = (condition: Condition): string | undefined =>
   pixelAnim[`track-${condition}-bg`] ?? pixelAnim[`${trackStandIn[condition]}-bg`]
+// Voiture détourée, vue de profil, pour la mini-course. Les légendaires animées en ont déjà une ; les autres arrivent avec
+// `yarn art --set anim --kind sprites`. Sans elle, la course montre la vignette de la carte.
+export const carSprite = (id: string): string | undefined => pixelAnim[`${id}-car`]
 const legacyArt: Record<string, Partial<Record<EditionStyle, Edition>>> = {
   clio: { Classic: { style: 'Classic', art: legacy.clio } },
   elise: { Classic: { style: 'Classic', art: legacy.elise } },
