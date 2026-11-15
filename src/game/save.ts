@@ -703,7 +703,7 @@ export function settleDuel(save: Save): Reward | undefined {
     save.duel = null
     return reward
   }
-  const rival = rivalById.get(duel.rivalId)!, league = leagueById.get(rival.league)!
+  const rival = rivalById.get(duel.rivalId)!
   const record = save.record[rival.id] ??= { wins: 0, losses: 0, perfect: false }
   if (specialByRivalId.has(rival.id)) {
     const first = record.wins === 0
@@ -719,6 +719,7 @@ export function settleDuel(save: Save): Reward | undefined {
     save.duel = null
     return reward
   }
+  const league = leagueById.get(rival.league)!
   let reward: Reward
   if (duel.winner === 'player') {
     reward = { credits: league.reward }

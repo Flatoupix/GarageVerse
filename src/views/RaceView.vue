@@ -434,12 +434,12 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <h1 v-if="isNight" tabindex="-1"><span v-help="'endless'">Nuit sans fin</span></h1>
         <h1 v-else tabindex="-1">{{ rival.circuit.name }}</h1>
         <p v-if="!isNight">Contre {{ rival.name }}</p>
-        <p v-if="special">{{ save.record[rival.id]?.wins ? rival.replay : rival.reward }} crédits · {{ save.record[rival.id]?.wins ? 'rejeu' : 'première victoire (doublés si parfaite)' }}<template v-if="rival.completionTicket"> · un ticket à la première victoire</template></p>
         <template v-else>
           <p>Enchaîne les courses contre des adversaires de plus en plus forts : ta nuit s’arrête à la première défaite.</p>
           <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
           <p v-help="'nightCap'">Plafond de coût : {{ NIGHT_CAP }}</p>
         </template>
+        <p v-if="special">{{ save.record[rival.id]?.wins ? rival.replay : rival.reward }} crédits · {{ save.record[rival.id]?.wins ? 'rejeu' : 'première victoire (doublés si parfaite)' }}<template v-if="rival.completionTicket && !save.record[rival.id]?.wins"> · un ticket à la première victoire</template></p>
       </div>
       <section v-if="isDaily" class="daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
       <div class="cap-meter" :class="{ over: cost > cap }">
