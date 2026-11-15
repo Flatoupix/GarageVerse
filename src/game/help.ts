@@ -6,6 +6,7 @@ import { NIGHT_CAP, nightReward } from './endless'
 export interface HelpEntry { term: string; text: string }
 
 export const glossary = {
+  legendaryPack: { term: 'Sachet légendaire', text: 'Un sachet doré avec le ruban « Édition légendaire » contient au moins une carte Légendaire. Tes cinq cartes sont tirées dès l’achat ou l’utilisation du ticket : tu retrouves le même lot après un rechargement. La boutique montre toujours la couverture normale.' },
   offline: { term: 'Mode hors ligne', text: 'Après une première visite connectée, le jeu garde sa page et ses ressources sur ton appareil. Relance-le sans réseau ; les images déjà chargées restent disponibles. Une nouvelle version arrive au prochain lancement connecté.' },
   exportSave: { term: 'Export de sauvegarde', text: 'Télécharge un fichier JSON daté contenant ta partie. Garde-le pour retrouver ton garage sur un autre navigateur ou appareil.' },
   importSave: { term: 'Import de sauvegarde', text: 'Choisis un fichier GarageVerse exporté. Après ta confirmation, il remplace toute ta partie actuelle. Exporte-la d’abord si tu veux la garder.' },
@@ -64,6 +65,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'consigne', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
   { title: 'Nuit sans fin', keys: ['endless', 'nightRound', 'nightRecord', 'nightCap', 'nightGains'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
+  { title: 'Boosters', keys: ['legendaryPack'] },
   { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition', 'vente', 'series', 'seriesReward'] },
 ]
 

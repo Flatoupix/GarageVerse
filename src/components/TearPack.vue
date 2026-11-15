@@ -4,7 +4,7 @@ import { palettes, sparks } from '../game/fx'
 import { buzz } from '../game/store'
 import PackArt from './PackArt.vue'
 
-defineProps<{ booster: string; torn: boolean; reduced: boolean }>()
+const props = defineProps<{ booster: string; torn: boolean; reduced: boolean; legend?: boolean }>()
 const emit = defineEmits<{ tear: [] }>()
 
 const progress = ref(0)
@@ -43,7 +43,7 @@ function move(event: PointerEvent) {
   progress.value = Math.min(1, Math.max(0, horizontal / finger.distance))
   bend.value = progress.value * finger.direction * 5
   // Étincelles et petits crans sous le doigt pendant la déchirure.
-  if (progress.value > 0.04 && event.timeStamp - sparkAt > 45) { sparkAt = event.timeStamp; sparks({ x: event.clientX, y: event.clientY }, palettes.pink, 3, 0.45) }
+  if (progress.value > 0.04 && event.timeStamp - sparkAt > 45) { sparkAt = event.timeStamp; sparks({ x: event.clientX, y: event.clientY }, props.legend ? palettes.gold : palettes.pink, 3, 0.45) }
   if (Math.floor(progress.value * 8) !== notch) { notch = Math.floor(progress.value * 8); buzz(5) }
   if (progress.value >= 1 && vertical <= 86) {
     finger = undefined
@@ -62,9 +62,9 @@ function stop(event: PointerEvent) {
 </script>
 
 <template>
-  <div class="tear-pack" :class="{ 'is-dragging': dragging, 'is-torn': torn, 'motion-reduced': reduced, 'tear-from-right': fromRight }" :style="packStyle">
-    <div class="foil-body"><PackArt :booster="booster" /></div>
-    <div class="foil-strip"><PackArt :booster="booster" /></div>
+  <div class="tear-pack" :class="{ 'is-legend': legend, 'is-dragging': dragging, 'is-torn': torn, 'motion-reduced': reduced, 'tear-from-right': fromRight }" :style="packStyle">
+    <div class="foil-body"><PackArt :booster="booster" :legend="legend" /></div>
+    <div class="foil-strip"><PackArt :booster="booster" :legend="legend" /></div>
     <div
       v-if="!torn"
       class="tear-zone"

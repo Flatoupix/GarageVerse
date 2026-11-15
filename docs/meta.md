@@ -79,7 +79,7 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 | After Hours | 250 | Pondération ×4 sur Cinéma, Série, Tuning et Drift, dernière voiture au moins Rare |
 | Overdrive | 400 | Pondération ×3 sur hypercars, supercars et records |
 
-Chaque booster contient cinq cartes, dont au plus une pièce. Le jeu détermine le type puis la rareté de chaque carte et choisit des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé au moment de la déchirure. Un rechargement retrouve le même lot, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
+Chaque booster contient cinq cartes, dont au plus une pièce. Le jeu détermine le type puis la rareté de chaque carte et choisit des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé dès que le sachet est scellé, à l’achat ou avec un ticket. L’ouverture réutilise exactement ce tirage ; les anciens sachets sans tirage enregistré tirent encore à la déchirure. Une couverture légendaire (illustration dédiée, cadre et halo dorés, étincelles et ruban « Édition légendaire ») signale la présence d’au moins une Légendaire ; la boutique garde la couverture normale. Le sachet métallisé porte le logo néon et les couleurs de sa collection. Son reflet et son frémissement légendaire sont immobiles en mouvement réduit. Un rechargement retrouve le même lot sans retirage, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
 ## 7. Direction artistique et thèmes d’interface
 

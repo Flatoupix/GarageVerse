@@ -3,7 +3,7 @@ import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { edition } from '../game/art'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
-import { collect, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
+import { collect, sealedHasLegend, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
 import { buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
 import PullCard from '../components/PullCard.vue'
 import RevealStack from '../components/RevealStack.vue'
@@ -26,6 +26,8 @@ function showEdition() {
 const recapPulls = computed(() => opening.value?.pulls.map(pull => pull.kind === 'car'
   ? { ...pull, style: save.cars[pull.id]?.shown ?? pull.style } : pull) ?? [])
 const tearing = ref(false)
+const legendaryTear = ref(false)
+const legendary = computed(() => sealedHasLegend(save) || (tearing.value && legendaryTear.value))
 const stackEntering = ref(false)
 const flipping = ref(false)
 const cinematic = ref(false)
@@ -68,13 +70,14 @@ function focusRevealAction() {
 
 function openPack() {
   if (!save.sealed) return
+  legendaryTear.value = sealedHasLegend(save)
   tear(save, Math.random)
   persist()
-  sound('tear')
+  sound(legendaryTear.value ? 'legend' : 'tear')
   buzz(25)
   const pack = document.querySelector('.tear-pack')?.getBoundingClientRect()
-  flash(tone.rose, 0.35); shake(2)
-  if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, [...palettes.pink, ...palettes.cyan], 44, 1.1)
+  flash(legendaryTear.value ? tone.gold : tone.rose, 0.35); shake(2)
+  if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, legendaryTear.value ? palettes.gold : [...palettes.pink, ...palettes.cyan], 44, 1.1)
   for (const pull of save.opening!.pulls) if (pull.kind === 'car') {
     const look = edition(pull.id, pull.style)
     for (const url of [look.art, look.drift?.backdrop, look.drift?.car]) if (url) new Image().src = url
@@ -164,7 +167,7 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
     </div>
     <div v-if="!opening || tearing" class="sealed-stage" :class="`stage-${booster.id}`">
       <div class="pack-spotlight"></div>
-      <TearPack :key="booster.id" :booster="booster.id" :torn="tearing" :reduced="reduced" @tear="openPack" />
+      <TearPack :key="booster.id" :booster="booster.id" :legend="legendary" :torn="tearing" :reduced="reduced" @tear="openPack" />
       <div class="sealed-actions" :class="{ 'actions-hidden': tearing }">
         <p>Glisse le doigt le long du bord supérieur.</p>
         <button type="button" class="button primary" :disabled="tearing" @click="openPack">Ouvrir le sachet <span aria-hidden="true">↗</span></button>

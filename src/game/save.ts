@@ -33,6 +33,7 @@ export interface Save {
   tickets: Record<string, number>
   cars: Record<string, OwnedCar>
   parts: Record<string, number>
+  sealedPulls: Pull[] | null
   sealed: string | null
   opening: Opening | null
   dailyLineup?: string[]
@@ -48,7 +49,7 @@ export function newSave(): Save {
     nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
-    version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
+    version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon' },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
@@ -126,6 +127,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   }
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
+  if (save.sealed && Array.isArray(input.sealedPulls) && input.sealedPulls.length === 5 &&
+      input.sealedPulls.every(p => p && (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))) {
+    save.sealedPulls = input.sealedPulls
+  }
   const o = input.opening
   if (o && boosterById.has(o.booster) && Array.isArray(o.pulls) && o.pulls.length === 5 &&
       o.pulls.every(p => p.kind === 'car' ? vehicleById.has(p.id) : partById.has(p.id))) {
@@ -180,7 +185,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
 
 // ——— Boosters ———
 
-export function buyBooster(save: Save, id: string): string | undefined {
+export function buyBooster(save: Save, id: string, rng: Rng = Math.random): string | undefined {
   const booster = boosterById.get(id)
   if (!booster) return 'Booster inconnu'
   if (save.sealed || (save.opening && !save.opening.collected)) return 'Termine d’abord le booster en cours'
@@ -188,6 +193,7 @@ export function buyBooster(save: Save, id: string): string | undefined {
   else if (save.credits >= booster.price) save.credits -= booster.price
   else return `Il manque ${booster.price - save.credits} crédits`
   save.sealed = id
+  save.sealedPulls = drawPulls(save, booster, rng)
   save.opening = null
 }
 
@@ -236,10 +242,23 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
   })
 }
 
+export function sealedHasLegend(save: Save): boolean {
+  return Boolean(save.sealed && save.sealedPulls?.some(p =>
+    (p.kind === 'car' ? vehicleById.get(p.id) : partById.get(p.id))?.rarity === 'Légendaire'))
+}
+
 export function tear(save: Save, rng: Rng) {
   if (!save.sealed) return
   const booster = boosterById.get(save.sealed)!
-  save.opening = { booster: booster.id, pulls: drawPulls(save, booster, rng), revealed: 0, view: 'back', collected: false }
+  const pulls = save.sealedPulls ?? drawPulls(save, booster, rng)
+  const seen = new Set<string>()
+  for (const pull of pulls) {
+    const key = `${pull.kind}:${pull.id}`
+    pull.isNew = !owned(save, pull) && !seen.has(key)
+    seen.add(key)
+  }
+  save.sealedPulls = null
+  save.opening = { booster: booster.id, pulls, revealed: 0, view: 'back', collected: false }
   save.sealed = null
 }
 
