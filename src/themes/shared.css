@@ -510,3 +510,45 @@
 .car-sheet-main, .setting > span { min-width: 0; overflow-wrap: anywhere; }
 .car-sheet .button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .car-sale-actions { flex-wrap: wrap; }
+
+/* Couleurs de collection stables dans les huit interfaces. */
+.garage .finish-common, .garage .rarity-common { --rarity-color: #aabbd0; }
+.garage .finish-rare, .garage .rarity-rare { --rarity-color: #4aa8ff; }
+.garage .finish-epic, .garage .rarity-epic { --rarity-color: #ff5fd2; }
+.garage .finish-legendary, .garage .rarity-legendary { --rarity-color: #ffc64a; }
+.garage .car-card {
+  --glow: var(--rarity-color);
+  --frame: var(--rarity-color);
+  border-color: var(--rarity-color);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--rarity-color) 35%, transparent);
+}
+.garage .car-rarity, .garage .missing-card > span:first-child {
+  color: var(--rarity-color); background: #141827; padding: 2px 4px; border-radius: 3px;
+}
+.garage .missing-card { border-color: var(--rarity-color); box-shadow: inset 3px 0 var(--rarity-color); }
+.garage-rarity-chips button[class] {
+  color: var(--rarity-color); background: #141827; border: 2px solid var(--rarity-color);
+}
+.garage-rarity-chips button[aria-pressed="true"] {
+  color: #141827; background: var(--rarity-color, #e5ecf4); box-shadow: inset 0 0 0 2px #141827;
+}
+.garage .new-car-badge, .garage .copy-count, .garage .tile-tag.lineup-tag {
+  color: #fff; background: #141827; border: 1px solid #e5ecf4; text-shadow: none;
+}
+.garage-rarity-chips, .garage-sort-chips { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.garage-rarity-chips button, .garage-sort-chips button { min-height: 44px; max-width: 100%; }
+.garage-toolbar-main, .garage-search, .garage-selects { min-width: 0; }
+.garage-selects select { max-width: 100%; }
+.garage .garage-selects.cars-selects { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.garage .garage-selects.cars-selects > label:last-child { grid-column: auto; }
+
+/* Le zoom et le tilt portent chacun leur transformation. Aucun mouvement interpolé. */
+.car-sheet .zoom-frame { overflow: hidden; user-select: none; cursor: zoom-in; }
+.car-sheet .zoom-frame.is-zoomed { cursor: grab; }
+.car-sheet .zoom-frame.is-zoomed:active { cursor: grabbing; }
+.card-zoom-transform { transform-origin: center; transition: none; }
+.reduce-zoom-motion .card-zoom-transform { transition: none; animation: none; }
+.card-zoom-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 12px; }
+.card-zoom-controls button { min-height: 44px; max-width: 100%; white-space: normal; }
+.car-sheet-aside { min-width: 0; }
+.garage-search-group { display: grid; gap: 9px; min-width: 0; }

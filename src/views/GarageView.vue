@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { boosterById, families, parts, rarities, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
+import { boosterById, families, parts, rarities, rarityClass, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
 import { claimSeries, seriesComplete, seriesProgress, freeParts, prepOf } from '../game/save'
 import { act, ownedCount, reducedMotion, save } from '../game/store'
@@ -18,10 +18,20 @@ const garageFilters = [
 ] as const
 const query = ref('')
 const category = ref('')
-const rarityFilter = ref<'' | Rarity>('')
+const rarityFilter = computed<'' | Rarity>({
+  get: () => save.preferences.garageRarity ?? '',
+  set: value => { act(s => { s.preferences.garageRarity = value || undefined }) },
+})
 const family = ref('')
 const showMissing = ref(false)
-const sort = ref('number')
+const sort = computed({
+  get: () => save.preferences.garageSort ?? 'number',
+  set: (value: string) => { act(s => { s.preferences.garageSort = value }) },
+})
+const quickSorts = [
+  { id: 'number', label: 'Collection' }, { id: 'rarity', label: 'Rareté' },
+  { id: 'power', label: 'Puissance' }, { id: 'name', label: 'Nom' }, { id: 'copies', label: 'Doublons' },
+]
 const colOptions = [
   { value: 0, label: 'Auto' },
   { value: 1, label: '1' },
@@ -115,19 +125,23 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
         <button v-for="f in garageFilters" :key="f.id" type="button" :aria-pressed="garageFilter === f.id" @click="garageFilter = f.id">{{ f.label }}</button>
       </div>
       <div class="garage-toolbar-main">
-        <label class="garage-search">
-          <span class="visually-hidden">Rechercher {{ tab === 'cars' ? 'une voiture' : 'une pièce' }}</span>
-          <input v-model="query" type="search" :placeholder="tab === 'cars' ? 'Rechercher une voiture (nom, année…)' : 'Rechercher une pièce'" />
-        </label>
+        <div class="garage-search-group">
+          <label class="garage-search">
+            <span class="visually-hidden">Rechercher {{ tab === 'cars' ? 'une voiture' : 'une pièce' }}</span>
+            <input v-model="query" type="search" :placeholder="tab === 'cars' ? 'Rechercher une voiture (nom, année…)' : 'Rechercher une pièce'" />
+          </label>
+          <template v-if="tab === 'cars'">
+            <div class="chips garage-rarity-chips" role="group" aria-label="Filtrer par rareté">
+              <button type="button" :aria-pressed="rarityFilter === ''" @click="rarityFilter = ''">Toutes</button>
+              <button v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarityFilter === r" @click="rarityFilter = r">{{ r }}</button>
+            </div>
+            <div class="chips garage-sort-chips" role="group" aria-label="Trier les voitures">
+              <button v-for="option in quickSorts" :key="option.id" type="button" :aria-pressed="sort === option.id" @click="sort = option.id">{{ option.label }}</button>
+            </div>
+          </template>
+        </div>
         <div class="garage-selects" :class="{ 'cars-selects': tab === 'cars' }">
           <template v-if="tab === 'cars'">
-            <label>
-              <span>Rareté</span>
-              <select v-model="rarityFilter">
-                <option value="">Toutes</option>
-                <option v-for="r in rarities" :key="r" :value="r">{{ r }}</option>
-              </select>
-            </label>
             <label>
               <span>Catégorie</span>
               <select v-model="category">
@@ -136,7 +150,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
               </select>
             </label>
             <label>
-              <span>Tri</span>
+              <span>Autres tris</span>
               <select v-model="sort">
                 <option value="number">Collection (n°)</option>
                 <option value="rarity">Rareté</option>
@@ -160,6 +174,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
           </template>
         </div>
       </div>
+
       <div v-if="tab === 'cars'" class="garage-density-bar">
         <span class="garage-count">{{ carList.length }} voiture{{ carList.length > 1 ? 's' : '' }}</span>
         <div class="garage-density" role="group" aria-label="Nombre de voitures par ligne">
@@ -199,7 +214,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
             <button type="button" class="favorite-button" :aria-label="`Favori · ${v.name} ${v.version}`" :aria-pressed="save.cars[v.id].favorite"
               @click="act(s => { s.cars[v.id].favorite = !s.cars[v.id].favorite })"><span aria-hidden="true">{{ save.cars[v.id].favorite ? '★' : '☆' }}</span></button>
           </template>
-          <button v-else type="button" class="missing-card" @click="emit('inspect', 'car', v.id)">
+          <button v-else type="button" class="missing-card" :class="`rarity-${rarityClass[v.rarity]}`" @click="emit('inspect', 'car', v.id)">
             <span>{{ v.number }} / {{ vehicles.length }} · {{ v.rarity }}</span>
             <strong>{{ v.name }}</strong>
             <span>{{ v.craft ? 'Évolution à débloquer' : v.version }}</span>

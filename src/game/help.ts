@@ -56,13 +56,16 @@ export const glossary = {
   piece: { term: 'Pièce', text: 'Carte Mécanique à monter sur une voiture : elle ajoute un bonus, parfois seulement sur un secteur ou une météo.' },
   vente: { term: 'Vente', text: 'Vends une voiture entière depuis sa fiche : elle quitte ta collection et ses pièces redeviennent libres. Tu reçois deux fois son prix de recyclage selon sa rareté, plus 10 crédits par Stage, la moitié des crédits dépensés à l’atelier (arrondie à l’entier inférieur) et le prix de recyclage de chaque doublon. Retire-la d’abord de tes écuries, y compris celle du défi du jour. Tu ne peux pas la vendre pendant une course qui l’engage, ni garder moins de trois voitures.' },
   edition: { term: 'Édition', text: 'Style d’illustration d’une carte (Pixel 16 bits, Synthwave, Classic…). Depuis la fiche d’une voiture possédée, tu peux basculer librement entre tes éditions ou payer en crédits pour débloquer un autre style existant. Elles ne changent pas les statistiques.' },
+  cardZoom: { term: 'Zoom et déplacement', text: 'Dans la fiche, pince la carte, utilise la molette ou touche deux fois pour zoomer entre 1× et 3×. Glisse la carte agrandie pour explorer ses détails. Les boutons Zoomer et Réinitialiser le zoom sont aussi disponibles.' },
+  garageChips: { term: 'Puces de tri et de filtre', text: 'Touche une rareté pour filtrer tes voitures ou Toutes pour les retrouver. Les puces Collection, Rareté, Puissance, Nom et Doublons changent le tri. Autres tris garde les critères détaillés. Tes choix restent mémorisés.' },
+  rarityColors: { term: 'Couleurs de rareté', text: 'Le cadre et l’étiquette indiquent la rareté : gris bleu pour Courante, bleu pour Rare, rose pour Épique et or pour Légendaire. Tu peux aussi lire son nom sur chaque carte.' },
   ecurie: { term: 'Écurie', text: 'Les trois voitures que tu engages en course. À chaque secteur, tu choisis en secret laquelle court.' },
 } satisfies Record<string, HelpEntry>
 export type HelpKey = keyof typeof glossary
 
 // Sections du lexique ouvert par le bouton « ? ».
 export const glossarySections: { title: string; keys: HelpKey[] }[] = [
-  { title: 'Repères du garage', keys: ['nouveau', 'recycle', 'disabled', 'touchHelp'] },
+  { title: 'Repères du garage', keys: ['cardZoom', 'garageChips', 'rarityColors', 'nouveau', 'recycle', 'disabled', 'touchHelp'] },
   { title: 'Sauvegarde et connexion', keys: ['offline', 'exportSave', 'importSave'] },
   { title: 'Les quatre statistiques', keys: ['acc', 'man', 'vit', 'end'] },
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },

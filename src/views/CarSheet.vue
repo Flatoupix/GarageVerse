@@ -9,7 +9,8 @@ import { circuitScores, compatibility, engagements, partUnlockLevel, potential, 
 import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionPrice, freeParts, install, installCheck, prepOf,
   selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, upgrade, upgradeCheck, upgradeStat } from '../game/save'
 import { recycle, undoRecycle, type RecycleReceipt } from '../game/recycle'
-import { act, buzz, save } from '../game/store'
+import { boundZoom, toggleZoom } from '../game/zoom'
+import { act, buzz, reducedMotion, save } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
 
@@ -18,6 +19,71 @@ const emit = defineEmits<{ open: [id: string]; close: [] }>()
 const v = computed(() => vehicleById.get(props.id)!)
 const car = computed(() => save.cars[props.id])
 const panel = ref<'overview' | 'workshop' | 'card'>(props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview')
+const zoomFrame = ref<HTMLElement>()
+const zoom = ref({ scale: 1, x: 0, y: 0 })
+function setZoom(scale: number, x = zoom.value.x, y = zoom.value.y) {
+  const frame = zoomFrame.value
+  zoom.value = boundZoom(scale, x, y, frame?.clientWidth ?? 0, frame?.clientHeight ?? 0)
+}
+function resetZoom() { zoom.value = { scale: 1, x: 0, y: 0 } }
+function switchZoom() { setZoom(toggleZoom(zoom.value.scale)) }
+function wheelZoom(event: WheelEvent) {
+  event.preventDefault()
+  setZoom(zoom.value.scale * Math.exp(-event.deltaY * 0.002))
+}
+let drag: { x: number; y: number; id: number } | undefined
+function pointerDown(event: PointerEvent) {
+  if (event.pointerType !== 'mouse' || event.button !== 0 || zoom.value.scale === 1) return
+  drag = { x: event.clientX, y: event.clientY, id: event.pointerId }
+  ;(event.currentTarget as HTMLElement).setPointerCapture(event.pointerId)
+}
+function pointerMove(event: PointerEvent) {
+  if (!drag || drag.id !== event.pointerId) return
+  setZoom(zoom.value.scale, zoom.value.x + event.clientX - drag.x, zoom.value.y + event.clientY - drag.y)
+  drag.x = event.clientX
+  drag.y = event.clientY
+}
+let touch: { x: number; y: number; distance: number } | undefined
+let lastTap: { time: number; x: number; y: number } | undefined
+let tapStart: { time: number; x: number; y: number } | undefined
+function touchGeometry(touches: TouchList) {
+  const a = touches[0]!
+  const b = touches[1] ?? a
+  return { x: (a.clientX + b.clientX) / 2, y: (a.clientY + b.clientY) / 2,
+    distance: Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY) }
+}
+function touchStart(event: TouchEvent) {
+  touch = touchGeometry(event.touches)
+  tapStart = event.touches.length === 1 ? { time: Date.now(), x: touch.x, y: touch.y } : undefined
+  if (event.touches.length > 1) { event.preventDefault(); lastTap = undefined }
+}
+function touchMove(event: TouchEvent) {
+  const next = touchGeometry(event.touches)
+  if (touch && (event.touches.length > 1 || zoom.value.scale > 1)) {
+    event.preventDefault()
+    const scale = touch.distance && next.distance ? zoom.value.scale * next.distance / touch.distance : zoom.value.scale
+    setZoom(scale, zoom.value.x + next.x - touch.x, zoom.value.y + next.y - touch.y)
+  }
+  if (tapStart && Math.hypot(next.x - tapStart.x, next.y - tapStart.y) > 10) tapStart = undefined
+  touch = next
+}
+function touchEnd(event: TouchEvent) {
+  if (!event.touches.length && tapStart && Date.now() - tapStart.time < 300) {
+    if (lastTap && Date.now() - lastTap.time < 350 && Math.hypot(tapStart.x - lastTap.x, tapStart.y - lastTap.y) < 30) {
+      event.preventDefault()
+      switchZoom()
+      lastTap = undefined
+    } else lastTap = tapStart
+  }
+  tapStart = undefined
+  touch = event.touches.length ? touchGeometry(event.touches) : undefined
+}
+function clearZoom() { resetZoom(); drag = undefined; touch = undefined; tapStart = undefined; lastTap = undefined }
+watch(() => props.id, () => {
+  clearZoom()
+  panel.value = props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview'
+})
+onBeforeUnmount(clearZoom)
 const confirmingSale = ref(false)
 const confirmingRecycle = ref(false)
 const receipt = shallowRef<RecycleReceipt>()
@@ -178,8 +244,19 @@ function workshop(key?: StatKey) {
 
     <div class="car-sheet-layout" :class="{ 'has-car': Boolean(car) }">
       <aside class="car-sheet-aside" :class="{ 'mobile-hidden': car && panel !== 'card' }">
-        <div class="sheet-card">
-          <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
+        <div ref="zoomFrame" class="sheet-card zoom-frame" :class="{ 'is-zoomed': zoom.scale > 1, 'reduce-zoom-motion': reducedMotion }"
+          :style="{ touchAction: zoom.scale > 1 ? 'none' : 'pan-y' }"
+          @wheel="wheelZoom" @dblclick="switchZoom" @dragstart.prevent
+          @pointerdown="pointerDown" @pointermove="pointerMove" @pointerup="drag = undefined" @pointercancel="drag = undefined"
+          @touchstart="touchStart" @touchmove="touchMove" @touchend="touchEnd" @touchcancel="clearZoom">
+          <div class="card-zoom-transform" :style="{ transform: `translate(${zoom.x}px, ${zoom.y}px) scale(${zoom.scale})` }">
+            <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
+          </div>
+        </div>
+        <div class="card-zoom-controls">
+          <button type="button" class="button small ghost" @click="switchZoom">Zoomer</button>
+          <button type="button" class="button small ghost" :disabled="zoom.scale === 1" @click="clearZoom">Réinitialiser le zoom</button>
+          <span>{{ zoom.scale.toFixed(1).replace('.', ',') }}×</span>
         </div>
       </aside>
 
