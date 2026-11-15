@@ -34,6 +34,12 @@ export const themes: readonly ThemeInfo[] = [
     unlock: { goal: 'Posséder une Légendaire', progress: s => [Math.min(legends(s), 1), 1] } },
 ]
 export type Theme = ThemeId
+// Rangement de la liste des Réglages : les trois thèmes à gagner restent ensemble, grisés avec leur objectif tant qu'ils sont fermés.
+export const themeGroups: readonly { title: string; ids: readonly Theme[] }[] = [
+  { title: 'Ambiances', ids: ['neon', 'pixel', 'sobre'] },
+  { title: 'Univers', ids: ['sport', 'carnet'] },
+  { title: 'À gagner', ids: ['arcade', 'console', 'dos'] },
+]
 
 export function unlocked(save: Save, id: Theme) {
   const goal = themes.find(t => t.id === id)?.unlock

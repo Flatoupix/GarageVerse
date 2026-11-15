@@ -550,3 +550,8 @@
 .reduce-zoom-motion .card-zoom-transform { transition: none; animation: none; }
 .car-sheet-aside { min-width: 0; }
 .garage-search-group { display: grid; gap: 9px; min-width: 0; }
+
+/* Liste des thèmes rangée par groupes (Ambiances, Univers, À gagner). */
+.theme-group { display: grid; gap: 6px; min-width: 0; }
+.theme-group + .theme-group { margin-top: 12px; }
+.theme-group-title { margin: 2px 0 0; color: var(--muted); font: 700 .72rem var(--body); text-transform: uppercase; letter-spacing: .12em; }

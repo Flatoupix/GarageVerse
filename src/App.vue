@@ -4,7 +4,7 @@ import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockA
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
-import { applyTheme, theme, themes, unlocked, type Theme } from './game/theme'
+import { applyTheme, theme, themeGroups, themes, unlocked, type Theme } from './game/theme'
 import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
@@ -163,6 +163,8 @@ async function toggleFullscreen() {
   }
 }
 
+// Liste des Réglages rangée par groupes ; chaque thème n'apparaît qu'une fois.
+const themeLists = themeGroups.map(group => ({ title: group.title, items: themes.filter(t => group.ids.includes(t.id)) }))
 // Un thème débloqué en cours de partie est annoncé une fois.
 const openThemes = computed(() => themes.filter(t => unlocked(save, t.id)).map(t => t.id))
 watch(openThemes, (now, before) => {
@@ -313,14 +315,17 @@ function toggleSetting(key: Setting) {
       </section>
       <fieldset class="theme-picker">
         <legend>Thème</legend>
-        <label v-for="t in themes" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
-          <input type="radio" name="theme" :value="t.id" :checked="theme === t.id" :disabled="!unlocked(save, t.id)" @change="chooseTheme(t.id)" />
-          <span class="theme-swatch" aria-hidden="true"><i v-for="c in t.swatch" :key="c" :style="{ background: c }"></i></span>
-          <span class="theme-text"><b>{{ t.name }}</b>
-            <small v-if="unlocked(save, t.id) || !t.unlock">{{ t.hint }}</small>
-            <small v-else class="theme-goal">🔒 {{ t.unlock.goal }} · {{ t.unlock.progress(save).join(' / ') }}</small>
-          </span>
-        </label>
+        <div v-for="group in themeLists" :key="group.title" class="theme-group" role="group" :aria-label="group.title">
+          <h3 class="theme-group-title">{{ group.title }}</h3>
+          <label v-for="t in group.items" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
+            <input type="radio" name="theme" :value="t.id" :checked="theme === t.id" :disabled="!unlocked(save, t.id)" @change="chooseTheme(t.id)" />
+            <span class="theme-swatch" aria-hidden="true"><i v-for="c in t.swatch" :key="c" :style="{ background: c }"></i></span>
+            <span class="theme-text"><b>{{ t.name }}</b>
+              <small v-if="unlocked(save, t.id) || !t.unlock">{{ t.hint }}</small>
+              <small v-else class="theme-goal">🔒 {{ t.unlock.goal }} · {{ t.unlock.progress(save).join(' / ') }}</small>
+            </span>
+          </label>
+        </div>
       </fieldset>
       <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
       <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
