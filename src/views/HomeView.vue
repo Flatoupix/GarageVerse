@@ -28,7 +28,8 @@ const nextRival = computed(() => {
         <span class="eyebrow"><span></span> Collection 001 · Neon Drive</span>
         <h1 id="home-title" tabindex="-1">GARAGE<em>VERSE</em></h1>
         <p>Collectionne 100 voitures, prépare-les pièce par pièce et bats les rivaux de la nuit en cinq secteurs.</p>
-        <button v-if="save.duel" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la course <span aria-hidden="true">⟶</span></button>
+        <button v-if="save.night" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la Nuit sans fin · manche {{ save.night.round }}</button>
+        <button v-else-if="save.duel" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la course <span aria-hidden="true">⟶</span></button>
         <button v-else-if="pending" type="button" class="button primary" @click="emit('go', 'booster')">Reprendre le booster <span aria-hidden="true">↗</span></button>
         <button v-else-if="tickets.length" type="button" class="button primary" @click="emit('go', 'shop')">
           Ouvrir {{ boosterById.get(tickets[0][0])!.name }} <span aria-hidden="true">↗</span>

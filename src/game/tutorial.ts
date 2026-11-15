@@ -4,7 +4,8 @@ import { tutorialSteps, type Discovery } from './save'
 
 export const discovery = ref<Discovery | null>(null)
 export function tutorialAction(from: number, to: number) {
-  if (save.tutorial.status !== 'active' || save.tutorial.step < from || save.tutorial.step >= to) return
+  // La Nuit sans fin ne fait pas avancer le tutoriel de la première partie.
+  if (save.night || save.tutorial.status !== 'active' || save.tutorial.step < from || save.tutorial.step >= to) return
   save.tutorial.step = to
   persist()
 }

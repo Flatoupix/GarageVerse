@@ -1,4 +1,5 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
+import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
   series, boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
@@ -21,6 +22,9 @@ export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'sta
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
 export interface Save {
+  nightRecord: number
+  night: Night | null
+  nightLineup: string[]
   series: string[]
   tutorial: Tutorial
   version: 2
@@ -41,6 +45,7 @@ export interface Save {
 export function newSave(): Save {
   const start = progression.start
   const save: Save = {
+    nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
@@ -128,6 +133,20 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     save.opening = { booster: o.booster, pulls: o.pulls, revealed, collected: Boolean(o.collected),
       view: o.collected || (revealed === 5 && o.view === 'recap') ? 'recap' : revealed && (o.view === 'face' || revealed === 5) ? 'face' : 'back' }
   }
+  save.nightRecord = int(input.nightRecord, 0, 100000, 0)
+  save.nightLineup = (input.nightLineup ?? save.nightLineup).filter(id => Boolean(save.cars[id])).slice(0, 3)
+  // Écurie de la nuit incomplète (voitures vendues, ancienne sauvegarde) : on la complète avec les voitures les moins chères.
+  if (save.nightLineup.length < 3) {
+    const cheap = Object.keys(save.cars).filter(id => vehicleById.has(id) && !save.nightLineup.includes(id)).sort((x, y) => vehicleById.get(x)!.cost - vehicleById.get(y)!.cost)
+    for (const id of cheap) {
+      if (save.nightLineup.length === 3) break
+      if (lineupCost([...save.nightLineup, id]) <= NIGHT_CAP) save.nightLineup.push(id)
+    }
+  }
+  const night = input.night
+  if (night && typeof night.seed === 'string' && Array.isArray(night.lineup) && night.lineup.length === 3 && new Set(night.lineup).size === 3 && night.lineup.every(id => save.cars[id])) {
+    save.night = { seed: night.seed, round: int(night.round, 1, 100000, 1), wins: int(night.wins, 0, 100000, 0), gains: int(night.gains, 0, 1e7, 0), lineup: [...night.lineup], resting: night.resting === true, newRecord: night.newRecord === true }
+  }
   save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
   save.lineup = (input.lineup ?? []).filter(id => save.cars[id]).slice(0, 3)
   save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)).map(([id, record]) => [id, {
@@ -135,11 +154,12 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   }]))
   try {
     const duel = input.duel
-    if (duel && (rivalById.has(duel.rivalId) || /^daily:\d{4}-\d{2}-\d{2}$/.test(duel.rivalId)) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
+    if (duel && (rivalById.has(duel.rivalId) || (save.night && duel.rivalId === `night:${save.night.seed}:${save.night.round}`) || /^daily:\d{4}-\d{2}-\d{2}$/.test(duel.rivalId)) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
       for (const who of ['player', 'rival'] as const) duel[who].lineup = duel[who].lineup.map(r => racer(r.id, r.prep))
       save.duel = duel
     }
   } catch { save.duel = null }
+  if (save.night && !save.night.resting && !save.duel) createNightRound(save)
   const tutorial = input.tutorial
   if (tutorial) save.tutorial = {
     step: int(tutorial.step, 0, tutorialSteps - 1, 0),
@@ -369,6 +389,8 @@ export function sellPrice(save: Save, id: string): number {
 
 export function sellCheck(save: Save, id: string): string | undefined {
   if (!save.cars[id]) return 'Voiture absente du garage'
+  if (save.night?.lineup.includes(id)) return 'Cette voiture est engagée dans ta Nuit sans fin en cours'
+  if (save.nightLineup.includes(id)) return 'Retire cette voiture de l’écurie Nuit sans fin avant de la vendre'
   if (save.lineup.includes(id)) return 'Retire cette voiture de ton écurie avant de la vendre'
   if (save.dailyLineup?.includes(id)) return 'Retire cette voiture de l’écurie du défi du jour avant de la vendre'
   if (save.duel?.player.lineup.some(car => car.id === id)) return 'Cette voiture est engagée dans une course en cours'
@@ -614,6 +636,7 @@ export function lineupCheck(save: Save, ids: string[], rivalId: string): string 
 }
 
 export function startDuel(save: Save, rivalId: string, rng: Rng): string | undefined {
+  if (save.night || save.duel) return 'Termine d’abord la course en cours'
   const problem = lineupCheck(save, save.lineup, rivalId)
   if (problem) return problem
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
@@ -692,6 +715,7 @@ export function prepareDaily(save: Save) {
   save.dailyLineup = validDailyLineup(Object.keys(save.cars), todayChallenge(save).constraint) ?? []
 }
 export function startDaily(save: Save) {
+  if (save.night || save.duel) return 'Termine d’abord la course en cours'
   refreshDaily(save)
   const problem = dailyLineupCheck(save)
   if (problem) return problem
@@ -710,4 +734,44 @@ export function claimSeries(save: Save, id: string): string | undefined {
   save.series.push(id)
   save.credits += entry.reward.credits
   if (entry.reward.ticket) save.tickets[entry.reward.ticket] = (save.tickets[entry.reward.ticket] ?? 0) + 1
+}
+
+// ——— Nuit sans fin ———
+export function nightLineupCheck(save: Save) {
+  if (save.nightLineup.some(id => !save.cars[id])) return 'Voiture absente du garage'
+  return constraintCheck(save.nightLineup, { type: 'cost', cap: NIGHT_CAP })
+}
+export function createNightRound(save: Save) {
+  const night = save.night
+  if (!night || save.duel) return
+  const rival = nightRival(night.seed, night.round)
+  save.duel = createRace(rival.id, rival.circuit, night.lineup.map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(rival), dailyRng(`${night.seed}:${night.round}`))
+  night.resting = false
+}
+export function startNight(save: Save, seed = String(Date.now())) {
+  if (save.duel || save.night) return 'Termine d’abord la course en cours'
+  const problem = nightLineupCheck(save)
+  if (problem) return problem
+  save.night = { seed, round: 1, wins: 0, gains: 0, lineup: [...save.nightLineup], resting: false, newRecord: false }
+  createNightRound(save)
+}
+export function finishNight(save: Save) {
+  const night = save.night
+  if (!night) return
+  save.credits += night.gains
+  save.night = null
+  save.duel = null
+  return { wins: night.wins, credits: night.gains, newRecord: night.newRecord }
+}
+export function settleNight(save: Save) {
+  const night = save.night, duel = save.duel
+  if (!night || !duel?.winner) return
+  if (duel.winner !== 'player') return finishNight(save)
+  night.wins++
+  night.gains += nightReward(night.round)
+  night.newRecord = night.wins > save.nightRecord
+  save.nightRecord = Math.max(save.nightRecord, night.wins)
+  night.round++
+  night.resting = true
+  save.duel = null
 }

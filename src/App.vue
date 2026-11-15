@@ -19,7 +19,7 @@ import ShopView from './views/ShopView.vue'
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
 type Setting = 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
-const screen = ref<Screen>(save.duel ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
+const screen = ref<Screen>(save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
 const lexicon = ref<HTMLDialogElement>()
 const bubble = ref<HTMLElement>()

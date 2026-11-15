@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
+import { NIGHT_CAP, nightRival } from '../game/endless'
+import { createNightRound, finishNight, nightLineupCheck, settleNight, startNight } from '../game/save'
 import { constraintCap, constraintText } from '../game/daily'
 import { art, carSprite, edition, trackBackdrop } from '../game/art'
 import {
@@ -16,18 +18,22 @@ import CarCard from '../components/CarCard.vue'
 import SectorRun from '../components/SectorRun.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
-const chosen = ref<string | null>(save.duel?.rivalId ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
+const chosen = ref<string | null>(save.duel?.rivalId ?? (save.night ? 'night' : null) ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
 dailySelected.value = false
 const challenge = computed(() => todayChallenge(save, chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
+const isNight = computed(() => chosen.value?.startsWith('night'))
+const nightSeed = ref(String(Date.now()))
+const nightOpponent = computed(() => nightRival(save.night?.seed ?? nightSeed.value, save.night?.round ?? 1))
+const nightEnd = ref<{ wins: number; credits: number; newRecord: boolean } | null>(null)
 const isDaily = computed(() => chosen.value?.startsWith('daily:'))
-const rival = computed(() => isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
+const rival = computed(() => isNight.value ? nightOpponent.value : isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
 const league = computed(() => rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
 if (chosen.value?.startsWith('daily:') && !save.duel) act(prepareDaily)
-const lineup = computed({ get: () => isDaily.value ? save.dailyLineup ?? [] : save.lineup, set: ids => { if (isDaily.value) save.dailyLineup = ids; else save.lineup = ids } })
-const cap = computed(() => isDaily.value ? constraintCap(challenge.value.constraint) : league.value?.cap ?? 9)
+const lineup = computed({ get: () => isNight.value ? save.nightLineup : isDaily.value ? save.dailyLineup ?? [] : save.lineup, set: ids => { if (isNight.value) save.nightLineup = ids; else if (isDaily.value) save.dailyLineup = ids; else save.lineup = ids } })
+const cap = computed(() => isNight.value ? NIGHT_CAP : isDaily.value ? constraintCap(challenge.value.constraint) : league.value?.cap ?? 9)
 const cost = computed(() => lineupCost(lineup.value))
-const problem = computed(() => isDaily.value ? dailyLineupCheck(save) : rival.value ? lineupCheck(save, save.lineup, rival.value.id) : undefined)
+const problem = computed(() => isNight.value ? nightLineupCheck(save) : isDaily.value ? dailyLineupCheck(save) : rival.value ? lineupCheck(save, save.lineup, rival.value.id) : undefined)
 const priorities = computed(() => rival.value ? circuitPriorities(rival.value.circuit) : [])
 const conditions = computed(() => {
   const entries = Object.entries(rival.value?.circuit.conditions ?? {}) as [Condition, number][]
@@ -67,8 +73,8 @@ function toggle(id: string) {
   void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, lineup.value.indexOf(id) + 1)})`, 1.1))
 }
 function start() {
-  if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
-    tutorialAction(0, 4)
+  if (rival.value && act(s => isNight.value ? startNight(s, nightSeed.value) : isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
+    if (!isNight.value) tutorialAction(0, 4)
     picked.value = 0; nitro.value = false; stance.value = 'normal'; detail.value = null
     sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
   }
@@ -204,7 +210,7 @@ function engage() {
   if (!d || d.winner) return
   const round = playRound(d, { car: picked.value, nitro: nitro.value, stance: stance.value }, Math.random)
   // Engager après la bulle de la nitro mène à la lecture du résultat ; les bulles 5 à 8 restent à lire avant.
-  tutorialAction(8, 9)
+  if (!isNight.value) tutorialAction(8, 9)
   shown.value = round
   detail.value = null
   nitro.value = false
@@ -232,6 +238,16 @@ function proceed() {
     const d = duel.value
     recap.value = d.rounds.map(r => ({ sector: r.sector, condition: r.condition, winner: r.winner, scores: [r.player.score, r.rival.score],
       player: name(d.player.lineup[r.player.car].id), rival: name(d.rival.lineup[r.rival.car].id) }))
+    if (isNight.value) {
+      nightEnd.value = settleNight(save) ?? null
+      persist()
+      sound(save.night?.newRecord ? 'legend' : won ? 'win' : 'lose')
+      clear()
+      if (save.night?.newRecord) {
+        if (!reducedMotion.value) { confetti(palettes.gold, 100); flash(tone.gold, 0.3) }
+      }
+      return
+    }
     reward.value = settleDuel(save) ?? null
     tutorialAction(0, 10)
     persist()
@@ -250,7 +266,19 @@ function proceed() {
   }
 }
 const lastWinner = ref<'player' | 'other'>('other')
+function nextNightRound() {
+  act(createNightRound)
+  shown.value = null; picked.value = 0; nitro.value = false; detail.value = null
+}
+function cashNight(returnGarage = false) {
+  nightEnd.value = finishNight(save) ?? null
+  persist()
+  if (nightEnd.value?.credits && returnGarage) sound('coin')
+  if (returnGarage) { nightEnd.value = null; chosen.value = null; emit('go', 'garage') }
+}
 function abandon() {
+  if (isNight.value) { clear(); shown.value = null; cashNight(); sound('lose'); return }
+
   act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0, perfect: false }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, 'Course abandonnée')
 }
 // Libellés courts pour la piste, qui doit tenir sur une ligne de cinq cases à 320 px.
@@ -259,9 +287,28 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 </script>
 
 <template>
-  <main class="race" :class="{ 'daily-race': isDaily && !duel }">
+  <main class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
+    <section v-if="nightEnd" class="race-end night-panel">
+      <h1 tabindex="-1">Nuit terminée</h1>
+      <p><span v-help="'nightRound'">Manches gagnées</span> : {{ nightEnd.wins }}</p>
+      <p>{{ nightEnd.credits }} crédits versés</p>
+      <p v-if="nightEnd.newRecord" v-help="'nightRecord'" role="status">Nouveau record !</p>
+      <button type="button" class="button primary wide" @click="nightEnd = null; chosen = null; emit('go', 'garage')">Rentrer au garage</button>
+    </section>
+    <section v-else-if="isNight && save.night?.resting" class="race-end night-panel">
+      <h1 tabindex="-1"><span v-help="'nightRound'">Manche suivante</span> : {{ save.night.round }}</h1>
+      <p>{{ nightOpponent.circuit.name }}</p>
+      <p>{{ conditionLabels[Object.keys(nightOpponent.circuit.conditions)[0] as Condition] }}</p>
+      <p><span v-help="'nightGains'">Gains accumulés</span> : {{ save.night.gains }} crédits</p>
+      <p v-if="save.night.newRecord" v-help="'nightRecord'" role="status">Nouveau record !</p>
+      <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
+      <div class="recap-actions">
+        <button type="button" class="button primary" @click="nextNightRound">Manche suivante</button>
+        <button type="button" class="button quiet" @click="cashNight(true)">Rentrer au garage</button>
+      </div>
+    </section>
     <!-- Résultat final -->
-    <section v-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
+    <section v-else-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
       <span class="eyebrow">{{ rival?.circuit.name }}</span>
       <h1 tabindex="-1">{{ reward.perfect ? 'Victoire parfaite' : lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
       <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> Tu as gagné tous les secteurs !</p>
@@ -286,7 +333,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="race-head">
         <img v-if="art.rival(rival.id)" :src="art.rival(rival.id)" alt="" class="rival-face" />
         <span v-else class="rival-face" aria-hidden="true">{{ rival.name[0] }}</span>
-        <div><span class="eyebrow">{{ rival.circuit.name }}</span><h1 tabindex="-1">{{ rival.name }}</h1></div>
+        <div><span class="eyebrow">{{ rival.circuit.name }}</span><h1 tabindex="-1"><span v-if="isNight" v-help="'nightRound'">{{ rival.name }}</span><template v-else>{{ rival.name }}</template></h1></div>
         <div class="scoreboard" aria-label="Score"><b :key="`p${points.player}`">{{ points.player }}</b><span>—</span><b :key="`r${points.rival}`">{{ points.rival }}</b></div>
       </div>
       <ol class="track">
@@ -324,7 +371,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p v-if="index === 0" class="engage-goal">Le plus gros score gagne le secteur. Remporte le plus de secteurs sur {{ duel.sectors.length }}. Ici, c’est {{ statArticle[sectorStat[duel.sectors[index]]] }}<b>{{ statLabels[sectorStat[duel.sectors[index]]] }}</b> qui compte : choisis ta voiture.</p>
         <p class="engage-brief">Secteur {{ index + 1 }}/{{ duel.sectors.length }} · <b v-help="duel.sectors[index]">{{ sectorLabels[duel.sectors[index]] }}</b> (<span v-help="sectorStat[duel.sectors[index]]">{{ statLabels[sectorStat[duel.sectors[index]]] }}</span>)
           · <span v-help="duel.conditions[index]">{{ conditionIcons[duel.conditions[index]] }} {{ conditionLabels[duel.conditions[index]] }}</span></p>
-        <h2 class="engage-rival-title">Voitures de {{ rival.name }} <small>Nitro ×{{ duel.rival.nitro }}</small></h2>
+        <h2 class="engage-rival-title">{{ isNight ? `Voitures adverses · ${rival.name}` : `Voitures de ${rival.name}` }} <small>Nitro ×{{ duel.rival.nitro }}</small></h2>
         <div class="engage-cars engage-rivals" aria-label="Écurie adverse">
           <button v-for="(r, car) in duel.rival.lineup" :key="car" type="button"
             class="engage-car engage-rival" :class="{ hot: overheated(duel.rival, car) }"
@@ -382,17 +429,25 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     <template v-else-if="rival && league">
       <div class="page-heading">
         <button type="button" class="back-link" @click="chosen = null"><span aria-hidden="true">←</span> Rivaux</button>
-        <span class="eyebrow">{{ league.name }} · plafond {{ cap }}</span>
-        <h1 tabindex="-1">{{ rival.circuit.name }}</h1>
-        <p>Contre {{ rival.name }}</p>
+        <span v-if="!isNight" class="eyebrow">{{ league.name }} · plafond {{ cap }}</span>
+        <h1 v-if="isNight" tabindex="-1"><span v-help="'endless'">Nuit sans fin</span></h1>
+        <h1 v-else tabindex="-1">{{ rival.circuit.name }}</h1>
+        <p v-if="!isNight">Contre {{ rival.name }}</p>
+        <template v-else>
+          <p>Enchaîne les courses contre des adversaires de plus en plus forts : ta nuit s’arrête à la première défaite.</p>
+          <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
+          <p v-help="'nightCap'">Plafond de coût : {{ NIGHT_CAP }}</p>
+        </template>
       </div>
       <section v-if="isDaily" class="daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
       <div class="cap-meter" :class="{ over: cost > cap }">
-        <span v-help="'plafond'">Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
+        <span v-help="isNight ? 'nightCap' : 'plafond'">Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
       </div>
-      <button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem" aria-hidden="true">⟶</span></button>
+      <button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isNight ? 'Commencer la nuit' : isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem && !isNight" aria-hidden="true">⟶</span></button>
+      <p v-if="isNight && problem" class="hint" role="status">{{ problem }}</p>
       <section class="race-briefing" aria-labelledby="briefing-title">
-        <div class="section-row"><h2 id="briefing-title">Préparer ta course</h2><span v-if="!isDaily && rival.league === 'neon'" class="race-intro-badge">Accessible d’origine</span></div>
+        <div class="section-row"><h2 id="briefing-title">Préparer ta course</h2><span v-if="!isNight && !isDaily && rival.league === 'neon'" class="race-intro-badge">Accessible d’origine</span></div>
+        <p v-if="isNight">{{ rival.circuit.name }}</p>
         <ol class="race-sector-order" aria-label="Ordre des secteurs">
           <li v-for="(sector, i) in rival.circuit.sectors" :key="i"><span aria-hidden="true">{{ sectorIcons[sector] }}</span><span v-help="sector">{{ sectorLabels[sector] }}</span></li>
         </ol>
@@ -444,6 +499,13 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
             <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small></span>
             <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ ${save.record[r.id].wins}` : 'Défier' }}</span>
+          </button>
+        </li>
+        <li class="deal" :style="{ '--i': 0 }">
+          <button type="button" class="rival-row night-entry" @click="nightSeed = String(Date.now()); chosen = 'night'">
+            <span class="rival-initial" aria-hidden="true">∞</span>
+            <span class="rival-info"><b>Nuit sans fin</b><small>Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</small></span>
+            <span class="rival-status">Commencer</span>
           </button>
         </li>
       </ul>

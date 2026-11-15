@@ -40,7 +40,7 @@ function refresh() {
     if (document.querySelector('.stance-toggle.set')) discover('stance')
     if (document.querySelector('.daily-race')) discover('daily')
   }
-  const found = entry.value ? [...document.querySelectorAll<HTMLElement>(entry.value[0])].find(el => el.getClientRects().length && (!modal || modal.contains(el))) ?? null : null
+  const found = entry.value && !document.querySelector('.night-race') ? [...document.querySelectorAll<HTMLElement>(entry.value[0])].find(el => el.getClientRects().length && (!modal || modal.contains(el))) ?? null : null
   if (found === target) return
   target?.removeAttribute('data-mechanic')
   host.value?.remove()

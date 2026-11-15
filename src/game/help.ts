@@ -1,10 +1,16 @@
 import { ref, type Directive } from 'vue'
 import { OVERHEAT } from './rules'
+import { NIGHT_CAP, nightReward } from './endless'
 
 // Aide rapide : chaque terme du jeu a une explication courte, ouverte d'un toucher ou depuis le lexique.
 export interface HelpEntry { term: string; text: string }
 
 export const glossary = {
+  endless: { term: 'Nuit sans fin', text: 'Enchaîne les courses contre trois voitures générées, de plus en plus fortes. La première défaite ou un abandon termine ta nuit. Tu peux aussi rentrer entre deux manches.' },
+  nightRound: { term: 'Manche', text: 'Une course en cinq secteurs de ta Nuit sans fin. Gagne-la pour accéder à la suivante ; une égalité termine aussi la nuit.' },
+  nightRecord: { term: 'Record de nuit', text: 'Ton meilleur nombre de manches gagnées pendant une seule nuit. Il est conservé dès que tu le bats.' },
+  nightCap: { term: 'Plafond de la nuit', text: `Tu engages trois voitures différentes pour un coût total maximal de ${NIGHT_CAP}, sans limite de Stage ni de pièces.` },
+  nightGains: { term: 'Gains accumulés', text: `Les crédits gagnés pendant ta nuit : ${nightReward(1)} pour la première manche, puis ${nightReward(2) - nightReward(1)} de plus par manche. Tu les encaisses une seule fois en rentrant, à la défaite ou à l’abandon.` },
   series: { term: 'Série', text: 'Réunis toutes les voitures d’un ensemble nommé pour compléter ta série. Une voiture peut compter dans plusieurs séries.' },
   seriesReward: { term: 'Récompense de série', text: 'Récupère les crédits et parfois un ticket de booster au garage quand tu possèdes toutes les voitures de la série. Tu ne peux recevoir cette récompense qu’une fois, même après une vente.' },
   acc: { term: 'Accélération', text: 'Compte sur les secteurs de Départ : plus elle est haute, plus ta voiture marque de points au démarrage.' },
@@ -52,6 +58,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },
   { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'consigne', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
+  { title: 'Nuit sans fin', keys: ['endless', 'nightRound', 'nightRecord', 'nightCap', 'nightGains'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
   { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition', 'vente', 'series', 'seriesReward'] },
 ]

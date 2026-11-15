@@ -423,3 +423,14 @@
 .run-lane.rival .run-car.sprite img { filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--pink) 75%, transparent)); }
 .run-car.sprite.nitro img, .run-car.sprite.perfect img { filter: drop-shadow(0 0 6px var(--sun)); }
 .run-car.sprite .run-flame { top: 52%; height: 30%; right: 96%; }
+
+/* Nuit sans fin : mêmes règles de disposition pour les huit thèmes. */
+.night-entry { grid-template-columns: 40px minmax(0, 1fr); }
+.night-entry .rival-initial { width: 40px; height: 40px; }
+.night-entry .rival-info { min-width: 0; overflow-wrap: anywhere; }
+.night-entry .rival-status { grid-column: 2; justify-self: start; color: var(--muted); }
+.night-panel { min-width: 0; overflow-wrap: anywhere; }
+.night-panel .recap-actions { flex-wrap: wrap; }
+.night-panel .recap-actions .button { flex: 1 1 180px; white-space: normal; min-width: 0; }
+.night-race .page-heading, .night-race .race-head > div { min-width: 0; }
+.night-race h1, .night-race h2, .night-race .rival-preview { overflow-wrap: anywhere; }
