@@ -4,7 +4,7 @@ import type { Play, Round } from '../game/rules'
 
 // Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
-const props = defineProps<{ round: Round; step: number; running: boolean; arts: { player?: string; rival?: string }; backdrop?: string }>()
+const props = defineProps<{ round: Round; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
 const emit = defineEmits<{ skip: [] }>()
 const sides = ['player', 'rival'] as const
 
@@ -25,7 +25,7 @@ const lanes = computed(() => sides.map(who => {
   const line = props.running && props.step <= play.lines.length ? play.lines[index] : undefined
   const position = Math.max(0, Math.min(1, prefix(play, props.step) / scale.value))
   return {
-    who, position, art: props.arts[who],
+    who, position, art: props.sprites?.[who] ?? props.arts[who], sprite: Boolean(props.sprites?.[who]),
     kind: line ? kindOf(play, index) : '',
     tag: line ? `${line.label} ${index && line.value > 0 ? '+' : ''}${line.value}` : '',
     nitro: play.nitro && play.lines.findIndex(l => l.label === 'Nitro') < props.step,
@@ -38,7 +38,7 @@ const lanes = computed(() => sides.map(who => {
     <div v-if="backdrop" class="run-scenery" :style="{ backgroundImage: `url(${backdrop})` }"></div>
     <div v-for="lane in lanes" :key="lane.who" class="run-lane" :class="lane.who">
       <div class="run-mover" :class="{ far: lane.position > .5 }" :style="{ '--p': lane.position }">
-        <div :key="`${step}${lane.kind}`" class="run-car" :class="lane.kind">
+        <div :key="`${step}${lane.kind}`" class="run-car" :class="[lane.kind, { sprite: lane.sprite }]">
           <i v-if="lane.nitro" class="run-flame"></i>
           <img v-if="lane.art" :src="lane.art" alt="" draggable="false" />
         </div>

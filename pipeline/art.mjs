@@ -99,6 +99,12 @@ function jobs() {
       `Pixel art side-scrolling game background, wide landscape 2:1, seen from the side like a 1990s racing game level. ` +
       `Scene: ${setting}. A flat road runs horizontally across the bottom fifth of the image, from edge to edge. ` +
       `No vehicles, no people in the foreground. ${PIXEL_STYLE} ${NO_TEXT}` })
+    // Voitures détourées de la mini-course, pour toutes les cartes qui n'ont pas de scène animée : `--set anim --kind sprites`.
+    if (kinds.includes('sprites')) for (const v of roster.vehicles.filter(v => !v.anim)) list.push({ kind: 'anim', id: `${v.id}-car`, size: [128, 64], post: 'key', prompt:
+      `Pixel art game sprite, wide 2:1. Subject: ${v.culture ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
+        : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`}, seen in exact side profile facing right, as if driving to the right. ` +
+      `The whole car fills about 92% of the image width, wheels touching the bottom edge. ` +
+      `Background: one flat uniform pure magenta color #FF00FF everywhere around the car, no shadow, no ground, no scenery, no magenta on the car itself. ${PIXEL_STYLE} ${NO_TEXT}` })
     for (const v of roster.vehicles.filter(v => v.anim)) {
       const subject = v.culture
         ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`

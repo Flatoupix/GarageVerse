@@ -112,3 +112,11 @@
 .stance-toggle button.attaque[aria-checked="true"] { border-color: var(--sun); box-shadow: inset 0 0 0 1px var(--sun); background: color-mix(in srgb, var(--sun) 18%, var(--night)); }
 /* Une bulle du mécano dans l'écran de choix : la barre reprend sa place dans la page pour ne pas la masquer. */
 .engage:has(.mechanic-guide) .engage-actions { position: static; }
+
+/* ——— Voiture détourée dans la mini-course : plus de cadre, la voiture roule sur sa voie ——— */
+.run-car.sprite { border: 0; border-radius: 0; background: none; box-shadow: none; }
+.run-car.sprite img { object-fit: contain; object-position: center bottom; image-rendering: pixelated; border-radius: 0;
+  filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--cyan) 75%, transparent)); }
+.run-lane.rival .run-car.sprite img { filter: drop-shadow(0 3px 0 color-mix(in srgb, var(--pink) 75%, transparent)); }
+.run-car.sprite.nitro img, .run-car.sprite.perfect img { filter: drop-shadow(0 0 6px var(--sun)); }
+.run-car.sprite .run-flame { top: 52%; height: 30%; right: 96%; }
