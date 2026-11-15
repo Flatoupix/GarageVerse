@@ -131,4 +131,1101 @@
     {"id": "muscle", "name": "Muscle cars", "description": "Fais rugir les grands moteurs américains.", "vehicles": ["firebird", "gt500", "demon", "c4zr1"], "reward": {"credits": 400}},
     {"id": "japon", "name": "Japonaises de légende", "description": "Rassemble tes icônes des routes japonaises.", "vehicles": ["supra", "r34", "nsx", "s15", "ek9", "mx5na"], "reward": {"credits": 500, "ticket": "night"}}
   ]
+,
+  "specials": [
+  {
+    "id": "depart",
+    "name": "Départ",
+    "sector": "depart",
+    "tiers": [
+      {
+        "id": "special-depart-1",
+        "name": "Départ · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Départ — Bronze",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "stratos",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "acc": 0
+            }
+          },
+          {
+            "id": "saxo",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "acc": 0
+            }
+          },
+          {
+            "id": "1000tipla",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "acc": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-2",
+        "name": "Départ · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Départ — Argent",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "elise",
+            "stage": 1,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 1
+            }
+          },
+          {
+            "id": "tesla",
+            "stage": 1,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 1
+            }
+          },
+          {
+            "id": "1000tipla",
+            "stage": 1,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-3",
+        "name": "Départ · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Départ — Or",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "tesla",
+            "stage": 2,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 2,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          },
+          {
+            "id": "1000tipla",
+            "stage": 2,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-4",
+        "name": "Départ · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Départ — Platine",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "tesla",
+            "stage": 3,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          },
+          {
+            "id": "1000tipla",
+            "stage": 3,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-5",
+        "name": "Départ · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Départ — Légende",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "venom",
+            "stage": 3,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          },
+          {
+            "id": "1000tipla",
+            "stage": 3,
+            "parts": [
+              "boite-courte"
+            ],
+            "upgrades": {
+              "acc": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "virage",
+    "name": "Virages",
+    "sector": "virage",
+    "tiers": [
+      {
+        "id": "special-virage-1",
+        "name": "Virages · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Virages — Bronze",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "elise",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "man": 0
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "man": 0
+            }
+          },
+          {
+            "id": "twizy",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "man": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-2",
+        "name": "Virages · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Virages — Argent",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "s15",
+            "stage": 1,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 1
+            }
+          },
+          {
+            "id": "elise",
+            "stage": 1,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 1
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 1,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-3",
+        "name": "Virages · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Virages — Or",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "elise",
+            "stage": 2,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 2,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          },
+          {
+            "id": "countach",
+            "stage": 2,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-4",
+        "name": "Virages · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Virages — Platine",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "s15",
+            "stage": 3,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          },
+          {
+            "id": "cgt",
+            "stage": 3,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-5",
+        "name": "Virages · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Virages — Légende",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "brian",
+            "stage": 3,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          },
+          {
+            "id": "cgt",
+            "stage": 3,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "susp-filetes"
+            ],
+            "upgrades": {
+              "man": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ligne",
+    "name": "Ligne droite",
+    "sector": "ligne",
+    "tiers": [
+      {
+        "id": "special-ligne-1",
+        "name": "Ligne droite · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Ligne droite — Bronze",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "abarth",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "vit": 0
+            }
+          },
+          {
+            "id": "rx7",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "vit": 0
+            }
+          },
+          {
+            "id": "testarossa",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "vit": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-2",
+        "name": "Ligne droite · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Ligne droite — Argent",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "rx7",
+            "stage": 1,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 1
+            }
+          },
+          {
+            "id": "charger",
+            "stage": 1,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 1
+            }
+          },
+          {
+            "id": "testarossa",
+            "stage": 1,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-3",
+        "name": "Ligne droite · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Ligne droite — Or",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "zonda",
+            "stage": 2,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          },
+          {
+            "id": "rx7",
+            "stage": 2,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          },
+          {
+            "id": "testarossa",
+            "stage": 2,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-4",
+        "name": "Ligne droite · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Ligne droite — Platine",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          },
+          {
+            "id": "countach",
+            "stage": 3,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          },
+          {
+            "id": "testarossa",
+            "stage": 3,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-5",
+        "name": "Ligne droite · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Ligne droite — Légende",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "venom",
+            "stage": 3,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          },
+          {
+            "id": "testarossa",
+            "stage": 3,
+            "parts": [
+              "admission"
+            ],
+            "upgrades": {
+              "vit": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "endurance",
+    "name": "Endurance",
+    "sector": "endurance",
+    "tiers": [
+      {
+        "id": "special-endurance-1",
+        "name": "Endurance · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Endurance — Bronze",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "r4l",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "end": 0
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "end": 0
+            }
+          },
+          {
+            "id": "jpjeep",
+            "stage": 0,
+            "parts": [],
+            "upgrades": {
+              "end": 0
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-2",
+        "name": "Endurance · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Endurance — Argent",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "defender",
+            "stage": 1,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 1
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 1,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 1
+            }
+          },
+          {
+            "id": "jpjeep",
+            "stage": 1,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-3",
+        "name": "Endurance · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Endurance — Or",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "domcharger",
+            "stage": 2,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 2
+            }
+          },
+          {
+            "id": "jpjeep",
+            "stage": 2,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 2
+            }
+          },
+          {
+            "id": "interceptor",
+            "stage": 2,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-4",
+        "name": "Endurance · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Endurance — Platine",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "veyron",
+            "stage": 3,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 2
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 3,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 2
+            }
+          },
+          {
+            "id": "jpjeep",
+            "stage": 3,
+            "parts": [
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "end": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-5",
+        "name": "Endurance · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Endurance — Légende",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "veyron",
+            "stage": 3,
+            "parts": [
+              "freins-endurance",
+              "susp-rallye"
+            ],
+            "upgrades": {
+              "end": 2,
+              "acc": 1
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 3,
+            "parts": [
+              "freins-endurance",
+              "susp-rallye"
+            ],
+            "upgrades": {
+              "end": 2,
+              "acc": 1
+            }
+          },
+          {
+            "id": "jpjeep",
+            "stage": 3,
+            "parts": [
+              "freins-endurance",
+              "susp-rallye"
+            ],
+            "upgrades": {
+              "end": 2,
+              "acc": 1
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
 }

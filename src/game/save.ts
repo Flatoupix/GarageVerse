@@ -2,7 +2,7 @@
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
-  series, boosterById, defaultStyle, leagueById, partById, parts, PIXEL, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
+  specials, specialByRivalId, rivals, series, boosterById, defaultStyle, leagueById, partById, parts, PIXEL, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
 import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, lineupCost, partUnlockLevel, potential, prepUsed, racer,
@@ -668,11 +668,13 @@ export function applyAutoUpgrade(save: Save, id: string, circuit?: Rival['circui
 
 export function lineupCheck(save: Save, ids: string[], rivalId: string): string | undefined {
   const rival = rivalById.get(rivalId), league = rival && leagueById.get(rival.league)
-  if (!rival || !league) return 'Rival inconnu'
+  if (!rival || (!league && !specialByRivalId.has(rivalId))) return 'Rival inconnu'
+  if (specialByRivalId.has(rivalId) && !unlockedSpecials(save).includes(rivalId)) return 'Palier verrouillé'
+  const cap = rival.cap ?? league!.cap
   if (ids.length !== 3 || new Set(ids).size !== 3) return 'Choisis trois voitures différentes'
   if (ids.some(id => !save.cars[id])) return 'Voiture absente du garage'
   const cost = lineupCost(ids)
-  if (cost > league.cap) return `Écurie trop chère : ${cost} / ${league.cap}`
+  if (cost > cap) return `Écurie trop chère : ${cost} / ${cap}`
 }
 
 export function startDuel(save: Save, rivalId: string, rng: Rng): string | undefined {
@@ -703,6 +705,20 @@ export function settleDuel(save: Save): Reward | undefined {
   }
   const rival = rivalById.get(duel.rivalId)!, league = leagueById.get(rival.league)!
   const record = save.record[rival.id] ??= { wins: 0, losses: 0, perfect: false }
+  if (specialByRivalId.has(rival.id)) {
+    const first = record.wins === 0
+    const reward: Reward = { credits: 0 }
+    if (duel.winner === 'player') {
+      reward.credits = first ? rival.reward! * (perfect ? 2 : 1) : rival.replay!
+      if (perfect) { record.perfect = true; if (first) reward.perfect = true }
+      if (first && rival.completionTicket) reward.ticket = rival.completionTicket
+      record.wins++
+    } else if (duel.winner === 'rival') record.losses++
+    save.credits += reward.credits
+    if (reward.ticket) save.tickets[reward.ticket] = (save.tickets[reward.ticket] ?? 0) + 1
+    save.duel = null
+    return reward
+  }
   let reward: Reward
   if (duel.winner === 'player') {
     reward = { credits: league.reward }
@@ -725,8 +741,11 @@ export function settleDuel(save: Save): Reward | undefined {
   return reward
 }
 
+export const specialsOpen = (save: Save) => rivals.filter(r => r.league === 'neon').every(r => (save.record[r.id]?.wins ?? 0) > 0)
+export const unlockedSpecials = (save: Save) => specialsOpen(save) ? specials.flatMap(s => s.tiers.filter((r, i) => i === 0 || (save.record[s.tiers[i - 1].id]?.wins ?? 0) > 0).map(r => r.id)) : []
+
 export const unlockedRivals = (save: Save) => {
-  const order = [...rivalById.values()]
+  const order = rivals
   return order.filter((r, i) => i === 0 || (save.record[order[i - 1].id]?.wins ?? 0) > 0).map(r => r.id)
 }
 

@@ -36,6 +36,7 @@ export interface Rival {
   circuit: { name: string; sectors: Sector[]; conditions: Partial<Record<Condition, number>> }
   lineup: LineupEntry[]
   // Pilotage simple : ce rival n'utilise ni l'attaque ni la gestion.
+  cap?: number; reward?: number; replay?: number; completionTicket?: string
   simple?: boolean
 }
 export interface CollectionSeries { id: string; name: string; description: string; vehicles: string[]; reward: { credits: number; ticket?: string } }
@@ -58,7 +59,10 @@ export const progression = garageJson.progression as {
 export const vehicleById = new Map(vehicles.map(v => [v.id, v]))
 export const partById = new Map(parts.map(p => [p.id, p]))
 export const boosterById = new Map(boosters.map(b => [b.id, b]))
-export const rivalById = new Map(rivals.map(r => [r.id, r]))
+export interface Special { id: string; name: string; sector: Sector; tiers: Rival[] }
+export const specials = garageJson.specials as Special[]
+export const specialByRivalId = new Map(specials.flatMap(s => s.tiers.map(r => [r.id, s] as const)))
+export const rivalById = new Map([...rivals, ...specials.flatMap(s => s.tiers)].map(r => [r.id, r]))
 export const leagueById = new Map(leagues.map(l => [l.id, l]))
 
 export const rarities: Rarity[] = ['Courante', 'Rare', 'Épique', 'Légendaire']

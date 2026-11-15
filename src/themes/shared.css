@@ -555,3 +555,10 @@
 .theme-group { display: grid; gap: 6px; min-width: 0; }
 .theme-group + .theme-group { margin-top: 12px; }
 .theme-group-title { margin: 2px 0 0; color: var(--muted); font: 700 .72rem var(--body); text-transform: uppercase; letter-spacing: .12em; }
+
+/* Spéciales : cartes fluides, y compris sur les petits écrans. */
+.special-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: 1rem; }
+.special-card { min-width: 0; padding: 1rem; border: 1px solid currentColor; border-radius: 8px; }
+.special-card h3 { overflow-wrap: anywhere; }
+.special-card ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; }
+.special-card .button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }

@@ -6,6 +6,9 @@ import { NIGHT_CAP, nightReward } from './endless'
 export interface HelpEntry { term: string; text: string }
 
 export const glossary = {
+  special: { term: 'Spéciale', text: 'Affronte cinq adversaires sur un circuit dominé par un même type de secteur. Adapte tes voitures à chaque spéciale.' },
+  specialTier: { term: 'Palier', text: 'Bronze, Argent, Or, Platine puis Légende : gagne pour ouvrir le suivant. Une victoire rejouée rapporte 20 % des crédits, sans doublement parfait. Ta première victoire en Légende donne aussi un ticket Overdrive.' },
+  specialUnlock: { term: 'Déblocage des spéciales', text: 'Bats chaque rival de la Ligue Néon au moins une fois pour ouvrir les quatre spéciales.' },
   nouveau: { term: 'Nouveau', text: 'Une voiture reçue porte ce badge jusqu’à ta première ouverture de sa fiche.' },
   recycle: { term: 'Annulation du recyclage', text: 'Confirme le recyclage d’un doublon, puis tu peux l’annuler pendant six secondes. Changer de voiture ou recharger ferme cette possibilité.' },
   disabled: { term: 'Bouton grisé', text: 'Cette action est indisponible. Lis la condition indiquée pour savoir ce qu’il te manque.' },
@@ -71,6 +74,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },
   { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'consigne', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
+  { title: 'Spéciales', keys: ['special', 'specialTier', 'specialUnlock'] },
   { title: 'Nuit sans fin', keys: ['endless', 'nightRound', 'nightRecord', 'nightCap', 'nightGains'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
   { title: 'Boosters', keys: ['legendaryPack'] },

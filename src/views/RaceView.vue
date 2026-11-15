@@ -5,13 +5,13 @@ import { createNightRound, finishNight, nightLineupCheck, settleNight, startNigh
 import { constraintCap, constraintText } from '../game/daily'
 import { art, carSprite, edition, trackBackdrop } from '../game/art'
 import {
-  boosterById, conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
+  specials, specialByRivalId, boosterById, conditionIcons, conditionLabels, leagueById, rivalById, rivals, sectorIcons, sectorLabels, sectorStat, statLabels, vehicleById, vehicles,
   type Condition, type Rival, type Sector, type StatKey,
 } from '../game/data'
 import { helpForLine, vHelp } from '../game/help'
 import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
 import { canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Round, type Stance } from '../game/rules'
-import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
+import { specialsOpen, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
@@ -27,7 +27,8 @@ const nightOpponent = computed(() => nightRival(save.night?.seed ?? nightSeed.va
 const nightEnd = ref<{ wins: number; credits: number; newRecord: boolean } | null>(null)
 const isDaily = computed(() => chosen.value?.startsWith('daily:'))
 const rival = computed(() => isNight.value ? nightOpponent.value : isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
-const league = computed(() => rival.value ? leagueById.get(rival.value.league) : undefined)
+const special = computed(() => chosen.value ? specialByRivalId.get(chosen.value) : undefined)
+const league = computed(() => rival.value?.cap !== undefined ? { name: special.value?.name, cap: rival.value.cap } : rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
 if (chosen.value?.startsWith('daily:') && !save.duel) act(prepareDaily)
 const lineup = computed({ get: () => isNight.value ? save.nightLineup : isDaily.value ? save.dailyLineup ?? [] : save.lineup, set: ids => { if (isNight.value) save.nightLineup = ids; else if (isDaily.value) save.dailyLineup = ids; else save.lineup = ids } })
@@ -433,6 +434,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <h1 v-if="isNight" tabindex="-1"><span v-help="'endless'">Nuit sans fin</span></h1>
         <h1 v-else tabindex="-1">{{ rival.circuit.name }}</h1>
         <p v-if="!isNight">Contre {{ rival.name }}</p>
+        <p v-if="special">{{ save.record[rival.id]?.wins ? rival.replay : rival.reward }} crédits · {{ save.record[rival.id]?.wins ? 'rejeu' : 'première victoire (doublés si parfaite)' }}<template v-if="rival.completionTicket"> · un ticket à la première victoire</template></p>
         <template v-else>
           <p>Enchaîne les courses contre des adversaires de plus en plus forts : ta nuit s’arrête à la première défaite.</p>
           <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
@@ -509,6 +511,18 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           </button>
         </li>
       </ul>
+      <section class="specials">
+        <h2 v-help="'special'">Spéciales</h2>
+        <p v-if="!specialsOpen(save)" v-help="'specialUnlock'">Bats toute la Ligue Néon pour les ouvrir.</p>
+        <div class="special-grid">
+          <article v-for="s in specials" :key="s.id" class="special-card">
+            <h3>{{ s.name }} · {{ s.tiers.filter(r => save.record[r.id]?.wins).length }}/{{ s.tiers.length }}</h3>
+            <ul>
+              <li v-for="r in s.tiers" :key="r.id"><button type="button" class="button quiet" :disabled="!unlockedSpecials(save).includes(r.id)" @click="chosen = r.id"><span v-help="'specialTier'">{{ r.title }}</span><span v-if="save.record[r.id]?.wins"> ✓</span></button></li>
+            </ul>
+          </article>
+        </div>
+      </section>
     </template>
   </main>
 </template>
