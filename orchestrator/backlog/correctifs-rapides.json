@@ -1,0 +1,37 @@
+{
+  "id": "correctifs-rapides",
+  "title": "Éviter les fausses manips : recyclage confirmé et annulable, boutons grisés, badge Nouveau, aide à la demande",
+  "brief": "Le joueur appuie par erreur sur des boutons actifs en apparence et a recyclé un doublon sans confirmation. Corriger quatre irritants dans la fiche voiture (src/views/CarSheet.vue), le garage et les réglages. Les boutons de Stage ont déjà `:disabled` dans le code mais utilisent la classe `button ghost`, qui n’a aucun style grisé : seul `.button.primary:disabled` en a un (src/themes/neon.css ligne ~75, src/themes/base.css ligne ~78, où il ne change même pas l’apparence). Ajouter un style `:disabled` lisible et commun à tous les boutons (`.button`, `.ghost`, `.quiet`, `.small`) dans src/themes/shared.css, sans casser les huit thèmes (src/game/theme.ts : Synthwave, Rétro pixel, Sobre, Sport auto, Carnet, Borne d’arcade, Console 16 bits, Atelier PC). Les règles propres à un thème vont dans src/themes/base.css et src/themes/neon.css (deux feuilles complètes, à garder synchronisées). Réutiliser les effets de src/game/fx.ts et les sons de src/feedback.ts. Les sauvegardes existantes doivent rester valides (src/game/save.ts, readSave) : tout nouveau champ de préférence est optionnel avec une valeur par défaut. Ajouter au lexique de src/game/help.ts (glossary et glossarySections) une entrée pour chaque nouvelle notion. Tout le texte est en français, tutoiement. Ne pas modifier l’équilibrage des voitures ni les rivaux.",
+  "requirements": [
+    "« Recycler un doublon » (CarSheet.vue, deux emplacements) ne s’exécute plus directement : un premier appui demande « Recycler ce doublon pour +N crédits ? » avec les boutons Confirmer et Annuler, sur le modèle de la vente (`confirmingSale`). Après confirmation, un bandeau « Doublon recyclé · +N crédits » avec un bouton « Annuler » reste visible environ 6 secondes et restitue exactement l’exemplaire et les crédits si on l’utilise. Au rechargement ou en changeant de voiture, l’annulation n’est plus proposée. La logique d’annulation est testée (fichier .check.cjs sur le modèle de src/game/booster.check.cjs).",
+    "Tout bouton désactivé est visiblement grisé dans les huit thèmes, y compris `ghost`, `quiet` et `small`, et reste lisible (contraste du texte conservé). Le bouton « Passer au Stage » grisé affiche juste dessous la raison exacte et chiffrée quand il manque des crédits ou des doublons, par exemple « Il te manque 30 crédits » ou « Il te manque 1 doublon » (compléter `stageProblem` si besoin). Le même principe s’applique à « Installer » et aux évolutions quand une condition précise manque.",
+    "Une voiture fraîchement tirée et jamais ouverte porte un badge « Nouveau » dans le garage (et dans la liste des séries si elle y apparaît). Le badge disparaît à la première ouverture de sa fiche, et l’état est sauvegardé (champ optionnel de la sauvegarde, par exemple `seenCars`). Les voitures déjà possédées au chargement d’une ancienne sauvegarde ne sont pas marquées Nouveau.",
+    "Un réglage « Aide en touchant les mots soulignés » est ajouté aux Réglages (préférence optionnelle dans `Preferences` de src/game/save.ts). Il est désactivé par défaut pour une partie neuve et conserve le comportement actuel (activé) pour les sauvegardes existantes ; documenter ce choix. Quand il est désactivé, les éléments `v-help` (directive dans src/game/help.ts) ne sont plus touchables ni soulignés en pointillé ; le bouton « ? » et le lexique restent disponibles. Le tutoriel (src/game/tutorial.ts) mentionne ce réglage une fois.",
+    "Aucune erreur dans la console. Les écrans Garage, Fiche voiture et Réglages restent lisibles et sans débordement horizontal à 320 et 390 px, dans au moins Synthwave et Rétro pixel. docs/meta.md décrit la confirmation et l’annulation du recyclage, les boutons grisés, le badge Nouveau et le réglage d’aide."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Garage"
+    },
+    {
+      "capture": "garage"
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Aide en touchant les mots soulignés"
+    },
+    {
+      "capture": "reglages"
+    }
+  ]
+}

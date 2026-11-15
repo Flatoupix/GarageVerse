@@ -35,6 +35,12 @@ const pixel = set === 'pixel' || anim
 const NO_TEXT = 'Strictly no text, no letters, no numbers, no logos, no brand badges, no readable license plates, no watermark, no card frame or border.'
 const STYLE = 'Style: premium 1980s synthwave / outrun poster illustration, clean crisp shapes, glossy reflections and chrome highlights, ' +
   'palette of hot magenta, electric cyan, deep violet and sunset orange, subtle film grain. Cohesive with a retro trading-card game.'
+// Légendaires (cartes avec un champ anim) : image fixe spectaculaire, volontairement stylisée et irréaliste.
+const LEGEND_STYLE = 'Style: over-the-top stylized synthwave outrun poster, a bold graphic illustration and NOT photorealistic: ' +
+  'cel-shaded comic and anime key-art look, thick clean outlines, flat saturated colour planes with glowing neon rim light, ' +
+  'exaggerated low-angle perspective and a dramatic oversized car, a gigantic striped sun, chrome reflections, laser-grid ground, ' +
+  'light streaks and energy bursts, a heroic poster composition. Palette of hot magenta, electric cyan, deep violet and sunset orange. ' +
+  'Looks like a legendary trading-card hero shot, instantly striking, never like a photograph or a 3D render.'
 // Styles alternatifs : une carte peut sortir du synthwave (champ look du roster) avec son propre décor (champ setting).
 // Décor de course par condition de piste (clés de `conditions` dans garage.json).
 // Couvertures de boosters : une scène par collection, et une variante légendaire annoncée quand le sachet en contient une.
@@ -98,7 +104,7 @@ function jobs() {
     list.push({ kind: 'cars', id: v.id, size: [640, 960], prompt:
       `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
       `centered in the lower two thirds, slight low camera angle, wheels on the ground unless it flies. ` +
-      (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${STYLE} ${NO_TEXT}`) })
+      (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${v.anim ? LEGEND_STYLE : STYLE} ${NO_TEXT}`) })
   }
   if (anim) {
     // Décors de course, un par condition : `--set anim --kind tracks`.

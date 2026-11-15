@@ -77,7 +77,8 @@ export type EditionStyle = 'Pixel 16 bits' | 'Synthwave' | 'Classic' | 'Pixel Ar
 export const PIXEL: EditionStyle = 'Pixel 16 bits'
 const formerStyles: Record<string, EditionStyle> = { clio: 'Photo', twingo: 'Gouache', panda: 'Rallye argentique' }
 export const formerStyle = (id: string): EditionStyle => formerStyles[id] ?? 'Synthwave'
-export const defaultStyle = (_id: string): EditionStyle => PIXEL
+// Les légendaires (cartes avec un champ anim) montrent par défaut leur grande image fixe, pas le pixel art.
+export const defaultStyle = (id: string): EditionStyle => vehicleById.get(id)?.anim ? formerStyle(id) : PIXEL
 // Nom affiché du style d'illustration d'une carte qui n'a qu'une édition (champ look du roster).
 const lookLabels: Record<string, string> = {
   poster: 'Affiche', rally: 'Rallye argentique', comic: 'Bande dessinée', anime: 'Anime', magazine: 'Magazine',

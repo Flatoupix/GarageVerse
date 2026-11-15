@@ -2,7 +2,7 @@
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
-  series, boosterById, defaultStyle, leagueById, partById, parts, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
+  series, boosterById, defaultStyle, leagueById, partById, parts, PIXEL, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
 import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, lineupCost, partUnlockLevel, potential, prepUsed, racer,
@@ -128,8 +128,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     }
     const levels = { acc: 0, vit: 0, man: 0, end: 0 }
     for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
+    // Une légendaire restée sur l'ancien défaut pixel prend sa nouvelle image fixe ; un autre choix du joueur est gardé.
+    const shownBefore = editions.includes(car.shown) ? car.shown : editions[0]
     save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
-      shown: editions.includes(car.shown) ? car.shown : editions[0],
+      shown: primary !== PIXEL && usesOldDefault && shownBefore === PIXEL ? primary : shownBefore,
       favorite: car.favorite === true, upgrades: levels }
   }
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
