@@ -548,7 +548,5 @@
 .car-sheet .zoom-frame.is-zoomed:active { cursor: grabbing; }
 .card-zoom-transform { transform-origin: center; transition: none; }
 .reduce-zoom-motion .card-zoom-transform { transition: none; animation: none; }
-.card-zoom-controls { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 6px; margin-top: 12px; }
-.card-zoom-controls button { min-height: 44px; max-width: 100%; white-space: normal; }
 .car-sheet-aside { min-width: 0; }
 .garage-search-group { display: grid; gap: 9px; min-width: 0; }

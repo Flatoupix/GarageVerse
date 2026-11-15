@@ -253,11 +253,6 @@ function workshop(key?: StatKey) {
             <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
           </div>
         </div>
-        <div class="card-zoom-controls">
-          <button type="button" class="button small ghost" @click="switchZoom">Zoomer</button>
-          <button type="button" class="button small ghost" :disabled="zoom.scale === 1" @click="clearZoom">Réinitialiser le zoom</button>
-          <span>{{ zoom.scale.toFixed(1).replace('.', ',') }}×</span>
-        </div>
       </aside>
 
       <div class="car-sheet-main">
