@@ -12,10 +12,14 @@ async function remember(request) {
 }
 
 // Prépare aussi les ressources de la première page, chargée avant la prise de contrôle.
+// Fichiers versionnés par Vite (nom avec empreinte) : jamais modifiés, donc inutile de les retélécharger.
+const hashed = url => /[-.][\w-]{8,}\.[\w]+$/.test(new URL(url).pathname)
+
 async function prepare(url, seen = new Set()) {
   if (seen.has(url) || new URL(url).origin !== ROOT.origin) return
   seen.add(url)
-  const response = await remember(url)
+  const cached = hashed(url) ? await (await caches.open(CACHE_NAME)).match(url) : undefined
+  const response = cached ? cached.clone() : await remember(url)
   const type = response.headers.get('content-type') || ''
   if (!/html|javascript|css/.test(type)) return
   const source = await response.text()
@@ -46,11 +50,12 @@ self.addEventListener('fetch', event => {
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME)
     if (request.mode === 'navigate') {
-      try { return await remember(request) } catch {
+      // En ligne, chaque ouverture complète le cache avec les fichiers de la version publiée.
+      try { const page = await remember(request); event.waitUntil(prepare(PAGE).catch(() => {})); return page } catch {
         return await cache.match(request) || await cache.match(PAGE) || Response.error()
       }
     }
-    if (/[-.][\w-]{8,}\.[\w]+$/.test(url.pathname)) {
+    if (hashed(request.url)) {
       const cached = await cache.match(request)
       if (cached) return cached
     }
