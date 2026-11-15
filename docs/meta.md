@@ -231,6 +231,10 @@ Taux de victoire du joueur mesurés par `node pipeline/balance.mjs` (prêt / sp�
 
 Les écarts de quelques points d’une case à l’autre (Départ Bronze et Argent, Virages Platine) sont dans le bruit de la simulation. Pour régler à nouveau : modifier les écuries, relancer `node pipeline/balance.mjs`, et garder la puissance croissante.
 
+## Choix des voitures d’une course
+
+Dans « Ton garage » (écran de préparation d’une course, d’un défi du jour ou de la Nuit sans fin), chaque voiture montre son **coût d’écurie** dans un rond dont la couleur dépend du chiffre : 1 vert menthe, 2 cyan, 3 bleu, 4 violet, 5 rose, 6 rose vif, 7 orange, 8 or, 9 rouge, 10 jaune (`.pick-cost[data-cost]` dans `src/themes/shared.css`). Une voiture qui dépasserait le **plafond de coût** si on l’ajoutait à l’écurie est **grisée et désactivée**, avec « Dépasse le plafond de N » ; les voitures déjà choisies restent actives pour pouvoir être retirées. Une écurie déjà pleine (trois voitures) garde le message « Retire d’abord une voiture ».
+
 ## Version et notes de version
 
 Le jeu suit SemVer. La version vient de `package.json` (champ `version`), injectée au build par `vite.config.ts` (constante `__APP_VERSION__`, déclarée dans `src/version.d.ts`) et affichée en bas des Réglages (« GarageVerse v0.3.0 »). Les notes de version sont dans `CHANGELOG.md`, à la racine, en français. À chaque publication : changer la version, ajouter une entrée en tête du fichier, puis publier. Tant que la version commence par 0 : le mineur apporte des nouveautés, le correctif ne corrige que des défauts.

@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier.
 
+## [0.3.1] — 2026-11-15
+
+### Modifié
+
+- **Choix des voitures d’une course.** Le coût de chaque voiture a sa propre couleur, du vert (1) au jaune (10). Une voiture qui ferait dépasser le plafond de coût de l’écurie est grisée et indique de combien elle le dépasse.
+
 ## [0.3.0] — 2026-11-15
 
 ### Ajouté

@@ -65,10 +65,13 @@ const pointsText = (value: number) => value.toFixed(1).replace('.', ',')
 // Score attendu avec sa part de hasard : « 7-9 », ou une seule valeur quand la forme du jour ne change rien.
 const rangeText = (value: number) => { const [low, high] = luckRange(value); return low === high ? String(value) : `${low}-${high}` }
 
+// De combien une voiture dépasserait le plafond de coût si on l'ajoutait à l'écurie (0 si elle est déjà choisie ou si elle tient).
+const overBy = (id: string, price: number) => lineup.value.includes(id) ? 0 : Math.max(0, cost.value + price - cap.value)
 function toggle(id: string) {
   act(() => {
     if (lineup.value.includes(id)) lineup.value = lineup.value.filter(x => x !== id)
     else if (lineup.value.length >= 3) return 'Retire d’abord une voiture'
+    else if (overBy(id, vehicleById.get(id)?.cost ?? 0) > 0) return 'Cette voiture dépasse le plafond de coût'
     else lineup.value = [...lineup.value, id]
   })
   void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, lineup.value.indexOf(id) + 1)})`, 1.1))
@@ -478,9 +481,9 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <h2 class="list-title">Ton garage</h2>
       <ul class="pick-list">
         <li v-for="{ v, car, scores } in garageCars" :key="v.id">
-          <button type="button" :aria-pressed="lineup.includes(v.id)" @click="toggle(v.id)">
-            <span class="pick-cost">{{ v.cost }}</span>
-            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" aria-label="Favori">★ </span>{{ v.name }}</b><small>{{ v.version }} · {{ car.uses }} secteurs avant surchauffe</small></span>
+          <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="overBy(v.id, v.cost) > 0" @click="toggle(v.id)">
+            <span class="pick-cost" :data-cost="v.cost">{{ v.cost }}</span>
+            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" aria-label="Favori">★ </span>{{ v.name }}</b><small>{{ overBy(v.id, v.cost) > 0 ? `Dépasse le plafond de ${overBy(v.id, v.cost)}` : `${v.version} · ${car.uses} secteurs avant surchauffe` }}</small></span>
             <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ s.label }} {{ pointsText(s.average) }} pts</span></span>
           </button>
         </li>
