@@ -163,6 +163,8 @@ async function toggleFullscreen() {
   }
 }
 
+// Version du jeu (semver), lue dans package.json au build et affichée en bas des Réglages.
+const appVersion = __APP_VERSION__
 // Liste des Réglages rangée par groupes ; chaque thème n'apparaît qu'une fois.
 const themeLists = themeGroups.map(group => ({ title: group.title, items: themes.filter(t => group.ids.includes(t.id)) }))
 // Un thème débloqué en cours de partie est annoncé une fois.
@@ -335,6 +337,7 @@ function toggleSetting(key: Setting) {
       <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
       <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
       <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
+      <p class="setting-note app-version">GarageVerse v{{ appVersion }}</p>
     </dialog>
 
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? 'Fiche voiture' : 'Fiche pièce'" @close="inspected = null">

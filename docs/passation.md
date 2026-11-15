@@ -51,6 +51,8 @@ Dernier commit publié : `d5dd0be` sur `prototype/mobile-tcg`. Fait et publié :
 - **Choix du thème au premier lancement** pour un joueur neuf.
 - **Nettoyage du CSS de scène** devenu inutilisé.
 
+**Version** : le jeu est en 0.3.0 (`package.json`, affichée dans les Réglages). À chaque publication, changer la version et ajouter une entrée en tête de `CHANGELOG.md` (voir `docs/meta.md`, « Version et notes de version »).
+
 **Règle apprise** : ne jamais ajouter de bouton ou de contrôle que le joueur n’a pas demandé (voir les boutons de zoom retirés).
 
 ## À faire (reliquat de la session précédente)
