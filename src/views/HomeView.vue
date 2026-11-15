@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import GameLogo from '../components/GameLogo.vue'
 import { discover } from '../game/tutorial'
 import { art } from '../game/art'
 import { constraintText } from '../game/daily'
@@ -26,7 +27,7 @@ const nextRival = computed(() => {
       <div class="hero-sun" aria-hidden="true"></div>
       <div class="hero-content">
         <span class="eyebrow"><span></span> Collection 001 · Neon Drive</span>
-        <h1 id="home-title" tabindex="-1">GARAGE<em>VERSE</em></h1>
+        <h1 id="home-title" tabindex="-1"><GameLogo /></h1>
         <p>Collectionne 100 voitures, prépare-les pièce par pièce et bats les rivaux de la nuit en cinq secteurs.</p>
         <button v-if="save.night" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la Nuit sans fin · manche {{ save.night.round }}</button>
         <button v-else-if="save.duel" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la course <span aria-hidden="true">⟶</span></button>

@@ -37,6 +37,13 @@ const STYLE = 'Style: premium 1980s synthwave / outrun poster illustration, clea
   'palette of hot magenta, electric cyan, deep violet and sunset orange, subtle film grain. Cohesive with a retro trading-card game.'
 // Styles alternatifs : une carte peut sortir du synthwave (champ look du roster) avec son propre décor (champ setting).
 // Décor de course par condition de piste (clés de `conditions` dans garage.json).
+// Couvertures de boosters : une scène par collection, et une variante légendaire annoncée quand le sachet en contient une.
+const PACK_LOOKS = {
+  neon: 'a low red Japanese sports coupe in three-quarter front view sweeping through a coastal highway curve at golden-hour sunset, motion streaks on the road, palm trees and the sea behind, warm magenta and orange sky',
+  night: 'a dark tuned street car drifting sideways through a rain-soaked city intersection at night, tyre smoke lit by violet and blue neon reflections, wet asphalt mirror, glowing headlights',
+  overdrive: 'a silver hypercar launching straight at the viewer on a high-banked speed bowl, heat haze, sparks under the splitter, a packed grandstand and stadium lights, red and gold palette',
+}
+const PACK_LEGEND = ', reimagined as the rare LEGENDARY edition: the same car now gleaming in gold and chrome, a radiant golden aura and light rays bursting from behind it, floating sparkles and embers, an ornate gold filigree frame around the whole artwork, treasure-like, awe-inspiring'
 const TRACKS = {
   sec: 'a sunny country road with plane trees, vineyards, a stone village on a hill and a clear blue sky',
   pluie: 'a country road under heavy dark rain clouds, falling rain, wet shiny asphalt with puddles, dripping trees and misty hills',
@@ -131,14 +138,10 @@ function jobs() {
       `Pixel art character portrait for a racing rival, square 1:1, head and shoulders, like a 1990s arcade character select screen. ` +
       `Subject: ${r.art.replace(/,?\s*synthwave portrait/i, '')}. Fictional person. Background: a simple garage or pit lane backdrop. ${PIXEL_STYLE} ${NO_TEXT}` })
     if (kinds.includes('packs')) {
-      const looks = {
-        neon: 'a red sports car crossing a finish line under a chequered flag, cheering crowd, blue sky',
-        night: 'a city at night in the rain with lit windows and a car drifting around a corner, headlight beams',
-        overdrive: 'a gold-trimmed supercar blasting off a speedway straight with heat haze and a grandstand',
-      }
-      for (const b of garage.boosters) list.push({ kind: 'packs', id: b.id, size: [150, 225], prompt:
-        `Pixel art printed on the front of a trading-card booster pack, portrait 2:3, fills the whole image edge to edge. ` +
-        `Design: ${looks[b.id]}. Leave the top 25% calmer for a title overlay. ${PIXEL_STYLE} ${NO_TEXT}` })
+      for (const b of garage.boosters) for (const legend of [false, true]) list.push({ kind: 'packs', id: legend ? `${b.id}-legend` : b.id, size: [150, 225], prompt:
+        `Pixel art key art printed on the front of a premium trading-card booster pack, portrait 2:3, fills the whole image edge to edge. ` +
+        `Design: ${PACK_LOOKS[b.id]}${legend ? PACK_LEGEND : ''}. Bold dynamic composition with strong perspective and depth, the car large and close in the lower half. ` +
+        `Leave the top 25% calmer and darker for a title overlay. ${PIXEL_STYLE} ${NO_TEXT}` })
     }
     if (kinds.includes('ui')) list.push({ kind: 'ui', id: 'hero', size: [225, 338], prompt:
       `Pixel art title screen background for a retro mobile racing game, portrait 2:3. A cosy roadside garage at dusk with its door open, ` +
@@ -152,14 +155,10 @@ function jobs() {
     `Character portrait for a racing rival, square 1:1, head and shoulders. Subject: ${r.art}. Fictional person. ` +
     `Background: neon city bokeh and a synthwave sunset. ${STYLE} ${NO_TEXT}` })
   if (kinds.includes('packs')) {
-    const looks = {
-      neon: 'magenta and cyan sunset over a laser grid with a chrome sports car silhouette',
-      night: 'midnight blue city skyline, rain and violet neon, a drifting car silhouette with light trails',
-      overdrive: 'molten gold and hot pink speed lines, an hypercar silhouette breaking through a chrome grid',
-    }
-    for (const b of garage.boosters) list.push({ kind: 'packs', id: b.id, size: [600, 900], prompt:
-      `Front artwork printed on a foil trading-card booster pack, portrait 2:3, fills the whole image edge to edge. ` +
-      `Design: ${looks[b.id]}. Leave the top 25% calmer for a title overlay. ${STYLE} ${NO_TEXT}` })
+    for (const b of garage.boosters) for (const legend of [false, true]) list.push({ kind: 'packs', id: legend ? `${b.id}-legend` : b.id, size: [600, 900], prompt:
+      `Front key art printed on a premium foil trading-card booster pack, portrait 2:3, fills the whole image edge to edge. ` +
+      `Design: ${PACK_LOOKS[b.id]}${legend ? PACK_LEGEND : ''}. Bold dynamic composition with strong perspective and depth, the car large and close in the lower half. ` +
+      `Leave the top 25% calmer and darker for a title overlay. ${STYLE} ${NO_TEXT}` })
   }
   if (kinds.includes('ui')) list.push({ kind: 'ui', id: 'hero', size: [900, 1350], prompt:
     `Mobile game home screen background, portrait 2:3. An open neon-lit garage at night facing a synthwave sunset, ` +
@@ -205,7 +204,8 @@ async function findAgyImage(name, since) {
   const found = []
   for (const conversation of await readdir(agyBrain).catch(() => [])) {
     for (const file of await readdir(join(agyBrain, conversation)).catch(() => [])) {
-      if (!file.startsWith(name) || !/\.(png|jpe?g|webp)$/i.test(file)) continue
+      // Nom exact suivi d'un éventuel suffixe numérique : « gv_packs_neon » ne doit pas capter « gv_packs_neon_legend ».
+      if (!new RegExp(`^${name}(_\\d+)?\\.(png|jpe?g|webp)$`, 'i').test(file)) continue
       const path = join(agyBrain, conversation, file)
       if ((await stat(path)).mtimeMs >= since) found.push(path)
     }
@@ -215,7 +215,8 @@ async function findAgyImage(name, since) {
 
 async function withAgy(job, prompt, started) {
   const name = `gv_${job.kind}_${job.id.replace(/\W/g, '_')}`
-  const ratio = job.size[0] === job.size[1] ? 'square 1:1' : 'portrait 2:3'
+  const [rw, rh] = job.size
+  const ratio = rw === rh ? 'square 1:1' : rw > rh ? `landscape ${rw / rh}:1` : 'portrait 2:3'
   const instruction = `Use your image generation tool to create exactly one ${ratio} image named "${name}" from the brief below. ` +
     `Wait until the image is generated, do not create or edit any other file, then reply only with "done".\n\nBrief: ${prompt}`
   const result = await run('agy', ['--sandbox', '--mode', 'accept-edits', '--disable-slash-commands', '--print-timeout', '420s', '-p', instruction],
@@ -244,18 +245,18 @@ async function convert(file, job) {
   await mkdir(dirname(out), { recursive: true })
   if (pixel) {
     // Réduction par moyenne de zone vers la grille de pixels cible, puis WebP sans perte : l'interface agrandit sans lissage.
-    const small = file.replace(/\.png$/, '-small.png')
+    const small = file.replace(/\.\w+$/, '-small.png')
     const scaled = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vf',
       `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},scale=${tw}:${th}:flags=area`, small])
     if (scaled.code !== 0) return scaled
     if (job.post === 'strip') {
-      const strip = file.replace(/\.png$/, '-strip.png')
+      const strip = file.replace(/\.\w+$/, '-strip.png')
       const made = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', small, '-filter_complex', '[0]split[a][b];[b]hflip[c];[a][c]hstack', strip])
       if (made.code !== 0) return made
       return run('cwebp', ['-quiet', '-lossless', strip, '-o', out])
     }
     if (job.post === 'key') {
-      const keyed = file.replace(/\.png$/, '-key.png')
+      const keyed = file.replace(/\.\w+$/, '-key.png')
       const made = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vf',
         `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},colorkey=0xFF00FF:0.32:0.08,scale=${tw}:${th}:flags=area,format=rgba,` +
         "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(gte(alpha(X,Y),120),255,0)'", keyed])

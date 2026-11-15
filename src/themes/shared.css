@@ -439,3 +439,26 @@
 .save-transfer { display: grid; gap: 10px; min-width: 0; margin-block: 16px; color: var(--text); }
 .save-transfer p { margin: 0; overflow-wrap: anywhere; line-height: 1.5; }
 .save-transfer .button { width: 100%; min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+
+/* ——— Logo du jeu : tubes néon rose et cyan, mêmes couleurs dans tous les thèmes ——— */
+.game-logo { display: inline-grid; justify-items: center; line-height: .95; font-family: 'Tilt Neon', 'Arial Rounded MT Bold', sans-serif; font-weight: 400; text-transform: uppercase; }
+.logo-garage { font-style: italic; letter-spacing: .04em; color: #ffe6f6;
+  text-shadow: 0 0 2px #fff, 0 0 .08em #ff4fd8, 0 0 .2em #ff2a8a, 0 0 .4em #ff2a8a, 0 0 .7em #c2185b; }
+.logo-verse { letter-spacing: .55em; margin-left: .55em; margin-top: .12em; color: #e6fdff;
+  text-shadow: 0 0 2px #fff, 0 0 .18em #2de2ff, 0 0 .4em #2de2ff, 0 0 .8em #0aa7d8, 0 0 1.3em #0a6fd8; }
+.logo-hero .logo-garage { font-size: clamp(52px, 17vw, 104px); }
+.logo-hero .logo-verse { font-size: clamp(22px, 7.4vw, 46px); }
+.logo-pack .logo-garage { font-size: 19cqw; }
+.logo-pack .logo-verse { font-size: 8.2cqw; }
+.logo-bar { display: inline-flex; align-items: baseline; gap: .3em; line-height: 1; }
+.logo-bar .logo-garage { font-size: 20px; }
+.logo-bar .logo-verse { font-size: 12px; letter-spacing: .3em; margin: 0; }
+.logo-flicker .logo-garage { animation: logo-on 1.4s steps(1, end) both; }
+.logo-flicker .logo-verse { animation: logo-on 1.4s .35s steps(1, end) both; }
+@keyframes logo-on {
+  0% { opacity: .15; text-shadow: none; } 8% { opacity: 1; } 12% { opacity: .2; text-shadow: none; } 20% { opacity: 1; }
+  26% { opacity: .35; text-shadow: none; } 34%, 100% { opacity: 1; }
+}
+.motion-reduced .logo-flicker .logo-garage, .motion-reduced .logo-flicker .logo-verse { animation: none; }
+@media (prefers-reduced-motion: reduce) { .logo-flicker .logo-garage, .logo-flicker .logo-verse { animation: none; } }
+.hero h1:has(.game-logo) { background: none; -webkit-text-fill-color: initial; filter: none; }

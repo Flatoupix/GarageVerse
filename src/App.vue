@@ -9,6 +9,7 @@ import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './gam
 import MechanicGuide from './components/MechanicGuide.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
+import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
 import HomeView from './views/HomeView.vue'
@@ -238,7 +239,7 @@ function toggleSetting(key: Setting) {
     <div class="sky" aria-hidden="true"><div class="sky-grid"></div></div>
     <header class="topbar">
       <button class="brand" type="button" aria-label="GarageVerse, accueil" @click="go('home')">
-        <span class="brand-mark" aria-hidden="true">GV</span><span>GARAGE<span class="brand-accent">VERSE</span></span>
+        <span class="brand-mark" aria-hidden="true">GV</span><GameLogo v-if="theme === 'neon'" size="bar" :flicker="false" /><span v-else>GARAGE<span class="brand-accent">VERSE</span></span>
       </button>
       <div class="wallet">
         <span ref="wallet" class="credits" :class="creditMove" :aria-label="`${save.credits} crédits`"><span aria-hidden="true">₡ {{ shownCredits }}</span></span>
