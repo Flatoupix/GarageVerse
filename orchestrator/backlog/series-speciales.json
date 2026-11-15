@@ -1,0 +1,10 @@
+{
+  "id": "series-speciales",
+  "title": "[À CHALLENGER AVEC LE JOUEUR — NE PAS LANCER] Séries de courses spéciales de plus en plus difficiles",
+  "brief": "IDÉE BRUTE DU JOUEUR, NON SPÉCIFIÉE : créer des séries de courses spéciales (spéciale endurance, spéciale vitesse, une spéciale aura, etc.) qui soient de plus en plus difficiles. À challenger avec le joueur avant toute spécification : le périmètre, la forme des séries, les paliers, les récompenses et le lien avec les rivaux, le défi du jour et la Nuit sans fin ne sont pas décidés. Ne pas lancer cette étape dans l’orchestrateur tant que cette fiche n’a pas été reprise et validée.",
+  "requirements": [
+    "À définir avec le joueur avant toute implémentation."
+  ],
+  "paths": ["docs/"],
+  "browser": "neon"
+}
