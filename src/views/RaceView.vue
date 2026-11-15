@@ -8,7 +8,7 @@ import {
 } from '../game/data'
 import { helpForLine, vHelp } from '../game/help'
 import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
-import { circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, type Round } from '../game/rules'
+import { canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Round, type Stance } from '../game/rules'
 import { dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
@@ -69,7 +69,7 @@ function toggle(id: string) {
 function start() {
   if (rival.value && act(s => isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
     tutorialAction(0, 4)
-    picked.value = 0; nitro.value = false; detail.value = null
+    picked.value = 0; nitro.value = false; stance.value = 'normal'; detail.value = null
     sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
   }
 }
@@ -78,6 +78,16 @@ function start() {
 const duel = computed(() => save.duel)
 const picked = ref(0)
 const nitro = ref(false)
+// Consigne de pilotage du secteur : attaque, normal ou gestion.
+const stance = ref<Stance>('normal')
+const stanceHints: Record<Stance, string> = { gestion: '−2 · 0 secteur', normal: '1 secteur', attaque: '+2 · 2 secteurs' }
+const stanceBlocked = (key: Stance) => Boolean(duel.value) && (key === 'attaque' ? !canAttack(duel.value!.player, picked.value)
+  : key === 'gestion' && overheated(duel.value!.player, picked.value))
+function setStance(key: Stance) {
+  stance.value = key
+  sound(key === 'attaque' ? 'rev' : 'flip')
+  if (key === 'attaque') streaks(palettes.fire, 10)
+}
 const detail = ref<{ side: 'player' | 'rival'; car: number } | null>(null)
 const carDetail = computed(() => {
   const d = duel.value, selected = detail.value
@@ -166,6 +176,7 @@ function settle(round: Round) {
 
 function pick(car: number, event: Event) {
   picked.value = car
+  if (stanceBlocked(stance.value)) stance.value = 'normal'
   detail.value = { side: 'player', car }
   pop(event.currentTarget as Element, 1.06, 220)
 }
@@ -177,17 +188,18 @@ function armNitro() {
 const rivalProjections = computed(() => duel.value && index.value < duel.value.sectors.length
   ? duel.value.rival.lineup.map((_, car) => evaluate(duel.value!, 'rival', car, false).score) : [])
 const projections = computed(() => duel.value && index.value < duel.value.sectors.length
-  ? duel.value.player.lineup.map((_, car) => evaluate(duel.value!, 'player', car, nitro.value).score) : [])
+  ? duel.value.player.lineup.map((_, car) => evaluate(duel.value!, 'player', car, nitro.value, undefined, stance.value).score) : [])
 
 function engage() {
   const d = duel.value
   if (!d || d.winner) return
-  const round = playRound(d, { car: picked.value, nitro: nitro.value }, Math.random)
+  const round = playRound(d, { car: picked.value, nitro: nitro.value, stance: stance.value }, Math.random)
   // Engager après la bulle de la nitro mène à la lecture du résultat ; les bulles 5 à 8 restent à lire avant.
   tutorialAction(8, 9)
   shown.value = round
   detail.value = null
   nitro.value = false
+  stance.value = 'normal'
   persist()
   clear()
   if (reducedMotion.value) settle(round)
@@ -344,6 +356,13 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p class="engage-hint">Sous chaque voiture : <span v-help="'forme'">fourchette de score</span> et <span v-help="'secteurs'">secteurs restants</span>.</p>
         <!-- Toujours à portée de pouce : la nitro et le bouton restent collés au bas de l'écran. -->
         <div class="engage-actions">
+          <div class="stance-toggle" :class="{ set: stance !== 'normal' }" role="radiogroup" aria-label="Consigne de pilotage">
+            <span v-help="'consigne'">Consigne</span>
+            <button v-for="key in (['gestion', 'normal', 'attaque'] as const)" :key="key" type="button" role="radio" :class="key"
+              :aria-checked="stance === key" :disabled="stanceBlocked(key)" @click="setStance(key)">
+              <b>{{ stances[key].label }}</b><small>{{ stanceHints[key] }}</small>
+            </button>
+          </div>
           <label class="nitro-toggle" :class="{ off: !duel.player.nitro, armed: nitro }">
             <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" @change="armNitro" />
             <span><span v-help="'nitro'">Nitro</span> <small>{{ duel.player.nitro }} charge{{ duel.player.nitro > 1 ? 's' : '' }} · +2</small></span>

@@ -21,6 +21,15 @@ export const STAT_CAP = 12
 export const SECTORS_PER_RACE = 5
 export const OVERHEAT = 3
 
+// Consigne de pilotage, choisie à chaque secteur avec la voiture. L'attaque brûle deux secteurs d'endurance et double le risque
+// d'incident ; la gestion n'en brûle aucun et divise ce risque par deux. Attaquer demande au moins deux secteurs restants.
+export type Stance = 'attaque' | 'normal' | 'gestion'
+export const stances: Record<Stance, { label: string; bonus: number; uses: number; risk: number }> = {
+  gestion: { label: 'Gestion', bonus: -2, uses: 0, risk: 0.5 },
+  normal: { label: 'Normal', bonus: 0, uses: 1, risk: 1 },
+  attaque: { label: 'Attaque', bonus: 2, uses: 2, risk: 2 },
+}
+
 export function compatibility(part: Part, v: Vehicle): string | undefined {
   const r = part.requires
   if (!r) return
@@ -82,7 +91,7 @@ export function racer(id: string, prep: Prep): Racer {
 
 export interface ScoreContext {
   sector: Sector; condition: Condition; lineup: Racer[]; opponent?: Racer
-  behind: boolean; nitro: boolean; overheated: boolean
+  behind: boolean; nitro: boolean; overheated: boolean; stance?: Stance
 }
 export interface ScoreLine { label: string; value: number }
 
@@ -124,6 +133,7 @@ export function score(r: Racer, ctx: ScoreContext): { total: number; lines: Scor
       if (allies) lines.push({ label: `Aura ${effect.tag}`, value: effect.value * allies })
     }
   }
+  if (ctx.stance && stances[ctx.stance].bonus) lines.push({ label: stances[ctx.stance].label, value: stances[ctx.stance].bonus })
   if (ctx.nitro) lines.push({ label: 'Nitro', value: 2 + sum(r.effects, 'nitroPower') })
   if (ctx.overheated) lines.push({ label: 'Surchauffe', value: -OVERHEAT })
   return { total: lines.reduce((n, l) => n + l.value, 0), lines }
@@ -142,7 +152,7 @@ export function circuitScores(r: Racer, circuit: Rival['circuit']) {
 // ——— Duel en cinq secteurs ———
 
 export interface Side { lineup: Racer[]; used: number[]; nitro: number; points: number }
-export interface Play { car: number; nitro: boolean; score: number; lines: ScoreLine[]; overheated: boolean; luck?: 'perfect' | 'incident' }
+export interface Play { car: number; nitro: boolean; stance?: Stance; score: number; lines: ScoreLine[]; overheated: boolean; luck?: 'perfect' | 'incident' }
 export interface Round { sector: Sector; condition: Condition; player: Play; rival: Play; winner: 'player' | 'rival' | 'tie' }
 export interface Duel {
   rivalId: string; sectors: Sector[]; conditions: Condition[]
@@ -182,21 +192,24 @@ export function createDuel(rivalId: string, lineup: { id: string; prep: Prep }[]
 }
 
 export const overheated = (s: Side, car: number) => s.used[car] >= s.lineup[car].uses
+export const remaining = (s: Side, car: number) => Math.max(0, s.lineup[car].uses - s.used[car])
+export const canAttack = (s: Side, car: number) => remaining(s, car) >= stances.attaque.uses
 
-export function evaluate(duel: Duel, who: 'player' | 'rival', car: number, nitro: boolean, against?: number): Play {
+export function evaluate(duel: Duel, who: 'player' | 'rival', car: number, nitro: boolean, against?: number, wanted: Stance = 'normal'): Play {
   const me = duel[who], other = duel[who === 'player' ? 'rival' : 'player']
   const index = duel.rounds.length
   const hot = overheated(me, car)
+  const stance = wanted === 'attaque' && !canAttack(me, car) ? 'normal' : wanted
   const { total, lines } = score(me.lineup[car], {
     sector: duel.sectors[index], condition: duel.conditions[index], lineup: me.lineup,
     opponent: against === undefined ? undefined : other.lineup[against],
-    behind: me.points < other.points, nitro: nitro && me.nitro > 0, overheated: hot,
+    behind: me.points < other.points, nitro: nitro && me.nitro > 0, overheated: hot, stance,
   })
-  return { car, nitro: nitro && me.nitro > 0, score: total, lines, overheated: hot }
+  return { car, nitro: nitro && me.nitro > 0, stance, score: total, lines, overheated: hot }
 }
 
 // L'IA connaît les mêmes informations que le joueur : écuries, secteurs et conditions annoncées.
-export function aiChoice(duel: Duel, who: 'player' | 'rival', rng: Rng): { car: number; nitro: boolean } {
+export function aiChoice(duel: Duel, who: 'player' | 'rival', rng: Rng): { car: number; nitro: boolean; stance: Stance } {
   const index = duel.rounds.length
   const foe = who === 'player' ? 'rival' : 'player'
   const me = duel[who], other = duel[foe]
@@ -214,8 +227,16 @@ export function aiChoice(duel: Duel, who: 'player' | 'rival', rng: Rng): { car: 
   const here = evaluate(duel, who, best.car, false).score
   const margin = here - threat
   const closing = index >= duel.sectors.length - 2
-  const nitro = me.nitro > 0 && margin >= -2 && margin <= 1 && (closing || me.nitro > 1 || rng() < 0.4)
-  return { car: best.car, nitro }
+  // Réserve d'endurance : secteurs encore disponibles dans l'écurie, moins ceux qu'il reste à courir.
+  const spare = me.lineup.reduce((n, _, car) => n + remaining(me, car), 0) - (duel.sectors.length - index)
+  let stance: Stance = 'normal'
+  // Un rival au pilotage simple roule toujours en Normal : le joueur découvre les consignes avec un avantage.
+  if (who === 'rival' && rivalById.get(duel.rivalId)?.simple) stance = 'normal'
+  else if (canAttack(me, best.car) && margin >= -3 && margin <= 1 && (spare >= 1 || closing)) stance = 'attaque'
+  else if (!overheated(me, best.car) && spare <= 0 && !closing && (margin >= 4 || margin <= -5)) stance = 'gestion'
+  const pushed = margin + stances[stance].bonus
+  const nitro = me.nitro > 0 && pushed >= -2 && pushed <= 1 && (closing || me.nitro > 1 || rng() < 0.4)
+  return { car: best.car, nitro, stance }
 }
 
 // ——— Part de hasard, à la manière des jeux de combat au tour par tour ———
@@ -239,7 +260,7 @@ export function incidentChance(condition: Condition, overheatedCar: boolean) {
 
 function applyLuck(play: Play, sector: Sector, condition: Condition, rng: Rng) {
   const roll = rng()
-  const incident = incidentChance(condition, play.overheated)
+  const incident = incidentChance(condition, play.overheated) * stances[play.stance ?? 'normal'].risk
   let line: ScoreLine | undefined
   if (roll < LUCK.perfect) { play.luck = 'perfect'; line = { label: 'Secteur parfait', value: perfectBonus(play.score) } }
   else if (roll < LUCK.perfect + incident) {
@@ -253,11 +274,11 @@ function applyLuck(play: Play, sector: Sector, condition: Condition, rng: Rng) {
   if (line) { play.lines.push(line); play.score += line.value }
 }
 
-export function playRound(duel: Duel, choice: { car: number; nitro: boolean }, rng: Rng): Round {
+export function playRound(duel: Duel, choice: { car: number; nitro: boolean; stance?: Stance }, rng: Rng): Round {
   if (duel.winner || duel.rounds.length >= duel.sectors.length) throw new Error('Course terminée')
   const ai = aiChoice(duel, 'rival', rng)
-  const player = evaluate(duel, 'player', choice.car, choice.nitro, ai.car)
-  const rival = evaluate(duel, 'rival', ai.car, ai.nitro, choice.car)
+  const player = evaluate(duel, 'player', choice.car, choice.nitro, ai.car, choice.stance)
+  const rival = evaluate(duel, 'rival', ai.car, ai.nitro, choice.car, ai.stance)
   const index = duel.rounds.length
   for (const play of [player, rival]) applyLuck(play, duel.sectors[index], duel.conditions[index], rng)
   let winner: Round['winner'] = player.score > rival.score ? 'player' : rival.score > player.score ? 'rival' : 'tie'
@@ -267,7 +288,7 @@ export function playRound(duel: Duel, choice: { car: number; nitro: boolean }, r
   }
   const round: Round = { sector: duel.sectors[index], condition: duel.conditions[index], player, rival, winner }
   for (const [who, play] of [['player', player], ['rival', rival]] as const) {
-    duel[who].used[play.car]++
+    duel[who].used[play.car] += stances[play.stance ?? 'normal'].uses
     if (play.nitro) duel[who].nitro--
   }
   if (winner !== 'tie') duel[winner].points++

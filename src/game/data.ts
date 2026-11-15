@@ -35,6 +35,8 @@ export interface Rival {
   id: string; name: string; title: string; league: string
   circuit: { name: string; sectors: Sector[]; conditions: Partial<Record<Condition, number>> }
   lineup: LineupEntry[]
+  // Pilotage simple : ce rival n'utilise ni l'attaque ni la gestion.
+  simple?: boolean
 }
 export interface League { id: string; name: string; cap: number; reward: number }
 

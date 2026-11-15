@@ -97,13 +97,13 @@
     { "id": "overdrive", "name": "Ligue Overdrive", "cap": 22, "reward": 260 }
   ],
   "rivals": [
-    { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon",
+    { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon", "simple": true,
       "circuit": { "name": "Boulevard Minitel", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "ville": 4, "sec": 3, "nuit": 2, "pluie": 1 } },
       "lineup": [{ "id": "twingo", "stage": 0, "parts": [] }, { "id": "deuch", "stage": 0, "parts": [] }, { "id": "beetle", "stage": 0, "parts": [] }],
       "art": "a cheerful young woman with a teal bob haircut and oversized 80s jacket, synthwave portrait" },
     { "id": "cassette", "name": "DJ Cassette", "title": "Roi du roadster", "league": "neon",
       "circuit": { "name": "Corniche Laser", "sectors": ["virage", "ligne", "endurance", "virage", "depart"], "conditions": { "sec": 4, "ville": 3, "pluie": 2, "nuit": 1 } },
-      "lineup": [{ "id": "mx5na", "stage": 0, "parts": [], "upgrades": { "acc": 1 } }, { "id": "panda", "stage": 0, "parts": [], "upgrades": { "end": 1 } }, { "id": "logan", "stage": 0, "parts": [], "upgrades": { "end": 1 } }],
+      "lineup": [{ "id": "mx5na", "stage": 0, "parts": [], "upgrades": { "acc": 1 } }, { "id": "panda", "stage": 0, "parts": [] }, { "id": "logan", "stage": 0, "parts": [] }],
       "art": "a laid-back DJ with headphones around his neck, mirrored aviator sunglasses and a mullet, synthwave portrait" },
     { "id": "kenji", "name": "Kenji Vapor", "title": "Drift de minuit", "league": "chrome",
       "circuit": { "name": "Wangan Vapor", "sectors": ["depart", "virage", "virage", "ligne", "endurance"], "conditions": { "nuit": 5, "pluie": 2, "sec": 2, "ville": 1 } },

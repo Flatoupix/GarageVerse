@@ -24,6 +24,7 @@ export const glossary = {
   victoireParfaite: { term: 'Victoire parfaite', text: 'Gagne tous les secteurs : tu doubles les crédits et tu reçois un ticket du booster de la ligue du rival, en plus du ticket de première victoire éventuel. Une étoile garde la trace de ton exploit. Pour le défi du jour, tu doubles les crédits de ta première victoire du jour.' },
   incident: { term: 'Incident', text: 'Faux départ, tête-à-queue, aspiration ratée, crevaison ou aquaplaning : environ une fois sur vingt-quatre, la voiture perd environ 40 % de son score. Plus fréquent sous la pluie, sur la terre et en surchauffe.' },
   nitro: { term: 'Nitro', text: 'À cocher avant d’engager une voiture : +2 points sur ce secteur (davantage avec certaines pièces). Tu as 2 charges par course, plus celles qu’apportent certaines voitures et pièces.' },
+  consigne: { term: 'Consigne de pilotage', text: 'À choisir avec la voiture. Attaque : +2 points, mais la voiture brûle deux secteurs d’endurance et risque deux fois plus l’incident ; il lui faut au moins deux secteurs restants. Gestion : −2 points, aucun secteur brûlé et moitié moins de risque. Normal : un secteur brûlé, sans bonus.' },
   surchauffe: { term: 'Surchauffe', text: `Chaque voiture peut courir un nombre limité de secteurs (affiché sous elle). Au-delà, elle surchauffe : −${OVERHEAT} points.` },
   secteurs: { term: 'Secteurs restants', text: 'Nombre de secteurs que la voiture peut encore courir sans surchauffer. Il dépend de son Endurance.' },
   capacite: { term: 'Capacité ou pièce', text: 'Bonus d’une capacité de la carte (encadré en bas de carte) ou d’une pièce montée, par exemple « +2 au Départ ».' },
@@ -48,7 +49,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Les quatre statistiques', keys: ['acc', 'man', 'vit', 'end'] },
   { title: 'Les secteurs', keys: ['depart', 'virage', 'ligne', 'endurance'] },
   { title: 'Météo et terrain', keys: ['sec', 'pluie', 'terre', 'ville', 'nuit', 'inconnu'] },
-  { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
+  { title: 'En course', keys: ['ecurie', 'secteurs', 'surchauffe', 'consigne', 'nitro', 'forme', 'parfait', 'incident', 'egalite', 'victoireParfaite'] },
   { title: 'Capacités', keys: ['capacite', 'retour', 'outsider', 'aura'] },
   { title: 'Garage', keys: ['cout', 'plafond', 'rarete', 'stage', 'atelier', 'piece', 'edition', 'vente'] },
 ]
@@ -56,7 +57,7 @@ export const glossarySections: { title: string; keys: HelpKey[] }[] = [
 // Retrouve l'explication d'une ligne du détail de score (« Pluie · intégrale », « Faux départ »…).
 export function helpForLine(label: string): HelpKey | undefined {
   const exact: Record<string, HelpKey> = {
-    Accélération: 'acc', Maniabilité: 'man', Vitesse: 'vit', Endurance: 'end', Nitro: 'nitro', Surchauffe: 'surchauffe',
+    Accélération: 'acc', Maniabilité: 'man', Vitesse: 'vit', Endurance: 'end', Nitro: 'nitro', Surchauffe: 'surchauffe', Attaque: 'consigne', Gestion: 'consigne',
     'Forme du jour': 'forme', 'Secteur parfait': 'parfait', 'Capacité ou pièce': 'capacite', 'Retour en force': 'retour', Outsider: 'outsider',
     'Faux départ': 'incident', 'Tête-à-queue': 'incident', 'Aspiration ratée': 'incident', Crevaison: 'incident', Aquaplaning: 'incident',
   }
