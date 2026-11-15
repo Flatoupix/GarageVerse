@@ -101,16 +101,19 @@ function flipCard() {
   persist()
   focusRevealAction()
   const rarity = rarityOf(pull)
-  sound(pull.kind === 'car' && edition(pull.id, pull.style).drift ? 'drift'
-    : rarity === 'Légendaire' ? 'legend' : rarity === 'Épique' ? 'epic' : rarity === 'Rare' ? 'rare' : 'flip')
-  // L'explosion part quand la face apparaît, à mi-retournement.
+  const cue = pull.kind === 'car' && edition(pull.id, pull.style).drift ? 'drift'
+    : rarity === 'Légendaire' ? 'revealLegend' : rarity === 'Épique' ? 'epic' : rarity === 'Rare' ? 'rare' : 'flip'
+  // Le son et les particules partent ensemble quand la face apparaît.
+  const reveal = () => { sound(cue); celebrate(rarity) }
   clearTimeout(burstTimer)
-  burstTimer = setTimeout(() => celebrate(rarity), reduced.value ? 0 : 170)
+  if (reduced.value) reveal()
+  else burstTimer = setTimeout(reveal, 170)
 }
 
 function nextCard(swiped = false) {
   const current = opening.value
   if (!current || current.view !== 'face') return
+  clearTimeout(burstTimer)
   current.view = current.revealed === current.pulls.length ? 'recap' : 'back'
   flipping.value = false
   cinematic.value = false
@@ -128,21 +131,25 @@ function swipeCard() {
 function quickReveal() {
   const current = opening.value
   if (!current) return
+  clearTimeout(burstTimer)
   const best = current.pulls.slice(current.revealed).map(rarityOf)
   const top = best.includes('Légendaire') ? 'Légendaire' : best.includes('Épique') ? 'Épique' : undefined
-  if (top) { sound(top === 'Légendaire' ? 'legend' : 'epic'); celebrate(top, '.recap-grid') }
   current.revealed = current.pulls.length
   current.view = 'recap'
   flipping.value = false
   cinematic.value = false
-  finish()
+  finish(!top)
+  if (top) {
+    sound(top === 'Légendaire' ? 'revealLegend' : 'epic')
+    void nextTick(() => celebrate(top, '.recap-grid'))
+  }
 }
 
 // Les cartes rejoignent le garage dès le récapitulatif : un rechargement ne peut pas les attribuer deux fois.
-function finish() {
+function finish(playCollectionSound = true) {
   if (opening.value && !opening.value.collected) {
     collect(save)
-    sound('collect')
+    if (playCollectionSound) sound('collect')
   }
   persist()
 }

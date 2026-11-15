@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { buzz, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
@@ -16,7 +17,7 @@ import RaceView from './views/RaceView.vue'
 import ShopView from './views/ShopView.vue'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
-type Setting = 'sound' | 'reducedMotion' | 'vibration'
+type Setting = 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 const screen = ref<Screen>(save.duel ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
 const settings = ref<HTMLDialogElement>()
@@ -33,6 +34,12 @@ const tabs: { id: Screen; label: string; icon: string }[] = [
 ]
 
 watch(() => save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
+watch(() => save.preferences.sound, enableEffects, { immediate: true })
+watch(
+  () => save.preferences.music && hasMusic ? (screen.value === 'race' && save.duel ? 'race' : 'garage') : undefined,
+  setMusicTrack,
+  { immediate: true },
+)
 
 // Crédits : le compteur défile et un montant flottant signale chaque gain ou dépense.
 const fx = ref<HTMLCanvasElement>()
@@ -51,17 +58,27 @@ watch(() => save.credits, (now, before) => {
   stopCredits = tween(shownCredits.value, now, 600, v => { shownCredits.value = v }, () => { creditMove.value = null })
 })
 
+function onAudioGesture() {
+  if (save.preferences.sound || (hasMusic && save.preferences.music)) unlockAudio()
+}
+
+function onControlClick(event: MouseEvent) {
+  onAudioGesture()
+  if (!(event.target instanceof Element)) return
+  const control = event.target.closest('button, [role="radio"], label:is(.setting, .theme-option, .nitro-toggle, .missing-toggle) input')
+  if (control && !control.matches(':disabled, [aria-disabled="true"]')) { sound('tap'); buzz(6) }
+}
+
 onMounted(() => {
   document.addEventListener('click', closeHelp)
+  document.addEventListener('click', onControlClick, true)
+  document.addEventListener('pointerup', onAudioGesture, true)
+  document.addEventListener('keydown', onAudioGesture, true)
+  document.addEventListener('visibilitychange', refreshMusicVisibility)
   document.addEventListener('keydown', onKey, true)
   addEventListener('scroll', onScroll, true)
   addEventListener('resize', onResize)
   if (fx.value) mountFx(fx.value)
-  // Retour tactile et sonore discret sur chaque commande.
-  document.addEventListener('click', event => {
-    const control = (event.target as Element).closest?.('button, [role="radio"], label.setting, label.theme-option, label.nitro-toggle, label.missing-toggle')
-    if (control && !(control as HTMLButtonElement).disabled) { sound('tap'); buzz(6) }
-  }, true)
 })
 
 function go(destination: Screen) {
@@ -137,6 +154,11 @@ const onScroll = (event: Event) => { if (!bubble.value?.contains(event.target as
 const onResize = () => { openHelp.value = null }
 onUnmounted(() => {
   document.removeEventListener('click', closeHelp)
+  document.removeEventListener('click', onControlClick, true)
+  document.removeEventListener('pointerup', onAudioGesture, true)
+  document.removeEventListener('keydown', onAudioGesture, true)
+  document.removeEventListener('visibilitychange', refreshMusicVisibility)
+  setMusicTrack()
   document.removeEventListener('keydown', onKey, true)
   removeEventListener('scroll', onScroll, true)
   removeEventListener('resize', onResize)
@@ -157,6 +179,7 @@ function chooseTheme(id: Theme) {
 
 function toggleSetting(key: Setting) {
   save.preferences[key] = !save.preferences[key]
+  if (save.preferences[key] && (key === 'music' || key === 'sound')) onAudioGesture()
   persist()
 }
 </script>
@@ -240,7 +263,8 @@ function toggleSetting(key: Setting) {
           </span>
         </label>
       </fieldset>
-      <label class="setting"><span>Son</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
+      <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
+      <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
       <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
       <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>
       <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>

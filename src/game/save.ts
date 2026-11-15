@@ -16,7 +16,7 @@ export interface Opening { booster: string; pulls: Pull[]; revealed: number; vie
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
 export type ThemeId = (typeof themeIds)[number]
-export interface Preferences { sound: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -42,7 +42,7 @@ export function newSave(): Save {
   const save: Save = {
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, reducedMotion: false, vibration: true, theme: 'neon' },
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon' },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
@@ -70,7 +70,10 @@ function migrate(raw: string | null, save: Save) {
       for (const key of opening.editions ?? []) if (legacyEditions[key]) addCar(save, ...legacyEditions[key])
     }
     if (Object.keys(old.record ?? {}).length) save.tutorial.status = 'done'
-    if (old.preferences) save.preferences = { ...save.preferences, ...old.preferences }
+    if (old.preferences) {
+      save.preferences = { ...save.preferences, ...old.preferences }
+      save.preferences.music = old.preferences.music ?? (old.preferences.sound !== false)
+    }
   } catch { /* ancienne sauvegarde illisible : on repart du garage de départ */ }
 }
 
@@ -143,6 +146,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {
     sound: input.preferences?.sound !== false,
+    music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,
     vibration: input.preferences?.vibration !== false,
     theme: themeIds.find(id => id === input.preferences?.theme) ?? 'neon',
