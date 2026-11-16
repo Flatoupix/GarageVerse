@@ -496,7 +496,6 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <div class="rival-character-text">
           <p class="rival-character-title">{{ character.title }} <span v-if="character.style" class="rival-style">{{ character.style }}</span></p>
           <p v-if="character.likes">Aime {{ character.likes }}</p>
-          <p v-if="character.bio" class="rival-bio">{{ character.bio }}</p>
           <blockquote v-if="character.intro">« {{ character.intro }} »</blockquote>
         </div>
       </section>
