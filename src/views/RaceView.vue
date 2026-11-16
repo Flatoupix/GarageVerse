@@ -32,7 +32,9 @@ function measureActions() {
   root.style.setProperty('--race-action-left', `${box.left + left}px`)
   root.style.setProperty('--race-action-width', `${box.width - left - right}px`)
   root.style.setProperty('--race-action-height', `${actions?.getBoundingClientRect().height ?? 0}px`)
-  root.style.setProperty('--race-tabbar-offset', `${tabbar ? window.innerHeight - tabbar.getBoundingClientRect().top : 0}px`)
+  // Sur ordinateur, les onglets sont dans la barre du haut : l'action se colle alors au bas de la fenêtre.
+  const tabbarTop = tabbar?.getBoundingClientRect().top ?? window.innerHeight
+  root.style.setProperty('--race-tabbar-offset', `${tabbarTop > window.innerHeight / 2 ? window.innerHeight - tabbarTop : 0}px`)
   if (actions) layoutObserver?.observe(actions)
 }
 onMounted(() => {
@@ -478,6 +480,9 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 
     <!-- Constitution de l'écurie -->
     <template v-else-if="rival && league">
+      <!-- Sur ordinateur, deux colonnes : le briefing à gauche, l'écurie et le garage à droite. Sur téléphone, les groupes s'effacent. -->
+      <div class="race-prep">
+      <div class="race-prep-brief">
       <div class="page-heading">
         <button type="button" class="back-link" @click="chosen = null"><span aria-hidden="true">←</span> Rivaux</button>
         <span v-if="!isNight" class="eyebrow">{{ league.name }} · plafond {{ cap }}</span>
@@ -525,6 +530,8 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </ul>
         <p v-if="lineup.length" class="hint">Scores moyens estimés selon le terrain, hors nitro et bonus liés à l’adversaire ou à l’écurie. Touche une voiture pour ouvrir l’atelier.</p>
       </section>
+      </div>
+      <div class="race-prep-pick">
       <div class="lineup-slots">
         <button v-for="n in 3" :key="n" type="button" class="lineup-slot" :disabled="!lineup[n - 1]" @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">
           <CarCard v-if="lineup[n - 1]" :id="lineup[n - 1]" :style-name="save.cars[lineup[n - 1]]?.shown" :prep="prepOf(save, lineup[n - 1])" compact />
@@ -535,6 +542,8 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 
       <h2 class="list-title">Ton garage</h2>
       <CarBrowser mode="pick" :lineup="lineup" :cap="cap" :circuit="rival.circuit" @toggle="toggle" />
+      </div>
+      </div>
     </template>
 
     <!-- Échelle des rivaux -->
