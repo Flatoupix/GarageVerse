@@ -2,7 +2,7 @@ import { ref, watch } from 'vue'
 import { completedSeries, persist, save } from './store'
 import { tutorialSteps, type Discovery } from './save'
 
-export const helpSettingTip = 'Tu peux activer « Aide en touchant les mots soulignés » dans les Réglages. Le bouton « ? » ouvre toujours le lexique.'
+export const helpSettingTip = 'Tu peux activer « Aide en touchant les mots soulignés » dans les Réglages. Le lexique reste accessible dans les Réglages, onglet Aide.'
 
 export const discovery = ref<Discovery | null>(null)
 export function tutorialAction(from: number, to: number) {

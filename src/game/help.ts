@@ -12,7 +12,7 @@ export const glossary = {
   nouveau: { term: 'Nouveau', text: 'Une voiture reçue porte ce badge jusqu’à ta première ouverture de sa fiche.' },
   recycle: { term: 'Annulation du recyclage', text: 'Confirme le recyclage d’un doublon, puis tu peux l’annuler pendant six secondes. Changer de voiture ou recharger ferme cette possibilité.' },
   disabled: { term: 'Bouton grisé', text: 'Cette action est indisponible. Lis la condition indiquée pour savoir ce qu’il te manque.' },
-  touchHelp: { term: 'Aide tactile', text: 'Active « Aide en touchant les mots soulignés » dans les Réglages pour ouvrir une explication au toucher. Le bouton « ? » ouvre toujours le lexique.' },
+  touchHelp: { term: 'Aide tactile', text: 'Active « Aide en touchant les mots soulignés » dans les Réglages pour ouvrir une explication au toucher. Le lexique reste accessible dans les Réglages, onglet Aide.' },
   legendaryPack: { term: 'Sachet légendaire', text: 'Un sachet doré avec le ruban « Édition légendaire » contient au moins une carte Légendaire. Tes cinq cartes sont tirées dès l’achat ou l’utilisation du ticket : tu retrouves le même lot après un rechargement. La boutique montre toujours la couverture normale.' },
   offline: { term: 'Mode hors ligne', text: 'Après une première visite connectée, le jeu garde sa page et ses ressources sur ton appareil. Relance-le sans réseau ; les images déjà chargées restent disponibles. Une nouvelle version arrive au prochain lancement connecté.' },
   exportSave: { term: 'Export de sauvegarde', text: 'Télécharge un fichier JSON daté contenant ta partie. Garde-le pour retrouver ton garage sur un autre navigateur ou appareil.' },
@@ -66,7 +66,7 @@ export const glossary = {
 } satisfies Record<string, HelpEntry>
 export type HelpKey = keyof typeof glossary
 
-// Sections du lexique ouvert par le bouton « ? ».
+// Sections du lexique dans les Réglages, onglet Aide.
 export const glossarySections: { title: string; keys: HelpKey[] }[] = [
   { title: 'Repères du garage', keys: ['cardZoom', 'garageChips', 'rarityColors', 'nouveau', 'recycle', 'disabled', 'touchHelp'] },
   { title: 'Sauvegarde et connexion', keys: ['offline', 'exportSave', 'importSave'] },

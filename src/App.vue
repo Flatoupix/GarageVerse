@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
+import { debugTap, type DebugTaps } from './game/debug'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
-import { buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
+import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themeGroups, themes, unlocked, type Theme } from './game/theme'
 import { cardBackOf, cardBacks } from './game/cardback'
 import type { CardBackId } from './game/save'
@@ -73,7 +74,37 @@ async function importSave(event: Event) {
     transferFeedback('Ta sauvegarde a été importée.')
   } catch { transferFeedback('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.', true) }
 }
-const lexicon = ref<HTMLDialogElement>()
+type SettingsTab = 'parameters' | 'themes' | 'help'
+const settingsTab = ref<SettingsTab>('parameters')
+const settingsTabs: { id: SettingsTab; label: string }[] = [
+  { id: 'parameters', label: 'Paramètres' }, { id: 'themes', label: 'Thèmes' }, { id: 'help', label: 'Aide' },
+]
+function showSettings(tab: SettingsTab = 'parameters') {
+  openHelp.value = null
+  selectSettingsTab(tab)
+  if (!settings.value?.open) settings.value?.showModal()
+}
+function selectSettingsTab(tab: SettingsTab) {
+  settingsTab.value = tab
+  document.getElementById('settings-content')?.scrollTo(0, 0)
+}
+function settingsTabKey(event: KeyboardEvent, index: number) {
+  const next = event.key === 'ArrowRight' ? (index + 1) % 3 : event.key === 'ArrowLeft' ? (index + 2) % 3 : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : -1
+  if (next < 0) return
+  event.preventDefault()
+  const tab = settingsTabs[next]!
+  selectSettingsTab(tab.id)
+  document.getElementById('settings-tab-' + tab.id)?.focus()
+}
+let debugTaps: DebugTaps = { count: 0, lastTap: null }
+function brandClick() {
+  go('home')
+  if (import.meta.env.DEV) {
+    const result = debugTap(debugTaps, performance.now())
+    debugTaps = result.state
+    if (result.triggered) act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits')
+  }
+}
 const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
 const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
@@ -155,7 +186,7 @@ const fullscreen = ref(Boolean(document.fullscreenElement))
 document.addEventListener('fullscreenchange', () => { fullscreen.value = Boolean(document.fullscreenElement) })
 
 async function toggleFullscreen() {
-  if (!canFullscreen) { settings.value?.showModal(); return }
+  if (!canFullscreen) { showSettings(); return }
   try {
     if (document.fullscreenElement) return await document.exitFullscreen()
     await document.documentElement.requestFullscreen({ navigationUI: 'hide' })
@@ -169,6 +200,10 @@ async function toggleFullscreen() {
 const appVersion = __APP_VERSION__
 // Liste des Réglages rangée par groupes ; chaque thème n'apparaît qu'une fois.
 const themeLists = themeGroups.map(group => ({ title: group.title, items: themes.filter(t => group.ids.includes(t.id)) }))
+const expandedGroups = ref<string[]>([themeLists.find(group => group.items.some(t => t.id === theme.value))!.title])
+function toggleThemeGroup(title: string) {
+  expandedGroups.value = expandedGroups.value.includes(title) ? expandedGroups.value.filter(t => t !== title) : [...expandedGroups.value, title]
+}
 // Un thème débloqué en cours de partie est annoncé une fois.
 const openThemes = computed(() => themes.filter(t => unlocked(save, t.id)).map(t => t.id))
 watch(openThemes, (now, before) => {
@@ -223,7 +258,7 @@ function showLexicon() {
   openHelp.value = null
   glossaryOpen.value = true
 }
-watch(glossaryOpen, open => { if (open && !lexicon.value?.open) lexicon.value?.showModal() })
+watch(glossaryOpen, open => { if (open) { showSettings('help'); glossaryOpen.value = false } })
 
 function chooseTheme(id: Theme) {
   if (id === theme.value || !unlocked(save, id)) return
@@ -252,19 +287,18 @@ function toggleSetting(key: Setting) {
   <div class="app-shell" :class="{ 'motion-reduced': reducedMotion }">
     <div class="sky" aria-hidden="true"><div class="sky-grid"></div></div>
     <header class="topbar">
-      <button class="brand" type="button" aria-label="GarageVerse, accueil" @click="go('home')">
+      <button class="brand" type="button" aria-label="GarageVerse, accueil" @click="brandClick">
         <span class="brand-mark" aria-hidden="true">GV</span><GameLogo v-if="theme === 'neon'" size="bar" :flicker="false" /><span v-else>GARAGE<span class="brand-accent">VERSE</span></span>
       </button>
       <div class="wallet">
         <span ref="wallet" class="credits" :class="creditMove" :aria-label="`${save.credits} crédits`"><span aria-hidden="true">₡ {{ shownCredits }}</span></span>
-        <button type="button" class="settings-button help-button" aria-label="Lexique : comprendre les règles" @click="showLexicon">?</button>
         <button v-if="!installed" type="button" class="settings-button fullscreen-button" :aria-label="fullscreen ? 'Quitter le plein écran' : 'Plein écran'"
           :aria-pressed="fullscreen" @click="toggleFullscreen">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
             <path v-if="fullscreen" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/><path v-else d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
           </svg>
         </button>
-        <button type="button" class="settings-button" aria-label="Réglages" @click="settings?.showModal()">
+        <button type="button" class="settings-button" aria-label="Réglages" @click="showSettings()">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 3v6m8 0v6m-6 0v6"/></svg>
         </button>
       </div>
@@ -303,59 +337,69 @@ function toggleSetting(key: Setting) {
     </div>
     </Teleport>
 
-    <dialog ref="lexicon" class="modal lexicon-modal" aria-label="Lexique" @close="glossaryOpen = false">
-      <form method="dialog"><button class="close-modal" aria-label="Fermer le lexique">×</button></form>
-      <h2>Lexique</h2>
-      <p class="lexicon-intro">Touche un mot souligné en pointillé, partout dans le jeu, pour voir son explication.</p>
-      <section v-for="section in glossarySections" :key="section.title" class="lexicon-section">
-        <h3>{{ section.title }}</h3>
-        <dl><template v-for="key in section.keys" :key="key"><dt>{{ glossary[key].term }}</dt><dd>{{ glossary[key].text }}</dd></template></dl>
-      </section>
-    </dialog>
-
-    <dialog ref="settings" class="modal settings-modal">
+    <dialog ref="settings" class="modal settings-modal" aria-label="Réglages">
       <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>
       <h2>Réglages</h2>
-      <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">Revoir le tutoriel</button>
-      <section class="save-transfer" aria-label="Sauvegarde">
-        <p v-if="offlineReady"><span v-help="'offline'">Disponible hors ligne</span></p>
-        <p><span v-help="'exportSave'">Export de sauvegarde</span> · <span v-help="'importSave'">Import de sauvegarde</span></p>
-        <button type="button" class="button ghost" @click="exportSave">Exporter la sauvegarde</button>
-        <button type="button" class="button ghost" @click="saveFile?.click()">Importer une sauvegarde</button>
-        <input ref="saveFile" type="file" accept=".json,application/json" hidden @change="importSave" />
-        <p v-if="transferMessage" role="status">{{ transferMessage }}</p>
-      </section>
-      <fieldset class="theme-picker">
-        <legend>Thème</legend>
-        <div v-for="group in themeLists" :key="group.title" class="theme-group" role="group" :aria-label="group.title">
-          <h3 class="theme-group-title">{{ group.title }}</h3>
-          <label v-for="t in group.items" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
-            <input type="radio" name="theme" :value="t.id" :checked="theme === t.id" :disabled="!unlocked(save, t.id)" @change="chooseTheme(t.id)" />
-            <span class="theme-swatch" aria-hidden="true"><i v-for="c in t.swatch" :key="c" :style="{ background: c }"></i></span>
-            <span class="theme-text"><b>{{ t.name }}</b>
-              <small v-if="unlocked(save, t.id) || !t.unlock">{{ t.hint }}</small>
-              <small v-else class="theme-goal">🔒 {{ t.unlock.goal }} · {{ t.unlock.progress(save).join(' / ') }}</small>
-            </span>
-          </label>
+      <div class="settings-tabs" role="tablist" aria-label="Réglages">
+        <button v-for="(tab, index) in settingsTabs" :id="'settings-tab-' + tab.id" :key="tab.id" type="button" role="tab"
+          :aria-selected="settingsTab === tab.id" :aria-controls="'settings-panel-' + tab.id" :tabindex="settingsTab === tab.id ? 0 : -1"
+          @click="selectSettingsTab(tab.id)" @keydown="settingsTabKey($event, index)">{{ tab.label }}</button>
+      </div>
+      <div id="settings-content" class="settings-content">
+        <div v-show="settingsTab === 'parameters'" id="settings-panel-parameters" role="tabpanel" aria-labelledby="settings-tab-parameters">
+          <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">Revoir le tutoriel</button>
+          <section class="save-transfer" aria-label="Sauvegarde">
+            <p v-if="offlineReady"><span v-help="'offline'">Disponible hors ligne</span></p>
+            <p><span v-help="'exportSave'">Export de sauvegarde</span> · <span v-help="'importSave'">Import de sauvegarde</span></p>
+            <button type="button" class="button ghost" @click="exportSave">Exporter la sauvegarde</button>
+            <button type="button" class="button ghost" @click="saveFile?.click()">Importer une sauvegarde</button>
+            <input ref="saveFile" type="file" accept=".json,application/json" hidden @change="importSave" />
+            <p v-if="transferMessage" role="status">{{ transferMessage }}</p>
+          </section>
+          <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
+          <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
+          <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
+          <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>
+          <label class="setting"><span>Aide en touchant les mots soulignés</span><input type="checkbox" :checked="save.preferences.touchHelp !== false" @change="toggleSetting('touchHelp')" /></label>
+          <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
+          <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
+          <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
+          <p class="setting-note app-version">GarageVerse v{{ appVersion }}</p>
         </div>
-      </fieldset>
-      <fieldset class="back-picker">
-        <legend>Dos des cartes</legend>
-        <label v-for="b in cardBacks" :key="b.id" class="back-option" :class="{ chosen: currentBack === b.id }">
-          <input type="radio" name="cardback" :value="b.id" :checked="currentBack === b.id" @change="chooseCardBack(b.id)" />
-          <span class="back-thumb" :style="{ backgroundImage: `url(${b.art})` }" aria-hidden="true"></span>
-          <span>{{ b.name }}</span>
-        </label>
-      </fieldset>
-      <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
-      <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
-      <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
-      <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>
-      <label class="setting"><span>Aide en touchant les mots soulignés</span><input type="checkbox" :checked="save.preferences.touchHelp !== false" @change="toggleSetting('touchHelp')" /></label>
-      <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
-      <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
-      <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
-      <p class="setting-note app-version">GarageVerse v{{ appVersion }}</p>
+        <div v-show="settingsTab === 'themes'" id="settings-panel-themes" role="tabpanel" aria-labelledby="settings-tab-themes">
+          <fieldset class="theme-picker">
+            <legend>Thème</legend>
+            <div v-for="(group, groupIndex) in themeLists" :key="group.title" class="theme-group" role="group" :aria-label="group.title">
+              <h3 class="theme-group-title"><button type="button" :aria-expanded="expandedGroups.includes(group.title)" :aria-controls="'theme-group-' + groupIndex" @click="toggleThemeGroup(group.title)">{{ group.title }} <span aria-hidden="true">{{ expandedGroups.includes(group.title) ? '⌄' : '›' }}</span></button></h3>
+              <div v-show="expandedGroups.includes(group.title)" :id="'theme-group-' + groupIndex" class="theme-group-items">
+              <label v-for="t in group.items" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
+                <input type="radio" name="theme" :value="t.id" :checked="theme === t.id" :disabled="!unlocked(save, t.id)" @change="chooseTheme(t.id)" />
+                <span class="theme-swatch" aria-hidden="true"><i v-for="c in t.swatch" :key="c" :style="{ background: c }"></i></span>
+                <span class="theme-text"><b>{{ t.name }}</b>
+                  <small v-if="!unlocked(save, t.id) && t.unlock" class="theme-goal">🔒 {{ t.unlock.goal }} · {{ t.unlock.progress(save).join(' / ') }}</small>
+                </span>
+              </label>
+              </div>
+            </div>
+          </fieldset>
+          <fieldset class="back-picker">
+            <legend>Dos des cartes</legend>
+            <label v-for="b in cardBacks" :key="b.id" class="back-option" :class="{ chosen: currentBack === b.id }">
+              <input type="radio" name="cardback" :value="b.id" :checked="currentBack === b.id" @change="chooseCardBack(b.id)" />
+              <span class="back-thumb" :style="{ backgroundImage: `url(${b.art})` }" aria-hidden="true"></span>
+              <span>{{ b.name }}</span>
+            </label>
+          </fieldset>
+        </div>
+        <div v-show="settingsTab === 'help'" id="settings-panel-help" role="tabpanel" aria-labelledby="settings-tab-help">
+          <h2>Lexique</h2>
+          <p class="lexicon-intro">Touche un mot souligné en pointillé, partout dans le jeu, pour voir son explication.</p>
+          <section v-for="section in glossarySections" :key="section.title" class="lexicon-section">
+            <h3>{{ section.title }}</h3>
+            <dl><template v-for="key in section.keys" :key="key"><dt>{{ glossary[key].term }}</dt><dd>{{ glossary[key].text }}</dd></template></dl>
+          </section>
+        </div>
+      </div>
     </dialog>
 
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? 'Fiche voiture' : 'Fiche pièce'" @close="inspected = null">
