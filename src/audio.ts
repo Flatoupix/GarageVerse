@@ -1,9 +1,12 @@
 type Track = 'garage' | 'race'
+// Bruitages en fichier ; « upgrade », « tap » et « tick » restent synthétisés (src/feedback.ts).
 type Sample = 'tear' | 'revealLegend' | 'nitro' | 'drift' | 'debugCredits'
+  | 'flip' | 'collect' | 'legend' | 'win' | 'lose' | 'slam' | 'rare' | 'epic' | 'rev' | 'whoosh' | 'error' | 'coin'
 type Asset = Track | Sample
 
 const files = import.meta.glob<string>('./assets/audio/*.mp3', { eager: true, query: '?url', import: 'default' })
-const samples: Sample[] = ['tear', 'revealLegend', 'nitro', 'drift', 'debugCredits']
+const samples: Sample[] = ['tear', 'revealLegend', 'nitro', 'drift', 'debugCredits',
+  'flip', 'collect', 'legend', 'win', 'lose', 'slam', 'rare', 'epic', 'rev', 'whoosh', 'error', 'coin']
 const musicLevel = 0.24
 const transitionSeconds = 0.22
 const buffers = new Map<Asset, AudioBuffer>()

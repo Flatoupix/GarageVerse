@@ -42,3 +42,24 @@ Les repères du tableau viennent de l’analyse Suno des prises brutes. Le monta
 Les ambiances sont lues en boucle après le premier geste. La piste de course démarre quand un duel est engagé et reste active entre les secteurs. Le réglage **Musique** apparaît dès qu’une piste est présente. Le réglage **Bruitages** reste indépendant et reprend l’ancienne préférence **Son**.
 
 Les six MP3 montés sont dans `src/assets/audio/`. Pour reproduire le montage avec FFmpeg, nommer les six exports Suno d’après leur identifiant de prise et lancer `node pipeline/audio.mjs <dossier-des-exports>`. Les effets synthétisés restent disponibles pendant le chargement.
+
+## Bruitages de l’interface et des récompenses (16 novembre)
+
+Douze effets synthétisés ont été remplacés par des fichiers produits avec le MCP Suno (outil `sounds_create`, deux prises par appel), piloté depuis Codex. Pour chaque effet, l’outil d’écoute de Suno (`audio_listen`) a noté les deux prises et seule la meilleure a été téléchargée, pour ménager les crédits de téléchargement. Les points de coupe ont ensuite été fixés d’après l’enveloppe sonore mesurée avec FFmpeg, les repères de Suno étant souvent décalés.
+
+| Effet | Usage | Coupe (s) | Gain |
+| --- | --- | --- | --- |
+| `flip` | retourner une carte | 0,33 à 0,80 | −4 dB |
+| `collect` | ajout au garage | 0 à 0,85 | 0 |
+| `legend` | victoire parfaite, évolution, thème débloqué | 0,05 à 1,6 | 0 |
+| `win` | victoire | 0 à 2,0 | 0 |
+| `lose` | défaite | 0 à 2,7 | −2 dB |
+| `slam` | verdict d’un secteur | 0,15 à 0,9 | −2 dB |
+| `rare` | révélation d’une carte rare | 0,05 à 1,2 | 0 |
+| `epic` | révélation d’une carte épique | 0,55 à 1,9 | 0 |
+| `rev` | départ de course | 0 à 1,8 | 0 |
+| `whoosh` | transitions | 0,2 à 0,8 | −6 dB |
+| `error` | action refusée | 0,04 à 0,55 | 0 |
+| `coin` | gain de crédits | 0 à 0,35 | −6 dB |
+
+Les identifiants des prises retenues sont dans `pipeline/audio.mjs`. Pour remonter un effet : `node pipeline/audio.mjs <dossier des exports nommés par identifiant> <nom…>`. `upgrade` (prise ratée : musique hip-hop), `tap` et `tick` (trop courts pour Suno) restent synthétisés. Après ce lot, le compte Suno disposait de 3 910 crédits et de 7 téléchargements.
