@@ -4,6 +4,23 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier.
 
+## [0.4.0] — 2026-11-16
+
+### Ajouté
+
+- **Version ordinateur.** Sur un grand écran, les onglets passent dans la barre du haut, la préparation d’une course s’affiche sur deux colonnes (le briefing à gauche, ton écurie et ton garage à droite), la barre de filtres reste compacte et les voitures du duel sont centrées. Rien ne change sur téléphone ni sur tablette.
+- **Personnalités des rivaux.** Les six rivaux ont un caractère, un style et des goûts. Leur portrait et leur réplique d’accueil apparaissent sur l’écran de préparation, et ils te répondent à la fin du duel, que tu gagnes, perdes ou réussisses une victoire parfaite.
+- **Tri « Adaptée au circuit »** pour choisir les voitures d’une course.
+
+### Modifié
+
+- **Un seul sélecteur de voitures.** Le garage et la préparation d’une course utilisent les mêmes filtres : rareté, tri, recherche, catégorie et nombre de voitures par ligne. Tes réglages sont gardés d’un écran à l’autre.
+- **Courses plus fluides.** Le bouton pour avancer (« Lancer la course », « Engager », « Secteur suivant », « Voir le résultat », « Manche suivante ») reste toujours visible en bas de l’écran, et la page suit l’étape en cours : plus besoin de faire défiler pour le retrouver.
+- **Nouveau style des boutons**, plus anguleux et en relief, pour les filtres du garage, les spéciales et les rivaux.
+- **Réglages en trois onglets** : Paramètres, Thèmes (groupes repliables) et Aide (tout le lexique). Le bouton « ? » de l’en-tête est retiré.
+- **Pièces mécaniques.** Un booster contient au plus deux pièces. Environ 48 % des sachets Neon Drive, 55 % des After Hours et 63 % des Overdrive en contiennent au moins une.
+- **Récompenses détaillées** sur les rivaux, la boutique et la fin de duel : crédits, ticket de booster nommé et bonus de victoire parfaite.
+
 ## [0.3.2] — 2026-11-15
 
 ### Ajouté

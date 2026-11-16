@@ -45,7 +45,7 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 7. **Debug** (fait) : 14 appuis sur le logo donnent 1 000 crédits, uniquement avec `import.meta.env.DEV` (absent du build de production).
 8. **Courses fluides** (demande ajoutée en cours de route, fait) : l’action principale de chaque étape d’un duel reste collée au-dessus de la barre d’onglets, et le défilement suit l’étape.
 
-**Reste à faire après le desktop** : un bilan complet (parcours mobile et desktop de toute la branche), puis **version 0.4.0** avec son entrée dans `CHANGELOG.md`, push de `feat/gaming-ui` vers `prototype/mobile-tcg` (toujours `git ls-remote --heads origin` avant), tag `v0.4.0` et release GitHub si le joueur la veut. **Ne rien pousser sans l’accord du joueur.**
+**Bilan fait le 16 novembre** : parcours complet Neon Drive (boutique, ouverture, garage, fiche, course jusqu’à l’arrivée, rivaux, boutique, réglages) réussi à 320, 390 et 1280 px, sans erreur ni débordement, captures relues. Remarque non traitée : à 320 px, les boutons de fin de duel (« Rivaux », « Préparer au garage ») restent sous la barre d’onglets et demandent un défilement. **Version 0.4.0** posée (`package.json`, `CHANGELOG.md`). **Reste** : push de `feat/gaming-ui` vers `prototype/mobile-tcg` (toujours `git ls-remote --heads origin` avant), tag `v0.4.0` et release GitHub si le joueur la veut. **Ne rien pousser sans l’accord du joueur.**
 
 **Ce qui a été appris**
 - L’outil de test navigateur (`orchestrator/browser.ts`) couvre 320, 390 **et 1280 px** ; la garde du cycle exige 3 contrôles et la revue d’Antigravity doit consulter des captures des trois largeurs. Passer le chemin du build en **absolu** (un chemin avec `..` est refusé).
