@@ -134,8 +134,8 @@ export async function invoke(
     if (phase === 'ux' && report.status !== 'blocked') {
       const observed = (await readFile(join(step, 'inspected.ndjson'), 'utf8').catch(() => '')).split('\n')
         .filter(Boolean).map(line => JSON.parse(line))
-      if (!observed.some(file => /^320-/.test(file)) || !observed.some(file => /^390-/.test(file))) {
-        return { problem: 'Antigravity n’a pas consulté les captures des deux formats mobiles', tokens }
+      if (!observed.some(file => /^320-/.test(file)) || !observed.some(file => /^390-/.test(file)) || !observed.some(file => /^1280-/.test(file))) {
+        return { problem: 'Antigravity n’a pas consulté les captures des trois formats (320, 390 et 1280 px)', tokens }
       }
     }
     return { report, tokens }
