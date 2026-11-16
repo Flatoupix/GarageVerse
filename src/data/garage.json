@@ -135,7 +135,7 @@
       "style": "Tenace",
       "likes": "les voitures de rallye",
       "intro": "Serre ton harnais. Tu vas devoir tenir jusqu’au dernier virage.",
-      "win": "Tu t’es battu jusqu’au bout. Victoire méritée !",
+      "win": "Tu as tenu bon jusqu’au bout. Victoire méritée !",
       "lose": "Tu lâches du terrain à la relance. Travaille ça et reviens !",
       "perfect": "Tous les secteurs ! Tu pourrais ouvrir la route de mon prochain rallye.",
       "circuit": { "name": "Col des Spectres", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "terre": 2, "pluie": 3, "sec": 2, "nuit": 1 } },
