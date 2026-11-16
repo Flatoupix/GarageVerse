@@ -4777,646 +4777,1099 @@
     "at": "2026-11-16T15:28:49.738Z"
   },
   "cars/civiceg-abandonnee": {
-    "status": "failed",
-    "engine": "codex",
-    "seconds": 6,
-    "tokens": 5379,
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 130,
     "prompt": "3c6c3b0014",
-    "at": "2026-11-16T15:28:55.800Z",
-    "detail": "tokens used | 5 379"
+    "at": "2026-11-16T18:13:10.710Z"
   },
   "cars/kangoo-solarpunk": {
-    "status": "failed",
-    "engine": "codex",
-    "seconds": 53,
-    "tokens": 16064,
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 113,
     "prompt": "f8a37af388",
-    "at": "2026-11-16T15:29:14.163Z",
-    "detail": "tokens used | 16 064"
+    "at": "2026-11-16T18:08:37.421Z"
   },
   "cars/kangoo-abandonnee": {
-    "status": "failed",
-    "engine": "codex",
-    "seconds": 76,
-    "tokens": 10684,
+    "status": "ok",
+    "engine": "agy",
+    "seconds": 134,
     "prompt": "54808c7b2f",
-    "at": "2026-11-16T15:29:57.824Z",
-    "detail": "tokens used | 10 684"
+    "at": "2026-11-16T18:10:51.726Z"
   },
   "cars/micra-solarpunk": {
-    "status": "failed",
+    "status": "ok",
     "engine": "agy",
-    "seconds": 221,
+    "seconds": 132,
     "prompt": "02d4e011ff",
-    "at": "2026-11-16T15:32:36.872Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T18:13:12.997Z"
   },
   "cars/micra-abandonnee": {
-    "status": "failed",
+    "status": "ok",
     "engine": "agy",
-    "seconds": 218,
+    "seconds": 130,
     "prompt": "bbdd7b1ec5",
-    "at": "2026-11-16T15:32:51.885Z",
-    "detail": "I am generating the image now. I'll let you know once it's done."
+    "at": "2026-11-16T18:15:20.885Z"
   },
   "cars/civiceg-solarpunk": {
-    "status": "failed",
+    "status": "ok",
     "engine": "agy",
-    "seconds": 247,
+    "seconds": 140,
     "prompt": "2a4b2a3899",
-    "at": "2026-11-16T15:32:52.668Z",
-    "detail": "Le sous-agent de génération d'image a été lancé. En attente de la fin de la génération..."
+    "at": "2026-11-16T18:13:21.093Z"
   },
   "cars/swift-solarpunk": {
-    "status": "failed",
+    "status": "ok",
     "engine": "agy",
-    "seconds": 235,
+    "seconds": 127,
     "prompt": "5a7fcf1416",
-    "at": "2026-11-16T15:33:52.368Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T18:15:20.280Z"
   },
   "cars/swift-abandonnee": {
-    "status": "failed",
+    "status": "ok",
     "engine": "agy",
-    "seconds": 230,
+    "seconds": 111,
     "prompt": "9d34f6a2ed",
-    "at": "2026-11-16T15:36:26.426Z",
-    "detail": "I have started generating the image with the requested specifications. I will let you know as soon as it is completed."
+    "at": "2026-11-16T18:15:12.414Z"
   },
   "cars/niva-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 13565,
     "prompt": "1c8fcc5598",
-    "at": "2026-11-16T15:36:32.202Z",
-    "detail": "I have launched the image generator subagent to create the image. I will wait for it to complete."
+    "at": "2026-11-16T19:18:57.506Z"
   },
   "cars/niva-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 227,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 17469,
     "prompt": "669493e59c",
-    "at": "2026-11-16T15:36:38.916Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:18:23.909Z"
   },
   "cars/duster-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 223,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 14050,
     "prompt": "7f4bb1f173",
-    "at": "2026-11-16T15:37:35.841Z",
-    "detail": "La génération d'image a échoué car le modèle requis (`gemini-3-pro-image`) n'est actuellement pas disponible dans la région `eu` configurée côté API (erreur HTTP 404 / `NOT_FOUND`).  | L'image n'a donc pas pu être créée. Pour que l'outil fonctionne, il faudrait que la région de l'API / du projet soit configurée sur une région supportant ce modèle (comme `us-central1`)."
+    "at": "2026-11-16T19:18:39.469Z"
   },
   "cars/volvo240-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 21380,
     "prompt": "c1eda306e0",
-    "at": "2026-11-16T15:40:12.571Z",
-    "detail": "Tu n'as rien à faire pour le moment, la génération de l'image est en cours. | La génération de l'image a échoué : le modèle de génération d'images (`gemini-3-pro-image`) n'est pas disponible dans la région actuelle (`eu`, erreur 404 : NOT_FOUND). Aucune image n'a pu être créée."
+    "at": "2026-11-16T19:19:15.584Z"
   },
   "cars/volvo240-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 225,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 78,
+    "tokens": 21706,
     "prompt": "ce485d90c8",
-    "at": "2026-11-16T15:40:23.750Z",
-    "detail": "Waiting for the image to be generated..."
+    "at": "2026-11-16T19:19:57.003Z"
   },
   "cars/duster-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 269,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 13385,
     "prompt": "49883f1068",
-    "at": "2026-11-16T15:40:55.072Z",
-    "detail": "La génération de l'image a échoué en raison d'une indisponibilité côté infrastructure : le modèle `gemini-3-pro-image` n'est actuellement pas disponible dans la région `eu` (erreur 404 `NOT_FOUND`).  | Aucun fichier n'a été créé ou modifié."
+    "at": "2026-11-16T19:18:57.586Z"
   },
   "cars/mini65-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 221,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 22452,
     "prompt": "6178ce208d",
-    "at": "2026-11-16T15:41:16.464Z",
-    "detail": "*Waiting for image generation...*"
+    "at": "2026-11-16T19:20:05.712Z"
   },
   "cars/mini65-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 223,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 15981,
     "prompt": "87502e942a",
-    "at": "2026-11-16T15:43:55.083Z",
-    "detail": "I will wait for the image generation to complete."
+    "at": "2026-11-16T19:19:55.247Z"
   },
   "cars/fiat500-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 41339,
     "prompt": "18bc3e744e",
-    "at": "2026-11-16T15:44:02.653Z",
-    "detail": "I have launched the image generator subagent to create the image. Waiting for it to complete."
+    "at": "2026-11-16T19:20:08.183Z"
   },
   "cars/fiat500-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 224,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 17631,
     "prompt": "7ae4b0c05e",
-    "at": "2026-11-16T15:44:38.786Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:20:52.662Z"
   },
   "cars/twizy-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 19453,
     "prompt": "d80169fdad",
-    "at": "2026-11-16T15:44:56.014Z",
-    "detail": "I have launched the image generation task and am waiting for the subagent to complete it."
+    "at": "2026-11-16T19:21:03.214Z"
   },
   "cars/twizy-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 229,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 73,
+    "tokens": 21621,
     "prompt": "8289434125",
-    "at": "2026-11-16T15:47:44.453Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:21:19.093Z"
   },
   "cars/smart-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 269,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 21626,
     "prompt": "a6fe087fff",
-    "at": "2026-11-16T15:48:31.453Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:20:58.706Z"
   },
   "cars/smart-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 239,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 17151,
     "prompt": "a1026f14d5",
-    "at": "2026-11-16T15:48:37.308Z",
-    "detail": "I will wait for the image generation to complete."
+    "at": "2026-11-16T19:21:37.581Z"
   },
   "cars/mehari-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 237,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 18920,
     "prompt": "7ce3d5ce71",
-    "at": "2026-11-16T15:48:53.293Z",
-    "detail": "> `NOT_FOUND (code 404): Model 'gemini-3-pro-image' is not available in 'eu' region.` | Le modèle de génération d'images utilisé en arrière-plan (`gemini-3-pro-image`) n'est actuellement pas déployé ou accessible dans la région `eu`. Il n'est donc pas possible de générer l'image `gv_cars_mehari_solarpunk` depuis cette région pour le moment."
+    "at": "2026-11-16T19:21:42.698Z"
   },
   "cars/mehari-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 21621,
     "prompt": "2c6139ccd2",
-    "at": "2026-11-16T15:51:24.287Z",
-    "detail": "Non-blocking background work ongoing. Waiting for the image generation to complete."
+    "at": "2026-11-16T19:22:10.717Z"
   },
   "cars/defender-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 75,
+    "tokens": 17551,
     "prompt": "607386c488",
-    "at": "2026-11-16T15:52:10.880Z",
-    "detail": "I am generating the image now and waiting for it to finish."
+    "at": "2026-11-16T19:22:34.480Z"
   },
   "cars/wrangler-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 16958,
     "prompt": "90ebfe9b0e",
-    "at": "2026-11-16T15:52:34.963Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:22:31.240Z"
   },
   "cars/defender-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 248,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 70,
+    "tokens": 21216,
     "prompt": "a3549e6a73",
-    "at": "2026-11-16T15:52:45.466Z",
-    "detail": "Got it, I have initiated the image generation and am waiting for completion."
+    "at": "2026-11-16T19:22:47.665Z"
   },
   "cars/wrangler-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 22893,
     "prompt": "7790d8332c",
-    "at": "2026-11-16T15:55:03.033Z",
-    "detail": "Tu n'as plus d'outils à exécuter pour le moment, j'attends la notification de fin de génération du sous-agent."
+    "at": "2026-11-16T19:23:00.324Z"
   },
   "cars/explorer-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 217,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 13825,
     "prompt": "ecb15f8b91",
-    "at": "2026-11-16T15:55:48.197Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:23:26.309Z"
   },
   "cars/combi-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 224,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 41200,
     "prompt": "4f40774ab9",
-    "at": "2026-11-16T15:56:29.182Z",
-    "detail": "I've initiated the image generation task. Waiting for completion..."
+    "at": "2026-11-16T19:23:39.651Z"
   },
   "cars/explorer-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 238,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 69,
+    "tokens": 17266,
     "prompt": "6c5aab5e72",
-    "at": "2026-11-16T15:56:32.816Z",
-    "detail": "I have started generating the image. Waiting for completion..."
+    "at": "2026-11-16T19:23:43.243Z"
   },
   "cars/combi-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 17220,
     "prompt": "5aa3aceba8",
-    "at": "2026-11-16T15:58:42.099Z",
-    "detail": "Waiting for the image generator subagent to complete..."
+    "at": "2026-11-16T19:24:07.439Z"
   },
   "cars/hilux-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 12984,
     "prompt": "407e10132a",
-    "at": "2026-11-16T15:59:27.264Z",
-    "detail": "**WAITING FOR SUBAGENT** - e0fd03b0-e764-4ac3-8628-269c25419f14 (Image Generator)"
+    "at": "2026-11-16T19:24:16.285Z"
   },
   "cars/hilux-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 217,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 21859,
     "prompt": "ae0a158440",
-    "at": "2026-11-16T16:00:06.028Z",
-    "detail": "I have started generating the image. Waiting for completion..."
+    "at": "2026-11-16T19:24:29.556Z"
   },
   "cars/p504-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 17227,
     "prompt": "6adeb9ac40",
-    "at": "2026-11-16T16:00:15.260Z",
-    "detail": "Waiting for the image to be generated."
+    "at": "2026-11-16T19:24:47.178Z"
   },
   "cars/p504-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 224,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 17107,
     "prompt": "015350144c",
-    "at": "2026-11-16T16:02:25.766Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:24:59.666Z"
   },
   "cars/simca-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 226,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 22613,
     "prompt": "b821a590f5",
-    "at": "2026-11-16T16:03:13.569Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:25:19.903Z"
   },
   "cars/simca-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 273,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 18299,
     "prompt": "fcbc990928",
-    "at": "2026-11-16T16:04:39.034Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:25:33.849Z"
   },
   "cars/transit-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 264,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 70,
+    "tokens": 13238,
     "prompt": "8ed3f9d8a0",
-    "at": "2026-11-16T16:04:39.082Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:25:57.027Z"
   },
   "cars/transit-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 227,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 70,
+    "tokens": 13949,
     "prompt": "490d653a17",
-    "at": "2026-11-16T16:06:12.877Z",
-    "detail": "I have initiated the image generation. I will wait for it to complete."
+    "at": "2026-11-16T19:26:09.419Z"
   },
   "cars/r5gt-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 225,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 77,
+    "tokens": 13491,
     "prompt": "bfe9e6ab76",
-    "at": "2026-11-16T16:06:58.691Z",
-    "detail": "No response needed yet; waiting for subagent."
+    "at": "2026-11-16T19:26:36.557Z"
   },
   "cars/ae86-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 17373,
     "prompt": "c2b1130ab8",
-    "at": "2026-11-16T16:08:19.010Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:26:59.409Z"
   },
   "cars/r5gt-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 239,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 21866,
     "prompt": "6f4896cfe5",
-    "at": "2026-11-16T16:08:37.712Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:26:27.634Z"
   },
   "cars/ae86-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 78,
+    "tokens": 21147,
     "prompt": "8f3c91f42b",
-    "at": "2026-11-16T16:09:54.872Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:27:27.261Z"
   },
   "cars/rx7-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 221,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 26419,
     "prompt": "fbcd837a1c",
-    "at": "2026-11-16T16:10:39.352Z",
-    "detail": "I will generate the image as requested. Please hold on."
+    "at": "2026-11-16T19:27:09.510Z"
   },
   "cars/rx7-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 17695,
     "prompt": "e00fc01333",
-    "at": "2026-11-16T16:12:00.809Z",
-    "detail": "Watching for the image generation to complete..."
+    "at": "2026-11-16T19:27:37.848Z"
   },
   "cars/impreza-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 221,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 13236,
     "prompt": "c545041942",
-    "at": "2026-11-16T16:12:19.173Z",
-    "detail": "I have initiated the image generation. Waiting for it to complete."
+    "at": "2026-11-16T19:27:51.080Z"
   },
   "cars/impreza-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 236,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 70,
+    "tokens": 18826,
     "prompt": "4fb159e8fe",
-    "at": "2026-11-16T16:13:50.757Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:28:19.227Z"
   },
   "cars/cosworth-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 230,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 21670,
     "prompt": "f512e0a5aa",
-    "at": "2026-11-16T16:14:29.796Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:28:17.183Z"
   },
   "cars/cosworth-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 231,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 40000,
     "prompt": "9dd486c4cb",
-    "at": "2026-11-16T16:15:51.350Z",
-    "detail": "I have launched the image generation task. I'll notify you as soon as it's completed."
+    "at": "2026-11-16T19:29:01.263Z"
   },
   "cars/quattro-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 223,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 13553,
     "prompt": "b369d36841",
-    "at": "2026-11-16T16:16:01.767Z",
-    "detail": "Got it, I've started the generation process. Waiting for completion..."
+    "at": "2026-11-16T19:28:44.399Z"
   },
   "cars/quattro-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 90,
+    "tokens": 13204,
     "prompt": "9442a24d75",
-    "at": "2026-11-16T16:17:30.207Z",
-    "detail": "Le sous-agent responsable de la génération d'image a été lancé. J'attends la notification de fin de génération."
+    "at": "2026-11-16T19:29:47.580Z"
   },
   "cars/m3e30-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 263,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 17291,
     "prompt": "343aa4808c",
-    "at": "2026-11-16T16:18:52.541Z",
-    "detail": "No response needed. I am waiting for the subagent to complete the task."
+    "at": "2026-11-16T19:29:10.541Z"
   },
   "cars/m3e30-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 221,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 21368,
     "prompt": "7d73b88247",
-    "at": "2026-11-16T16:19:32.297Z",
-    "detail": "I am generating the image. I will notify you once it's complete."
+    "at": "2026-11-16T19:29:38.170Z"
   },
   "cars/evo2-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 228,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 69,
+    "tokens": 42052,
     "prompt": "31ff97c5bc",
-    "at": "2026-11-16T16:19:49.334Z",
-    "detail": "> `NOT_FOUND (code 404): Model 'gemini-3-pro-image' is not available in 'eu' region.` | L'outil `generate_image` est actuellement configuré sur la région `eu`, où le modèle `gemini-3-pro-image` n'est pas encore déployé/accessible. Le fichier `gv_cars_evo2_solarpunk` n'a donc pas pu être généré."
+    "at": "2026-11-16T19:30:09.996Z"
   },
   "cars/evo2-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 226,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 18292,
     "prompt": "d87d82d9f7",
-    "at": "2026-11-16T16:21:15.757Z",
-    "detail": "**Task launched.** Waiting for the image generation to complete."
+    "at": "2026-11-16T19:30:18.463Z"
   },
   "cars/golf2-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 232,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 56,
+    "tokens": 13103,
     "prompt": "8d1f50f3ba",
-    "at": "2026-11-16T16:22:44.182Z",
-    "detail": "Subagent lancé. J'attends la génération de l'image."
+    "at": "2026-11-16T19:30:34.050Z"
   },
   "cars/golf2-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 70,
+    "tokens": 19756,
     "prompt": "1f0d045b7b",
-    "at": "2026-11-16T16:23:14.556Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:30:57.591Z"
   },
   "cars/r32-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 262,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 22855,
     "prompt": "d3c43405ef",
-    "at": "2026-11-16T16:24:11.086Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:30:57.106Z"
   },
   "cars/r32-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 218,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 24038,
     "prompt": "a37a331c63",
-    "at": "2026-11-16T16:24:54.143Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:31:41.654Z"
   },
   "cars/celica-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 12954,
     "prompt": "3f4356a41a",
-    "at": "2026-11-16T16:26:25.687Z",
-    "detail": "Everything's set up! I have invoked the image generator subagent to produce the image according to your brief and will notify you as soon as it completes."
+    "at": "2026-11-16T19:31:18.722Z"
   },
   "cars/celica-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 266,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 59,
+    "tokens": 16828,
     "prompt": "9c4a1f94a7",
-    "at": "2026-11-16T16:27:40.653Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:31:56.503Z"
   },
   "cars/camaro-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 221,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 20038,
     "prompt": "19a1404ea6",
-    "at": "2026-11-16T16:27:51.704Z",
-    "detail": "*Waiting for image generation to complete...*"
+    "at": "2026-11-16T19:31:50.210Z"
   },
   "cars/camaro-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 264,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 24698,
     "prompt": "bbdee81157",
-    "at": "2026-11-16T16:29:17.907Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:32:04.089Z"
   },
   "cars/mustang67-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 20168,
     "prompt": "118cb1f672",
-    "at": "2026-11-16T16:30:05.712Z",
-    "detail": "I have started generating the image. I will let you know once it is ready."
+    "at": "2026-11-16T19:32:42.459Z"
   },
   "cars/mustang67-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 17404,
     "prompt": "db586e52f0",
-    "at": "2026-11-16T16:31:19.249Z",
-    "detail": "jetski: no output produced — a tool required the \"command\" permission that headless mode cannot prompt for, so it was auto-denied. Add an allow-rule under permissions.allow in settings.json (e.g. command(<target>)). Alternatively, re-run with --dangerously-skip-permissions to auto-approve all tools."
+    "at": "2026-11-16T19:32:56.217Z"
   },
   "cars/charger-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 230,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 82,
+    "tokens": 18171,
     "prompt": "dea9d566d6",
-    "at": "2026-11-16T16:31:41.594Z",
-    "detail": "Tu seras notifié dès que la génération sera terminée."
+    "at": "2026-11-16T19:33:18.764Z"
   },
   "cars/charger-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 220,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 21691,
     "prompt": "bc1b372ceb",
-    "at": "2026-11-16T16:32:57.652Z",
-    "detail": "Waiting for image generation to complete..."
+    "at": "2026-11-16T19:33:01.661Z"
   },
   "cars/eleanor-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 224,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 16821,
     "prompt": "f70cabcd46",
-    "at": "2026-11-16T16:33:49.635Z",
-    "detail": "No response needed yet. Waiting for the image generation subagent to complete."
+    "at": "2026-11-16T19:33:29.366Z"
   },
   "cars/eleanor-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 232,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 21539,
     "prompt": "70475530f4",
-    "at": "2026-11-16T16:35:10.865Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:33:54.068Z"
   },
   "cars/domcharger-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 223,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 17574,
     "prompt": "4f265222b4",
-    "at": "2026-11-16T16:35:25.078Z",
-    "detail": "Got it, the subagent has been launched. Waiting for image generation to complete..."
+    "at": "2026-11-16T19:33:56.029Z"
   },
   "cars/domcharger-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 309,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 17622,
     "prompt": "45371d2445",
-    "at": "2026-11-16T16:38:06.596Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:34:16.475Z"
   },
   "cars/countach-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 277,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 21918,
     "prompt": "69000e9f22",
-    "at": "2026-11-16T16:38:26.459Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:34:17.044Z"
   },
   "cars/countach-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 223,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 15923,
     "prompt": "14334b716e",
-    "at": "2026-11-16T16:38:53.772Z",
-    "detail": "Tu n'as rien d'autre à faire pour l'instant, j'attends la génération de l'image."
+    "at": "2026-11-16T19:34:59.827Z"
   },
   "cars/testarossa-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 232,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 20249,
     "prompt": "16d41821b3",
-    "at": "2026-11-16T16:39:16.670Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:34:45.874Z"
   },
   "cars/testarossa-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 235,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 25968,
     "prompt": "0e53836adc",
-    "at": "2026-11-16T16:42:01.374Z",
-    "detail": "*Waiting for image generation to complete...*"
+    "at": "2026-11-16T19:35:10.386Z"
   },
   "cars/jpjeep-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 225,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 17263,
     "prompt": "b14f50e848",
-    "at": "2026-11-16T16:42:11.573Z",
-    "detail": "root agent idle; waiting up to 7m0s for 1 background task(s)"
+    "at": "2026-11-16T19:35:03.628Z"
   },
   "cars/jpjeep-abandonnee": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 225,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 19739,
     "prompt": "98626b96e2",
-    "at": "2026-11-16T16:42:38.464Z",
-    "detail": "**Image generation initiated.** | I'm waiting for the `image-generator` subagent to complete the generation of `gv_cars_jpjeep_abandonnee`."
+    "at": "2026-11-16T19:35:53.909Z"
   },
   "cars/interceptor-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 222,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 16563,
     "prompt": "5f25594db9",
-    "at": "2026-11-16T16:42:59.078Z",
-    "detail": "Waiting for the image generation to complete..."
+    "at": "2026-11-16T19:35:49.683Z"
   },
   "cars/multipla-solarpunk": {
-    "status": "failed",
-    "engine": "agy",
-    "seconds": 219,
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 30391,
     "prompt": "10759a3821",
-    "at": "2026-11-16T16:45:50.951Z",
-    "detail": "No response text needed yet."
+    "at": "2026-11-16T19:36:13.573Z"
+  },
+  "cars/interceptor-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 19152,
+    "prompt": "adf186102f",
+    "at": "2026-11-16T19:35:55.441Z"
+  },
+  "cars/multipla-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 21391,
+    "prompt": "8675f80cbd",
+    "at": "2026-11-16T19:36:43.503Z"
+  },
+  "cars/1000tipla-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 13855,
+    "prompt": "19b1710bdf",
+    "at": "2026-11-16T19:36:52.082Z"
+  },
+  "cars/p205gl-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 13148,
+    "prompt": "db6c672700",
+    "at": "2026-11-16T19:37:01.696Z"
+  },
+  "cars/1000tipla-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 44180,
+    "prompt": "2628d0091d",
+    "at": "2026-11-16T19:37:03.478Z"
+  },
+  "cars/p106xn-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 22321,
+    "prompt": "9fbd38bc6b",
+    "at": "2026-11-16T19:37:37.340Z"
+  },
+  "cars/p205gl-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 72,
+    "tokens": 21595,
+    "prompt": "715b41e586",
+    "at": "2026-11-16T19:37:55.849Z"
+  },
+  "cars/saxo11-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 13658,
+    "prompt": "c3176d7147",
+    "at": "2026-11-16T19:38:08.157Z"
+  },
+  "cars/p106xn-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 19946,
+    "prompt": "75e1dfa4ac",
+    "at": "2026-11-16T19:38:08.471Z"
+  },
+  "cars/saxo11-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 21699,
+    "prompt": "b23edeec72",
+    "at": "2026-11-16T19:38:43.173Z"
+  },
+  "cars/ax10-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 18074,
+    "prompt": "4b37a26d65",
+    "at": "2026-11-16T19:38:44.362Z"
+  },
+  "cars/r5five-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 21851,
+    "prompt": "0a87ccf041",
+    "at": "2026-11-16T19:38:51.979Z"
+  },
+  "cars/ax10-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 19719,
+    "prompt": "f718d67a4c",
+    "at": "2026-11-16T19:39:15.154Z"
+  },
+  "cars/uno45-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 45,
+    "tokens": 22532,
+    "prompt": "9edcf4922b",
+    "at": "2026-11-16T19:39:28.964Z"
+  },
+  "cars/r5five-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 17891,
+    "prompt": "5b14f20738",
+    "at": "2026-11-16T19:39:35.348Z"
+  },
+  "cars/uno45-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 26368,
+    "prompt": "93c0af80ca",
+    "at": "2026-11-16T19:39:40.253Z"
+  },
+  "cars/fiesta11-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 22912,
+    "prompt": "06500828e2",
+    "at": "2026-11-16T19:40:01.905Z"
+  },
+  "cars/fiesta11-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 26183,
+    "prompt": "7c5481e1ba",
+    "at": "2026-11-16T19:40:16.912Z"
+  },
+  "cars/swift10-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 34358,
+    "prompt": "1410c6fe88",
+    "at": "2026-11-16T19:40:37.483Z"
+  },
+  "cars/swift10-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 17260,
+    "prompt": "7c1c6b0e8a",
+    "at": "2026-11-16T19:40:48.455Z"
+  },
+  "cars/mini850-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 33823,
+    "prompt": "6748271fa2",
+    "at": "2026-11-16T19:41:08.014Z"
+  },
+  "cars/mini850-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 22048,
+    "prompt": "9217e50e87",
+    "at": "2026-11-16T19:41:09.835Z"
+  },
+  "cars/fiat500b-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 23023,
+    "prompt": "ec8bbb7a03",
+    "at": "2026-11-16T19:41:29.917Z"
+  },
+  "cars/simcals-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 42,
+    "tokens": 22856,
+    "prompt": "b3dd9cc27c",
+    "at": "2026-11-16T19:41:50.020Z"
+  },
+  "cars/fiat500b-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 22732,
+    "prompt": "192d92fa66",
+    "at": "2026-11-16T19:41:51.479Z"
+  },
+  "cars/a1101100-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 13411,
+    "prompt": "57c8c77c57",
+    "at": "2026-11-16T19:42:13.997Z"
+  },
+  "cars/simcals-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 17254,
+    "prompt": "a0bd5a2e80",
+    "at": "2026-11-16T19:42:15.326Z"
+  },
+  "cars/golf11-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 11620,
+    "prompt": "6abdb20ad7",
+    "at": "2026-11-16T19:42:39.487Z"
+  },
+  "cars/a1101100-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 17244,
+    "prompt": "08ea021baf",
+    "at": "2026-11-16T19:42:56.033Z"
+  },
+  "cars/golf11-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 21298,
+    "prompt": "78544728f3",
+    "at": "2026-11-16T19:43:02.765Z"
+  },
+  "cars/scirocco14-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 17260,
+    "prompt": "e97c780f96",
+    "at": "2026-11-16T19:43:18.509Z"
+  },
+  "cars/scirocco14-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 17590,
+    "prompt": "c387663c30",
+    "at": "2026-11-16T19:43:46.766Z"
+  },
+  "cars/impreza16-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 21263,
+    "prompt": "01ecaead70",
+    "at": "2026-11-16T19:43:49.638Z"
+  },
+  "cars/impreza16-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 19369,
+    "prompt": "d6ea68423d",
+    "at": "2026-11-16T19:43:49.847Z"
+  },
+  "cars/lancer16-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 17559,
+    "prompt": "ea969ed379",
+    "at": "2026-11-16T19:44:23.239Z"
+  },
+  "cars/lancer16-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 17851,
+    "prompt": "57a0da7f80",
+    "at": "2026-11-16T19:44:37.492Z"
+  },
+  "cars/delta16-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 21779,
+    "prompt": "2a1cc4a9b9",
+    "at": "2026-11-16T19:44:41.372Z"
+  },
+  "cars/delta16-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 71,
+    "tokens": 16961,
+    "prompt": "e93652e2da",
+    "at": "2026-11-16T19:45:01.310Z"
+  },
+  "cars/escort14-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 13342,
+    "prompt": "898b0faf56",
+    "at": "2026-11-16T19:45:06.374Z"
+  },
+  "cars/escort14-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 18104,
+    "prompt": "416013b565",
+    "at": "2026-11-16T19:45:28.152Z"
+  },
+  "cars/celica18-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 21172,
+    "prompt": "6777c5b76c",
+    "at": "2026-11-16T19:45:41.646Z"
+  },
+  "cars/celica18-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 1095,
+    "tokens": 31324,
+    "prompt": "41d14ffc59",
+    "at": "2026-11-16T20:03:16.181Z"
+  },
+  "cars/e190-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 1116,
+    "tokens": 22953,
+    "prompt": "f73ba76bfe",
+    "at": "2026-11-16T20:03:42.636Z"
+  },
+  "cars/e190-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 1096,
+    "tokens": 17819,
+    "prompt": "3187f08157",
+    "at": "2026-11-16T20:03:43.662Z"
+  },
+  "cars/e30316-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 15747,
+    "prompt": "688067dec7",
+    "at": "2026-11-16T20:04:02.649Z"
+  },
+  "cars/e30316-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 1120,
+    "tokens": 34053,
+    "prompt": "1cdb6f364a",
+    "at": "2026-11-16T20:04:21.643Z"
+  },
+  "cars/p911sc-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 30917,
+    "prompt": "de27bb132d",
+    "at": "2026-11-16T20:04:29.843Z"
+  },
+  "cars/p911sc-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 15838,
+    "prompt": "ebc7f08be8",
+    "at": "2026-11-16T20:04:50.907Z"
+  },
+  "cars/c4-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 12926,
+    "prompt": "6163d37fe7",
+    "at": "2026-11-16T20:04:56.259Z"
+  },
+  "cars/c4-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 13231,
+    "prompt": "0df03277ef",
+    "at": "2026-11-16T20:05:15.705Z"
+  },
+  "cars/camaro250-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 76,
+    "tokens": 17516,
+    "prompt": "230d834beb",
+    "at": "2026-11-16T20:05:45.708Z"
+  },
+  "cars/charger318-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 18066,
+    "prompt": "1fb6a07ada",
+    "at": "2026-11-16T20:05:50.124Z"
+  },
+  "cars/camaro250-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 68,
+    "tokens": 13182,
+    "prompt": "ba827975a1",
+    "at": "2026-11-16T20:05:58.437Z"
+  },
+  "cars/charger318-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 13711,
+    "prompt": "7d80aa6d02",
+    "at": "2026-11-16T20:06:18.399Z"
+  },
+  "cars/challsxt-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 17492,
+    "prompt": "c4be22f124",
+    "at": "2026-11-16T20:06:45.931Z"
+  },
+  "cars/mustangeco-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 18475,
+    "prompt": "08fc3e0a88",
+    "at": "2026-11-16T20:06:47.938Z"
+  },
+  "cars/mustangeco-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 18123,
+    "prompt": "850efcaa95",
+    "at": "2026-11-16T20:06:54.745Z"
+  },
+  "cars/challsxt-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 34145,
+    "prompt": "b0775e25e9",
+    "at": "2026-11-16T20:07:07.113Z"
   }
 }

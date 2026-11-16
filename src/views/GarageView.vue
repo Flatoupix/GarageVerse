@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import { boosterById, families, parts, rarities, rarityClass, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
-import { claimSeries, seriesComplete, seriesProgress, freeParts, prepOf } from '../game/save'
+import { claimSeries, craftCheck, seriesComplete, seriesProgress, freeParts, prepOf, totalMountedParts, uninstallAll } from '../game/save'
 import { act, ownedCount, reducedMotion, save } from '../game/store'
 import { edition } from '../game/art'
 import { confetti, palettes } from '../game/fx'
@@ -28,6 +28,15 @@ const rarityFilter = computed<'' | Rarity>({
 })
 const family = ref('')
 const showMissing = ref(false)
+const confirmingStripAll = ref(false)
+const mountedPartsCount = computed(() => totalMountedParts(save))
+const hasReadyEvo = (id: string) => vehicles.some(e => e.evolvesFrom === id && !save.cars[e.id] && !craftCheck(save, e.id))
+function stripAllParts() {
+  const count = mountedPartsCount.value
+  if (act(s => uninstallAll(s), `${count} pièce${count > 1 ? 's' : ''} rendue${count > 1 ? 's' : ''} au stock`, 'flip')) {
+    confirmingStripAll.value = false
+  }
+}
 const sort = computed({
   get: () => save.preferences.garageSort ?? 'number',
   set: (value: string) => { act(s => { s.preferences.garageSort = value }) },
@@ -176,6 +185,16 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
           <template v-else>
             <label><span>Famille</span><select v-model="family"><option value="">Toutes</option><option v-for="(label, id) in families" :key="id" :value="id">{{ label }}</option></select></label>
             <label class="missing-toggle"><input v-model="showMissing" type="checkbox" /> Pièces manquantes</label>
+            <div v-if="mountedPartsCount > 0" class="strip-all-box">
+              <template v-if="confirmingStripAll">
+                <span class="hint" role="status">Rendre {{ mountedPartsCount }} pièce{{ mountedPartsCount > 1 ? 's' : '' }} au stock ?</span>
+                <button type="button" class="button small primary" @click="stripAllParts">Confirmer</button>
+                <button type="button" class="button small quiet" @click="confirmingStripAll = false">Annuler</button>
+              </template>
+              <button v-else type="button" class="button small ghost" @click="confirmingStripAll = true">
+                Tout démonter ({{ mountedPartsCount }})
+              </button>
+            </div>
           </template>
         </div>
       </div>
@@ -215,6 +234,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
               <CarCard :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" :compact="cols !== 1" />
               <span v-if="save.cars[v.id].copies > 1" class="copy-count">×{{ save.cars[v.id].copies }}</span>
               <span v-if="save.lineup.includes(v.id)" class="tile-tag lineup-tag">Écurie</span>
+              <span v-else-if="hasReadyEvo(v.id)" class="tile-tag evo-tag">Évolution</span>
             </button>
             <button type="button" class="favorite-button" :aria-label="`Favori · ${v.name} ${v.version}`" :aria-pressed="save.cars[v.id].favorite"
               @click="act(s => { s.cars[v.id].favorite = !s.cars[v.id].favorite })"><span aria-hidden="true">{{ save.cars[v.id].favorite ? '★' : '☆' }}</span></button>

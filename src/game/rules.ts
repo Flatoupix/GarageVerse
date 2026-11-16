@@ -4,7 +4,7 @@ import {
   type Condition, type Effect, type Part, type Rival, type Sector, type StatKey, type Stats, type Vehicle,
 } from './data'
 
-export interface Prep { stage: number; parts: string[]; upgrades?: Partial<Record<StatKey, number>> }
+export interface Prep { stage: number; parts: string[]; upgrades?: Partial<Record<StatKey, number>>; extraSlot?: StatKey }
 
 export const upgrades = {
   man: { label: 'Pneus et suspension', art: 'pneus-route', families: ['pneus', 'suspension'] },
@@ -15,6 +15,8 @@ export const upgrades = {
 export const upgradeKeys = Object.keys(upgrades) as StatKey[]
 export const upgradePrices = [10, 15]
 export const partUnlockLevel = upgradePrices.length
+export const EXTRA_SLOT_PRICE = 250
+export const EXTRA_SLOT_POTENTIAL = 2
 export const upgradeForFamily = (family: string) => upgradeKeys.find(key => upgrades[key].families.includes(family))
 
 export const STAT_CAP = 12
@@ -46,8 +48,8 @@ export function effectsOf(v: Vehicle, prep: Prep): Effect[] {
   return [...v.signature.effects, ...installed(prep).flatMap(p => p.effects ?? [])]
 }
 
-export function potential(v: Vehicle, stage: number) {
-  return Math.max(2, 12 - v.cost) + stage + sum(v.signature.effects, 'potential')
+export function potential(v: Vehicle, stage: number, extraSlot?: StatKey) {
+  return Math.max(2, 12 - v.cost) + stage + sum(v.signature.effects, 'potential') + (extraSlot ? EXTRA_SLOT_POTENTIAL : 0)
 }
 export const prepUsed = (prep: Prep) => installed(prep).reduce((n, p) => n + p.cost, 0)
 

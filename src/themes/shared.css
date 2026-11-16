@@ -808,3 +808,16 @@ main.race { padding-bottom: calc(var(--race-action-height, 140px) + 24px); }
 /* Course : l'entrée de page n'utilise qu'un fondu, sans déplacement, pour ne pas décaler les barres d'action fixes. */
 @keyframes race-view-in { from { opacity: 0; } }
 main.race { animation-name: race-view-in; }
+
+/* ——— Améliorations confort & progression (démontage rapide, étapes rivaux, 3ᵉ pièce, caisses) ——— */
+.strip-all-box { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; grid-column: 1 / -1; }
+.mounted-cars { display: grid; gap: 8px; margin: 8px 0; }
+.mounted-chip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--radius, 8px); background: var(--night); }
+.extra-slot-box { margin: 8px 0; padding: 8px 10px; border: 1px dashed var(--sun, #ffc23d); border-radius: var(--radius, 8px); background: color-mix(in srgb, var(--sun, #ffc23d) 10%, var(--night)); }
+.rival-steps-box { display: grid; gap: 6px; margin: 10px 0; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius, 10px); background: var(--panel); }
+.rival-steps-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.rival-steps-tabs > * { min-width: 0; font-size: .76rem; padding-inline: 6px; overflow-wrap: normal; word-break: normal; }
+@media (max-width: 380px) { .rival-steps-tabs { grid-template-columns: 1fr; } }
+.garage-tile .tile-tag.evo-tag { left: 12.5cqw; bottom: 33%; background: #ffc23d; color: #1b1200; font-weight: 800; }
+.pack-art.pack-starter .pack-picture { filter: hue-rotate(-38deg) saturate(0.95); }
+.pack-art.pack-atelier .pack-picture { filter: hue-rotate(120deg) saturate(1.1); }

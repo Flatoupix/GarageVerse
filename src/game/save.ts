@@ -2,16 +2,16 @@
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
-  specials, specialByRivalId, rivals, series, boosterById, defaultStyle, leagueById, partById, parts, PIXEL, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
+  specials, specialByRivalId, rivals, rivalStepMap, series, boosterById, defaultStyle, leagueById, partById, parts, PIXEL, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
-import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, lineupCost, partUnlockLevel, potential, prepUsed, racer,
+import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, lineupCost, partUnlockLevel, potential, prepUsed, racer,
   STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
 
 export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
 
-export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number> }
+export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number>; extraSlot?: StatKey }
 export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean; showEdition?: boolean } | { kind: 'part'; id: string; isNew: boolean }
 export interface Opening { booster: string; pulls: Pull[]; revealed: number; view: 'back' | 'face' | 'recap'; collected: boolean }
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
@@ -124,18 +124,25 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const usesOldDefault = !editions.includes(primary)
     if (usesOldDefault) editions.unshift(primary)
     const stage = int(car.stage, 0, 3, 0)
+    const levels = { acc: 0, vit: 0, man: 0, end: 0 }
+    for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
+    const extraSlot = stage === 3 && upgradeKeys.every(k => levels[k] >= partUnlockLevel)
+      ? upgradeKeys.find(k => k === car.extraSlot)
+      : undefined
     const installed: string[] = []
     for (const partId of car.parts ?? []) {
       const part = partById.get(partId)
-      if (part && !compatibility(part, v) && !installed.some(p => partById.get(p)?.family === part.family)) installed.push(partId)
+      if (!part || compatibility(part, v) || installed.includes(partId)) continue
+      const key = upgradeForFamily(part.family)
+      const sameFamily = installed.filter(p => partById.get(p)?.family === part.family)
+      const sameCategory = key ? installed.filter(p => (upgrades[key].families as string[]).includes(partById.get(p)?.family ?? '')) : []
+      if (extraSlot && key === extraSlot ? sameCategory.length < 3 : sameFamily.length < 1) installed.push(partId)
     }
-    const levels = { acc: 0, vit: 0, man: 0, end: 0 }
-    for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
     // Une légendaire restée sur l'ancien défaut pixel prend sa nouvelle image fixe ; un autre choix du joueur est gardé.
     const shownBefore = editions.includes(car.shown) ? car.shown : editions[0]
     save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
       shown: primary !== PIXEL && usesOldDefault && shownBefore === PIXEL ? primary : shownBefore,
-      favorite: car.favorite === true, upgrades: levels }
+      favorite: car.favorite === true, upgrades: levels, ...(extraSlot ? { extraSlot } : {}) }
   }
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
@@ -327,10 +334,56 @@ export function collect(save: Save) {
 
 export const prepOf = (save: Save, id: string): Prep => {
   const car = save.cars[id]
-  return { stage: car?.stage ?? 0, parts: [...(car?.parts ?? [])], upgrades: { ...car?.upgrades } }
+  return { stage: car?.stage ?? 0, parts: [...(car?.parts ?? [])], upgrades: { ...car?.upgrades }, ...(car?.extraSlot ? { extraSlot: car.extraSlot } : {}) }
 }
 export const installedCount = (save: Save, partId: string) => Object.values(save.cars).filter(c => c.parts.includes(partId)).length
 export const freeParts = (save: Save, partId: string) => (save.parts[partId] ?? 0) - installedCount(save, partId)
+export const lockedInDuel = (save: Save, carId: string) => Boolean(save.duel?.player.lineup.some(c => c.id === carId))
+export const totalMountedParts = (save: Save) =>
+  Object.entries(save.cars).reduce((sum, [id, car]) => sum + (lockedInDuel(save, id) ? 0 : car.parts.length), 0)
+
+export function uninstallAll(save: Save): string | undefined {
+  let count = 0
+  for (const [id, car] of Object.entries(save.cars)) {
+    if (lockedInDuel(save, id) || !car.parts.length) continue
+    count += car.parts.length
+    car.parts = []
+  }
+  if (!count) return 'Aucune pièce démontable pour le moment'
+}
+
+export function uninstallPartEverywhere(save: Save, partId: string): string | undefined {
+  let count = 0
+  for (const [id, car] of Object.entries(save.cars)) {
+    if (lockedInDuel(save, id) || !car.parts.includes(partId)) continue
+    car.parts = car.parts.filter(p => p !== partId)
+    count++
+  }
+  if (!count) return 'Cette pièce n’est montée sur aucune voiture disponible'
+}
+
+export const isCarMaxedForExtraSlot = (car?: OwnedCar) =>
+  Boolean(car && car.stage >= 3 && upgradeKeys.every(k => car.upgrades[k] >= partUnlockLevel))
+
+export function extraSlotCheck(save: Save, carId: string, key: StatKey): string | undefined {
+  const car = save.cars[carId]
+  if (!car) return 'Voiture absente du garage'
+  if (!isCarMaxedForExtraSlot(car)) return 'Requiert Stage 3 et les 4 ateliers au niveau 2'
+  if (car.extraSlot === key) return '3ᵉ emplacement déjà débloqué sur cet atelier'
+  if (car.extraSlot) {
+    const oldCatParts = car.parts.filter(p => (upgrades[car.extraSlot!].families as string[]).includes(partById.get(p)?.family ?? ''))
+    const oldFamilies = new Set(oldCatParts.map(p => partById.get(p)?.family))
+    if (oldCatParts.length > oldFamilies.size) return `Retire d’abord la 3ᵉ pièce de ${upgrades[car.extraSlot].label}`
+  }
+  if (save.credits < EXTRA_SLOT_PRICE) return `Il te manque ${EXTRA_SLOT_PRICE - save.credits} crédits`
+}
+
+export function unlockExtraSlot(save: Save, carId: string, key: StatKey): string | undefined {
+  const problem = extraSlotCheck(save, carId, key)
+  if (problem) return problem
+  save.credits -= EXTRA_SLOT_PRICE
+  save.cars[carId].extraSlot = key
+}
 
 export function upgradeCheck(save: Save, id: string, key: StatKey): string | undefined {
   const car = save.cars[id]
@@ -365,6 +418,17 @@ export function upgrade(save: Save, id: string): string | undefined {
   car.stage = next.stage
 }
 
+export function partReplacedOnInstall(car: OwnedCar, part: Part): Part | undefined {
+  const key = upgradeForFamily(part.family)
+  const sameFamily = car.parts.map(id => partById.get(id)!).filter(p => p?.family === part.family)
+  if (!sameFamily.length) return undefined
+  if (key && car.extraSlot === key) {
+    const sameCategory = car.parts.map(id => partById.get(id)!).filter(p => p && (upgrades[key].families as string[]).includes(p.family))
+    if (sameCategory.length < 3) return undefined
+  }
+  return sameFamily[0]
+}
+
 export function installCheck(save: Save, carId: string, partId: string): string | undefined {
   const v = vehicleById.get(carId), part = partById.get(partId), car = save.cars[carId]
   if (!v || !part || !car) return 'Pièce ou voiture absente'
@@ -376,16 +440,18 @@ export function installCheck(save: Save, carId: string, partId: string): string 
     return `${upgrades[key].label} · niveau ${partUnlockLevel} requis`
   }
   if (freeParts(save, partId) <= 0) return 'Aucun exemplaire libre'
-  const replaced = car.parts.filter(p => partById.get(p)?.family !== part.family)
-  if (prepUsed({ stage: car.stage, parts: replaced }) + part.cost > potential(v, car.stage)) return 'Potentiel de préparation insuffisant'
+  const toReplace = partReplacedOnInstall(car, part)
+  const remaining = toReplace ? car.parts.filter(p => p !== toReplace.id) : car.parts
+  if (prepUsed({ stage: car.stage, parts: remaining }) + part.cost > potential(v, car.stage, car.extraSlot)) return 'Potentiel de préparation insuffisant'
 }
 
 export function install(save: Save, carId: string, partId: string): string | undefined {
   const problem = installCheck(save, carId, partId)
   if (problem) return problem
-  const family = partById.get(partId)!.family
+  const part = partById.get(partId)!
   const car = save.cars[carId]
-  car.parts = [...car.parts.filter(p => partById.get(p)?.family !== family), partId]
+  const toReplace = partReplacedOnInstall(car, part)
+  car.parts = [...(toReplace ? car.parts.filter(p => p !== toReplace.id) : car.parts), partId]
 }
 
 export function uninstall(save: Save, carId: string, partId: string) {
@@ -541,7 +607,7 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
   const beforePrep = prepOf(save, id)
   const beforeStats = statsOf(v, beforePrep)
   const staminaBefore = engagements(v, beforePrep)
-  const potentialBefore = potential(v, car.stage)
+  const potentialBefore = potential(v, car.stage, car.extraSlot)
 
   // Clone léger de la sauvegarde pour simuler les actions réelles dans l'ordre le plus rentable.
   const sim: Save = {
@@ -612,7 +678,7 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
   const afterPrep = prepOf(sim, id)
   const afterStats = statsOf(v, afterPrep)
   const staminaAfter = engagements(v, afterPrep)
-  const potentialAfter = potential(v, simCar.stage)
+  const potentialAfter = potential(v, simCar.stage, simCar.extraSlot)
   const statChanges = upgradeKeys
     .filter(k => afterStats[k] !== beforeStats[k])
     .map(k => ({ key: k, label: statLabels[k], before: beforeStats[k], after: afterStats[k] }))
@@ -676,6 +742,7 @@ export function lineupCheck(save: Save, ids: string[], rivalId: string): string 
   const rival = rivalById.get(rivalId), league = rival && leagueById.get(rival.league)
   if (!rival || (!league && !specialByRivalId.has(rivalId))) return 'Rival inconnu'
   if (specialByRivalId.has(rivalId) && !unlockedSpecials(save).includes(rivalId)) return 'Palier verrouillé'
+  if (rival.baseRivalId && !unlockedRivalSteps(save, rival.baseRivalId).includes(rivalId)) return 'Étape verrouillée'
   const cap = rival.cap ?? league!.cap
   if (ids.length !== 3 || new Set(ids).size !== 3) return 'Choisis trois voitures différentes'
   if (ids.some(id => !save.cars[id])) return 'Voiture absente du garage'
@@ -690,7 +757,7 @@ export function startDuel(save: Save, rivalId: string, rng: Rng): string | undef
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
 }
 
-export interface Reward { credits: number; ticket?: string; perfect?: true; perfectTicket?: string }
+export interface Reward { credits: number; ticket?: string; perfect?: true; perfectTicket?: string; car?: string }
 export function settleDuel(save: Save): Reward | undefined {
   const duel = save.duel
   if (!duel?.winner) return
@@ -726,19 +793,26 @@ export function settleDuel(save: Save): Reward | undefined {
     return reward
   }
   const league = leagueById.get(rival.league)!
+  const first = record.wins === 0
   let reward: Reward
   if (duel.winner === 'player') {
-    reward = { credits: league.reward }
-    if (record.wins === 0) reward.ticket = league.ticket
+    const baseCredits = first ? (rival.reward ?? league.reward) : (rival.replay ?? league.reward)
+    const ticketId = rival.completionTicket ?? league.ticket
+    reward = { credits: baseCredits }
+    if (first && ticketId) reward.ticket = ticketId
+    if (first && rival.rewardCar && !save.cars[rival.rewardCar]) {
+      addCar(save, rival.rewardCar, defaultStyle(rival.rewardCar))
+      reward.car = rival.rewardCar
+    }
     if (perfect) {
       reward.perfect = true
       reward.credits *= 2
-      reward.perfectTicket = league.ticket
+      reward.perfectTicket = ticketId
       record.perfect = true
     }
     record.wins++
   } else {
-    reward = { credits: duel.winner === 'tie' ? Math.round(league.reward / 2) : 30 }
+    reward = { credits: duel.winner === 'tie' ? Math.round((rival.reward ?? league.reward) / 2) : 30 }
     if (duel.winner === 'rival') record.losses++
   }
   save.credits += reward.credits
@@ -754,6 +828,26 @@ export const unlockedSpecials = (save: Save) => specialsOpen(save) ? specials.fl
 export const unlockedRivals = (save: Save) => {
   const order = rivals
   return order.filter((r, i) => i === 0 || (save.record[order[i - 1].id]?.wins ?? 0) > 0).map(r => r.id)
+}
+
+export const unlockedRivalSteps = (save: Save, baseRivalId: string): string[] => {
+  if (!unlockedRivals(save).includes(baseRivalId)) return []
+  const steps = rivalStepMap.get(baseRivalId) ?? []
+  const bossWon = (save.record[baseRivalId]?.wins ?? 0) > 0
+  return steps.filter((step, idx) => idx === 0 || bossWon || (save.record[steps[idx - 1].id]?.wins ?? 0) > 0).map(s => s.id)
+}
+
+export const rivalStepsDone = (save: Save, baseRivalId: string): number => {
+  const steps = rivalStepMap.get(baseRivalId) ?? []
+  if ((save.record[baseRivalId]?.wins ?? 0) > 0) return steps.length
+  return steps.filter(s => (save.record[s.id]?.wins ?? 0) > 0).length
+}
+
+export const currentRivalStep = (save: Save, baseRivalId: string): string => {
+  const steps = rivalStepMap.get(baseRivalId) ?? []
+  if ((save.record[baseRivalId]?.wins ?? 0) > 0) return baseRivalId
+  const next = steps.find(s => !(save.record[s.id]?.wins ?? 0))
+  return next ? next.id : baseRivalId
 }
 
 // Défi du jour vu par ce joueur : la contrainte tient compte des voitures qu'il possède.

@@ -51,9 +51,15 @@ export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edi
 // Le thème Synthwave reprend les illustrations d'origine des pièces, rivaux, sachets et de l'accueil ; les autres thèmes montrent le pixel art.
 const pick = (pixel: Record<string, string>, former: Record<string, string>, id: string) =>
   (theme.value === 'neon' ? former[id] ?? pixel[id] : pixel[id] ?? former[id]) as string | undefined
+const packStandIn: Record<string, string> = {
+  starter: 'neon',
+  'starter-legend': 'neon-legend',
+  atelier: 'night',
+  'atelier-legend': 'night-legend',
+}
 export const art = {
   part: (id: string) => pick(pixelPart, partArt, id),
-  rival: (id: string) => pick(pixelRival, rivalArt, id),
-  pack: (id: string) => pick(pixelPack, packArt, id),
+  rival: (id: string) => pick(pixelRival, rivalArt, id.replace(/:\d+$/, '')),
+  pack: (id: string) => pick(pixelPack, packArt, id) ?? pick(pixelPack, packArt, packStandIn[id] ?? 'neon'),
   get hero() { return pick(pixelUi, uiArt, 'hero') },
 }

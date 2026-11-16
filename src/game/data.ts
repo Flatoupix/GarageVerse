@@ -40,7 +40,8 @@ export interface Rival {
   bio?: string; style?: string; likes?: string; intro?: string; win?: string; lose?: string; perfect?: string
   lineup: LineupEntry[]
   // Pilotage simple : ce rival n'utilise ni l'attaque ni la gestion.
-  cap?: number; reward?: number; replay?: number; completionTicket?: string
+  cap?: number; reward?: number; replay?: number; completionTicket?: string; rewardCar?: string
+  stepIndex?: number; baseRivalId?: string; stepLabel?: string
   simple?: boolean
 }
 export interface CollectionSeries { id: string; name: string; description: string; vehicles: string[]; reward: { credits: number; ticket?: string } }
@@ -53,6 +54,7 @@ export const parts = garageJson.parts as Part[]
 export const families = garageJson.families as Record<string, string>
 export const boosters = garageJson.boosters as Booster[]
 export const leagues = garageJson.leagues as League[]
+export const leagueById = new Map(leagues.map(l => [l.id, l]))
 export const rivals = garageJson.rivals as Rival[]
 export const progression = garageJson.progression as {
   stages: { stage: number; credits: number; duplicates: number; text: string }[]
@@ -63,11 +65,78 @@ export const progression = garageJson.progression as {
 export const vehicleById = new Map(vehicles.map(v => [v.id, v]))
 export const partById = new Map(parts.map(p => [p.id, p]))
 export const boosterById = new Map(boosters.map(b => [b.id, b]))
+
+const earlyLineups: Record<string, [LineupEntry[], LineupEntry[]]> = {
+  lola: [
+    [{ id: 'r4l', stage: 0, parts: [] }, { id: 'deuch', stage: 0, parts: [] }, { id: 'fiat500', stage: 0, parts: [] }],
+    [{ id: 'twingo', stage: 0, parts: [] }, { id: 'deuch', stage: 0, parts: [] }, { id: 'r4l', stage: 0, parts: [] }],
+  ],
+  cassette: [
+    [{ id: 'fiat500b', stage: 0, parts: [] }, { id: 'panda', stage: 0, parts: [] }, { id: 'logan', stage: 0, parts: [] }],
+    [{ id: 'mx5na', stage: 0, parts: [] }, { id: 'panda', stage: 0, parts: [] }, { id: 'logan', stage: 0, parts: [] }],
+  ],
+}
+
+export function rivalSteps(r: Rival): Rival[] {
+  const league = leagueById.get(r.league)!
+  const step1Lineup = earlyLineups[r.id]?.[0] ?? r.lineup.map(e => ({
+    id: e.id,
+    stage: Math.max(0, e.stage - 2),
+    parts: [],
+  }))
+  const step2Lineup = earlyLineups[r.id]?.[1] ?? r.lineup.map(e => ({
+    id: e.id,
+    stage: Math.max(1, e.stage - 1),
+    parts: e.parts.slice(0, 1),
+    upgrades: e.upgrades ? Object.fromEntries(Object.entries(e.upgrades).map(([k, v]) => [k, Math.max(0, (v ?? 0) - 1)])) : undefined,
+  }))
+  return [
+    {
+      ...r,
+      id: `${r.id}:1`,
+      baseRivalId: r.id,
+      stepIndex: 1,
+      stepLabel: 'Étape 1 · Essais',
+      lineup: step1Lineup,
+      reward: Math.round(league.reward * 0.6),
+      replay: Math.round(league.reward * 0.4),
+      completionTicket: 'starter',
+      rewardCar: undefined,
+      simple: true,
+    },
+    {
+      ...r,
+      id: `${r.id}:2`,
+      baseRivalId: r.id,
+      stepIndex: 2,
+      stepLabel: 'Étape 2 · Qualifs',
+      lineup: step2Lineup,
+      reward: Math.round(league.reward * 0.8),
+      replay: Math.round(league.reward * 0.55),
+      completionTicket: r.league === 'neon' ? 'starter' : 'atelier',
+      rewardCar: undefined,
+    },
+    {
+      ...r,
+      id: r.id,
+      baseRivalId: r.id,
+      stepIndex: 3,
+      stepLabel: 'Étape 3 · Finale',
+      reward: league.reward,
+      replay: league.reward,
+      completionTicket: league.ticket,
+    },
+  ]
+}
+
+export const rivalStepMap = new Map(rivals.map(r => [r.id, rivalSteps(r)]))
 export interface Special { id: string; name: string; sector: Sector; tiers: Rival[] }
 export const specials = garageJson.specials as Special[]
 export const specialByRivalId = new Map(specials.flatMap(s => s.tiers.map(r => [r.id, s] as const)))
-export const rivalById = new Map([...rivals, ...specials.flatMap(s => s.tiers)].map(r => [r.id, r]))
-export const leagueById = new Map(leagues.map(l => [l.id, l]))
+export const rivalById = new Map([
+  ...rivals.flatMap(r => rivalSteps(r)),
+  ...specials.flatMap(s => s.tiers),
+].map(r => [r.id, r]))
 
 export const rarities: Rarity[] = ['Courante', 'Rare', 'Épique', 'Légendaire']
 export const rarityMark: Record<Rarity, string> = { Courante: '●', Rare: '◆', Épique: '✦', Légendaire: '✧' }
@@ -96,15 +165,9 @@ export const styleLabel = (v: Vehicle, style: EditionStyle) => style === 'Synthw
 const altStyles: Record<string, EditionStyle[]> = {
   clio: ['Classic'], elise: ['Classic'], r34: ['Classic'], venom: ['Classic', 'Pixel Art'], brian: ['Classic'],
 }
-// Éditions Solarpunk et Abandonnée : cartes dont les deux images existent (`node pipeline/art.mjs --set edition`, src/assets/cars/<id>-solarpunk.webp et -abandonnee.webp).
+// Éditions Solarpunk et Abandonnée : les 129 voitures disposent de leurs deux illustrations (`src/assets/cars/<id>-solarpunk.webp` et `-abandonnee.webp`).
 const extraStyles: EditionStyle[] = ['Solarpunk', 'Abandonnée']
-const editionCars = new Set([
-  'clio', 'twingo', 'p205', 'deuch', 'golf1', 'panda', 'c4zr1', 'f40', 'p930', 'supra', 'r34', 'venom', 'mx5nb', 'scirocco',
-  's15', 'elise', 'mf1', 'stratos', 'dmc', 'firebird', 'beetle', 'esprit', 'elise111s', 'elise190', 'bttf', 'kitt', 'brian',
-  'herbie', 'bond', 'taxi', 'ecto1', 'batmobile', 'abarth', 'logan', 'ek9', 'mx5na', 'm3e46', 'delta', 'evo8', 'a110', 'nsx',
-  'tesla', 'gt500', 'demon', 'ruf', 'cgt', 'zonda', 'agera', 'veyron', 'h1', 'r4l', 'saxo', 'p106', 'p206', 'uno', 'golf4',
-  'corsa', 'fiesta', 'espace', 'ax',
-])
+const editionCars = new Set(vehicles.map(v => v.id))
 export function stylesOf(id: string): EditionStyle[] {
   const former = formerStyle(id)
   const styles: EditionStyle[] = [PIXEL, former]

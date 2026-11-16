@@ -89,7 +89,23 @@
         { "Courante": 40, "Rare": 44, "Épique": 15, "Légendaire": 1, "partChance": 0.22 },
         { "Courante": 25, "Rare": 49, "Épique": 23, "Légendaire": 3, "partChance": 0.22 },
         { "Épique": 82, "Légendaire": 18, "partChance": 0 }
-      ], "altChance": 0.15 }
+      ], "altChance": 0.15 },
+    { "id": "starter", "name": "Caisse Bricole", "tagline": "Voitures courantes et pièces du quotidien", "price": 75,
+      "maxParts": 3, "slots": [
+        { "Courante": 96, "Rare": 4, "partChance": 0.35 },
+        { "Courante": 96, "Rare": 4, "partChance": 0.35 },
+        { "Courante": 94, "Rare": 6, "partChance": 0.35 },
+        { "Courante": 90, "Rare": 10, "partChance": 0.35 },
+        { "Courante": 82, "Rare": 17, "Épique": 1, "partChance": 0.25 }
+      ], "altChance": 0.04 },
+    { "id": "atelier", "name": "Caisse Mécanique", "tagline": "5 pièces d’atelier garanties", "price": 180,
+      "maxParts": 5, "slots": [
+        { "Courante": 82, "Rare": 16, "Épique": 2, "partChance": 1 },
+        { "Courante": 78, "Rare": 19, "Épique": 3, "partChance": 1 },
+        { "Courante": 68, "Rare": 26, "Épique": 6, "partChance": 1 },
+        { "Courante": 50, "Rare": 38, "Épique": 12, "partChance": 1 },
+        { "Rare": 72, "Épique": 28, "partChance": 1 }
+      ], "altChance": 0 }
   ],
   "leagues": [
     { "id": "neon", "name": "Ligue Néon", "cap": 9, "reward": 100, "ticket": "neon" },
@@ -97,7 +113,7 @@
     { "id": "overdrive", "name": "Ligue Overdrive", "cap": 22, "reward": 260, "ticket": "overdrive" }
   ],
   "rivals": [
-    { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon", "simple": true,
+    { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon", "simple": true, "rewardCar": "p205gl",
       "bio": "J’ai appris la mécanique dans le parking de ma résidence, avec les voisins comme premiers supporters. Depuis, je retape des petites voitures pour qu’on puisse tous prendre le départ.",
       "style": "Débrouillarde",
       "likes": "les citadines",
@@ -108,7 +124,7 @@
       "circuit": { "name": "Boulevard Minitel", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "ville": 4, "sec": 3, "nuit": 2, "pluie": 1 } },
       "lineup": [{ "id": "twingo", "stage": 0, "parts": [] }, { "id": "deuch", "stage": 0, "parts": [] }, { "id": "beetle", "stage": 0, "parts": [] }],
       "art": "a cheerful young woman with a teal bob haircut and oversized 80s jacket, synthwave portrait" },
-    { "id": "cassette", "name": "DJ Cassette", "title": "Roi du roadster", "league": "neon",
+    { "id": "cassette", "name": "DJ Cassette", "title": "Roi du roadster", "league": "neon", "rewardCar": "mx5na",
       "bio": "Le jour, je répare des platines dans une radio associative. La nuit, je roule décapoté : le vent pose les basses et les virages font le reste.",
       "style": "Showman",
       "likes": "les roadsters",
@@ -119,7 +135,7 @@
       "circuit": { "name": "Corniche Laser", "sectors": ["virage", "ligne", "endurance", "virage", "depart"], "conditions": { "sec": 4, "ville": 3, "pluie": 2, "nuit": 1 } },
       "lineup": [{ "id": "mx5na", "stage": 0, "parts": [], "upgrades": { "acc": 1 } }, { "id": "panda", "stage": 0, "parts": [] }, { "id": "logan", "stage": 0, "parts": [] }],
       "art": "a laid-back DJ with headphones around his neck, mirrored aviator sunglasses and a mullet, synthwave portrait" },
-    { "id": "kenji", "name": "Kenji Vapor", "title": "Drift de minuit", "league": "chrome",
+    { "id": "kenji", "name": "Kenji Vapor", "title": "Drift de minuit", "league": "chrome", "rewardCar": "civiceg",
       "bio": "J’ai quitté les podiums pour reprendre l’atelier de mon père. Chaque nuit, je règle une voiture, puis je cherche une trajectoire plus juste.",
       "style": "Sang-froid",
       "likes": "les japonaises",
@@ -130,7 +146,7 @@
       "circuit": { "name": "Wangan Vapor", "sectors": ["depart", "virage", "virage", "ligne", "endurance"], "conditions": { "nuit": 5, "pluie": 2, "sec": 2, "ville": 1 } },
       "lineup": [{ "id": "s15", "stage": 3, "parts": ["susp-drift", "boite-seq", "underglow", "turbo-hybride"], "upgrades": { "man": 2, "acc": 2, "vit": 1 } }, { "id": "ek9", "stage": 3, "parts": ["stage1", "pneus-semi", "kit-turbo", "freins-endurance"], "upgrades": { "acc": 2, "man": 2 } }, { "id": "mx5nb", "stage": 2, "parts": ["autobloquant", "aileron"], "upgrades": { "man": 2, "end": 2 } }],
       "art": "a calm Japanese street racer in a racing jacket with a toothpick, neon city reflections, synthwave portrait" },
-    { "id": "roxy", "name": "Roxy Turbo", "title": "Pilote de spéciales", "league": "chrome",
+    { "id": "roxy", "name": "Roxy Turbo", "title": "Pilote de spéciales", "league": "chrome", "rewardCar": "delta16",
       "bio": "J’ai commencé copilote, un carnet sur les genoux et de la boue jusqu’au casque. Après une saison à réparer pour les autres, j’ai enfin monté mon propre équipage.",
       "style": "Tenace",
       "likes": "les voitures de rallye",
@@ -141,7 +157,7 @@
       "circuit": { "name": "Col des Spectres", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "terre": 2, "pluie": 3, "sec": 2, "nuit": 1 } },
       "lineup": [{ "id": "delta", "stage": 3, "parts": ["pneus-terre", "susp-rallye"], "upgrades": { "man": 2, "end": 1 } }, { "id": "a110", "stage": 3, "parts": ["pneus-terre", "autobloquant"], "upgrades": { "man": 2 } }, { "id": "h1", "stage": 2, "parts": ["k9k"], "upgrades": { "end": 2 } }],
       "art": "a rally driver woman with braided red hair holding an open-face helmet, dust and neon dusk, synthwave portrait" },
-    { "id": "baron", "name": "Le Baron Chrome", "title": "Collectionneur fortuné", "league": "overdrive",
+    { "id": "baron", "name": "Le Baron Chrome", "title": "Collectionneur fortuné", "league": "overdrive", "rewardCar": "p911sc",
       "bio": "J’ai hérité d’une collection sous des housses et d’un nom sur une grille. J’ai choisi de salir les pneus : une mécanique admirable mérite mieux qu’un salon.",
       "style": "Raffiné",
       "likes": "les classiques de prestige",
@@ -152,7 +168,7 @@
       "circuit": { "name": "Autodrome Chromé", "sectors": ["ligne", "virage", "depart", "ligne", "endurance"], "conditions": { "sec": 5, "nuit": 2, "pluie": 2, "ville": 1 } },
       "lineup": [{ "id": "f40", "stage": 3, "parts": ["admission", "freins-carbone", "pneus-semi"], "upgrades": { "vit": 2, "acc": 2, "man": 1 } }, { "id": "p930", "stage": 2, "parts": ["turbo-hybride", "aileron"], "upgrades": { "acc": 2, "man": 2 } }, { "id": "kitt", "stage": 3, "parts": ["compresseur", "underglow", "freins-endurance", "susp-filetes"], "upgrades": { "end": 2, "vit": 2 } }],
       "art": "an elegant older gentleman with silver hair, white suit and driving gloves, chrome reflections, synthwave portrait" },
-    { "id": "nyx", "name": "Nyx", "title": "Reine de la Nuit", "league": "overdrive",
+    { "id": "nyx", "name": "Nyx", "title": "Reine de la Nuit", "league": "overdrive", "rewardCar": "dmc",
       "bio": "Avant de courir, je réglais les lumières d’un théâtre condamné à fermer. J’ai emporté ses projecteurs dans mon garage ; désormais, la ville entière me sert de scène.",
       "style": "Énigmatique",
       "likes": "les hypercars",
@@ -166,8 +182,15 @@
   ],
   "series": [
     {"id": "depart", "name": "Premiers tours de roue", "description": "Commence ta collection avec tes trois premières voitures.", "vehicles": ["clio", "twingo", "panda"], "reward": {"credits": 150}},
+    {"id": "bombinettes", "name": "Bombinettes GTI", "description": "Réunis les petites sportives nerveuses des années 80 et 90.", "vehicles": ["p205", "golf1", "r5gt", "saxo", "p106", "ax"], "reward": {"credits": 350, "ticket": "neon"}},
+    {"id": "famille", "name": "Fourgons & Familiales cultes", "description": "Des vacances en famille aux virées improvisées.", "vehicles": ["r4l", "mehari", "espace", "kangoo", "combi", "multipla"], "reward": {"credits": 300, "ticket": "starter"}},
+    {"id": "baroudeurs", "name": "Baroudeurs tout-terrain", "description": "Affronte la boue, le sable et les sentiers escarpés.", "vehicles": ["niva", "duster", "defender", "wrangler", "hilux", "h1"], "reward": {"credits": 350, "ticket": "atelier"}},
+    {"id": "lignees", "name": "Du quotidien au circuit", "description": "Collectionne les versions d’origine et leurs évolutions sportives.", "vehicles": ["p205gl", "p205", "golf11", "golf1", "e30316", "m3e30"], "reward": {"credits": 400, "ticket": "neon"}},
     {"id": "cinema", "name": "Stars de cinéma", "description": "Réunis les vedettes de tes films cultes.", "vehicles": ["bttf", "kitt", "ecto1", "batmobile", "taxi", "herbie"], "reward": {"credits": 600, "ticket": "overdrive"}},
+    {"id": "poursuite", "name": "Courses-poursuites à l’écran", "description": "Les bolides d’action qui brûlent l’asphalte au cinéma.", "vehicles": ["brian", "eleanor", "domcharger", "jpjeep", "interceptor"], "reward": {"credits": 650, "ticket": "overdrive"}},
     {"id": "rallye", "name": "Reines du rallye", "description": "Retrouve les championnes des routes sinueuses.", "vehicles": ["stratos", "delta", "evo8", "impreza"], "reward": {"credits": 350}},
+    {"id": "allemandes", "name": "Icônes d’outre-Rhin", "description": "Rassemble l’élite des sportives allemandes.", "vehicles": ["m3e30", "evo2", "quattro", "p930", "golf2", "ruf"], "reward": {"credits": 500, "ticket": "night"}},
+    {"id": "italiennes", "name": "Dolce Vita & V12", "description": "Des ruelles de Turin aux circuits de Modène.", "vehicles": ["fiat500", "abarth", "countach", "testarossa", "f40", "zonda"], "reward": {"credits": 650, "ticket": "overdrive"}},
     {"id": "lotus", "name": "La lignée Lotus", "description": "Explore la famille des sportives légères.", "vehicles": ["elise", "elise111s", "elise190", "esprit", "bond"], "reward": {"credits": 500, "ticket": "night"}},
     {"id": "records", "name": "Hypercars de record", "description": "Repousse tes limites avec ces bolides.", "vehicles": ["venom", "veyron", "agera", "mf1"], "reward": {"credits": 700, "ticket": "overdrive"}},
     {"id": "muscle", "name": "Muscle cars", "description": "Fais rugir les grands moteurs américains.", "vehicles": ["firebird", "gt500", "demon", "c4zr1"], "reward": {"credits": 400}},

@@ -4,6 +4,23 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier.
 
+## [0.5.0] — 2026-11-16
+
+### Ajouté
+
+- **Éditions Solarpunk et Abandonnée complètes.** Les 129 voitures du jeu disposent désormais toutes de leurs deux illustrations alternatives *Solarpunk* et *Abandonnée*.
+- **Parcours des rivaux en trois étapes.** Chaque rival se joue en trois courses progressives (*Étape 1 · Essais*, *Étape 2 · Qualifs*, *Étape 3 · Finale*). Les étapes d’approche offrent des tickets de caisse et le duel final offre la voiture signature du rival à la première victoire.
+- **Deux nouvelles caisses en boutique** : la **Caisse Bricole** (75 crédits, voitures courantes et jusqu’à trois pièces du quotidien) et la **Caisse Mécanique** (180 crédits, cinq pièces mécaniques garanties).
+- **Sept nouvelles séries de collection** (14 séries au total) : *Bombinettes GTI*, *Fourgons & Familiales cultes*, *Baroudeurs tout-terrain*, *Du quotidien au circuit*, *Courses-poursuites à l’écran*, *Icônes d’outre-Rhin* et *Dolce Vita & V12*.
+- **Démontage rapide des pièces.** Un bouton « Tout démonter » dans l’onglet Mécaniques du garage et « Retirer de toutes les voitures » sur la fiche d’une pièce rendent instantanément tes pièces au stock pour équiper ton écurie.
+- **Troisième emplacement de pièce sur voiture maxée.** Une voiture au Stage 3 avec ses quatre ateliers au niveau 2 peut débloquer un 3ᵉ emplacement de pièce (+2 potentiel) dans l’atelier de son choix.
+
+### Modifié
+
+- **Courbe de difficulté de la Nuit sans fin** plus progressive sur les quinze premières manches, avec des compositions adverses spécialisées par secteur au-delà.
+- **Évolutions toujours visibles** sur les onglets Performances et Atelier de la fiche voiture, avec un badge « Évolution » au garage dès qu’une voiture au Stage 3 peut débloquer son évolution.
+- **Boutons de fin de duel** collés au-dessus de la barre d’onglets sur petit écran (320 px).
+
 ## [0.4.0] — 2026-11-16
 
 ### Ajouté
