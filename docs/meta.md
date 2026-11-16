@@ -252,3 +252,31 @@ En développement uniquement, touche 14 fois de suite le logo GarageVerse de l�
 Les quatre premiers emplacements donnent chacun 15 % (Neon Drive), 18 % (After Hours) ou 22 % (Overdrive) de chance de pièce ; le cinquième reste à 0 %. Avec le plafond à deux, l’espérance est respectivement de 0,59, 0,70 et 0,84 pièce par sachet. La boutique calcule la chance d’au moins une pièce : `1 − ∏(1 − partChance)` si `maxParts > 0`, soit environ 48 %, 55 % et 63 %. Les anciens lots scellés sont conservés.
 
 Les lignes des rivaux affichent les crédits de ligue et le ticket de première victoire (`leagues[].ticket`, également utilisé pour attribuer le gain). La fin du duel détaille les crédits totaux, le ticket de booster nommé et le bonus de victoire parfaite, avec sa part de crédits. Les séries séparent crédits et ticket de booster ; leurs gains sont inchangés.
+
+
+### Commandes anguleuses et courses
+
+`src/components/GvButton.vue` fournit les variantes `primary`, `secondary`, `tab`,
+`filter` et `icon`. `tone` accepte une couleur CSS et alimente `--gv-tone` ;
+`active` pilote le relief actif, `disabled` désactive le bouton natif. Les attributs
+`aria-pressed`, `aria-selected`, `aria-label`, les événements et les classes sont
+transmis au bouton. Fournis toujours un nom accessible aux commandes à icône.
+Le contour métallique, les deux biseaux de 10 px et le relief utilisent les
+variables du thème dans `shared.css`, commun aux huit thèmes. Le focus est
+intérieur pour rester visible malgré le découpage. Le balayage et les entrées
+sont supprimés par `.motion-reduced` et par la préférence système.
+
+Le garage propose quatre vues anguleuses, cinq filtres (Toutes et les quatre
+raretés existantes), avec gemmes, nombres de modèles et noms accessibles complets.
+Les nombres suivent la vue choisie. Les cinq tris rapides utilisent des icônes ;
+Autres tris conserve les treize critères. Les sept densités (Auto, 1 à 6) restent
+accessibles sur mobile. Rareté, catégorie, tri et densité sont mémorisés dans
+Preferences. Recherche et catégories gardent leurs contrôles natifs.
+
+Les quatre spéciales affichent le glyphe de secteur et cinq segments Bronze,
+Argent, Or, Platine et Légende : couleur de médaille, cadenas, victoire, palier
+courant (`aria-current="step"`) et gain en crédits (première victoire ou rejeu).
+Le déverrouillage et l'ouverture de la fiche de duel réutilisent les règles
+existantes. Les rivaux gardent portrait, ligue, plafond, récompenses, victoires et
+étoile de victoire parfaite. Les entrées sont courtes et décalées, sans mouvement
+si demandé. Les captures à 320/390 px sont vérifiées par l'orchestrateur.

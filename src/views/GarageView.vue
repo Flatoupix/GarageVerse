@@ -7,6 +7,7 @@ import { act, ownedCount, reducedMotion, save } from '../game/store'
 import { edition } from '../game/art'
 import { confetti, palettes } from '../game/fx'
 import CarCard from '../components/CarCard.vue'
+import GvButton from '../components/GvButton.vue'
 import PartCard from '../components/PartCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string] }>()
@@ -17,7 +18,10 @@ const garageFilters = [
   { id: 'lineup', label: 'Écurie' }, { id: 'collection', label: 'Collection' },
 ] as const
 const query = ref('')
-const category = ref('')
+const category = computed({
+  get: () => save.preferences.garageCategory ?? '',
+  set: (value: string) => { act(s => { s.preferences.garageCategory = value || undefined }) },
+})
 const rarityFilter = computed<'' | Rarity>({
   get: () => save.preferences.garageRarity ?? '',
   set: value => { act(s => { s.preferences.garageRarity = value || undefined }) },
@@ -29,8 +33,8 @@ const sort = computed({
   set: (value: string) => { act(s => { s.preferences.garageSort = value }) },
 })
 const quickSorts = [
-  { id: 'number', label: 'Collection' }, { id: 'rarity', label: 'Rareté' },
-  { id: 'power', label: 'Puissance' }, { id: 'name', label: 'Nom' }, { id: 'copies', label: 'Doublons' },
+  { id: 'number', label: 'Collection', icon: '▦' }, { id: 'rarity', label: 'Rareté', icon: '◆' },
+  { id: 'power', label: 'Puissance', icon: 'ϟ' }, { id: 'name', label: 'Nom', icon: 'A↓' }, { id: 'copies', label: 'Doublons', icon: '▣' },
 ]
 const colOptions = [
   { value: 0, label: 'Auto' },
@@ -93,6 +97,7 @@ const carList = computed(() => vehicles.filter(v => {
   if (sort.value === 'year') return b.year - a.year || a.number.localeCompare(b.number)
   return a.number.localeCompare(b.number)
 }))
+const rarityCount = (rarity?: Rarity) => vehicles.filter(v => (!rarity || v.rarity === rarity) && (garageFilter.value === 'collection' || Boolean(save.cars[v.id])) && (garageFilter.value !== 'favorites' || save.cars[v.id]?.favorite) && (garageFilter.value !== 'lineup' || save.lineup.includes(v.id))).length
 const ownedParts = computed(() => parts.filter(p => (save.parts[p.id] ?? 0) > 0))
 const partGroups = computed(() => Object.entries(families)
   .filter(([id]) => !family.value || family.value === id)
@@ -121,8 +126,8 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
       <button type="button" :aria-pressed="tab === 'series'" @click="selectTab('series')">Séries <span v-help="'series'" aria-label="Aide sur les séries">?</span></button>
     </div>
     <div v-if="tab !== 'series'" class="garage-tools">
-      <div v-if="tab === 'cars'" class="chips garage-filters" aria-label="Afficher les voitures">
-        <button v-for="f in garageFilters" :key="f.id" type="button" :aria-pressed="garageFilter === f.id" @click="garageFilter = f.id">{{ f.label }}</button>
+      <div v-if="tab === 'cars'" class="garage-filters" aria-label="Afficher les voitures">
+        <GvButton variant="tab" v-for="f in garageFilters" :key="f.id" type="button" :aria-pressed="garageFilter === f.id" @click="garageFilter = f.id">{{ f.label }}</GvButton>
       </div>
       <div class="garage-toolbar-main">
         <div class="garage-search-group">
@@ -131,12 +136,12 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
             <input v-model="query" type="search" :placeholder="tab === 'cars' ? 'Rechercher une voiture (nom, année…)' : 'Rechercher une pièce'" />
           </label>
           <template v-if="tab === 'cars'">
-            <div class="chips garage-rarity-chips" role="group" aria-label="Filtrer par rareté">
-              <button type="button" :aria-pressed="rarityFilter === ''" @click="rarityFilter = ''">Toutes</button>
-              <button v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarityFilter === r" @click="rarityFilter = r">{{ r }}</button>
+            <div class="garage-rarity-chips" role="group" aria-label="Filtrer par rareté">
+              <GvButton variant="filter" :aria-label="`Toutes, ${rarityCount()} voitures`" :aria-pressed="rarityFilter === ''" @click="rarityFilter = ''"><span aria-hidden="true">◈</span> Toutes <b>{{ rarityCount() }}</b></GvButton>
+              <GvButton variant="filter" tone="var(--rarity-color)" :aria-label="`${r}, ${rarityCount(r)} voiture${rarityCount(r) > 1 ? 's' : ''}`" v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarityFilter === r" @click="rarityFilter = r"><span class="rarity-gem" aria-hidden="true">◆</span><span class="visually-hidden">{{ r }}</span><b>{{ rarityCount(r) }}</b></GvButton>
             </div>
-            <div class="chips garage-sort-chips" role="group" aria-label="Trier les voitures">
-              <button v-for="option in quickSorts" :key="option.id" type="button" :aria-pressed="sort === option.id" @click="sort = option.id">{{ option.label }}</button>
+            <div class="garage-sort-chips" role="group" aria-label="Trier les voitures">
+              <GvButton variant="tab" :aria-label="option.label" :title="option.label" v-for="option in quickSorts" :key="option.id" type="button" :aria-pressed="sort === option.id" @click="sort = option.id"><span aria-hidden="true">{{ option.icon }}</span><span class="visually-hidden">{{ option.label }}</span></GvButton>
             </div>
           </template>
         </div>
@@ -179,8 +184,8 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
         <span class="garage-count">{{ carList.length }} voiture{{ carList.length > 1 ? 's' : '' }}</span>
         <div class="garage-density" role="group" aria-label="Nombre de voitures par ligne">
           <span class="density-label">Par ligne</span>
-          <div class="chips density-chips">
-            <button
+          <div class="density-chips">
+            <GvButton variant="icon"
               v-for="opt in colOptions"
               :key="opt.value"
               type="button"
@@ -189,8 +194,8 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
               :aria-label="opt.value === 0 ? 'Nombre de colonnes automatique' : `${opt.value} voiture${opt.value > 1 ? 's' : ''} par ligne`"
               @click="setCols(opt.value)"
             >
-              {{ opt.label }}
-            </button>
+              <span v-if="opt.value === 0" aria-hidden="true">▦</span><span v-else class="density-icon" aria-hidden="true"><i v-for="n in opt.value" :key="n"></i></span>
+            </GvButton>
           </div>
         </div>
       </div>

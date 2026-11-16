@@ -14,6 +14,7 @@ import { canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luck
 import { specialsOpen, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
+import GvButton from '../components/GvButton.vue'
 import CarCard from '../components/CarCard.vue'
 import SectorRun from '../components/SectorRun.vue'
 
@@ -504,7 +505,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
             <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small><small>{{ leagueById.get(r.league)!.reward }} crédits · ticket {{ boosterById.get(leagueById.get(r.league)!.ticket)?.name }} à la première victoire</small></span>
-            <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ ${save.record[r.id].wins}` : 'Défier' }}</span>
+            <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ ${save.record[r.id].wins} victoire${save.record[r.id].wins > 1 ? 's' : ''}` : 'Défier' }}</span>
           </button>
         </li>
         <li class="deal" :style="{ '--i': 0 }">
@@ -519,11 +520,20 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <h2 v-help="'special'">Spéciales</h2>
         <p v-if="!specialsOpen(save)" v-help="'specialUnlock'">Bats toute la Ligue Néon pour les ouvrir.</p>
         <div class="special-grid">
-          <article v-for="s in specials" :key="s.id" class="special-card">
+          <article v-for="(s, i) in specials" :key="s.id" class="special-card" :style="{ '--i': i }">
+            <span class="special-sector" aria-hidden="true">{{ sectorIcons[s.sector] }}</span><span class="visually-hidden">{{ sectorLabels[s.sector] }}</span>
             <h3>{{ s.name }} · {{ s.tiers.filter(r => save.record[r.id]?.wins).length }}/{{ s.tiers.length }}</h3>
-            <ul>
-              <li v-for="r in s.tiers" :key="r.id"><button type="button" class="button quiet" :disabled="!unlockedSpecials(save).includes(r.id)" @click="chosen = r.id"><span v-help="'specialTier'">{{ r.title }}</span><span v-if="save.record[r.id]?.wins"> ✓</span></button></li>
-            </ul>
+            <ol class="special-tiers" aria-label="Paliers de la spéciale">
+              <li v-for="(r, tier) in s.tiers" :key="r.id" :class="`special-tier-${tier}`">
+                <GvButton variant="filter" tone="var(--tier-tone)" :class="{ 'tier-won': save.record[r.id]?.wins }"
+                  :aria-current="unlockedSpecials(save).includes(r.id) && !save.record[r.id]?.wins ? 'step' : undefined"
+                  :disabled="!unlockedSpecials(save).includes(r.id)" @click="chosen = r.id">
+                  <span aria-hidden="true">{{ !unlockedSpecials(save).includes(r.id) ? '🔒' : save.record[r.id]?.wins ? '✓' : '◆' }}</span>
+                  <span v-help="'specialTier'">{{ r.title }}</span>
+                  <small>{{ save.record[r.id]?.wins ? r.replay : r.reward }} crédits</small>
+                </GvButton>
+              </li>
+            </ol>
           </article>
         </div>
       </section>

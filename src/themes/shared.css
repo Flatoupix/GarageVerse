@@ -631,3 +631,65 @@
   .rival-list .rival-row img, .rival-list .rival-initial { width: 40px; height: 40px; }
   .rival-list .rival-status { grid-column: 2; }
 }
+
+/* Commandes de jeu : le métal et le relief dérivent de la palette du thème. */
+.gv-button.gv-button {
+  --gv-tone: var(--accent); position: relative; isolation: isolate; overflow: hidden;
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  min-width: 0; min-height: 44px; max-width: 100%; padding: 9px 12px; border: 0; border-radius: 0;
+  background: linear-gradient(135deg, var(--text), var(--line) 40%, var(--gv-tone) 75%, var(--night));
+  color: var(--text); font: 700 .85rem/1.2 var(--body); letter-spacing: 0; text-transform: none;
+  box-shadow: inset 0 2px color-mix(in srgb, var(--text) 50%, transparent), inset 0 -4px var(--night);
+  transition: transform 100ms ease-out;
+}
+.gv-button::before { content: ''; position: absolute; z-index: -1; inset: 2px;
+  clip-path: inherit; background: linear-gradient(180deg, color-mix(in srgb, var(--text) 12%, var(--panel)), var(--night)); }
+.gv-button::after { content: ''; position: absolute; inset: -60%; pointer-events: none; opacity: 0;
+  background: linear-gradient(115deg, transparent 40%, color-mix(in srgb, var(--text) 40%, transparent) 50%, transparent 60%); transform: translateX(-65%); }
+.gv-button:is(.is-active, [aria-pressed="true"], [aria-selected="true"], [aria-current="step"], :active)::after { animation: gv-sweep 650ms ease-out; }
+.gv-button:is(.is-active, [aria-pressed="true"], [aria-selected="true"], [aria-current="step"], .gv-button--primary)::before {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--gv-tone) 28%, var(--panel)), var(--night)); }
+.gv-button:is(.is-active, [aria-pressed="true"], [aria-selected="true"], [aria-current="step"]) { box-shadow: inset 0 3px var(--gv-tone), inset 0 -4px var(--gv-tone); }
+.gv-button:not(:disabled):active { transform: translateY(3px); box-shadow: inset 0 3px var(--night), inset 0 -1px var(--text); }
+.gv-button:focus-visible { outline: 3px solid var(--text); outline-offset: -5px; }
+.gv-button:disabled { filter: grayscale(1); opacity: .65; cursor: default; }
+.gv-button-content { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
+.gv-button--filter .rarity-gem { color: var(--gv-tone); font-size: 1.2rem; text-shadow: 0 2px var(--night); }
+.gv-button--icon { padding-inline: 6px; }
+@keyframes gv-sweep { 25% { opacity: 1; } to { opacity: 0; transform: translateX(65%); } }
+.garage-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+.garage-sort-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
+.garage-sort-chips .gv-button { font-size: 1.15rem; }
+.garage-rarity-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
+.garage-rarity-chips .gv-button { padding-inline: 3px; font-size: .75rem; }
+.garage-rarity-chips .gv-button:first-child .gv-button-content { flex-wrap: wrap; gap: 2px; }
+.garage .garage-search input, .garage .garage-selects select { border-radius: 0; border-color: var(--line); border-bottom: 3px solid var(--accent); background: var(--night); color: var(--text); width: 100%; min-width: 0; }
+.garage-density-bar { flex-wrap: wrap; }
+.garage-density { width: 100%; flex-wrap: wrap; }
+.density-chips { display: grid; width: 100%; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.density-chips .gv-button.gv-button { display: block; min-height: 44px; padding-inline: 3px; }
+.density-icon { display: flex; gap: 2px; height: 16px; }
+.density-icon i { width: 3px; background: currentColor; }
+.specials .special-card, .rival-list .rival-row {
+  border-radius: 0; border: 1px solid var(--line); border-top: 2px solid var(--accent);
+  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  background: linear-gradient(145deg, var(--panel-2), var(--night)); color: var(--text);
+  box-shadow: inset 0 1px color-mix(in srgb, var(--text) 25%, transparent), inset 0 -4px var(--night);
+}
+.special-sector { display: block; color: var(--accent); font: 700 2.5rem/1 var(--body); margin-bottom: 8px; }
+.special-card h3 { font: 700 1rem/1.3 var(--body); }
+.special-tiers { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
+.special-tiers li { min-width: 0; }
+.special-tiers .gv-button { width: 100%; padding: 7px 2px; height: 100%; font-size: .7rem; }
+.special-tiers .gv-button-content { flex-direction: column; gap: 5px; }
+.special-tiers small { font: inherit; }
+.special-tier-0 { --tier-tone: #c98c5b; } .special-tier-1 { --tier-tone: #bac8dc; }
+.special-tier-2 { --tier-tone: #f2c65b; } .special-tier-3 { --tier-tone: #75d9c9; } .special-tier-4 { --tier-tone: #df97ff; }
+.special-tiers .tier-won { border-bottom: 3px solid var(--tier-tone); }
+.special-tiers [aria-current="step"] { font-weight: 900; }
+.special-card, .rival-list .deal { animation: gv-enter 280ms ease-out backwards; animation-delay: calc(min(var(--i, 0), 6) * 35ms); }
+@keyframes gv-enter { from { opacity: 0; transform: translateY(8px); } }
+.motion-reduced :is(.gv-button, .special-card, .rival-list .deal), .motion-reduced .gv-button::after { animation: none !important; transition: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .gv-button, .gv-button::after, .special-card, .rival-list .deal { animation: none !important; transition: none !important; }
+}
