@@ -623,3 +623,11 @@
 .settings-content .theme-swatch i { width: 8px; height: 24px; }
 .settings-content .theme-text { overflow-wrap: anywhere; }
 .settings-content .back-option { min-width: 0; text-align: center; }
+
+/* Les récompenses restent lisibles dans les lignes étroites. */
+.rival-row .rival-info { min-width: 0; overflow-wrap: anywhere; white-space: normal; }
+@media (max-width: 420px) {
+  .rival-list .rival-row { grid-template-columns: 40px minmax(0, 1fr); gap: 8px; }
+  .rival-list .rival-row img, .rival-list .rival-initial { width: 40px; height: 40px; }
+  .rival-list .rival-status { grid-column: 2; }
+}

@@ -243,7 +243,9 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
       <section v-for="entry in series" :key="entry.id" class="series-card" :aria-labelledby="`series-${entry.id}`">
         <h2 :id="`series-${entry.id}`">{{ entry.name }}</h2>
         <p>{{ entry.description }}</p>
-        <p><span v-help="'seriesReward'">Récompense de série</span> : {{ entry.reward.credits }} crédits<template v-if="entry.reward.ticket"> + 1 ticket {{ boosterById.get(entry.reward.ticket)!.name }}</template></p>
+        <p><span v-help="'seriesReward'">Récompense de série</span></p>
+        <p>Crédits : +{{ entry.reward.credits }}</p>
+        <p v-if="entry.reward.ticket">Ticket de booster : +1 ticket {{ boosterById.get(entry.reward.ticket)!.name }}</p>
         <div class="series-progress" role="progressbar" :aria-label="entry.name" :aria-valuenow="seriesProgress(save, entry)" :aria-valuemax="entry.vehicles.length" :aria-valuemin="0">
           <span :style="{ width: `${seriesProgress(save, entry) / entry.vehicles.length * 100}%` }"></span>
         </div>

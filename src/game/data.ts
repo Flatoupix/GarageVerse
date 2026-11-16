@@ -28,7 +28,7 @@ export interface Part {
 }
 
 export type SlotTable = Partial<Record<Rarity, number>> & { partChance: number }
-export interface Booster { id: string; name: string; tagline: string; price: number; slots: SlotTable[]; altChance: number; favorTags?: string[]; favorWeight?: number }
+export interface Booster { id: string; name: string; tagline: string; price: number; maxParts?: number; slots: SlotTable[]; altChance: number; favorTags?: string[]; favorWeight?: number }
 // Un rival peut aussi monter ses groupes de statistiques à l’atelier (0 à 2 niveaux), comme le joueur.
 export interface LineupEntry { id: string; stage: number; parts: string[]; upgrades?: Partial<Record<StatKey, number>> }
 export interface Rival {
@@ -42,7 +42,7 @@ export interface Rival {
 export interface CollectionSeries { id: string; name: string; description: string; vehicles: string[]; reward: { credits: number; ticket?: string } }
 export const series = garageJson.series as CollectionSeries[]
 
-export interface League { id: string; name: string; cap: number; reward: number }
+export interface League { id: string; name: string; cap: number; reward: number; ticket: string }
 
 export const vehicles = rosterJson.vehicles as Vehicle[]
 export const parts = garageJson.parts as Part[]

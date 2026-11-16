@@ -317,9 +317,10 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <h1 tabindex="-1">{{ reward.perfect ? 'Victoire parfaite' : lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
       <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> Tu as gagné tous les secteurs !</p>
       <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? 'Défi déjà récompensé aujourd’hui.' : 'Retente le défi quand tu veux.' }}</p>
-      <p v-else :aria-label="`+${reward.credits} crédits`">+{{ rewardShown }} crédits<template v-if="reward.perfect"> · crédits doublés</template></p>
-      <p v-if="reward.ticket">+1 ticket {{ boosterById.get(reward.ticket)?.name }} · première victoire</p>
-      <p v-if="reward.perfectTicket">+1 ticket {{ boosterById.get(reward.perfectTicket)?.name }} · victoire parfaite</p>
+      <p v-else :aria-label="`+${reward.credits} crédits`">Crédits : +{{ rewardShown }} au total</p>
+      <p v-if="reward.perfect">Crédits de course : +{{ reward.credits / 2 }} · bonus de victoire parfaite : +{{ reward.credits / 2 }} crédits</p>
+      <p v-if="reward.ticket">Ticket de booster : +1 ticket {{ boosterById.get(reward.ticket)?.name }} · première victoire</p>
+      <p v-if="reward.perfectTicket">Bonus de victoire parfaite : +1 ticket de booster {{ boosterById.get(reward.perfectTicket)?.name }}</p>
       <ol v-if="recap.length" class="race-recap" aria-label="Résumé des secteurs">
         <li v-for="(r, i) in recap" :key="i" :class="r.winner" :style="{ '--i': i }">
           <span class="recap-sector"><span aria-hidden="true">{{ sectorIcons[r.sector] }} {{ conditionIcons[r.condition] }}</span><span class="visually-hidden">{{ sectorLabels[r.sector] }}, {{ conditionLabels[r.condition] }} : </span></span>
@@ -502,7 +503,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <button type="button" class="rival-row" :disabled="!unlocked.includes(r.id)" @click="chosen = r.id">
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
-            <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small></span>
+            <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small><small>{{ leagueById.get(r.league)!.reward }} crédits · ticket {{ boosterById.get(leagueById.get(r.league)!.ticket)?.name }} à la première victoire</small></span>
             <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ ${save.record[r.id].wins}` : 'Défier' }}</span>
           </button>
         </li>

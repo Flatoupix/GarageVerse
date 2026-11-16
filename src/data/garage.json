@@ -67,34 +67,34 @@
   },
   "boosters": [
     { "id": "neon", "name": "Neon Drive", "tagline": "Collection 001", "price": 150,
-      "slots": [
-        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.09 },
-        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.09 },
-        { "Courante": 85, "Rare": 13, "Épique": 2, "partChance": 0.09 },
-        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.09 },
+      "maxParts": 2, "slots": [
+        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.15 },
+        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.15 },
+        { "Courante": 85, "Rare": 13, "Épique": 2, "partChance": 0.15 },
+        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.15 },
         { "Rare": 82, "Épique": 16, "Légendaire": 2, "partChance": 0 }
       ], "altChance": 0.08 },
     { "id": "night", "name": "After Hours", "tagline": "Édition de nuit · Culture", "price": 250, "favorTags": ["Cinéma", "Série", "Tuning", "Drift"], "favorWeight": 4,
-      "slots": [
-        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.11 },
-        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.11 },
-        { "Courante": 65, "Rare": 30, "Épique": 5, "partChance": 0.11 },
-        { "Courante": 40, "Rare": 47, "Épique": 12, "Légendaire": 1, "partChance": 0.11 },
+      "maxParts": 2, "slots": [
+        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.18 },
+        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.18 },
+        { "Courante": 65, "Rare": 30, "Épique": 5, "partChance": 0.18 },
+        { "Courante": 40, "Rare": 47, "Épique": 12, "Légendaire": 1, "partChance": 0.18 },
         { "Rare": 50, "Épique": 43, "Légendaire": 7, "partChance": 0 }
       ], "altChance": 0.12 },
     { "id": "overdrive", "name": "Overdrive", "tagline": "Hypercars et pièces rares", "price": 400, "favorTags": ["Hypercar", "Supercar", "Record"], "favorWeight": 3,
-      "slots": [
-        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.14 },
-        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.14 },
-        { "Courante": 40, "Rare": 44, "Épique": 15, "Légendaire": 1, "partChance": 0.14 },
-        { "Courante": 25, "Rare": 49, "Épique": 23, "Légendaire": 3, "partChance": 0.14 },
+      "maxParts": 2, "slots": [
+        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.22 },
+        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.22 },
+        { "Courante": 40, "Rare": 44, "Épique": 15, "Légendaire": 1, "partChance": 0.22 },
+        { "Courante": 25, "Rare": 49, "Épique": 23, "Légendaire": 3, "partChance": 0.22 },
         { "Épique": 82, "Légendaire": 18, "partChance": 0 }
       ], "altChance": 0.15 }
   ],
   "leagues": [
-    { "id": "neon", "name": "Ligue Néon", "cap": 9, "reward": 100 },
-    { "id": "chrome", "name": "Ligue Chrome", "cap": 15, "reward": 160 },
-    { "id": "overdrive", "name": "Ligue Overdrive", "cap": 22, "reward": 260 }
+    { "id": "neon", "name": "Ligue Néon", "cap": 9, "reward": 100, "ticket": "neon" },
+    { "id": "chrome", "name": "Ligue Chrome", "cap": 15, "reward": 160, "ticket": "night" },
+    { "id": "overdrive", "name": "Ligue Overdrive", "cap": 22, "reward": 260, "ticket": "overdrive" }
   ],
   "rivals": [
     { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon", "simple": true,

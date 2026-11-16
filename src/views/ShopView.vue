@@ -9,7 +9,7 @@ const odds = (booster: (typeof boosters)[number]) => {
   const slot = booster.slots.at(-1)!
   return (['Rare', 'Épique', 'Légendaire'] as const).filter(r => slot[r]).map(r => `${r} ${slot[r]} %`).join(' · ')
 }
-const partOdds = (booster: (typeof boosters)[number]) => Math.round(100 * (1 - booster.slots.reduce((total, slot) => total * (1 - slot.partChance), 1)))
+const partOdds = (booster: (typeof boosters)[number]) => Math.round(100 * ((booster.maxParts ?? 1) <= 0 ? 0 : 1 - booster.slots.reduce((total, slot) => total * (1 - slot.partChance), 1)))
 
 function buy(id: string) {
   if (act(s => buyBooster(s, id))) { sound('whoosh'); emit('open') }
@@ -33,7 +33,7 @@ function buy(id: string) {
           <h2>{{ booster.name }}</h2>
           <p>{{ booster.tagline }}</p>
           <p class="odds">Dernière voiture · {{ odds(booster) }}</p>
-          <p class="odds">{{ partOdds(booster) }} % de chance de trouver une pièce · une par booster maximum</p>
+          <p class="odds">Jusqu’à {{ (booster.maxParts ?? 1) === 2 ? 'deux' : (booster.maxParts ?? 1) }} {{ (booster.maxParts ?? 1) > 1 ? 'pièces mécaniques' : 'pièce mécanique' }} · environ {{ partOdds(booster) }} sachets sur 100 contiennent au moins une pièce</p>
           <button type="button" class="button primary" @click="buy(booster.id)">
             <template v-if="(save.tickets[booster.id] ?? 0) > 0">Utiliser un ticket ({{ save.tickets[booster.id] }})</template>
             <template v-else>{{ booster.price }} crédits</template>

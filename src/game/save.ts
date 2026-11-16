@@ -226,9 +226,9 @@ const owned = (save: Save, pull: { kind: 'car' | 'part'; id: string }) =>
 
 export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
   const seen = new Set<string>()
-  let drewPart = false
+  let partsDrawn = 0
   return booster.slots.map(slot => {
-    const isPart = !drewPart && rng() < slot.partChance
+    const isPart = partsDrawn < (booster.maxParts ?? 1) && rng() < slot.partChance
     const spawnable = rarities.filter(r => slot[r] && (!isPart || parts.some(p => p.rarity === r)))
     const rarity = weighted(spawnable.length ? spawnable : rarities.filter(r => slot[r]), r => slot[r] ?? 0, rng)
     const nearest = <T extends { rarity: Rarity }>(pool: T[]): T[] => {
@@ -240,8 +240,9 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
       return pool
     }
     if (isPart) {
-      drewPart = true
-      const part = weighted(nearest(parts), () => 1, rng)
+      partsDrawn++
+      const unseen = parts.filter(p => !seen.has(`part:${p.id}`))
+      const part = weighted(nearest(unseen.length ? unseen : parts), () => 1, rng)
       const pull: Pull = { kind: 'part', id: part.id, isNew: !owned(save, { kind: 'part', id: part.id }) && !seen.has(`part:${part.id}`) }
       seen.add(`part:${part.id}`)
       return pull
@@ -727,11 +728,11 @@ export function settleDuel(save: Save): Reward | undefined {
   let reward: Reward
   if (duel.winner === 'player') {
     reward = { credits: league.reward }
-    if (record.wins === 0) reward.ticket = league.id === 'neon' ? 'neon' : league.id === 'chrome' ? 'night' : 'overdrive'
+    if (record.wins === 0) reward.ticket = league.ticket
     if (perfect) {
       reward.perfect = true
       reward.credits *= 2
-      reward.perfectTicket = league.id === 'neon' ? 'neon' : league.id === 'chrome' ? 'night' : 'overdrive'
+      reward.perfectTicket = league.ticket
       record.perfect = true
     }
     record.wins++
