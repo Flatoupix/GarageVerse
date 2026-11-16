@@ -10,8 +10,14 @@ const { stylesOf } = require('./data.ts')
 
 assert.equal(editionDuplicates, 2)
 const id = 'clio'
-assert.ok(stylesOf(id).includes('Solarpunk') && stylesOf(id).includes('Abandonnée'), 'les cinq cartes d’essai ont les nouveaux styles')
-assert.ok(!stylesOf('twingo').includes('Solarpunk'), 'les autres cartes ne les ont pas')
+// Une carte propose Solarpunk et Abandonnée exactement quand ses deux images existent.
+const path = require('node:path')
+const cars = path.join(__dirname, '../assets/cars')
+for (const v of require('../data/roster.json').vehicles) {
+  const files = fs.existsSync(path.join(cars, `${v.id}-solarpunk.webp`)) && fs.existsSync(path.join(cars, `${v.id}-abandonnee.webp`))
+  const styles = stylesOf(v.id)
+  assert.equal(styles.includes('Solarpunk') && styles.includes('Abandonnée'), files, `éditions de ${v.id}`)
+}
 
 const save = newSave()
 const price = editionPrice(id)

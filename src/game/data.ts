@@ -96,12 +96,18 @@ export const styleLabel = (v: Vehicle, style: EditionStyle) => style === 'Synthw
 const altStyles: Record<string, EditionStyle[]> = {
   clio: ['Classic'], elise: ['Classic'], r34: ['Classic'], venom: ['Classic', 'Pixel Art'], brian: ['Classic'],
 }
-// Éditions Solarpunk et Abandonnée : à l'essai sur cinq cartes avant d'être étendues (images `pipeline/art.mjs --set edition`).
-const trialStyles: EditionStyle[] = ['Solarpunk', 'Abandonnée']
-const trialCars = ['clio', 'p205', 'supra', 'mx5nb', 'f40']
+// Éditions Solarpunk et Abandonnée : cartes dont les deux images existent (`node pipeline/art.mjs --set edition`, src/assets/cars/<id>-solarpunk.webp et -abandonnee.webp).
+const extraStyles: EditionStyle[] = ['Solarpunk', 'Abandonnée']
+const editionCars = new Set([
+  'clio', 'twingo', 'p205', 'deuch', 'golf1', 'panda', 'c4zr1', 'f40', 'p930', 'supra', 'r34', 'venom', 'mx5nb', 'scirocco',
+  's15', 'elise', 'mf1', 'stratos', 'dmc', 'firebird', 'beetle', 'esprit', 'elise111s', 'elise190', 'bttf', 'kitt', 'brian',
+  'herbie', 'bond', 'taxi', 'ecto1', 'batmobile', 'abarth', 'logan', 'ek9', 'mx5na', 'm3e46', 'delta', 'evo8', 'a110', 'nsx',
+  'tesla', 'gt500', 'demon', 'ruf', 'cgt', 'zonda', 'agera', 'veyron', 'h1', 'r4l', 'saxo', 'p106', 'p206', 'uno', 'golf4',
+  'corsa', 'fiesta', 'espace', 'ax',
+])
 export function stylesOf(id: string): EditionStyle[] {
   const former = formerStyle(id)
   const styles: EditionStyle[] = [PIXEL, former]
   if (former !== 'Synthwave') styles.push('Synthwave')
-  return styles.concat(altStyles[id] ?? [], trialCars.includes(id) ? trialStyles : [])
+  return styles.concat(altStyles[id] ?? [], editionCars.has(id) ? extraStyles : [])
 }
