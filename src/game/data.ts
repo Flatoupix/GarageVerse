@@ -34,6 +34,7 @@ export interface LineupEntry { id: string; stage: number; parts: string[]; upgra
 export interface Rival {
   id: string; name: string; title: string; league: string
   circuit: { name: string; sectors: Sector[]; conditions: Partial<Record<Condition, number>> }
+  bio?: string; style?: string; likes?: string; intro?: string; win?: string; lose?: string; perfect?: string
   lineup: LineupEntry[]
   // Pilotage simple : ce rival n'utilise ni l'attaque ni la gestion.
   cap?: number; reward?: number; replay?: number; completionTicket?: string

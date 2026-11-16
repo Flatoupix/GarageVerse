@@ -65,6 +65,9 @@ const nightEnd = ref<{ wins: number; credits: number; newRecord: boolean } | nul
 const isDaily = computed(() => chosen.value?.startsWith('daily:'))
 const rival = computed(() => isNight.value ? nightOpponent.value : isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
 const special = computed(() => chosen.value ? specialByRivalId.get(chosen.value) : undefined)
+// Seuls les rivaux de ligue portent une personnalité, même si un autre mode réutilise leur identifiant.
+const character = computed(() => !isNight.value && !isDaily.value && !special.value ? rivals.find(r => r.id === chosen.value) : undefined)
+const hasPersonality = computed(() => character.value && [character.value.bio, character.value.style, character.value.likes, character.value.intro].some(Boolean))
 const league = computed(() => rival.value?.cap !== undefined ? { name: special.value?.name, cap: rival.value.cap } : rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
 if (chosen.value?.startsWith('daily:') && !save.duel) act(prepareDaily)
@@ -310,6 +313,7 @@ function proceed() {
   }
 }
 const lastWinner = ref<'player' | 'other'>('other')
+const rivalReply = computed(() => reward.value?.perfect ? character.value?.perfect : lastWinner.value === 'player' ? character.value?.win : character.value?.lose)
 function nextNightRound() {
   act(createNightRound)
   void scrollToStage()
@@ -357,6 +361,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <span class="eyebrow">{{ rival?.circuit.name }}</span>
       <h1 tabindex="-1">{{ reward.perfect ? 'Victoire parfaite' : lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
       <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> Tu as gagné tous les secteurs !</p>
+      <blockquote v-if="rivalReply" class="rival-reply"><p>« {{ rivalReply }} »</p><cite>{{ character?.name }}</cite></blockquote>
       <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? 'Défi déjà récompensé aujourd’hui.' : 'Retente le défi quand tu veux.' }}</p>
       <p v-else :aria-label="`+${reward.credits} crédits`">Crédits : +{{ rewardShown }} au total</p>
       <p v-if="reward.perfect">Crédits de course : +{{ reward.credits / 2 }} · bonus de victoire parfaite : +{{ reward.credits / 2 }} crédits</p>
@@ -486,6 +491,15 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </template>
         <p v-if="special">{{ save.record[rival.id]?.wins ? rival.replay : rival.reward }} crédits · {{ save.record[rival.id]?.wins ? 'rejeu' : 'première victoire (doublés si parfaite)' }}<template v-if="rival.completionTicket && !save.record[rival.id]?.wins"> · un ticket à la première victoire</template></p>
       </div>
+      <section v-if="hasPersonality && character" class="rival-character" :aria-label="`Portrait de ${character.name}`">
+        <img v-if="art.rival(character.id)" :src="art.rival(character.id)" alt="" class="rival-face" />
+        <div class="rival-character-text">
+          <p class="rival-character-title">{{ character.title }} <span v-if="character.style" class="rival-style">{{ character.style }}</span></p>
+          <p v-if="character.likes">Aime {{ character.likes }}</p>
+          <p v-if="character.bio" class="rival-bio">{{ character.bio }}</p>
+          <blockquote v-if="character.intro">« {{ character.intro }} »</blockquote>
+        </div>
+      </section>
       <section v-if="isDaily" class="daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
       <div class="cap-meter" :class="{ over: cost > cap }">
         <span v-help="isNight ? 'nightCap' : 'plafond'">Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
@@ -536,7 +550,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <button type="button" class="rival-row" :disabled="!unlocked.includes(r.id)" @click="chosen = r.id">
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
-            <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }} · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small><small>{{ leagueById.get(r.league)!.reward }} crédits · ticket {{ boosterById.get(leagueById.get(r.league)!.ticket)?.name }} à la première victoire</small></span>
+            <span class="rival-info"><b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b><small>{{ r.title }}<template v-if="r.style"> · {{ r.style }}</template> · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small><small>{{ leagueById.get(r.league)!.reward }} crédits · ticket {{ boosterById.get(leagueById.get(r.league)!.ticket)?.name }} à la première victoire</small></span>
             <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ ${save.record[r.id].wins} victoire${save.record[r.id].wins > 1 ? 's' : ''}` : 'Défier' }}</span>
           </button>
         </li>
