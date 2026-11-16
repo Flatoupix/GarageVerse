@@ -805,3 +805,6 @@ main.race { padding-bottom: calc(var(--race-action-height, 140px) + 24px); }
 .car-sheet .evolution-text { display: grid; gap: 2px; min-width: 0; overflow-wrap: break-word; }
 .car-sheet .evolution .button { width: 100%; margin: 0; white-space: normal; }
 .car-sheet .evolution .hint { margin: 0; }
+/* Course : l'entrée de page n'utilise qu'un fondu, sans déplacement, pour ne pas décaler les barres d'action fixes. */
+@keyframes race-view-in { from { opacity: 0; } }
+main.race { animation-name: race-view-in; }

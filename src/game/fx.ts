@@ -258,9 +258,13 @@ export function shake(level: 1 | 2 | 3 = 1) {
   if (reducedMotion.value) return
   const el = document.querySelector('dialog[open] .sheet') ?? document.querySelector('main')
   const d = [0, 4, 8, 14][level]
-  el?.animate({
-    translate: ['0 0', `${d}px ${-d * 0.6}px`, `${-d}px ${d * 0.5}px`, `${d * 0.6}px ${d * 0.3}px`, `${-d * 0.3}px ${-d * 0.2}px`, '0 0'],
-  }, { duration: 170 + level * 90, easing: blocky.has(theme.value) ? 'steps(6, end)' : 'ease-out' })
+  if (!(el instanceof HTMLElement)) return
+  // La secousse déplace l'élément par left/top et non par translate : un déplacement transformé ferait de l'élément
+  // le repère des barres d'action fixes de la course, qui sauteraient alors sur le côté pendant l'animation.
+  if (getComputedStyle(el).position === 'static') el.style.position = 'relative'
+  const steps: [number, number][] = [[0, 0], [d, -d * 0.6], [-d, d * 0.5], [d * 0.6, d * 0.3], [-d * 0.3, -d * 0.2], [0, 0]]
+  el.animate(steps.map(([x, y]) => ({ left: `${x}px`, top: `${y}px` })),
+    { duration: 170 + level * 90, easing: blocky.has(theme.value) ? 'steps(6, end)' : 'ease-out' })
 }
 
 export function pop(target: Target, scale = 1.14, duration = 320) {
