@@ -775,3 +775,33 @@ main.race { padding-bottom: calc(var(--race-action-height, 140px) + 24px); }
   .density-chips { display: flex; width: auto; gap: 2px; }
   .density-chips .gv-button.gv-button { width: 46px; }
 }
+
+/* Nom des voitures : jamais coupé au milieu d'un mot ; CarCard réduit la taille pour tenir sur deux lignes au plus. */
+.car-model strong { overflow-wrap: normal; word-break: normal; hyphens: none; white-space: normal; max-width: 100%; }
+/* Stage de la voiture : badge bien visible en haut de la carte, avec trois crans, lisible même sur les petites cartes. */
+.car-masthead-meta .car-stage { display: inline-flex; align-items: center; gap: .4em; padding: .15em .5em; border-radius: .25em;
+  background: #ffc23d; color: #1b1200; font: 900 max(3.8cqw, 9px)/1.15 var(--mono); letter-spacing: .05em; text-transform: uppercase;
+  font-style: normal; white-space: nowrap; box-shadow: 0 0 .6em #ffc23d88; }
+.car-card.compact .car-masthead-meta .car-stage { font-size: max(4.8cqw, 9px); }
+.car-masthead-meta .car-stage::before { content: none; }
+/* Petites cartes : le chiffre et les crans suffisent ; la ligne passe à la ligne plutôt que de couper le badge. */
+.car-card.compact .car-stage-word { display: none; }
+.car-masthead-meta:has(.car-stage) { flex-wrap: wrap; row-gap: .3em; }
+.car-stage-pips { display: inline-flex; gap: .18em; }
+.car-stage-pips i { width: .42em; height: .72em; border: .1em solid #1b1200; border-radius: .08em; transform: skewX(-15deg); }
+.car-stage-pips i.on { background: #1b1200; }
+/* Thèmes dérivés de Rétro pixel : sur les petites cartes, la case Coût suit la largeur de la carte pour laisser la place au nom. */
+:root:not([data-theme="neon"]) .car-card.compact .car-lineup-cost { font-size: clamp(8px, 7cqw, 15px); border-width: clamp(1px, 1.5cqw, 3px); }
+:root:not([data-theme="neon"]) .car-card.compact .car-lineup-cost b { font-size: clamp(7px, 6.5cqw, 10px); }
+/* Très petites cartes : le badge de coût ne garde que son chiffre pour laisser la place au nom. */
+@container (max-width: 130px) {
+  .car-lineup-cost > span:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+/* La police d’affichage pixel est trop large sur les cartes compactes : le nom passe dans la police de texte du thème. */
+@container (max-width: 180px) { .gv-card.car-card .car-model strong, .gv-card.car-card.compact .car-model.long-model strong { font-family: var(--body); } }
+/* Évolutions de la fiche : un bloc par évolution, texte puis bouton pleine largeur, puis la condition manquante. */
+.car-sheet .evolution { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 10px; margin-top: 8px;
+  border: 1px solid var(--line); border-radius: var(--radius, 8px); }
+.car-sheet .evolution-text { display: grid; gap: 2px; min-width: 0; overflow-wrap: break-word; }
+.car-sheet .evolution .button { width: 100%; margin: 0; white-space: normal; }
+.car-sheet .evolution .hint { margin: 0; }

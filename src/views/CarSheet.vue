@@ -379,10 +379,10 @@ function workshop(key?: StatKey) {
           <section v-if="car && evolutions.length" class="sheet-section">
             <h3>Évolutions</h3>
             <div v-for="e in evolutions" :key="e.id" class="evolution">
-              <span><b>{{ e.name }} {{ e.version }}</b><small>{{ e.signature.name }} · {{ e.signature.text }}</small></span>
-              <button v-if="save.cars[e.id]" type="button" class="button small ghost" @click="emit('open', e.id)">Voir</button>
-              <button v-else type="button" class="button small primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
-                {{ `Débloquer · ${e.craft!.credits} cr.` }}
+              <span class="evolution-text"><b>{{ e.name }}</b><small>{{ e.version }} · {{ e.rarity }}</small><small>{{ e.signature.name }} · {{ e.signature.text }}</small></span>
+              <button v-if="save.cars[e.id]" type="button" class="button ghost" @click="emit('open', e.id)">Voir la carte</button>
+              <button v-else type="button" class="button primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
+                {{ `Débloquer · ${e.craft!.credits} crédits` }}
               </button>
               <p v-if="!save.cars[e.id] && craftCheck(save, e.id)" class="hint">{{ craftCheck(save, e.id) }}</p>
             </div>

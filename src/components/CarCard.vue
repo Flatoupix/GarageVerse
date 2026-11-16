@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { edition } from '../game/art'
+import { theme } from '../game/theme'
 import { partById, rarityClass, rarityMark, sectorIcons, statLabels, statShort, styleLabel, vehicleById, vehicles, type EditionStyle, type StatKey } from '../game/data'
 import { partUnlockLevel, STAT_CAP, statsOf, upgrades, type Prep } from '../game/rules'
 
@@ -19,6 +20,36 @@ const mods = computed(() => props.prep && keys.map(key => {
   const text = [`niveau ${level} sur ${partUnlockLevel}`, ...fitted.map(part => part!.name)].join(', ')
   return { key, level, fitted, label: `${upgrades[key].label} : ${text}` }
 }))
+// Le nom tient toujours sur deux lignes au plus, coupé seulement entre les mots : la taille du texte se réduit
+// jusqu'à ce qu'il rentre en largeur et en hauteur, puis se recalcule quand la carte change de taille.
+const nameEl = ref<HTMLElement>()
+function fitName() {
+  const el = nameEl.value
+  if (!el) return
+  el.style.fontSize = ''
+  const style = getComputedStyle(el)
+  let size = parseFloat(style.fontSize)
+  const ratio = (parseFloat(style.lineHeight) || size * 1.1) / size
+  for (let i = 0; i < 60 && size > 3; i++) {
+    if (el.scrollWidth <= el.clientWidth + 1 && el.scrollHeight <= size * ratio * 2 + 2) break
+    size *= 0.94
+    el.style.fontSize = `${size}px`
+  }
+}
+let observer: ResizeObserver | undefined
+onMounted(() => {
+  fitName()
+  void document.fonts?.ready.then(fitName)
+  if (nameEl.value?.parentElement) {
+    observer = new ResizeObserver(() => fitName())
+    observer.observe(nameEl.value.parentElement)
+  }
+})
+// Un thème change la police et la taille de base : le nom est recalculé, et de nouveau quand ses polices ont fini de charger.
+const refit = () => nextTick(fitName)
+watch([() => props.id, theme], refit)
+document.fonts?.addEventListener('loadingdone', refit)
+onBeforeUnmount(() => { observer?.disconnect(); document.fonts?.removeEventListener('loadingdone', refit) })
 const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: sectorIcons.ligne, man: sectorIcons.virage, end: sectorIcons.endurance }
 </script>
 
@@ -29,12 +60,16 @@ const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: secto
       <div class="car-masthead-meta">
         <span>{{ category }}</span>
         <span v-if="id === 'venom'" class="car-maker">Hennessey</span>
+        <span v-if="prep && prep.stage" class="car-stage" :aria-label="`Stage ${prep.stage} sur 3`">
+          <span aria-hidden="true"><span class="car-stage-word">Stage </span>{{ prep.stage }}</span>
+          <span class="car-stage-pips" aria-hidden="true"><i v-for="n in 3" :key="n" :class="{ on: n <= prep.stage }"></i></span>
+        </span>
       </div>
       <div class="car-masthead-main">
         <div class="car-model" :class="{ 'long-model': title.length > 19 }">
-          <strong v-if="id === 'venom'">Venom <em>F5</em></strong>
-          <strong v-else>{{ title }}</strong>
-          <span>{{ v.version }}<template v-if="prep && prep.stage"> · Stage {{ prep.stage }}</template></span>
+          <strong v-if="id === 'venom'" ref="nameEl">Venom <em>F5</em></strong>
+          <strong v-else ref="nameEl">{{ title }}</strong>
+          <span>{{ v.version }}</span>
         </div>
         <span class="car-lineup-cost" :title="`Coût d’écurie ${v.cost}`"><span>Coût<span class="visually-hidden"> d’écurie</span></span><b>{{ v.cost }}</b></span>
       </div>
