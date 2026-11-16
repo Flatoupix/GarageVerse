@@ -526,12 +526,6 @@
   color: var(--rarity-color); background: #141827; padding: 2px 4px; border-radius: 3px;
 }
 .garage .missing-card { border-color: var(--rarity-color); box-shadow: inset 3px 0 var(--rarity-color); }
-.garage-rarity-chips button[class] {
-  color: var(--rarity-color); background: #141827; border: 2px solid var(--rarity-color);
-}
-.garage-rarity-chips button[aria-pressed="true"] {
-  color: #141827; background: var(--rarity-color, #e5ecf4); box-shadow: inset 0 0 0 2px #141827;
-}
 .garage .new-car-badge, .garage .copy-count, .garage .tile-tag.lineup-tag {
   color: #fff; background: #141827; border: 1px solid #e5ecf4; text-shadow: none;
 }
@@ -681,7 +675,8 @@
 .special-tiers { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
 .special-tiers li { min-width: 0; }
 .special-tiers .gv-button { width: 100%; padding: 7px 2px; height: 100%; font-size: .7rem; }
-.special-tiers .gv-button-content { flex-direction: column; gap: 5px; }
+.special-tiers .gv-button-content { flex-direction: column; gap: 5px; overflow-wrap: normal; word-break: normal; hyphens: none; }
+.special-tiers .gv-button { font-size: clamp(.58rem, 1.6vw, .7rem); }
 .special-tiers small { font: inherit; }
 .special-tier-0 { --tier-tone: #c98c5b; } .special-tier-1 { --tier-tone: #bac8dc; }
 .special-tier-2 { --tier-tone: #f2c65b; } .special-tier-3 { --tier-tone: #75d9c9; } .special-tier-4 { --tier-tone: #df97ff; }
