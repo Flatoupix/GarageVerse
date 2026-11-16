@@ -3247,5 +3247,549 @@
     "tokens": 17010,
     "prompt": "1e9f89b0f8",
     "at": "2026-11-15T22:19:13.121Z"
+  },
+  "cars/twingo-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 13133,
+    "prompt": "0fb748a685",
+    "at": "2026-11-16T10:34:03.327Z"
+  },
+  "cars/deuch-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 17884,
+    "prompt": "4d9b1f15be",
+    "at": "2026-11-16T10:34:09.632Z"
+  },
+  "cars/deuch-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 59,
+    "tokens": 18447,
+    "prompt": "a98b473cab",
+    "at": "2026-11-16T10:34:11.277Z"
+  },
+  "cars/twingo-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 13712,
+    "prompt": "03ff695f95",
+    "at": "2026-11-16T10:34:13.164Z"
+  },
+  "cars/golf1-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 21564,
+    "prompt": "5bd7359345",
+    "at": "2026-11-16T10:35:05.980Z"
+  },
+  "cars/panda-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 59,
+    "tokens": 17124,
+    "prompt": "22319de544",
+    "at": "2026-11-16T10:35:10.137Z"
+  },
+  "cars/panda-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 17180,
+    "prompt": "168eae7499",
+    "at": "2026-11-16T10:35:16.238Z"
+  },
+  "cars/golf1-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 85,
+    "tokens": 21352,
+    "prompt": "c8bb058777",
+    "at": "2026-11-16T10:35:34.699Z"
+  },
+  "cars/p930-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 21414,
+    "prompt": "2d88074dc6",
+    "at": "2026-11-16T10:36:06.968Z"
+  },
+  "cars/c4zr1-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 78,
+    "tokens": 17179,
+    "prompt": "1ce5c55505",
+    "at": "2026-11-16T10:36:24.217Z"
+  },
+  "cars/c4zr1-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 89,
+    "tokens": 17133,
+    "prompt": "8d95ce35e0",
+    "at": "2026-11-16T10:36:39.504Z"
+  },
+  "cars/p930-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 49248,
+    "prompt": "c92b007b07",
+    "at": "2026-11-16T10:36:57.389Z"
+  },
+  "cars/r34-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 12583,
+    "prompt": "84a110f0d8",
+    "at": "2026-11-16T10:36:58.412Z"
+  },
+  "cars/r34-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 13748,
+    "prompt": "d2fe34abeb",
+    "at": "2026-11-16T10:37:24.091Z"
+  },
+  "cars/venom-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 21518,
+    "prompt": "e7c51d5727",
+    "at": "2026-11-16T10:37:29.578Z"
+  },
+  "cars/scirocco-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 18081,
+    "prompt": "6b65c26f3a",
+    "at": "2026-11-16T10:37:58.026Z"
+  },
+  "cars/venom-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 86,
+    "tokens": 15734,
+    "prompt": "137350721e",
+    "at": "2026-11-16T10:38:23.254Z"
+  },
+  "cars/s15-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 25946,
+    "prompt": "2a1786d965",
+    "at": "2026-11-16T10:38:32.881Z"
+  },
+  "cars/scirocco-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 17249,
+    "prompt": "5ec72945e2",
+    "at": "2026-11-16T10:38:46.928Z"
+  },
+  "cars/elise-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 22123,
+    "prompt": "7338115a55",
+    "at": "2026-11-16T10:39:09.903Z"
+  },
+  "cars/s15-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 85,
+    "tokens": 18173,
+    "prompt": "1cc061f45a",
+    "at": "2026-11-16T10:39:22.675Z"
+  },
+  "cars/elise-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 17266,
+    "prompt": "45bc5ce893",
+    "at": "2026-11-16T10:39:36.778Z"
+  },
+  "cars/mf1-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 69,
+    "tokens": 13695,
+    "prompt": "d8597a88b0",
+    "at": "2026-11-16T10:39:55.780Z"
+  },
+  "cars/mf1-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 82,
+    "tokens": 13147,
+    "prompt": "21b88505e1",
+    "at": "2026-11-16T10:40:32.359Z"
+  },
+  "cars/stratos-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 11862,
+    "prompt": "408d16bf61",
+    "at": "2026-11-16T10:40:39.299Z"
+  },
+  "cars/stratos-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 83,
+    "tokens": 21479,
+    "prompt": "7b4bf6633b",
+    "at": "2026-11-16T10:40:45.325Z"
+  },
+  "cars/dmc-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 52,
+    "tokens": 20667,
+    "prompt": "1fabe2c441",
+    "at": "2026-11-16T10:40:47.536Z"
+  },
+  "cars/dmc-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 17051,
+    "prompt": "0d2b717292",
+    "at": "2026-11-16T10:41:34.709Z"
+  },
+  "cars/beetle-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 31305,
+    "prompt": "f68f2cc704",
+    "at": "2026-11-16T10:41:38.178Z"
+  },
+  "cars/firebird-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 21575,
+    "prompt": "2984041156",
+    "at": "2026-11-16T10:41:43.315Z"
+  },
+  "cars/firebird-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 86,
+    "tokens": 13081,
+    "prompt": "f956d90f50",
+    "at": "2026-11-16T10:42:11.448Z"
+  },
+  "cars/esprit-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 15957,
+    "prompt": "6bd0c467e6",
+    "at": "2026-11-16T10:42:31.586Z"
+  },
+  "cars/beetle-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 30795,
+    "prompt": "b305c052f1",
+    "at": "2026-11-16T10:42:35.365Z"
+  },
+  "cars/esprit-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 64,
+    "tokens": 17330,
+    "prompt": "ec1da63f5c",
+    "at": "2026-11-16T10:42:47.452Z"
+  },
+  "cars/elise111s-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 69,
+    "tokens": 21486,
+    "prompt": "356db000c2",
+    "at": "2026-11-16T10:43:20.272Z"
+  },
+  "cars/elise111s-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 21220,
+    "prompt": "67ade039aa",
+    "at": "2026-11-16T10:43:37.715Z"
+  },
+  "cars/elise190-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 82,
+    "tokens": 42224,
+    "prompt": "b9df2d2f16",
+    "at": "2026-11-16T10:43:57.059Z"
+  },
+  "cars/bttf-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 17345,
+    "prompt": "549bec321e",
+    "at": "2026-11-16T10:44:06.516Z"
+  },
+  "cars/elise190-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 85,
+    "tokens": 37624,
+    "prompt": "855ea82861",
+    "at": "2026-11-16T10:44:12.331Z"
+  },
+  "cars/bttf-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 33680,
+    "prompt": "7544ee265a",
+    "at": "2026-11-16T10:44:25.775Z"
+  },
+  "cars/kitt-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 13414,
+    "prompt": "abef72a22f",
+    "at": "2026-11-16T10:44:44.133Z"
+  },
+  "cars/p106xn": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 21127,
+    "prompt": "a10b392103",
+    "at": "2026-11-16T10:48:49.991Z"
+  },
+  "cars/p205gl": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 22368,
+    "prompt": "f6a53bde0c",
+    "at": "2026-11-16T10:48:54.644Z"
+  },
+  "cars/ax10": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 13199,
+    "prompt": "2b9a6bbfbf",
+    "at": "2026-11-16T10:48:55.417Z"
+  },
+  "cars/saxo11": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 21052,
+    "prompt": "f746e534dc",
+    "at": "2026-11-16T10:48:59.516Z"
+  },
+  "cars/uno45": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 29634,
+    "prompt": "bff56b6a91",
+    "at": "2026-11-16T10:49:40.685Z"
+  },
+  "cars/r5five": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 51,
+    "tokens": 22178,
+    "prompt": "4be2329584",
+    "at": "2026-11-16T10:49:40.744Z"
+  },
+  "cars/swift10": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 13166,
+    "prompt": "03386c5d9a",
+    "at": "2026-11-16T10:49:46.876Z"
+  },
+  "cars/fiesta11": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 59,
+    "tokens": 19727,
+    "prompt": "d7153258e4",
+    "at": "2026-11-16T10:49:54.328Z"
+  },
+  "cars/simcals": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 13396,
+    "prompt": "4f716cc377",
+    "at": "2026-11-16T10:50:33.021Z"
+  },
+  "cars/mini850": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 18763,
+    "prompt": "e26f1774a6",
+    "at": "2026-11-16T10:50:40.532Z"
+  },
+  "cars/fiat500b": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 61,
+    "tokens": 21524,
+    "prompt": "4c1084c2b7",
+    "at": "2026-11-16T10:50:41.589Z"
+  },
+  "cars/a1101100": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 18306,
+    "prompt": "33b929ed4c",
+    "at": "2026-11-16T10:50:54.658Z"
+  },
+  "cars/golf11": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 43,
+    "tokens": 42044,
+    "prompt": "e429acdbfd",
+    "at": "2026-11-16T10:51:16.477Z"
+  },
+  "cars/scirocco14": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 17187,
+    "prompt": "8fc3996d14",
+    "at": "2026-11-16T10:51:27.209Z"
+  },
+  "cars/impreza16": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 50,
+    "tokens": 20947,
+    "prompt": "853a5af377",
+    "at": "2026-11-16T10:51:31.661Z"
+  },
+  "cars/lancer16": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 13317,
+    "prompt": "4f70586671",
+    "at": "2026-11-16T10:51:42.687Z"
+  },
+  "cars/delta16": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 30350,
+    "prompt": "770a4012f1",
+    "at": "2026-11-16T10:52:04.671Z"
+  },
+  "cars/escort14": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 17571,
+    "prompt": "261f91b4ed",
+    "at": "2026-11-16T10:52:14.305Z"
+  },
+  "cars/celica18": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 17322,
+    "prompt": "dad8e6e37d",
+    "at": "2026-11-16T10:52:25.268Z"
+  },
+  "cars/e190": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 31689,
+    "prompt": "c3c73aa241",
+    "at": "2026-11-16T10:52:40.415Z"
+  },
+  "cars/p911sc": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 18606,
+    "prompt": "c1affac39b",
+    "at": "2026-11-16T10:53:02.200Z"
+  },
+  "cars/e30316": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 63,
+    "tokens": 13622,
+    "prompt": "f2b41e1da1",
+    "at": "2026-11-16T10:53:07.684Z"
+  },
+  "cars/c4": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 54,
+    "tokens": 17444,
+    "prompt": "4ca3eb0f3c",
+    "at": "2026-11-16T10:53:19.761Z"
+  },
+  "cars/camaro250": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 21069,
+    "prompt": "6f9ac14a54",
+    "at": "2026-11-16T10:53:35.197Z"
+  },
+  "cars/charger318": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 17536,
+    "prompt": "ba3afa097b",
+    "at": "2026-11-16T10:53:51.004Z"
+  },
+  "cars/mustangeco": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 49,
+    "tokens": 10879,
+    "prompt": "a00c25af15",
+    "at": "2026-11-16T10:53:56.363Z"
+  },
+  "cars/challsxt": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 13381,
+    "prompt": "40e34feacd",
+    "at": "2026-11-16T10:54:03.969Z"
   }
 }

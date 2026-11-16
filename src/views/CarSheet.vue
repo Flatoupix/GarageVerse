@@ -132,7 +132,7 @@ const stageProblem = computed(() => {
 })
 const evolutions = computed(() => vehicles.filter(e => e.evolvesFrom === props.id))
 const base = computed(() => vehicleById.get(v.value.evolvesFrom ?? v.value.culture?.base ?? ''))
-const variants = computed(() => vehicles.filter(e => e.culture?.base === props.id))
+const variants = computed(() => vehicles.filter(e => e.culture?.base === props.id && e.evolvesFrom !== props.id))
 const inLineup = computed(() => save.lineup.includes(props.id))
 const courseScores = computed(() => props.circuit ? circuitScores(racer(props.id, prep.value), props.circuit) : [])
 const readiness = computed(() => [...courseScores.value].sort((a, b) => b.average - a.average))
@@ -419,12 +419,12 @@ function workshop(key?: StatKey) {
         <template v-else>
           <section v-if="!car" class="sheet-section">
             <h3>Pas encore dans ton garage</h3>
-            <p v-if="v.craft" class="hint">Évolution de {{ base?.name }} {{ base?.version }}. Prépare-la au Stage {{ v.craft.stage }}, puis débloque-la pour {{ v.craft.credits }} crédits.</p>
+            <p v-if="v.craft" class="hint">Évolution de {{ base?.name }} {{ base?.version }}. Prépare-la au Stage {{ v.craft.stage }}, puis débloque-la pour {{ v.craft.credits }} crédits.<template v-if="v.craft.inBoosters"> Elle sort aussi des boosters.</template></p>
             <p v-else class="hint">Disponible dans les boosters.</p>
             <button v-if="v.craft" type="button" class="button primary" :disabled="Boolean(craftCheck(save, id))" @click="unlock(id, true)">
               {{ `Débloquer · ${v.craft.credits} crédits` }}
             </button>
-            <p v-if="craftCheck(save, id)" class="hint">{{ craftCheck(save, id) }}</p>
+            <p v-if="v.craft && craftCheck(save, id)" class="hint">{{ craftCheck(save, id) }}</p>
           </section>
           <section v-else class="sheet-section">
             <h3><span v-help="'stage'">Stage</span> {{ car.stage }}/3</h3>

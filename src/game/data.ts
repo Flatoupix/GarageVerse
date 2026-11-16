@@ -17,7 +17,8 @@ export interface Vehicle {
   rarity: Rarity; cost: number; stats: Stats; drive: string; engine: string; tags: string[]; spec?: string
   signature: { name: string; text: string; effects: Effect[] }
   culture?: { work: string; base?: string; aura: string[] }
-  evolvesFrom?: string; craft?: { stage: number; credits: number }; look?: string
+  // craft.inBoosters : l'évolution se débloque à l'atelier et sort aussi des boosters (sinon, atelier seulement).
+  evolvesFrom?: string; craft?: { stage: number; credits: number; inBoosters?: boolean }; look?: string
   anim?: { setting: string; fx: string[] }
 }
 

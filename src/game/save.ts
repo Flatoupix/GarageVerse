@@ -248,7 +248,7 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
       seen.add(`part:${part.id}`)
       return pull
     }
-    const pool = nearest(vehicles.filter(v => !v.craft))
+    const pool = nearest(vehicles.filter(v => !v.craft || v.craft.inBoosters))
     const unseen = pool.filter(v => !seen.has(`car:${v.id}`))
     const favor = (v: (typeof vehicles)[number]) =>
       booster.favorTags?.some(tag => v.tags.includes(tag) || v.culture?.aura.includes(tag)) ? booster.favorWeight ?? 1 : 1

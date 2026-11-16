@@ -222,7 +222,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
           <button v-else type="button" class="missing-card" :class="`rarity-${rarityClass[v.rarity]}`" @click="emit('inspect', 'car', v.id)">
             <span>{{ v.number }} / {{ vehicles.length }} · {{ v.rarity }}</span>
             <strong>{{ v.name }}</strong>
-            <span>{{ v.craft ? 'Évolution à débloquer' : v.version }}</span>
+            <span>{{ v.craft && !v.craft.inBoosters ? 'Évolution à débloquer' : v.version }}</span>
           </button>
         </div>
       </div>

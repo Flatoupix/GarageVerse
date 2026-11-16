@@ -60,7 +60,8 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - **Démontage de voiture** à l’atelier, pour récupérer des pièces. Mis de côté : le joueur veut en reparler. Pas de kits d’amélioration.
 - **Mode multijoueur** (le site est statique sur GitHub Pages, sans serveur : duels asynchrones plus simples que le temps réel).
 - **Version Android**, avec son écran de lancement de studio « Crazy Popping Cats » (fait sous Construct, fichiers à récupérer sur son PC). Une publication sur le Play Store rouvre la question des marques et des voitures de films : prévoir un nom générique par voiture et une version sans marques, séparée et sans code secret.
-- **Étendre Solarpunk et Abandonnée** aux autres cartes, et éventuellement d’autres styles.
+- **Étendre Solarpunk et Abandonnée** aux autres cartes (accord du joueur pour toutes les voitures, génération en pause le 16 novembre pour ménager le quota) : 51 images sur 194 existent (`src/assets/cars/<id>-solarpunk.webp` et `-abandonnee.webp`), mais seules les 5 voitures d’essai les proposent (`trialCars` dans `src/game/data.ts`). Reprendre avec `node pipeline/art.mjs --set edition --engine auto --jobs 4` (ne génère que le manquant, et couvre aussi les 27 nouvelles cartes), contrôler les images, puis ouvrir les deux éditions à toutes les voitures.
+- **Compléter les 27 nouvelles cartes de base** (103 à 129) : pixel 16 bits (`--set pixel`), voiture de profil (`--set anim --kind sprites`) et éditions. Le joueur a demandé de ne faire que le Synthwave pour l’instant. En attendant, leur pied de carte affiche « Pixel 16 bits » au-dessus de l’illustration Synthwave (repli de `edition()` dans `src/game/art.ts`).
 - **Choix du thème au premier lancement** pour un joueur neuf.
 - **Nettoyage du CSS de scène** devenu inutilisé.
 
