@@ -470,13 +470,8 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--cyan), va
 .slot-placeholder { display: grid; place-items: center; aspect-ratio: .72; border-radius: 14px; border: 1px dashed #4b3a8a; color: var(--muted); font-size: .75rem; }
 .rival-preview { color: var(--muted); font-size: .78rem; margin-top: 10px; line-height: 1.4; }
 .list-title { font: 700 .82rem var(--display); color: var(--cyan); text-transform: uppercase; letter-spacing: .08em; margin: 20px 0 8px; }
-.pick-list, .rival-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.pick-list button { width: 100%; display: grid; grid-template-columns: 36px 1fr; gap: 2px 10px; align-items: center; text-align: left; padding: 8px 10px;
-  border-radius: 12px; border: 1px solid var(--line); background: #150834; }
-.pick-list button[aria-pressed="true"] { border-color: var(--cyan); background: #2de2ff12; }
+.rival-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .pick-cost { grid-row: span 2; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; font: 900 1rem var(--display); color: #1b0630; background: var(--cyan); }
-.pick-name { display: grid; } .pick-name b { font-size: .88rem; } .pick-name small, .pick-stats { color: var(--muted); font-size: .72rem; }
-.pick-stats { font-family: var(--mono); }
 .rival-row { width: 100%; display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; text-align: left; padding: 8px;
   border-radius: 14px; border: 1px solid var(--line); background: linear-gradient(120deg, #241451, #120830); }
 .rival-row img, .rival-initial { width: 56px; height: 56px; border-radius: 12px; object-fit: cover; }
@@ -500,11 +495,11 @@ main { animation: view-in 280ms cubic-bezier(.2,.8,.3,1) backwards; }
 @keyframes modal-in { from { opacity: 0; translate: 0 30px; scale: .96; } }
 @keyframes fade-in { from { opacity: 0; } }
 
-.button, .tile, .card-tile, .rival-row, .engage-car, .pick-list button, .chips button, .tabs button, .tabbar button, .settings-button,
+.button, .tile, .card-tile, .rival-row, .engage-car, .chips button, .tabs button, .tabbar button, .settings-button,
 .lineup-slot, .missing-card, .edition-picker button {
   transition: scale 120ms ease-out, translate 180ms ease-out, filter 120ms, box-shadow 180ms, border-color 180ms, background-color 180ms;
   -webkit-tap-highlight-color: transparent; }
-:is(.button, .tile, .card-tile, .rival-row, .engage-car, .pick-list button, .chips button, .tabs button, .tabbar button, .settings-button,
+:is(.button, .tile, .card-tile, .rival-row, .engage-car, .chips button, .tabs button, .tabbar button, .settings-button,
   .lineup-slot, .missing-card, .edition-picker button):active:not(:disabled) { scale: .95; }
 .button.primary { position: relative; overflow: hidden; }
 .button.primary:active:not(:disabled) { filter: brightness(1.2); }
@@ -762,7 +757,6 @@ button.card-back { animation: back-bob 2.6s ease-in-out infinite; }
 .race-priorities li b { font-size: .85rem; }
 .race-priorities li small { color: var(--muted); font-size: .73rem; }
 .race-prepare { min-height: 40px; padding: 3px 7px; background: #2de2ff10; border: 1px solid #2de2ff55; border-radius: 7px; color: var(--cyan); text-align: right; }
-.pick-stats > span { display: block; }
 
 /* Cartes pièces (atelier) */
 .part-card { display: flex; flex-direction: column; }
@@ -901,3 +895,6 @@ img[src*=".px"], .pixelated { image-rendering: pixelated; }
 .mechanic-actions button { max-width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--sun); border-radius: var(--radius, 0); background: var(--panel); color: var(--text); white-space: normal; }
 .mechanic-actions button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 [data-mechanic] { outline: 2px solid var(--sun); outline-offset: -2px; }
+
+.car-browser .browser-pick-info { color: var(--muted); background: var(--night); }
+.car-browser .card-tile[aria-pressed="true"] { outline: 2px solid var(--cyan); background: #2de2ff12; }

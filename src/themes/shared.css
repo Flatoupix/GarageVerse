@@ -370,10 +370,6 @@
     aspect-ratio: 1.45;
     max-height: 190px;
   }
-  .pick-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
   .rival-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
@@ -580,8 +576,6 @@
 .pick-cost[data-cost="8"] { background: #ffb347; }
 .pick-cost[data-cost="9"] { background: #ff4a4a; }
 .pick-cost[data-cost="10"] { background: #fff27a; }
-/* Une voiture qui dépasserait le plafond de coût est grisée et ne se choisit pas. */
-.pick-list button:disabled { opacity: .45; filter: grayscale(1); cursor: not-allowed; }
 
 /* Liste des thèmes rangée par groupes (Ambiances, Univers, À gagner). */
 .theme-group { display: grid; gap: 6px; min-width: 0; }
@@ -688,3 +682,13 @@
 @media (prefers-reduced-motion: reduce) {
   .gv-button, .gv-button::after, .special-card, .rival-list .deal { animation: none !important; transition: none !important; }
 }
+
+/* Les deux sélecteurs utilisent la même grille, même dans une course. */
+.car-browser, .car-browser .garage-tile { min-width: 0; }
+.browser-pick-info { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px; font-family: var(--mono); font-size: .75rem; overflow-wrap: anywhere; }
+.browser-pick-info .pick-cost { flex: 0 0 36px; }
+.car-browser .card-tile:disabled { opacity: .45; filter: grayscale(1); cursor: not-allowed; }
+@media (max-width: 649px) {
+  .car-browser .garage-grid.grid-dense { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+}
+.browser-place { font-weight: 900; }

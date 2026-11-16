@@ -193,7 +193,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     reducedMotion: input.preferences?.reducedMotion === true,
     vibration: input.preferences?.vibration !== false,
     theme: themeIds.find(id => id === input.preferences?.theme) ?? 'neon',
-    ...(typeof input.preferences?.garageSort === 'string' && ['number', 'rarity', 'power', 'name', 'copies', 'stage', 'cost', 'cost-desc', 'acc', 'vit', 'man', 'end', 'year'].includes(input.preferences.garageSort) ? { garageSort: input.preferences.garageSort } : {}),
+    ...(typeof input.preferences?.garageSort === 'string' && ['number', 'rarity', 'power', 'name', 'copies', 'stage', 'cost', 'cost-desc', 'acc', 'vit', 'man', 'end', 'year', 'circuit'].includes(input.preferences.garageSort) ? { garageSort: input.preferences.garageSort } : {}),
     ...(typeof input.preferences?.garageCategory === 'string' ? { garageCategory: input.preferences.garageCategory } : {}),
     ...(input.preferences?.garageRarity && rarities.includes(input.preferences.garageRarity) ? { garageRarity: input.preferences.garageRarity } : {}),
     ...(cardBackIds.includes(input.preferences?.cardBack as CardBackId) ? { cardBack: input.preferences!.cardBack } : {}),
