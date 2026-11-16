@@ -51,6 +51,64 @@ const EDITION_LOOKS = {
     'ivy and weeds growing through it, shafts of golden light through the broken roof, floating dust. ' +
     'Style: moody cinematic illustrated painting, muted earthy palette with the faded paint still recognisable, melancholic and nostalgic, not photorealistic.',
 }
+// Abandonnée : chaque voiture raconte comment on l'a retrouvée, selon son genre (succession, villa, saisie, planque…).
+// Le style reste commun ; seuls le lieu, les objets et la lumière changent d'une histoire à l'autre.
+const ABANDON_STYLE = 'The car is abandoned but intact and complete, a sleeping time capsule that could be restored: body straight and undamaged, ' +
+  'all windows, lights, panels and wheels in place, no dents, no rust holes, no missing parts, no broken glass. Only a layer of dust, ' +
+  'a few cobwebs and slightly faded paint show the passing years. ' +
+  'Style: moody cinematic illustrated painting, a melancholic and nostalgic mood, rich storytelling details in the surroundings, not photorealistic.'
+const ABANDON_STORIES = {
+  succession: { cars: ['p205gl', 'golf11', 'simcals', 'e30316', 'e190', 'escort14', 'lancer16', 'impreza16', 'delta16', 'celica18', 'volvo240', 'espace',
+      'mx5na', 'mx5nb', 'fiesta', 'uno', 'corsa', 'p106xn', 'saxo11', 'ax10', 'ax', 'swift', 'golf1', 'beetle', 'fiat500', 'mini850', 'mini65',
+      'a1101100', 'camaro250', 'p911sc', 'simca', 'fiesta11', 'swift10'],
+    scene: "the late grandfather's car, found by his family when clearing out his house before the estate auction: a cramped suburban garage, " +
+      'a faded dust sheet half pulled off the car, an old workbench with jam jars of screws and hanging tools, a flat cap and a folded tartan blanket ' +
+      'on the seat, faded family photos pinned to the wall, a blank cardboard auction lot tag hanging from the mirror, soft grey daylight from a small window.' },
+  villa: { cars: ['f40', 'mf1', 'venom', 'countach', 'testarossa', 'cgt', 'zonda', 'agera', 'veyron', 'nsx', 'ruf', 'esprit', 'dmc'],
+    scene: 'left behind in the open garage of a derelict luxury 1980s Riviera villa after its owner vanished: cracked marble floor, shattered floor-to-ceiling ' +
+      'glass walls, dry palm fronds and bougainvillea creeping in, an empty swimming pool with stagnant green water visible outside, ' +
+      'sun-bleached pastel walls, warm late-afternoon Mediterranean light.' },
+  // Voitures qui jurent avec leur lieu d'abandon : chacune a son propre décor.
+  decalee: { cars: ['tesla', 'gt500', 'demon', 'h1', 'mustangeco', 'challsxt', 'm3e46', 'evo2', 'p930', 'c4'], scenes: {
+    tesla: 'absurdly left inside the great hall of an abandoned medieval castle: stone walls, a huge cold fireplace, faded tapestries, dusty suits of armour, light through tall gothic windows.',
+    gt500: 'absurdly parked at the bottom of an empty, drained indoor swimming pool of an abandoned 1970s municipal baths: cracked blue tiles, a rusty diving board above, skylight beams.',
+    demon: 'absurdly parked in the middle of the ballroom of an abandoned grand hotel: a dusty crystal chandelier overhead, peeling gilded mouldings, stacked chairs, a grand piano under a sheet.',
+    h1: 'absurdly left among the rides of an abandoned amusement park: a faded carousel with wooden horses behind it, a stalled Ferris wheel, overgrown paths, an empty candy-floss stand.',
+    mustangeco: 'absurdly parked in the central atrium of an abandoned shopping mall: dry fountain, escalators frozen in place, empty shop windows without signs, potted palms gone wild, skylight light.',
+    challsxt: 'absurdly left inside the top station of an abandoned mountain ski lift: a rusty cable wheel, stacked old wooden skis, snow drifting in through a broken door, peaks outside.',
+    m3e46: 'absurdly parked between tall bookshelves in the reading room of an abandoned old library: scattered books, green banker lamps, a spiral staircase, dusty light from high windows.',
+    evo2: 'absurdly parked on the concourse of an abandoned 1900s railway station: iron and glass roof, an old station clock, wooden benches, an empty platform with a stopped steam-era carriage.',
+    p930: 'absurdly left inside the great glasshouse of an abandoned botanical garden: wrought-iron frame, giant tropical palms and ferns, broken glass panes letting in sunbeams and humid haze.',
+    c4: 'absurdly parked on the wooden floor of an abandoned 1980s roller disco: a dusty mirror ball, neon tubes switched off, scattered roller skates, a DJ booth, coloured light through grimy windows.',
+  } },
+  planque: { cars: ['cosworth', 'impreza', 'evo8', 'r5gt', 'golf2', 'p205', 'supra', 's15', 'rx7', 'r32', 'r34', 'ek9', 'civiceg', 'scirocco14',
+      'abarth', 'saxo', 'p106'],
+    scene: 'a getaway car hidden after a heist and sealed for decades in a rented lock-up garage under a brick railway arch: a rusty roll-up door half open ' +
+      'onto a rainy night street, a dusty canvas duffel bag on the floor, piles of yellowed newspapers, a road map pinned to the brick wall, ' +
+      'a single bare bulb, puddles reflecting orange streetlight.' },
+  ferme: { cars: ['deuch', 'r4l', 'mehari', 'combi', 'transit', 'hilux', 'panda', 'niva', 'defender', 'kangoo', 'p504', 'duster'],
+    scene: 'retired on a family farm and forgotten there: parked in an open-sided hay shed beside bales of straw, an old tractor wheel, ' +
+      'milk churns and a rusty wheelbarrow, a couple of chickens around the wheels, fields and a hedge behind, bright overcast countryside daylight.' },
+  foret: { cars: ['stratos', 'delta', 'a110', 'quattro', 'celica', 'wrangler', 'explorer', 'jpjeep'],
+    scene: 'parked decades ago at the end of a forest track and forgotten there: fallen leaves and pine needles on the roof and bonnet, ' +
+      'ferns and tall grass around the wheels, a few ivy tendrils on the bumper, misty pine and birch woods, cool green light filtering through the canopy.' },
+  circuit: { cars: ['scirocco', 'elise', 'elise111s', 'elise190', 'm3e30', 'camaro', 'ae86'],
+    scene: 'left in the pit garage of a race circuit that closed long ago: peeling paint on the garage walls, stacks of old slick racing tyres, ' +
+      'a faded chequered pattern on the floor, weeds pushing through the cracked tarmac of the empty pit lane outside, a torn grandstand roof in the distance, pale morning light.' },
+  desert: { cars: ['c4zr1', 'firebird', 'mustang67', 'charger', 'charger318', 'interceptor'],
+    scene: 'rusting beside an abandoned gas station on a forgotten desert highway: a little sand drifted against the tyres, tumbleweeds, a sun-bleached pump island ' +
+      'and an empty signpost without text, cracked asphalt, harsh golden-hour sun and long shadows.' },
+  plateau: { cars: ['bttf', 'kitt', 'brian', 'herbie', 'bond', 'taxi', 'ecto1', 'batmobile', 'eleanor', 'domcharger', '1000tipla'],
+    scene: 'forgotten in the back of a closed-down film studio prop warehouse after the shooting ended: dusty stage spotlights on stands, rolled canvas backdrops, ' +
+      'wooden flight cases, a director\'s chair with a torn seat, a beam of light from a high window across the dust.' },
+  parking: { cars: ['clio', 'twingo', 'smart', 'twizy', 'p206', 'golf4', 'micra', 'logan', 'multipla', 'fiat500b', 'r5five', 'uno45'],
+    scene: 'abandoned for years on the lowest level of a closed underground car park: water puddles on the concrete, numbered pillars without readable numbers, ' +
+      'a single flickering neon tube, a broken parking barrier, a fine layer of dust and dead leaves blown in, cold blue-grey light.' },
+}
+const abandonStory = id => {
+  const story = Object.values(ABANDON_STORIES).find(story => story.cars.includes(id))
+  return story && { scene: story.scenes?.[id] ?? story.scene }
+}
 // --set cardback [--only cardback-a,cardback-b] : propositions de dos de carte, src/assets/ui/cardback-<lettre>.webp (portrait, sans texte).
 const CARDBACK_BASE = 'Back of a collectible car trading card, portrait 2:3, full-bleed artwork filling the whole image with perfect left-right mirror symmetry, ' +
   'no frame, no border and no card edge, a calm empty round area at the exact centre where a monogram will be added later, rich detail near the edges.'
@@ -115,9 +173,13 @@ function jobs() {
       const subject = v.culture
         ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
         : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
-      for (const style of styles) list.push({ kind: 'cars', id: `${v.id}-${style}`, size: [640, 960], prompt:
-        `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
-        `centered in the lower two thirds, slight low camera angle, wheels on the ground. ${EDITION_LOOKS[style]} ${NO_TEXT}` })
+      for (const style of styles) {
+        const story = style === 'abandonnee' && abandonStory(v.id)
+        list.push({ kind: 'cars', id: `${v.id}-${style}`, size: [640, 960], prompt:
+          `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
+          `centered in the lower two thirds, slight low camera angle, wheels on the ground. ` +
+          `${story ? `Scene: ${story.scene} ${ABANDON_STYLE}` : EDITION_LOOKS[style]} ${NO_TEXT}` })
+      }
     }
     return list
   }

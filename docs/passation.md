@@ -60,7 +60,6 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - **Démontage de voiture** à l’atelier, pour récupérer des pièces. Mis de côté : le joueur veut en reparler. Pas de kits d’amélioration.
 - **Mode multijoueur** (le site est statique sur GitHub Pages, sans serveur : duels asynchrones plus simples que le temps réel).
 - **Version Android**, avec son écran de lancement de studio « Crazy Popping Cats » (fait sous Construct, fichiers à récupérer sur son PC). Une publication sur le Play Store rouvre la question des marques et des voitures de films : prévoir un nom générique par voiture et une version sans marques, séparée et sans code secret.
-- **8 éditions faites par Antigravity à refaire avec Codex** : Civic EG, Kangoo, Micra et Swift, Solarpunk et Abandonnée (grange sombre sans végétation, ville pâle). Les 129 voitures ont leurs deux éditions.
 - **Bruitages Suno** (16 novembre) : 12 effets synthétisés remplacés par des fichiers Suno, via le MCP « suno » configuré dans Codex (`codex exec`, outil `sounds_create`), détail dans `docs/audit-audio.md`. Restent synthétisés : `upgrade` (à refaire, la prise était ratée), `tap` et `tick`. Le compte n’a plus que 7 crédits de téléchargement.
 - **Choix du thème au premier lancement** pour un joueur neuf.
 - **Nettoyage du CSS de scène** devenu inutilisé.

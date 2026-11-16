@@ -21,7 +21,7 @@ import RaceView from './views/RaceView.vue'
 import ShopView from './views/ShopView.vue'
 
 import { offlineReady } from './game/offline'
-import { readSave, SAVE_KEY } from './game/save'
+import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
 type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
@@ -73,6 +73,15 @@ async function importSave(event: Event) {
     screen.value = save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home'
     transferFeedback('Ta sauvegarde a été importée.')
   } catch { transferFeedback('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.', true) }
+}
+// Remise à zéro complète : nouvelle partie, réglages compris. Le rechargement repart d'un état propre.
+function resetGame() {
+  if (!window.confirm('Tout remettre à zéro ? Voitures, pièces, crédits, progression et réglages seront effacés. Exporte ta sauvegarde avant si tu veux la garder.')) return
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify(newSave()))
+    localStorage.removeItem(LEGACY_KEY)
+    location.reload()
+  } catch { transferFeedback('Remise à zéro impossible : le stockage du navigateur est indisponible.', true) }
 }
 type SettingsTab = 'parameters' | 'themes' | 'help'
 const settingsTab = ref<SettingsTab>('parameters')
@@ -353,6 +362,7 @@ function toggleSetting(key: Setting) {
             <button type="button" class="button ghost" @click="exportSave">Exporter la sauvegarde</button>
             <button type="button" class="button ghost" @click="saveFile?.click()">Importer une sauvegarde</button>
             <input ref="saveFile" type="file" accept=".json,application/json" hidden @change="importSave" />
+            <button type="button" class="button quiet" @click="resetGame">Réinitialiser la partie</button>
             <p v-if="transferMessage" role="status">{{ transferMessage }}</p>
           </section>
           <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>

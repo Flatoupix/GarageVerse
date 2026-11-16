@@ -3267,18 +3267,18 @@
   "cars/deuch-abandonnee": {
     "status": "ok",
     "engine": "codex",
-    "seconds": 59,
-    "tokens": 18447,
-    "prompt": "a98b473cab",
-    "at": "2026-11-16T10:34:11.277Z"
+    "seconds": 85,
+    "tokens": 17328,
+    "prompt": "391c2f34c4",
+    "at": "2026-11-16T21:15:38.378Z"
   },
   "cars/twingo-abandonnee": {
     "status": "ok",
     "engine": "codex",
-    "seconds": 61,
-    "tokens": 13712,
-    "prompt": "03ff695f95",
-    "at": "2026-11-16T10:34:13.164Z"
+    "seconds": 86,
+    "tokens": 20924,
+    "prompt": "277f0c16e8",
+    "at": "2026-11-16T21:15:39.462Z"
   },
   "cars/golf1-solarpunk": {
     "status": "ok",
@@ -3339,10 +3339,10 @@
   "cars/p930-abandonnee": {
     "status": "ok",
     "engine": "codex",
-    "seconds": 83,
-    "tokens": 49248,
-    "prompt": "c92b007b07",
-    "at": "2026-11-16T10:36:57.389Z"
+    "seconds": 68,
+    "tokens": 16494,
+    "prompt": "c2ecbb5c68",
+    "at": "2026-11-16T21:15:21.277Z"
   },
   "cars/r34-solarpunk": {
     "status": "ok",
@@ -3443,10 +3443,10 @@
   "cars/stratos-abandonnee": {
     "status": "ok",
     "engine": "codex",
-    "seconds": 63,
-    "tokens": 11862,
-    "prompt": "408d16bf61",
-    "at": "2026-11-16T10:40:39.299Z"
+    "seconds": 89,
+    "tokens": 22906,
+    "prompt": "3fff4adeaa",
+    "at": "2026-11-16T21:15:41.929Z"
   },
   "cars/stratos-solarpunk": {
     "status": "ok",
@@ -3507,10 +3507,10 @@
   "cars/beetle-abandonnee": {
     "status": "ok",
     "engine": "codex",
-    "seconds": 61,
-    "tokens": 30795,
-    "prompt": "b305c052f1",
-    "at": "2026-11-16T10:42:35.365Z"
+    "seconds": 76,
+    "tokens": 22499,
+    "prompt": "16066de979",
+    "at": "2026-11-16T21:15:29.739Z"
   },
   "cars/esprit-abandonnee": {
     "status": "ok",
@@ -4313,12 +4313,13 @@
     "at": "2026-11-16T15:12:56.127Z"
   },
   "cars/ecto1-abandonnee": {
-    "status": "ok",
+    "status": "failed",
     "engine": "codex",
-    "seconds": 80,
-    "tokens": 17512,
-    "prompt": "a7b227caf5",
-    "at": "2026-11-16T15:13:09.928Z"
+    "seconds": 72,
+    "tokens": 10484,
+    "prompt": "f84ec0b6d5",
+    "at": "2026-11-16T21:16:33.330Z",
+    "detail": "tokens used | 10 484"
   },
   "cars/batmobile-abandonnee": {
     "status": "ok",
@@ -4778,59 +4779,67 @@
   },
   "cars/civiceg-abandonnee": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 130,
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 17346,
     "prompt": "3c6c3b0014",
-    "at": "2026-11-16T18:13:10.710Z"
+    "at": "2026-11-16T21:10:14.571Z"
   },
   "cars/kangoo-solarpunk": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 113,
+    "engine": "codex",
+    "seconds": 46,
+    "tokens": 17182,
     "prompt": "f8a37af388",
-    "at": "2026-11-16T18:08:37.421Z"
+    "at": "2026-11-16T21:10:14.169Z"
   },
   "cars/kangoo-abandonnee": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 134,
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 17785,
     "prompt": "54808c7b2f",
-    "at": "2026-11-16T18:10:51.726Z"
+    "at": "2026-11-16T21:10:34.695Z"
   },
   "cars/micra-solarpunk": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 132,
+    "engine": "codex",
+    "seconds": 56,
+    "tokens": 13684,
     "prompt": "02d4e011ff",
-    "at": "2026-11-16T18:13:12.997Z"
+    "at": "2026-11-16T21:11:07.810Z"
   },
   "cars/micra-abandonnee": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 130,
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 21443,
     "prompt": "bbdd7b1ec5",
-    "at": "2026-11-16T18:15:20.885Z"
+    "at": "2026-11-16T21:11:01.818Z"
   },
   "cars/civiceg-solarpunk": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 140,
+    "engine": "codex",
+    "seconds": 44,
+    "tokens": 21132,
     "prompt": "2a4b2a3899",
-    "at": "2026-11-16T18:13:21.093Z"
+    "at": "2026-11-16T21:10:12.093Z"
   },
   "cars/swift-solarpunk": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 127,
+    "engine": "codex",
+    "seconds": 70,
+    "tokens": 29916,
     "prompt": "5a7fcf1416",
-    "at": "2026-11-16T18:15:20.280Z"
+    "at": "2026-11-16T21:11:24.544Z"
   },
   "cars/swift-abandonnee": {
     "status": "ok",
-    "engine": "agy",
-    "seconds": 111,
+    "engine": "codex",
+    "seconds": 77,
+    "tokens": 26681,
     "prompt": "9d34f6a2ed",
-    "at": "2026-11-16T18:15:12.414Z"
+    "at": "2026-11-16T21:11:51.202Z"
   },
   "cars/niva-abandonnee": {
     "status": "ok",
@@ -5161,12 +5170,13 @@
     "at": "2026-11-16T19:28:17.183Z"
   },
   "cars/cosworth-abandonnee": {
-    "status": "ok",
+    "status": "failed",
     "engine": "codex",
-    "seconds": 83,
-    "tokens": 40000,
-    "prompt": "9dd486c4cb",
-    "at": "2026-11-16T19:29:01.263Z"
+    "seconds": 71,
+    "tokens": 14847,
+    "prompt": "8775722c8f",
+    "at": "2026-11-16T21:16:40.692Z",
+    "detail": "tokens used | 14 847"
   },
   "cars/quattro-solarpunk": {
     "status": "ok",
@@ -5193,12 +5203,12 @@
     "at": "2026-11-16T19:29:10.541Z"
   },
   "cars/m3e30-abandonnee": {
-    "status": "ok",
+    "status": "failed",
     "engine": "codex",
-    "seconds": 54,
-    "tokens": 21368,
-    "prompt": "7d73b88247",
-    "at": "2026-11-16T19:29:38.170Z"
+    "seconds": 2,
+    "prompt": "1cc32b9960",
+    "at": "2026-11-16T21:15:40.696Z",
+    "detail": "ERROR: You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at Nov 17th, 2026 1:04 AM. | ERROR: You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at Nov 17th, 2026 1:04 AM."
   },
   "cars/evo2-solarpunk": {
     "status": "ok",
@@ -5305,12 +5315,12 @@
     "at": "2026-11-16T19:33:18.764Z"
   },
   "cars/charger-abandonnee": {
-    "status": "ok",
+    "status": "failed",
     "engine": "codex",
-    "seconds": 58,
-    "tokens": 21691,
-    "prompt": "bc1b372ceb",
-    "at": "2026-11-16T19:33:01.661Z"
+    "seconds": 2,
+    "prompt": "06c26954d4",
+    "at": "2026-11-16T21:15:41.753Z",
+    "detail": "ERROR: You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at Nov 17th, 2026 1:04 AM. | ERROR: You’ve hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/settings/usage to purchase more credits or try again at Nov 17th, 2026 1:04 AM."
   },
   "cars/eleanor-solarpunk": {
     "status": "ok",

@@ -190,7 +190,7 @@ En production, `src/main.ts` enregistre `./sw.js`. Le service worker sans dépen
 
 Le cache versionné est déclaré en tête de `public/sw.js` : changer son nom à chaque publication. Une version en attente s’active quand les anciennes fenêtres du jeu sont fermées, au prochain lancement ; l’activation supprime les anciens caches. Les réglages affichent « Disponible hors ligne » quand le worker contrôle la page. En développement ou sans service worker, le jeu fonctionne comme avant.
 
-Dans les réglages, « Exporter la sauvegarde » télécharge la partie courante au format JSON dans un fichier daté. « Importer une sauvegarde » vérifie le format GarageVerse v2 puis utilise `readSave` pour normaliser les données. Une confirmation précède le remplacement et la persistance ; annuler ou choisir un fichier invalide conserve la partie actuelle. Exporte ta partie avant de la remplacer pour en garder une copie.
+Dans les réglages, « Exporter la sauvegarde » télécharge la partie courante au format JSON dans un fichier daté. « Importer une sauvegarde » vérifie le format GarageVerse v2 puis utilise `readSave` pour normaliser les données. Une confirmation précède le remplacement et la persistance ; annuler ou choisir un fichier invalide conserve la partie actuelle. Exporte ta partie avant de la remplacer pour en garder une copie. « Réinitialiser la partie », sous l’import, remet tout à zéro après confirmation : nouvelle partie de `newSave` (300 crédits, Clio, Twingo et Panda, tutoriel relancé), réglages et thèmes compris, puis rechargement de la page.
 
 
 ### Actions du garage et aide
