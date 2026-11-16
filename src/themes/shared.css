@@ -809,7 +809,7 @@ main.race { padding-bottom: calc(var(--race-action-height, 140px) + 24px); }
 @keyframes race-view-in { from { opacity: 0; } }
 main.race { animation-name: race-view-in; }
 
-/* ——— Améliorations confort & progression (démontage rapide, étapes rivaux, 3ᵉ pièce, caisses) ——— */
+/* ——— Améliorations confort & progression (démontage rapide, étapes rivaux, 3ᵉ pièce, boosters Bricole et Mécanique) ——— */
 .strip-all-box { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; grid-column: 1 / -1; }
 .mounted-cars { display: grid; gap: 8px; margin: 8px 0; }
 .mounted-chip { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--radius, 8px); background: var(--night); }

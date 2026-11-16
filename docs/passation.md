@@ -73,7 +73,7 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 1. ~~8 voitures de côté manquantes~~ : faites.
 2. ~~Contrôle des détourages~~ : fait, voir ci-dessus.
 3. **Séries spéciales de courses** (endurance, vitesse, aura…, de plus en plus difficiles) : idée brute du joueur, fiche `orchestrator/backlog/series-speciales.json` marquée « à challenger, ne pas lancer ». En discuter avant toute spécification.
-4. **Retours de Galaad traités en 0.5.0** (7 messages vocaux, tickets GAL-01 à GAL-07 dans l’historique d’Antigravity) : démontage rapide, sept séries, rivaux en trois étapes avec voiture offerte, Caisse Bricole et Caisse Mécanique, 3ᵉ emplacement de pièce, courbe de la Nuit sans fin. Il a proposé d’envoyer une liste de voitures et de pièces de performance à ajouter.
+4. **Retours de Galaad traités en 0.5.0** (7 messages vocaux, tickets GAL-01 à GAL-07 dans l’historique d’Antigravity) : démontage rapide, sept séries, rivaux en trois étapes avec voiture offerte, Booster Bricole et Booster Mécanique (ex-« caisses »), 3ᵉ emplacement de pièce, courbe de la Nuit sans fin. Il a proposé d’envoyer une liste de voitures et de pièces de performance à ajouter.
 5. Idées possibles : rivaux d’Overdrive, test de la déchirure du sachet légendaire à la main (son et effets dorés non vérifiés), liseré violet des voitures.
 
 ## Pièges connus

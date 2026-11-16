@@ -33,7 +33,7 @@ function buy(id: string) {
           <h2>{{ booster.name }}</h2>
           <p>{{ booster.tagline }}</p>
           <p class="odds">{{ booster.slots.every(s => s.partChance >= 1) ? 'Dernière pièce' : 'Dernière voiture' }} · {{ odds(booster) }}</p>
-          <p v-if="booster.slots.every(s => s.partChance >= 1)" class="odds">5 pièces mécaniques garanties dans chaque caisse</p>
+          <p v-if="booster.slots.every(s => s.partChance >= 1)" class="odds">5 pièces mécaniques garanties dans chaque booster</p>
           <p v-else class="odds">Jusqu’à {{ (booster.maxParts ?? 1) === 2 ? 'deux' : (booster.maxParts ?? 1) === 3 ? 'trois' : (booster.maxParts ?? 1) }} {{ (booster.maxParts ?? 1) > 1 ? 'pièces mécaniques' : 'pièce mécanique' }} · environ {{ partOdds(booster) }} sachets sur 100 contiennent au moins une pièce</p>
           <button type="button" class="button primary" @click="buy(booster.id)">
             <template v-if="(save.tickets[booster.id] ?? 0) > 0">Utiliser un ticket ({{ save.tickets[booster.id] }})</template>

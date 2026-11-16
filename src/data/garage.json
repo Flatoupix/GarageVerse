@@ -90,7 +90,7 @@
         { "Courante": 25, "Rare": 49, "Épique": 23, "Légendaire": 3, "partChance": 0.22 },
         { "Épique": 82, "Légendaire": 18, "partChance": 0 }
       ], "altChance": 0.15 },
-    { "id": "starter", "name": "Caisse Bricole", "tagline": "Voitures courantes et pièces du quotidien", "price": 75,
+    { "id": "starter", "name": "Booster Bricole", "tagline": "Voitures courantes et pièces du quotidien", "price": 60,
       "maxParts": 3, "slots": [
         { "Courante": 96, "Rare": 4, "partChance": 0.35 },
         { "Courante": 96, "Rare": 4, "partChance": 0.35 },
@@ -98,7 +98,7 @@
         { "Courante": 90, "Rare": 10, "partChance": 0.35 },
         { "Courante": 82, "Rare": 17, "Épique": 1, "partChance": 0.25 }
       ], "altChance": 0.04 },
-    { "id": "atelier", "name": "Caisse Mécanique", "tagline": "5 pièces d’atelier garanties", "price": 180,
+    { "id": "atelier", "name": "Booster Mécanique", "tagline": "5 pièces d’atelier garanties", "price": 240,
       "maxParts": 5, "slots": [
         { "Courante": 82, "Rare": 16, "Épique": 2, "partChance": 1 },
         { "Courante": 78, "Rare": 19, "Épique": 3, "partChance": 1 },

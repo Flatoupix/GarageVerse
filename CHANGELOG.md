@@ -4,6 +4,14 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier.
 
+## [Non publié]
+
+### Modifié
+
+- **Les caisses deviennent des boosters** : Booster Bricole et Booster Mécanique.
+- **Booster Bricole à 60 crédits** au lieu de 75, contenu inchangé (retour playtest de Galaad).
+- **Booster Mécanique à 240 crédits** au lieu de 180 : il se place entre Neon Drive (150) et After Hours (250).
+
 ## [0.5.0] — 2026-11-16
 
 ### Ajouté
