@@ -283,14 +283,6 @@ existantes. Les rivaux gardent portrait, ligue, plafond, récompenses, victoires
 si demandé. Les captures à 320/390 px sont vérifiées par l'orchestrateur.
 
 
-### Sélection des voitures partagée
-
-`CarBrowser` affiche la grille de `CarCard` dans le garage et la préparation des courses. `CarFilterBar` rassemble les vues, la recherche, la catégorie, les gemmes de rareté, les tris et les boutons de densité avec `GvButton`.
-
-En mode `browse`, une voiture ouvre sa fiche ; les favoris, les nouveautés, les exemplaires, l’étiquette Écurie et les voitures manquantes en Collection sont conservés. En mode `pick`, le composant émet `toggle` pour ajouter ou retirer une voiture de l’écurie fournie par la course (classique, défi ou Nuit sans fin). Les places choisies sont numérotées et cochées ; les coûts colorés, le dépassement désactivé et les points estimés restent visibles. La vue Sélection utilise cette même écurie.
-
-Les préférences `garageRarity`, `garageSort`, `garageCols` et `garageCategory` sont mémorisées et partagées via le magasin existant. Sans tri enregistré, le garage utilise Collection et la course utilise « Adaptée au circuit », par moyenne pondérée des scores estimés. Un tri explicite remplace ce défaut dans les deux écrans. Le tri circuit est réservé au mode `pick` ; en revenant au garage, il est présenté comme Collection sans écraser la préférence. Les anciennes sauvegardes restent valides sans migration obligatoire. La logique pure de filtrage, de tri et de dépassement est dans `src/game/carBrowser.ts` et vérifiée par `carBrowser.check.cjs`.
-
 ### Personnalité des rivaux
 
 Les six rivaux de ligue portent sept champs optionnels de type texte dans `garage.json` et `Rival` : `bio` (histoire), `style` (étiquette de personnalité), `likes` (groupe nominal, par exemple « les roadsters »), `intro` (avant le duel), `win` (victoire du joueur), `lose` (défaite du joueur) et `perfect` (victoire parfaite du joueur, prioritaire sur `win`).

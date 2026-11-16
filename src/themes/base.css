@@ -472,8 +472,13 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
 .slot-placeholder { display: grid; place-items: center; aspect-ratio: .72; border-radius: var(--radius); border: 1px dashed var(--night); color: var(--muted); font-size: 15px; }
 .rival-preview { color: var(--muted); font-size: 15px; margin-top: 10px; line-height: 1.4; }
 .list-title { font: 700 calc(0.75rem * var(--dz)) var(--display); color: var(--cyan); text-transform: uppercase; letter-spacing: .08em; margin: 20px 0 8px; }
-.rival-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.pick-cost { grid-row: span 2; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; font: 400 calc(0.75rem * var(--dz)) var(--display); color: var(--outline); background: var(--cyan); }
+.pick-list, .rival-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.pick-list button { width: 100%; display: grid; grid-template-columns: 36px 1fr; gap: 2px 10px; align-items: center; text-align: left; padding: 8px 10px;
+  border-radius: var(--radius); border: 2px solid var(--line); background: var(--night); }
+.pick-list button[aria-pressed="true"] { border-color: var(--cyan); background: var(--light-blue); }
+.pick-cost { grid-row: span 2; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius); font: 400 calc(0.75rem * var(--dz)) var(--display); color: var(--outline); background: var(--cyan); }
+.pick-name { display: grid; } .pick-name b { font-size: 15px; } .pick-name small, .pick-stats { color: var(--muted); font-size: 15px; }
+.pick-stats { font-family: var(--mono); }
 .rival-row { width: 100%; display: grid; grid-template-columns: 56px 1fr auto; gap: 12px; align-items: center; text-align: left; padding: 8px;
   border-radius: var(--radius); border: 2px solid var(--line); background: var(--night-2); }
 .rival-row img, .rival-initial { width: 56px; height: 56px; border-radius: var(--radius); object-fit: cover; }
@@ -497,11 +502,11 @@ main { animation: view-in 280ms var(--ease) backwards; }
 @keyframes modal-in { from { opacity: 0; translate: 0 30px; scale: .96; } }
 @keyframes fade-in { from { opacity: 0; } }
 
-.button, .tile, .card-tile, .rival-row, .engage-car, .chips button, .tabs button, .tabbar button, .settings-button,
+.button, .tile, .card-tile, .rival-row, .engage-car, .pick-list button, .chips button, .tabs button, .tabbar button, .settings-button,
 .lineup-slot, .missing-card, .edition-picker button {
   transition: scale 120ms var(--ease), translate 180ms var(--ease), filter 120ms, box-shadow 180ms, border-color 180ms, background-color 180ms;
   -webkit-tap-highlight-color: transparent; }
-:is(.button, .tile, .card-tile, .rival-row, .engage-car, .chips button, .tabs button, .tabbar button, .settings-button,
+:is(.button, .tile, .card-tile, .rival-row, .engage-car, .pick-list button, .chips button, .tabs button, .tabbar button, .settings-button,
   .lineup-slot, .missing-card, .edition-picker button):active:not(:disabled) { scale: .95; }
 .button.primary { position: relative; overflow: hidden; }
 .button.primary:active:not(:disabled) {  }
@@ -758,6 +763,7 @@ button.card-back { animation: none; }
 .race-priorities li b { font-size: 15px; }
 .race-priorities li small { color: var(--muted); font-size: 15px; }
 .race-prepare { min-height: 40px; padding: 3px 7px; background: var(--light-blue); border: 2px solid var(--light-blue); border-radius: var(--radius); color: var(--outline); text-align: right; }
+.pick-stats > span { display: block; }
 
 /* Reliefs et motifs de la borne : aucun décor animé en arrière-plan. */
 .pixelated { image-rendering: pixelated; }
@@ -874,7 +880,9 @@ p, strong, h1, h2, h3, dd, .track li { overflow-wrap: normal; }
 /* Les surfaces claires portent une encre sombre, y compris leurs sous-libellés. */
 .notice, .rival-car, .rival-car small, .nitro-left,
 .nitro-toggle, .nitro-toggle small, .track li.current, .track li.current .track-cond,
-.track li.current .track-icon::after { color: var(--outline); }
+.track li.current .track-icon::after, .pick-list button[aria-pressed="true"],
+.pick-list button[aria-pressed="true"] small,
+.pick-list button[aria-pressed="true"] .pick-stats { color: var(--outline); }
 .car-sheet-tabs button { white-space: nowrap; letter-spacing: 0; }
 .stack-actions, .recap-actions { width: 100%; flex-wrap: wrap; }
 .stack-actions .button, .recap-actions .button { flex: 1 1 160px; min-width: 0; }
@@ -1055,6 +1063,3 @@ button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow
 .mechanic-actions button { max-width: 100%; min-height: 44px; padding: 8px 10px; border: 1px solid var(--sun); border-radius: var(--radius, 0); background: var(--panel); color: var(--text); white-space: normal; }
 .mechanic-actions button:focus-visible { outline: 3px solid var(--sun); outline-offset: 2px; }
 [data-mechanic] { outline: 2px solid var(--sun); outline-offset: -2px; }
-
-.car-browser .browser-pick-info { color: var(--muted); background: var(--night); }
-.car-browser .card-tile[aria-pressed="true"] { outline: 2px solid var(--cyan); background: var(--light-blue); }

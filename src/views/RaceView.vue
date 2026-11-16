@@ -16,7 +16,6 @@ import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '.
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
 import CarCard from '../components/CarCard.vue'
-import CarBrowser from '../components/CarBrowser.vue'
 import SectorRun from '../components/SectorRun.vue'
 
 // Les mesures suivent aussi les changements de thème, de police et de zone sûre.
@@ -541,7 +540,15 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <p class="rival-preview">Écurie adverse · {{ rivalLineup(rival).map(e => name(e.id)).join(' · ') }}</p>
 
       <h2 class="list-title">Ton garage</h2>
-      <CarBrowser mode="pick" :lineup="lineup" :cap="cap" :circuit="rival.circuit" @toggle="toggle" />
+      <ul class="pick-list">
+        <li v-for="{ v, car, scores } in garageCars" :key="v.id">
+          <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="overBy(v.id, v.cost) > 0" @click="toggle(v.id)">
+            <span class="pick-cost" :data-cost="v.cost">{{ v.cost }}</span>
+            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" aria-label="Favori">★ </span>{{ v.name }}</b><small>{{ overBy(v.id, v.cost) > 0 ? `Dépasse le plafond de ${overBy(v.id, v.cost)}` : `${v.version} · ${car.uses} secteurs avant surchauffe` }}</small></span>
+            <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ s.label }} {{ pointsText(s.average) }} pts</span></span>
+          </button>
+        </li>
+      </ul>
       </div>
       </div>
     </template>

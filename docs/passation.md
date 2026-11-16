@@ -36,7 +36,7 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 
 **Branche locale non publiée `feat/gaming-ui`** (tête `8f88138`, 17 commits d’avance, rien n’est poussé). Demande du joueur, en sept points, dont six sont faits :
 
-1. **Sélection unifiée** (fait) : `CarBrowser` et `CarFilterBar` servent au garage (mode `browse`) et à la préparation d’une course (mode `pick`) ; rareté, tri et densité partagés dans `Preferences` ; tri « Adaptée au circuit ». Voir `docs/meta.md`.
+1. **Sélection unifiée** (publiée en 0.4.0 puis **annulée** le 16 novembre à la demande du joueur, **à rediscuter avant toute reprise**) : la grille de cartes commune (`CarBrowser`, `CarFilterBar`, tri « Adaptée au circuit ») était jugée illisible et trop serrée dans la préparation d’une course. Le garage a retrouvé sa barre de filtres et la course son ancienne liste « Ton garage » (coût, secteurs avant surchauffe, points estimés). Au passage, « Par ligne » ne propose plus 4, 5 et 6 sur téléphone (une règle CSS les réaffichait alors qu’ils écrasaient les cartes). La 0.4.0 publiée contient encore la sélection unifiée : la prochaine version devra le noter dans `CHANGELOG.md`.
 2. **Design « Asphalt 9 »** (fait pour les boutons, les filtres du garage, les spéciales et les rivaux) : composant `GvButton` (variantes, ton, biseau, relief, balayage), cartes anguleuses des spéciales et des rivaux.
 3. **Économie** (fait) : `maxParts` 2 par booster, `partChance` 0,15 / 0,18 / 0,22, soit 0,59 / 0,70 / 0,84 pièce par sachet ; récompenses détaillées sur les rivaux, la boutique et la fin de duel.
 4. **Réglages en onglets** (fait) : Paramètres, Thèmes (groupes repliables) et Aide ; le bouton « ? » est retiré de l’en-tête et le lexique est dans l’onglet Aide.

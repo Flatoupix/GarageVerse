@@ -241,14 +241,16 @@
   padding: 0 10px;
   font: 700 .75rem var(--mono);
 }
+/* Trop de cartes par ligne les rend illisibles : ces choix sont masqués sur petit écran. */
 @media (max-width: 649px) {
-  .density-chips .col-opt-4,
-  .density-chips .col-opt-5,
-  .density-chips .col-opt-6 { display: none; }
+  .density-chips .gv-button.gv-button.col-opt-4,
+  .density-chips .gv-button.gv-button.col-opt-5,
+  .density-chips .gv-button.gv-button.col-opt-6 { display: none; }
+  .garage-grid.grid-custom.grid-dense { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 }
 @media (min-width: 650px) and (max-width: 959px) {
-  .density-chips .col-opt-5,
-  .density-chips .col-opt-6 { display: none; }
+  .density-chips .gv-button.gv-button.col-opt-5,
+  .density-chips .gv-button.gv-button.col-opt-6 { display: none; }
 }
 .garage-grid.grid-custom {
   grid-template-columns: repeat(var(--garage-cols, 2), minmax(0, 1fr)) !important;
@@ -369,6 +371,10 @@
   .engage-cars .engage-car {
     aspect-ratio: 1.45;
     max-height: 190px;
+  }
+  .pick-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
   }
   .rival-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -576,6 +582,8 @@
 .pick-cost[data-cost="8"] { background: #ffb347; }
 .pick-cost[data-cost="9"] { background: #ff4a4a; }
 .pick-cost[data-cost="10"] { background: #fff27a; }
+/* Une voiture qui dépasserait le plafond de coût est grisée et ne se choisit pas. */
+.pick-list button:disabled { opacity: .45; filter: grayscale(1); cursor: not-allowed; }
 
 /* Liste des thèmes rangée par groupes (Ambiances, Univers, À gagner). */
 .theme-group { display: grid; gap: 6px; min-width: 0; }
@@ -654,7 +662,7 @@
 .garage .garage-search input, .garage .garage-selects select { border-radius: 0; border-color: var(--line); border-bottom: 3px solid var(--accent); background: var(--night); color: var(--text); width: 100%; min-width: 0; }
 .garage-density-bar { flex-wrap: wrap; }
 .garage-density { width: 100%; flex-wrap: wrap; }
-.density-chips { display: grid; width: 100%; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
+.density-chips { display: grid; width: 100%; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 2px; }
 .density-chips .gv-button.gv-button { display: block; min-height: 44px; padding-inline: 3px; }
 .density-icon { display: flex; gap: 2px; height: 16px; }
 .density-icon i { width: 3px; background: currentColor; }
@@ -682,16 +690,6 @@
 @media (prefers-reduced-motion: reduce) {
   .gv-button, .gv-button::after, .special-card, .rival-list .deal { animation: none !important; transition: none !important; }
 }
-
-/* Les deux sélecteurs utilisent la même grille, même dans une course. */
-.car-browser, .car-browser .garage-tile { min-width: 0; }
-.browser-pick-info { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px; font-family: var(--mono); font-size: .75rem; overflow-wrap: anywhere; }
-.browser-pick-info .pick-cost { flex: 0 0 36px; }
-.car-browser .card-tile:disabled { opacity: .45; filter: grayscale(1); cursor: not-allowed; }
-@media (max-width: 649px) {
-  .car-browser .garage-grid.grid-dense { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-}
-.browser-place { font-weight: 900; }
 
 /* Actions de course : la hauteur réelle réserve la place du dernier élément. */
 main.race { padding-bottom: calc(var(--race-action-height, 140px) + 24px); }
