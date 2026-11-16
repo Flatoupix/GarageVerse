@@ -5,7 +5,7 @@ import {
   specials, specialByRivalId, rivals, rivalStepMap, series, boosterById, defaultStyle, leagueById, partById, parts, PIXEL, progression, rarities, rivalById, statLabels, stylesOf, vehicleById, vehicles,
   type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
-import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, lineupCost, partUnlockLevel, potential, prepUsed, racer,
+import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, extraSlotFamily, lineupCost, partUnlockLevel, potential, prepUsed, racer,
   STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
 
 export const SAVE_KEY = 'garageverse:v2'
@@ -114,6 +114,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   save.credits = int(input.credits, 0, 1e7, save.credits)
   save.tickets = Object.fromEntries(Object.entries(input.tickets ?? {}).filter(([id]) => boosterById.has(id)).map(([id, n]) => [id, int(n, 0, 99, 0)]))
   save.cars = {}
+  let refunds = 0
   for (const [id, car] of Object.entries(input.cars ?? {})) {
     const v = vehicleById.get(id)
     if (!v || !car) continue
@@ -126,17 +127,17 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const stage = int(car.stage, 0, 3, 0)
     const levels = { acc: 0, vit: 0, man: 0, end: 0 }
     for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
-    const extraSlot = stage === 3 && upgradeKeys.every(k => levels[k] >= partUnlockLevel)
-      ? upgradeKeys.find(k => k === car.extraSlot)
-      : undefined
+    const maxed = stage === 3 && upgradeKeys.every(k => levels[k] >= partUnlockLevel)
+    const extraSlot = maxed ? upgradeKeys.find(k => k === car.extraSlot && extraSlotFamily[k]) : undefined
+    // Un 3ᵉ emplacement acheté sur un atelier qui n'en propose plus est remboursé.
+    if (maxed && car.extraSlot && !extraSlot && upgradeKeys.includes(car.extraSlot)) refunds += EXTRA_SLOT_PRICE
+    const doubled = extraSlot && extraSlotFamily[extraSlot]
     const installed: string[] = []
     for (const partId of car.parts ?? []) {
       const part = partById.get(partId)
       if (!part || compatibility(part, v) || installed.includes(partId)) continue
-      const key = upgradeForFamily(part.family)
-      const sameFamily = installed.filter(p => partById.get(p)?.family === part.family)
-      const sameCategory = key ? installed.filter(p => (upgrades[key].families as string[]).includes(partById.get(p)?.family ?? '')) : []
-      if (extraSlot && key === extraSlot ? sameCategory.length < 3 : sameFamily.length < 1) installed.push(partId)
+      const sameFamily = installed.filter(p => partById.get(p)?.family === part.family).length
+      if (sameFamily < (part.family === doubled ? 2 : 1)) installed.push(partId)
     }
     // Une légendaire restée sur l'ancien défaut pixel prend sa nouvelle image fixe ; un autre choix du joueur est gardé.
     const shownBefore = editions.includes(car.shown) ? car.shown : editions[0]
@@ -144,6 +145,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       shown: primary !== PIXEL && usesOldDefault && shownBefore === PIXEL ? primary : shownBefore,
       favorite: car.favorite === true, upgrades: levels, ...(extraSlot ? { extraSlot } : {}) }
   }
+  save.credits = Math.min(1e7, save.credits + refunds)
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
@@ -368,13 +370,11 @@ export const isCarMaxedForExtraSlot = (car?: OwnedCar) =>
 export function extraSlotCheck(save: Save, carId: string, key: StatKey): string | undefined {
   const car = save.cars[carId]
   if (!car) return 'Voiture absente du garage'
+  if (!extraSlotFamily[key]) return 'Pas de 3ᵉ pièce sur cet atelier'
   if (!isCarMaxedForExtraSlot(car)) return 'Requiert Stage 3 et les 4 ateliers au niveau 2'
   if (car.extraSlot === key) return '3ᵉ emplacement déjà débloqué sur cet atelier'
-  if (car.extraSlot) {
-    const oldCatParts = car.parts.filter(p => (upgrades[car.extraSlot!].families as string[]).includes(partById.get(p)?.family ?? ''))
-    const oldFamilies = new Set(oldCatParts.map(p => partById.get(p)?.family))
-    if (oldCatParts.length > oldFamilies.size) return `Retire d’abord la 3ᵉ pièce de ${upgrades[car.extraSlot].label}`
-  }
+  const previous = car.extraSlot && extraSlotFamily[car.extraSlot]
+  if (previous && car.parts.filter(p => partById.get(p)?.family === previous).length > 1) return `Retire d’abord la 3ᵉ pièce de ${upgrades[car.extraSlot!].label}`
   if (save.credits < EXTRA_SLOT_PRICE) return `Il te manque ${EXTRA_SLOT_PRICE - save.credits} crédits`
 }
 
@@ -418,15 +418,12 @@ export function upgrade(save: Save, id: string): string | undefined {
   car.stage = next.stage
 }
 
+// Pièce remplacée au montage : celle de la même famille, sauf quand le 3ᵉ emplacement de l'atelier laisse la place
+// à une 2ᵉ pièce de sa famille.
 export function partReplacedOnInstall(car: OwnedCar, part: Part): Part | undefined {
-  const key = upgradeForFamily(part.family)
   const sameFamily = car.parts.map(id => partById.get(id)!).filter(p => p?.family === part.family)
-  if (!sameFamily.length) return undefined
-  if (key && car.extraSlot === key) {
-    const sameCategory = car.parts.map(id => partById.get(id)!).filter(p => p && (upgrades[key].families as string[]).includes(p.family))
-    if (sameCategory.length < 3) return undefined
-  }
-  return sameFamily[0]
+  const room = car.extraSlot && extraSlotFamily[car.extraSlot] === part.family ? 2 : 1
+  return sameFamily.length < room ? undefined : sameFamily[0]
 }
 
 export function installCheck(save: Save, carId: string, partId: string): string | undefined {

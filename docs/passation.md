@@ -5,7 +5,7 @@ Note de reprise pour une nouvelle session. À lire avec `docs/meta.md` (règles 
 ## Où en est le projet
 
 - Dépôt public `Flatoupix/GarageVerse`, branche de travail `prototype/mobile-tcg`, site https://flatoupix.github.io/GarageVerse/ (déployé par GitHub Actions à chaque push).
-- Dernier commit publié : `f01ff15` (sachets métallisés et légendaires). Projet personnel : pas de rappel sur les droits, pas de diffusion prévue.
+- Version 0.5.0 en ligne (commit `133501c` d’Antigravity, sans tag ni release GitHub ; la dernière release est v0.4.0). Projet personnel : pas de rappel sur les droits, pas de diffusion prévue.
 - Publié : 8 thèmes (Synthwave par défaut, Rétro pixel, Sobre, Sport auto, Carnet, et trois à débloquer : Borne d’arcade, Console 16 bits, Atelier PC), hasard en course, aide rapide et lexique (« ? »), course miroir, victoire parfaite, booster tactile, éditions choisies au tirage, vente de voitures, tutoriel du mécano, séries de collection, Nuit sans fin, hors-ligne avec export/import de sauvegarde, logo néon et icône, sachets métallisés avec couverture légendaire, mini-course des secteurs.
 - Autres contributeurs : le propriétaire pousse aussi sur `prototype/mobile-tcg` (v0.2.0, bande-son), et une session Claude sur le web (branches `ccr-…`). Toujours `git ls-remote --heads origin` avant de pousser.
 
@@ -60,7 +60,7 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - **Démontage de voiture** à l’atelier, pour récupérer des pièces. Mis de côté : le joueur veut en reparler. Pas de kits d’amélioration.
 - **Mode multijoueur** (le site est statique sur GitHub Pages, sans serveur : duels asynchrones plus simples que le temps réel).
 - **Version Android**, avec son écran de lancement de studio « Crazy Popping Cats » (fait sous Construct, fichiers à récupérer sur son PC). Une publication sur le Play Store rouvre la question des marques et des voitures de films : prévoir un nom générique par voiture et une version sans marques, séparée et sans code secret.
-- **Finir Solarpunk et Abandonnée** : 60 voitures sur 129 ont leurs deux images et proposent ces éditions (`editionCars` dans `src/game/data.ts`). La génération du 16 novembre s’est arrêtée sur la limite d’usage Codex ; le relais Antigravity n’a produit aucune image (il rend la main avant la fin de la génération). Reprendre avec `node pipeline/art.mjs --set edition --jobs 4` quand Codex est de nouveau disponible (ne génère que le manquant, 69 voitures restantes dont les 27 nouvelles cartes), contrôler les images, puis ajouter les voitures complètes à `editionCars` (`src/game/edition.check.cjs` vérifie que la liste suit les fichiers).
+- **8 éditions faites par Antigravity à refaire avec Codex** : Civic EG, Kangoo, Micra et Swift, Solarpunk et Abandonnée (grange sombre sans végétation, ville pâle). Les 129 voitures ont leurs deux éditions.
 - **Bruitages Suno** (16 novembre) : 12 effets synthétisés remplacés par des fichiers Suno, via le MCP « suno » configuré dans Codex (`codex exec`, outil `sounds_create`), détail dans `docs/audit-audio.md`. Restent synthétisés : `upgrade` (à refaire, la prise était ratée), `tap` et `tick`. Le compte n’a plus que 7 crédits de téléchargement.
 - **Choix du thème au premier lancement** pour un joueur neuf.
 - **Nettoyage du CSS de scène** devenu inutilisé.
@@ -74,7 +74,7 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 1. ~~8 voitures de côté manquantes~~ : faites.
 2. ~~Contrôle des détourages~~ : fait, voir ci-dessus.
 3. **Séries spéciales de courses** (endurance, vitesse, aura…, de plus en plus difficiles) : idée brute du joueur, fiche `orchestrator/backlog/series-speciales.json` marquée « à challenger, ne pas lancer ». En discuter avant toute spécification.
-4. **Faire tester Galaad** sur une partie neuve : tutoriel, aide rapide, difficulté et hasard.
+4. **Retours de Galaad traités en 0.5.0** (7 messages vocaux, tickets GAL-01 à GAL-07 dans l’historique d’Antigravity) : démontage rapide, sept séries, rivaux en trois étapes avec voiture offerte, Caisse Bricole et Caisse Mécanique, 3ᵉ emplacement de pièce, courbe de la Nuit sans fin. Il a proposé d’envoyer une liste de voitures et de pièces de performance à ajouter.
 5. Idées possibles : rivaux d’Overdrive, test de la déchirure du sachet légendaire à la main (son et effets dorés non vérifiés), liseré violet des voitures.
 
 ## Pièges connus

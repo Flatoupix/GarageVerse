@@ -38,6 +38,16 @@ export function nightRival(seed: string, round: number): Rival {
   while (picked.length < 3) {
     const fallback = candidates.find(({ v }) => !picked.includes(v))?.v ?? vehicles[picked.length]
     picked.push(fallback)
+    spent += fallback.cost
+  }
+  // Le trio s'approche du budget : la voiture la moins chère cède sa place à une plus chère tant qu'il reste de la marge,
+  // pour que la force adverse ne redescende jamais d'une manche à l'autre.
+  for (let guard = 0; spent < teamBudget && guard < 12; guard++) {
+    const cheapest = picked.reduce((a, b) => (b.cost < a.cost ? b : a))
+    const swap = candidates.find(({ v }) => !picked.includes(v) && v.cost > cheapest.cost && v.cost - cheapest.cost <= teamBudget - spent)?.v
+    if (!swap) break
+    picked[picked.indexOf(cheapest)] = swap
+    spent += swap.cost - cheapest.cost
   }
 
   const stage = Math.min(3, Math.max(0, Math.floor((round - 4) / 4)))

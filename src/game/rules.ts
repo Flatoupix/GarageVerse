@@ -17,6 +17,9 @@ export const upgradePrices = [10, 15]
 export const partUnlockLevel = upgradePrices.length
 export const EXTRA_SLOT_PRICE = 250
 export const EXTRA_SLOT_POTENTIAL = 2
+// 3ᵉ emplacement d'une voiture maxée : une 2ᵉ pièce dans la seule famille de l'atelier où en cumuler deux a du sens
+// (nitro et néons, admission et reprogrammation, allègement et aileron). Pas de 3ᵉ pièce en Pneus et suspension.
+export const extraSlotFamily: Partial<Record<StatKey, string>> = { acc: 'special', vit: 'moteur', end: 'chassis' }
 export const upgradeForFamily = (family: string) => upgradeKeys.find(key => upgrades[key].families.includes(family))
 
 export const STAT_CAP = 12

@@ -85,12 +85,12 @@ const old = newSave()
 delete old.nightRecord; delete old.night; delete old.nightLineup
 assert.equal(readSave(JSON.stringify(old)).nightRecord, 0)
 assert.equal(readSave(null, JSON.stringify({ version: 1 })).night, null)
-// Une course classique et ses récompenses restent disponibles après la nuit.
-assert.equal(startDuel(save, rivals[0].id, () => 0.5), undefined)
+// Une course classique et ses récompenses restent disponibles après la nuit (1ʳᵉ étape du premier rival).
+assert.equal(startDuel(save, `${rivals[0].id}:1`, () => 0.5), undefined)
 save.duel.winner = 'player'
 assert.ok(settleDuel(save).credits > 0)
 assert.equal(save.duel, null)
-assert.equal(startDuel(save, rivals[0].id, () => 0.5), undefined)
+assert.equal(startDuel(save, `${rivals[0].id}:1`, () => 0.5), undefined)
 save.duel.winner = 'rival'
 assert.ok(settleDuel(save))
 console.log('Nuit : génération, progression, reprise, record, encaissement unique, abandon, migration et rival : OK')

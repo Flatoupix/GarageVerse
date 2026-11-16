@@ -68,7 +68,7 @@ for (const [index, booster] of boosters.entries()) {
     assert.ok(drawPulls(save, legacy, rngFor(seed)).filter(p => p.kind === 'part').length <= 1)
   }
   const mean = total / 10000
-  assert.ok(Math.abs(mean - [0.6, 0.7, 0.85][index]) <= 0.1, `${booster.name} : ${mean}`)
+  assert.ok(Math.abs(mean - [0.6, 0.7, 0.85, 1.6, 5][index]) <= 0.1, `${booster.name} : ${mean}`)
   console.log(`${booster.name} : ${mean} pièce par sachet`)
 }
 // Lot historique à une pièce : aucune application des nouvelles probabilités.

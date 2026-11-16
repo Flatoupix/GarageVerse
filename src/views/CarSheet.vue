@@ -4,7 +4,7 @@ import { art, edition } from '../game/art'
 import { families, partById, parts, progression, statLabels, styleLabel, stylesOf, vehicleById, vehicles, type EditionStyle, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { vHelp } from '../game/help'
-import { circuitScores, compatibility, engagements, EXTRA_SLOT_POTENTIAL, EXTRA_SLOT_PRICE, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
+import { circuitScores, compatibility, engagements, EXTRA_SLOT_POTENTIAL, EXTRA_SLOT_PRICE, extraSlotFamily, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
 import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionDuplicates, editionPrice, extraSlotCheck, freeParts, install, installCheck, isCarMaxedForExtraSlot, partReplacedOnInstall, prepOf,
   selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, unlockExtraSlot, upgrade, upgradeCheck, upgradeStat } from '../game/save'
@@ -102,6 +102,7 @@ const modules = computed(() => upgradeKeys.map(key => {
   const nextStats = { ...prep.value, upgrades: { ...prep.value.upgrades, [key]: level + 1 } }
   return { key, config, level, installed, available, price: upgradePrices[level], problem: upgradeCheck(save, props.id, key),
     nextValue: statsOf(v.value, nextStats)[key], hasCompatiblePart: fitting.length > 0,
+    extraFamily: extraSlotFamily[key] && families[extraSlotFamily[key]!],
     extraSlotActive: car.value?.extraSlot === key,
     extraSlotProblem: extraSlotCheck(save, props.id, key) }
 }))
@@ -297,7 +298,7 @@ function workshop(key?: StatKey) {
         </template>
 
         <template v-else-if="car && panel === 'workshop'">
-          <p class="hint workshop-intro">Les niveaux restent acquis à cette voiture. Au niveau {{ partUnlockLevel }}, tu peux monter les pièces compatibles de ton stock. <template v-if="isCarMaxedForExtraSlot(car)">Voiture maxée : tu peux débloquer un 3ᵉ emplacement de pièce (+{{ EXTRA_SLOT_POTENTIAL }} potentiel) dans un atelier de ton choix.</template></p>
+          <p class="hint workshop-intro">Les niveaux restent acquis à cette voiture. Au niveau {{ partUnlockLevel }}, tu peux monter les pièces compatibles de ton stock. <template v-if="isCarMaxedForExtraSlot(car)">Voiture maxée : tu peux débloquer un 3ᵉ emplacement de pièce (+{{ EXTRA_SLOT_POTENTIAL }} potentiel) dans un atelier de ton choix, sauf Pneus et suspension. Il accueille une 2ᵉ pièce d’une famille de cet atelier.</template></p>
           <ul class="workshop-list">
             <li v-for="module in modules" :key="module.key" class="workshop-module" :class="{ 'module-selected': selected === module.key }">
               <button type="button" class="module-trigger" :aria-expanded="selected === module.key" :aria-controls="`module-${module.key}`"
@@ -317,11 +318,11 @@ function workshop(key?: StatKey) {
                   </button>
                   <p v-if="module.problem" class="hint">{{ module.problem }}</p>
                 </template>
-                <div v-if="isCarMaxedForExtraSlot(car)" class="extra-slot-box">
-                  <p v-if="module.extraSlotActive" class="upgrade-preview">★ 3ᵉ emplacement de pièce actif sur cet atelier (+{{ EXTRA_SLOT_POTENTIAL }} potentiel)</p>
+                <div v-if="isCarMaxedForExtraSlot(car) && module.extraFamily" class="extra-slot-box">
+                  <p v-if="module.extraSlotActive" class="upgrade-preview">★ 3ᵉ emplacement actif : une 2ᵉ pièce {{ module.extraFamily }} (+{{ EXTRA_SLOT_POTENTIAL }} potentiel)</p>
                   <template v-else>
                     <button type="button" class="button small ghost" :disabled="Boolean(module.extraSlotProblem)" @click="buyExtraSlot(module.key)">
-                      {{ car.extraSlot ? `Transférer le 3ᵉ emplacement ici · ${EXTRA_SLOT_PRICE} crédits` : `Débloquer une 3ᵉ pièce ici (+${EXTRA_SLOT_POTENTIAL} potentiel) · ${EXTRA_SLOT_PRICE} crédits` }}
+                      {{ car.extraSlot ? `Transférer le 3ᵉ emplacement ici · ${EXTRA_SLOT_PRICE} crédits` : `Débloquer une 2ᵉ pièce ${module.extraFamily} (+${EXTRA_SLOT_POTENTIAL} potentiel) · ${EXTRA_SLOT_PRICE} crédits` }}
                     </button>
                     <p v-if="module.extraSlotProblem" class="hint">{{ module.extraSlotProblem }}</p>
                   </template>
