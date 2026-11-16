@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onUnmounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref } from 'vue'
 import { NIGHT_CAP, nightRival } from '../game/endless'
 import { createNightRound, finishNight, nightLineupCheck, settleNight, startNight } from '../game/save'
 import { constraintCap, constraintText } from '../game/daily'
@@ -18,6 +18,41 @@ import GvButton from '../components/GvButton.vue'
 import CarCard from '../components/CarCard.vue'
 import CarBrowser from '../components/CarBrowser.vue'
 import SectorRun from '../components/SectorRun.vue'
+
+// Les mesures suivent aussi les changements de thème, de police et de zone sûre.
+const raceRoot = ref<HTMLElement | null>(null)
+let layoutObserver: ResizeObserver | undefined
+function measureActions() {
+  const root = raceRoot.value
+  if (!root) return
+  const box = root.getBoundingClientRect(), style = getComputedStyle(root)
+  const left = parseFloat(style.paddingLeft), right = parseFloat(style.paddingRight)
+  const tabbar = document.querySelector<HTMLElement>('.tabbar')
+  const actions = root.querySelector<HTMLElement>('.race-actions')
+  root.style.setProperty('--race-action-left', `${box.left + left}px`)
+  root.style.setProperty('--race-action-width', `${box.width - left - right}px`)
+  root.style.setProperty('--race-action-height', `${actions?.getBoundingClientRect().height ?? 0}px`)
+  root.style.setProperty('--race-tabbar-offset', `${tabbar ? window.innerHeight - tabbar.getBoundingClientRect().top : 0}px`)
+  if (actions) layoutObserver?.observe(actions)
+}
+onMounted(() => {
+  layoutObserver = new ResizeObserver(measureActions)
+  if (raceRoot.value) layoutObserver.observe(raceRoot.value)
+  const tabbar = document.querySelector('.tabbar')
+  if (tabbar) layoutObserver.observe(tabbar)
+  window.addEventListener('resize', measureActions)
+  measureActions()
+})
+onUpdated(measureActions)
+onUnmounted(() => { layoutObserver?.disconnect(); window.removeEventListener('resize', measureActions) })
+async function scrollToStage(result = false) {
+  await nextTick()
+  const target = raceRoot.value?.querySelector<HTMLElement>(result ? '.round-result' : '.engage-brief, .night-panel, .race-end')
+  if (!target) return
+  const header = document.querySelector('.topbar')?.getBoundingClientRect().height ?? 0
+  const instant = reducedMotion.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - header - 12), behavior: instant ? 'instant' : 'smooth' })
+}
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
 const chosen = ref<string | null>(save.duel?.rivalId ?? (save.night ? 'night' : null) ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
@@ -82,6 +117,7 @@ function start() {
   if (rival.value && act(s => isNight.value ? startNight(s, nightSeed.value) : isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) {
     if (!isNight.value) tutorialAction(0, 4)
     picked.value = 0; nitro.value = false; stance.value = 'normal'; detail.value = null
+    void scrollToStage()
     sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
   }
 }
@@ -233,12 +269,14 @@ function engage() {
     for (let k = 1; k <= steps; k++) timers.push(setTimeout(() => advance(round, k), 320 + (k - 1) * STEP_MS))
     timers.push(setTimeout(() => settle(round), 320 + steps * STEP_MS + 240))
   }
+  void scrollToStage(true)
   const free = d.player.lineup.findIndex((_, car) => !overheated(d.player, car))
   if (overheated(d.player, picked.value) && free >= 0) picked.value = free
 }
 
 function proceed() {
   shown.value = null
+  void scrollToStage()
   if (duel.value?.winner) {
     const won = duel.value.winner === 'player'
     const d = duel.value
@@ -274,6 +312,7 @@ function proceed() {
 const lastWinner = ref<'player' | 'other'>('other')
 function nextNightRound() {
   act(createNightRound)
+  void scrollToStage()
   shown.value = null; picked.value = 0; nitro.value = false; detail.value = null
 }
 function cashNight(returnGarage = false) {
@@ -293,13 +332,13 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 </script>
 
 <template>
-  <main class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
+  <main ref="raceRoot" class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
     <section v-if="nightEnd" class="race-end night-panel">
       <h1 tabindex="-1">Nuit terminée</h1>
       <p><span v-help="'nightRound'">Manches gagnées</span> : {{ nightEnd.wins }}</p>
       <p>{{ nightEnd.credits }} crédits versés</p>
       <p v-if="nightEnd.newRecord" v-help="'nightRecord'" role="status">Nouveau record !</p>
-      <button type="button" class="button primary wide" @click="nightEnd = null; chosen = null; emit('go', 'garage')">Rentrer au garage</button>
+      <div class="race-actions"><button type="button" class="button primary wide" @click="nightEnd = null; chosen = null; emit('go', 'garage')">Rentrer au garage</button></div>
     </section>
     <section v-else-if="isNight && save.night?.resting" class="race-end night-panel">
       <h1 tabindex="-1"><span v-help="'nightRound'">Manche suivante</span> : {{ save.night.round }}</h1>
@@ -308,7 +347,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <p><span v-help="'nightGains'">Gains accumulés</span> : {{ save.night.gains }} crédits</p>
       <p v-if="save.night.newRecord" v-help="'nightRecord'" role="status">Nouveau record !</p>
       <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
-      <div class="recap-actions">
+      <div class="recap-actions race-actions">
         <button type="button" class="button primary" @click="nextNightRound">Manche suivante</button>
         <button type="button" class="button quiet" @click="cashNight(true)">Rentrer au garage</button>
       </div>
@@ -366,12 +405,12 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ l.label }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
           </div>
         </div>
-        <button v-if="settled" type="button" class="button primary wide" @click="proceed">{{ duel.winner ? 'Voir le résultat' : 'Secteur suivant' }} <span aria-hidden="true">⟶</span></button>
+        <div v-if="settled" class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? 'Voir le résultat' : 'Secteur suivant' }} <span aria-hidden="true">⟶</span></button></div>
       </section>
 
       <section v-else-if="duel.winner" class="round-result">
         <h2>Course terminée · {{ duel.player.points }} – {{ duel.rival.points }}</h2>
-        <button type="button" class="button primary wide" @click="proceed">Voir le résultat <span aria-hidden="true">⟶</span></button>
+        <div class="race-actions"><button type="button" class="button primary wide" @click="proceed">Voir le résultat <span aria-hidden="true">⟶</span></button></div>
       </section>
 
       <section v-else class="engage">
@@ -414,7 +453,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </section>
         <p class="engage-hint">Sous chaque voiture : <span v-help="'forme'">fourchette de score</span> et <span v-help="'secteurs'">secteurs restants</span>.</p>
         <!-- Toujours à portée de pouce : la nitro et le bouton restent collés au bas de l'écran. -->
-        <div class="engage-actions">
+        <div class="engage-actions race-actions">
           <div class="stance-toggle" :class="{ set: stance !== 'normal' }" role="radiogroup" aria-label="Consigne de pilotage">
             <span v-help="'consigne'">Consigne</span>
             <button v-for="key in (['gestion', 'normal', 'attaque'] as const)" :key="key" type="button" role="radio" :class="key"
@@ -451,7 +490,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="cap-meter" :class="{ over: cost > cap }">
         <span v-help="isNight ? 'nightCap' : 'plafond'">Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
       </div>
-      <button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isNight ? 'Commencer la nuit' : isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem && !isNight" aria-hidden="true">⟶</span></button>
+      <div class="race-actions"><button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isNight ? 'Commencer la nuit' : isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem && !isNight" aria-hidden="true">⟶</span></button></div>
       <p v-if="isNight && problem" class="hint" role="status">{{ problem }}</p>
       <section class="race-briefing" aria-labelledby="briefing-title">
         <div class="section-row"><h2 id="briefing-title">Préparer ta course</h2><span v-if="!isNight && !isDaily && rival.league === 'neon'" class="race-intro-badge">Accessible d’origine</span></div>

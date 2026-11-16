@@ -410,7 +410,7 @@
 .stance-toggle button[aria-checked="true"] { border-color: var(--cyan); box-shadow: inset 0 0 0 1px var(--cyan); background: color-mix(in srgb, var(--cyan) 14%, var(--night)); }
 .stance-toggle button.attaque[aria-checked="true"] { border-color: var(--sun); box-shadow: inset 0 0 0 1px var(--sun); background: color-mix(in srgb, var(--sun) 18%, var(--night)); }
 /* Une bulle du mécano dans l'écran de choix : la barre reprend sa place dans la page pour ne pas la masquer. */
-.engage:has(.mechanic-guide) .engage-actions { position: static; }
+
 
 /* ——— Voiture détourée dans la mini-course : plus de cadre, la voiture roule sur sa voie ——— */
 .run-car.sprite { border: 0; border-radius: 0; background: none; box-shadow: none; }
@@ -692,3 +692,19 @@
   .car-browser .garage-grid.grid-dense { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 }
 .browser-place { font-weight: 900; }
+
+/* Actions de course : la hauteur réelle réserve la place du dernier élément. */
+main.race { padding-bottom: calc(var(--race-action-height, 140px) + 24px); }
+.race .race-actions {
+  position: fixed; z-index: 19; left: var(--race-action-left, 16px);
+  bottom: var(--race-tabbar-offset, calc(76px + env(safe-area-inset-bottom)));
+  width: var(--race-action-width, calc(100% - 32px)); max-width: none;
+  box-sizing: border-box; margin: 0; padding: 16px 0 8px;
+  display: grid; gap: 8px; border: 0; border-radius: 0;
+  background: linear-gradient(to bottom, transparent, var(--night) 16px);
+  animation: none;
+}
+.race .race-actions > .button { width: 100%; min-width: 0; margin: 0; white-space: normal; animation: none; }
+.race .engage-actions { grid-template-columns: auto minmax(0, 1fr); }
+.race .round-result, .race .night-panel { overflow: visible; animation: none; }
+.race .night-panel { isolation: auto; }
