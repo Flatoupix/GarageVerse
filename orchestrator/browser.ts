@@ -32,8 +32,9 @@ const checks: Array<{ name: string; status: 'pass' | 'fail'; detail?: string }> 
 const screenshots: string[] = []
 let width = 0
 try {
-  for (width of [320, 390]) {
-    const page = await browser.newPage({ viewport: { width, height: width === 320 ? 640 : 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 1 })
+  // 320 et 390 px : téléphone. 1280 px : ordinateur (tactile conservé pour que les mêmes parcours restent jouables).
+  for (width of [320, 390, 1280]) {
+    const page = await browser.newPage({ viewport: { width, height: width === 320 ? 640 : width === 390 ? 844 : 800 }, isMobile: width < 700, hasTouch: true, deviceScaleFactor: 1 })
     // Seuls le jeu local et les polices Google Fonts sont autorisés : les captures montrent la vraie typographie.
     const fonts = /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\//
     await page.route('**/*', route => route.request().url().startsWith(url) || fonts.test(route.request().url()) ? route.continue() : route.abort())
@@ -204,4 +205,4 @@ try {
   await browser.close()
   server.close()
 }
-console.log(JSON.stringify({ checks, screenshots, environment: 'Chrome · tactile émulé à 320 et 390 px · macOS' }))
+console.log(JSON.stringify({ checks, screenshots, environment: 'Chrome · tactile émulé à 320 et 390 px, ordinateur à 1280 px · macOS' }))
