@@ -347,7 +347,7 @@
   }
   .car-sheet-layout {
     display: grid;
-    grid-template-columns: 280px minmax(0, 1fr);
+    grid-template-columns: 360px minmax(0, 1fr);
     gap: 20px;
     align-items: start;
   }
@@ -539,11 +539,10 @@
 .garage .garage-selects.cars-selects > label:last-child { grid-column: auto; }
 
 /* Le zoom et le tilt portent chacun leur transformation. Aucun mouvement interpolé. */
-.car-sheet .zoom-frame { overflow: hidden; user-select: none; cursor: zoom-in; }
-.car-sheet .zoom-frame.is-zoomed { cursor: grab; }
-.car-sheet .zoom-frame.is-zoomed:active { cursor: grabbing; }
-.card-zoom-transform { transform-origin: center; transition: none; }
-.reduce-zoom-motion .card-zoom-transform { transition: none; animation: none; }
+/* Fiche voiture : la carte occupe toute la largeur de la fiche, sans cadre qui la rogne. */
+.car-sheet .sheet-card { width: 100%; max-width: 520px; margin: 6px auto 0; user-select: none; }
+/* Sur téléphone, la fiche s’étend presque bord à bord pour agrandir la carte. */
+@media (max-width: 649px) { .modal.sheet-modal { width: calc(100vw - 12px); max-width: none; padding-inline: 8px; } }
 .car-sheet-aside { min-width: 0; }
 .garage-search-group { display: grid; gap: 9px; min-width: 0; }
 
