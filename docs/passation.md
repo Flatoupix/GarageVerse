@@ -1,4 +1,4 @@
-# Passation GarageVerse (15 novembre 2026)
+# Passation GarageVerse (16 novembre 2026)
 
 Note de reprise pour une nouvelle session. À lire avec `docs/meta.md` (règles du jeu, thèmes, aide, économie) et `orchestrator/README.md`.
 
@@ -30,17 +30,30 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - L’intégration automatique d’une étape (`--integrate`) est refusée quand le clone a des fichiers non suivis (3 PNG de cartes à la racine et `.codex-attachments/`, qui sont à l’utilisateur) : récupérer alors le commit à la main (`git fetch ../<cycle>/checkout orchestrator/<cycle>:refs/cycle/x`, puis `cherry-pick`).
 - Quotas : Codex et Antigravity s’épuisent en cours de lot. Si l’un est à court, relancer la même commande avec l’autre moteur ; le pipeline ne régénère que le manquant. Quota d’image d’Antigravity (`gemini-3.1-flash-image`) : retour annoncé vers 21 h 10 le 15 novembre.
 
-## État du plan validé avec le joueur (15 novembre, soir)
+## État du chantier (16 novembre 2026)
 
-Dernier commit publié : `d5dd0be` sur `prototype/mobile-tcg`. Fait et publié :
+**Publié** : `prototype/mobile-tcg` est à `012033b`, version **0.3.2** (tags `v0.3.0` à `v0.3.2`, releases GitHub 0.3.0 et 0.3.1).
 
-1. **Correctifs rapides** : recyclage confirmé puis annulable 6 s (refusé si les crédits sont dépensés), boutons grisés avec la raison chiffrée, badge « Nouveau », réglage « aide en touchant les mots soulignés » (désactivé pour une partie neuve).
-2. **Garage** : un appui ouvre la carte ; zoom et déplacement **au geste seulement** (le joueur a refusé les boutons de zoom) avec l’inclinaison holo conservée ; couleurs de rareté ; puces de rareté et de tri.
-3. **Légendaires en image fixe** : l’animation de carte est abandonnée. Onze en Synthwave stylisé (`LEGEND_STYLE` dans `pipeline/art.mjs`), Jeep, Interceptor et 1000tipla gardent leur style propre. Les calques animés ne servent plus qu’à la mini-course. Les ~31 règles CSS `.pixel-scene`/`.scene-*` de chaque feuille sont devenues inutiles (nettoyage à faire).
-4. **Thèmes** : les 8 sont gardés et rangés en trois groupes (Ambiances, Univers, À gagner). Le thème par défaut reste Synthwave (Galaad ne l’aime pas : le choix au premier lancement n’a pas été décidé).
-5. **Éditions** : débloquer une édition coûte les crédits (40/75/120/200) **et 2 doublons**, pour toutes les éditions ; Solarpunk et Abandonnée sont **à l’essai sur 5 cartes** (Clio III, 205 GTI, Supra, MX-5 NB, F40). À étendre aux autres cartes seulement si le joueur valide l’essai (~200 images).
+**Branche locale non publiée `feat/gaming-ui`** (tête `8f88138`, 17 commits d’avance, rien n’est poussé). Demande du joueur, en sept points, dont six sont faits :
 
-**Prochain : séries spéciales de courses.** 4 séries, une par secteur (départ/accélération, virage/maniabilité, ligne droite/vitesse, endurance), plusieurs paliers de difficulté et gains croissants ; passer `balance.mjs` pour l’inflation de crédits. Puis **exhibition** : concours à critères tournants (juges qui aiment le rétro, le tuning, la rareté…) pour qu’une Fiat 500 puisse battre une Mazda tunée selon le concours. À spécifier avec le joueur avant de coder.
+1. **Sélection unifiée** (fait) : `CarBrowser` et `CarFilterBar` servent au garage (mode `browse`) et à la préparation d’une course (mode `pick`) ; rareté, tri et densité partagés dans `Preferences` ; tri « Adaptée au circuit ». Voir `docs/meta.md`.
+2. **Design « Asphalt 9 »** (fait pour les boutons, les filtres du garage, les spéciales et les rivaux) : composant `GvButton` (variantes, ton, biseau, relief, balayage), cartes anguleuses des spéciales et des rivaux.
+3. **Économie** (fait) : `maxParts` 2 par booster, `partChance` 0,15 / 0,18 / 0,22, soit 0,59 / 0,70 / 0,84 pièce par sachet ; récompenses détaillées sur les rivaux, la boutique et la fin de duel.
+4. **Réglages en onglets** (fait) : Paramètres, Thèmes (groupes repliables) et Aide ; le bouton « ? » est retiré de l’en-tête et le lexique est dans l’onglet Aide.
+5. **Desktop** (**À FAIRE, c’est le prochain lot**) : l’interface reste un téléphone étiré (barre d’onglets flottante au milieu, colonne de contenu étroite). Reprendre la mise en page pour l’ordinateur sans toucher au mobile ni au tactile. Prévu sur Opus (jugement visuel).
+6. **Personnages** (fait) : six rivaux avec `bio`, `style`, `likes`, `intro`, `win`, `lose`, `perfect` ; carte de personnage sur la préparation, réplique en fin de duel ; la bio n’est pas affichée (trop haute).
+7. **Debug** (fait) : 14 appuis sur le logo donnent 1 000 crédits, uniquement avec `import.meta.env.DEV` (absent du build de production).
+8. **Courses fluides** (demande ajoutée en cours de route, fait) : l’action principale de chaque étape d’un duel reste collée au-dessus de la barre d’onglets, et le défilement suit l’étape.
+
+**Reste à faire après le desktop** : un bilan complet (parcours mobile et desktop de toute la branche), puis **version 0.4.0** avec son entrée dans `CHANGELOG.md`, push de `feat/gaming-ui` vers `prototype/mobile-tcg` (toujours `git ls-remote --heads origin` avant), tag `v0.4.0` et release GitHub si le joueur la veut. **Ne rien pousser sans l’accord du joueur.**
+
+**Ce qui a été appris**
+- L’outil de test navigateur (`orchestrator/browser.ts`) couvre 320, 390 **et 1280 px** ; la garde du cycle exige 3 contrôles et la revue d’Antigravity doit consulter des captures des trois largeurs. Passer le chemin du build en **absolu** (un chemin avec `..` est refusé).
+- Chaque cycle Codex part du clone `.orchestrator/source` : le **recaler** sur la branche locale avant chaque cycle (`git fetch` depuis le dépôt puis `git reset --hard FETCH_HEAD`), sinon le patch part d’une base périmée. Le récupérer ensuite avec `git fetch <cycle>/checkout` et `git cherry-pick`.
+- Une fiche de l’orchestrateur ne peut viser que `src/`, `docs/`, `public/`, `README.md` et `index.html` (pas `pipeline/`). Le bac à sable de Codex interdit de lancer un navigateur : le dire dans la fiche et demander le statut « pass ».
+- **Toujours regarder les captures soi-même** avant d’intégrer : cela a révélé des défauts que les revues avaient laissés passer (texte illisible sur le bouton « Toutes » à cause d’anciennes règles CSS, mot « Légende » coupé sur desktop, info de surchauffe disparue des tuiles de course).
+- Le joueur refuse tout bouton ou contrôle qu’il n’a pas demandé (voir les boutons de zoom retirés). Les captures doivent lui être montrées, pas seulement décrites.
+- Un garde-fou de hooks refuse parfois la première écriture d’un fichier ou d’une commande « destructive » (`git reset --hard`) : exposer les faits demandés puis réessayer.
 
 ## À voir plus tard (rien à faire sans l’accord du joueur)
 
