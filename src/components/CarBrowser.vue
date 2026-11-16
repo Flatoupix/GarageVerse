@@ -21,6 +21,8 @@ const estimates = computed(() => Object.fromEntries(vehicles.filter(v => save.ca
   const scores = props.circuit ? circuitScores(racer(v.id, prepOf(save, v.id)), props.circuit) : []
   return [v.id, scores]
 })))
+// Secteurs que la voiture peut courir avant la surchauffe, avec sa préparation actuelle (comme l'ancienne liste de la course).
+const uses = computed(() => Object.fromEntries(vehicles.filter(v => save.cars[v.id]).map(v => [v.id, racer(v.id, prepOf(save, v.id)).uses])))
 const averages = computed(() => Object.fromEntries(Object.entries(estimates.value).map(([id, scores]) => [id, scores.reduce((sum, s) => sum + s.average * s.times, 0) / (props.circuit?.sectors.length || 1)])))
 const priorities = computed(() => props.circuit ? circuitPriorities(props.circuit) : [])
 const overBy = (id: string, price: number) => overBudget(id, price, selected.value, lineupCost(selected.value), props.cap)
@@ -49,6 +51,7 @@ const pointsText = (value: number) => value.toFixed(1).replace('.', ',')
               <span v-if="selected.includes(v.id)" class="browser-place">✓ {{ selected.indexOf(v.id) + 1 }}</span>
               <span class="pick-cost" :data-cost="v.cost">{{ v.cost }}</span>
               <span v-for="score in estimates[v.id]?.filter(s => s.times === priorities[0]?.times)" :key="score.stat">{{ score.label }} {{ pointsText(score.average) }} pts</span>
+              <span>{{ uses[v.id] }} secteur{{ uses[v.id] > 1 ? 's' : '' }} avant surchauffe</span>
               <span v-if="overBy(v.id, v.cost) > 0">Dépasse le plafond de {{ overBy(v.id, v.cost) }}</span>
             </span>
           </button>
