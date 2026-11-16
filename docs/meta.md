@@ -1,4 +1,4 @@
-# GarageVerse · Méta « Neon Drive » v0.5.0
+# GarageVerse · Méta « Neon Drive » v0.6.0
 
 Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et §9) pour la version jouable. Les valeurs vivent dans `src/data/roster.json` et `src/data/garage.json`, les règles dans `src/game/rules.ts`. La simulation `node pipeline/balance.mjs` vérifie les ordres de grandeur.
 
@@ -246,7 +246,7 @@ Dans « Ton garage » (écran de préparation d’une course, d’un défi du jo
 
 ## Version et notes de version
 
-Le jeu suit SemVer. La version vient de `package.json` (champ `version`), injectée au build par `vite.config.ts` (constante `__APP_VERSION__`, déclarée dans `src/version.d.ts`) et affichée en bas des Réglages (« GarageVerse v0.3.0 »). Les notes de version sont dans `CHANGELOG.md`, à la racine, en français. À chaque publication : changer la version, ajouter une entrée en tête du fichier, puis publier. Tant que la version commence par 0 : le mineur apporte des nouveautés, le correctif ne corrige que des défauts.
+Le jeu suit SemVer. La version vient de `package.json` (champ `version`), injectée au build par `vite.config.ts` (constante `__APP_VERSION__`, déclarée dans `src/version.d.ts`) et affichée en bas des Réglages (« GarageVerse v0.3.0 »). Les notes de version sont dans `CHANGELOG.md`, à la racine, en français. À chaque publication : changer la version, ajouter une entrée en tête du fichier, puis publier. Le build échoue si la version de `package.json` n’a pas son entrée `## [x.y.z] — AAAA-MM-JJ`. Le jeu lit ce fichier au build (`src/game/releases.ts`, `src/components/ReleaseNotes.vue`) : au premier lancement d’une nouvelle version, une fenêtre « Nouveautés » présente les entrées publiées depuis la dernière version vue (trois au plus), et le lien « Notes de version » des Réglages les montre toutes. La dernière version vue est gardée dans `localStorage` (clé `garageverse-notes-vues`), hors de la sauvegarde. Un nouveau joueur ne voit pas la fenêtre : le tutoriel l’accueille. Les entrées sans numéro (« Non publié ») restent invisibles. Tant que la version commence par 0 : le mineur apporte des nouveautés, le correctif ne corrige que des défauts.
 
 ### Onglets des Réglages et raccourci de développement
 

@@ -821,3 +821,16 @@ main.race { animation-name: race-view-in; }
 .garage-tile .tile-tag.evo-tag { left: 12.5cqw; bottom: 33%; background: #ffc23d; color: #1b1200; font-weight: 800; }
 .pack-art.pack-starter .pack-picture { filter: hue-rotate(-38deg) saturate(0.95); }
 .pack-art.pack-atelier .pack-picture { filter: hue-rotate(120deg) saturate(1.1); }
+
+/* Notes de version : en-tête et bouton fixes, contenu défilant dans la boîte. */
+.release-modal[open] { display: flex; flex-direction: column; overflow: hidden; }
+.release-modal > h2, .release-modal > .eyebrow, .release-actions { flex: none; }
+.release-modal > h2 { margin: 6px 0 10px; padding-right: 52px; overflow-wrap: anywhere; }
+.release-content { min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; overflow-wrap: anywhere; }
+.release + .release { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.release h3 { margin: 0 0 6px; }
+.release h3 small { color: var(--muted); font-weight: 400; }
+.release h4 { margin: 12px 0 4px; color: var(--accent); font: 700 .78rem var(--body); text-transform: uppercase; letter-spacing: .1em; }
+.release ul { margin: 0; padding-left: 1.1em; display: grid; gap: 6px; }
+.release li { line-height: 1.45; }
+.release-actions { display: flex; justify-content: flex-end; margin-top: 12px; }

@@ -2,15 +2,19 @@
 
 Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. Tant que la version commence par 0, un changement de **mineur** apporte des nouveautés et un changement de **correctif** ne corrige que des défauts. La version affichée en bas des Réglages vient de `package.json`.
 
-À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier.
+À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
-## [Non publié]
+## [0.6.0] — 2026-11-16
+
+### Ajouté
+
+- **Notes de version dans le jeu.** À chaque mise à jour, le jeu te présente ses nouveautés dès l’ouverture. Tu peux les relire à tout moment depuis les Réglages, sous le numéro de version.
 
 ### Modifié
 
 - **Les caisses deviennent des boosters** : Booster Bricole et Booster Mécanique.
-- **Booster Bricole à 60 crédits** au lieu de 75, contenu inchangé (retour playtest de Galaad).
-- **Booster Mécanique à 240 crédits** au lieu de 180 : il se place entre Neon Drive (150) et After Hours (250).
+- **Booster Bricole à 60 crédits** au lieu de 75, avec le même contenu.
+- **Booster Mécanique à 240 crédits** au lieu de 180. Il se place entre Neon Drive (150) et After Hours (250).
 
 ## [0.5.0] — 2026-11-16
 

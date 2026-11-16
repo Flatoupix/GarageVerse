@@ -10,6 +10,7 @@ import { cardBackOf, cardBacks } from './game/cardback'
 import type { CardBackId } from './game/save'
 import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
+import ReleaseNotes from './components/ReleaseNotes.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
 import GameLogo from './components/GameLogo.vue'
@@ -206,6 +207,11 @@ async function toggleFullscreen() {
 
 // Version du jeu (semver), lue dans package.json au build et affichée en bas des Réglages.
 const appVersion = __APP_VERSION__
+const releaseNotes = ref<InstanceType<typeof ReleaseNotes>>()
+function showReleaseNotes() {
+  settings.value?.close()
+  releaseNotes.value?.openAll()
+}
 // Liste des Réglages rangée par groupes ; chaque thème n'apparaît qu'une fois.
 const themeLists = themeGroups.map(group => ({ title: group.title, items: themes.filter(t => group.ids.includes(t.id)) }))
 const expandedGroups = ref<string[]>([themeLists.find(group => group.items.some(t => t.id === theme.value))!.title])
@@ -315,6 +321,7 @@ function toggleSetting(key: Setting) {
     <p v-if="storageWarning" class="storage-warning" role="alert">La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.</p>
 
     <MechanicGuide />
+    <ReleaseNotes ref="releaseNotes" />
 
     <HomeView v-if="screen === 'home'" @go="go" />
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
@@ -373,7 +380,7 @@ function toggleSetting(key: Setting) {
           <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
           <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
           <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
-          <p class="setting-note app-version">GarageVerse v{{ appVersion }}</p>
+          <p class="setting-note app-version">GarageVerse v{{ appVersion }} · <button type="button" class="link" @click="showReleaseNotes">Notes de version</button></p>
         </div>
         <div v-show="settingsTab === 'themes'" id="settings-panel-themes" role="tabpanel" aria-labelledby="settings-tab-themes">
           <fieldset class="theme-picker">

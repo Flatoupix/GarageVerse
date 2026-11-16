@@ -9,6 +9,8 @@ function load(): Save {
 }
 
 export const storageWarning = ref(false)
+// Aucune partie enregistrée avant ce lancement : nouveau joueur, accueilli par le tutoriel plutôt que par les notes de version.
+export const firstLaunch = (() => { try { return !localStorage.getItem(SAVE_KEY) && !localStorage.getItem(LEGACY_KEY) } catch { return false } })()
 export const save = reactive(load()) as Save
 watch(() => save.preferences.touchHelp, value => { touchHelpEnabled.value = value !== false }, { immediate: true })
 export const toast = ref<{ text: string; tone: 'info' | 'error' } | null>(null)
