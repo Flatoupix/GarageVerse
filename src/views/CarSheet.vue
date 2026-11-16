@@ -472,6 +472,10 @@ function workshop(key?: StatKey) {
               <div v-if="v.spec"><dt>Donnée réelle</dt><dd>{{ v.spec }} <small>(à vérifier)</small></dd></div>
             </dl>
           </section>
+          <section v-if="v.story" class="sheet-section car-story">
+            <h3>Histoire</h3>
+            <p>{{ v.story }}</p>
+          </section>
         </template>
 
         <section v-if="car" class="sheet-section car-sale">

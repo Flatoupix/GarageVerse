@@ -412,6 +412,7 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
 .spec dl { margin: 0; display: grid; gap: 6px; }
 .spec dl div { display: grid; grid-template-columns: 9.5em 1fr; gap: 8px; font-size: 15px; }
 .spec dt { color: var(--muted); } .spec dd { margin: 0; }
+.car-story p { margin: 0; font-size: 15px; line-height: 1.45; overflow-wrap: anywhere; }
 .fit-list { display: flex; flex-wrap: wrap; gap: 6px; }
 
 /* Course */

@@ -20,6 +20,8 @@ export interface Vehicle {
   // craft.inBoosters : l'évolution se débloque à l'atelier et sort aussi des boosters (sinon, atelier seulement).
   evolvesFrom?: string; craft?: { stage: number; credits: number; inBoosters?: boolean }; look?: string
   anim?: { setting: string; fx: string[] }
+  // Anecdote historique affichée sur la fiche (docs/anecdotes.md, faits à vérifier).
+  story?: string
 }
 
 export interface Part {
