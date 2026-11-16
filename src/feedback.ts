@@ -1,7 +1,7 @@
 import { audioContext, duckMusic, effectsOutput, playSample } from './audio'
 
 export type Cue = 'tear' | 'flip' | 'drift' | 'collect' | 'legend' | 'revealLegend' | 'win' | 'lose' | 'nitro' | 'upgrade'
-  | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh'
+  | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh' | 'debugCredits'
 
 function tone(ctx: AudioContext, at: number, freq: number, duration: number, type: OscillatorType = 'sine', gain = 0.075, slideTo?: number) {
   const oscillator = ctx.createOscillator()
@@ -40,6 +40,8 @@ const cues: Record<Exclude<Cue, 'revealLegend'>, (c: AudioContext, t: number) =>
   whoosh: (c, t) => noise(c, t, 0.26, 'bandpass', 500, 3200, 0.12),
   tap: (c, t) => tone(c, t, 880, 0.05, 'sine', 0.035, 620),
   tick: (c, t) => tone(c, t, 1400, 0.03, 'square', 0.012),
+  // Son du raccourci des 1 000 crédits (fichier debugCredits.mp3) ; la pièce sert de secours pendant le chargement.
+  debugCredits: (c, t) => { tone(c, t, 988, 0.08, 'square', 0.03); tone(c, t + 0.07, 1319, 0.22, 'square', 0.03) },
   coin: (c, t) => { tone(c, t, 988, 0.08, 'square', 0.03); tone(c, t + 0.07, 1319, 0.22, 'square', 0.03) },
   error: (c, t) => { tone(c, t, 170, 0.09, 'square', 0.04); tone(c, t + 0.1, 120, 0.14, 'square', 0.04) },
   slam: (c, t) => { tone(c, t, 150, 0.28, 'sine', 0.32, 38); noise(c, t, 0.14, 'lowpass', 900, 120, 0.22) },
@@ -72,7 +74,8 @@ const cues: Record<Exclude<Cue, 'revealLegend'>, (c: AudioContext, t: number) =>
 export function playCue(cue: Cue) {
   try {
     const audio = audioContext()
-    if (cue === 'revealLegend' || cue === 'legend' || cue === 'win' || cue === 'drift') duckMusic(0.9)
+    if (cue === 'debugCredits') duckMusic(2.3)
+    else if (cue === 'revealLegend' || cue === 'legend' || cue === 'win' || cue === 'drift') duckMusic(0.9)
     else if (cue === 'tear' || cue === 'nitro') duckMusic(0.42)
     if (!playSample(cue, audio)) cues[cue === 'revealLegend' ? 'legend' : cue](audio, audio.currentTime)
   } catch {

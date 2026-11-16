@@ -99,11 +99,10 @@ function settingsTabKey(event: KeyboardEvent, index: number) {
 let debugTaps: DebugTaps = { count: 0, lastTap: null }
 function brandClick() {
   go('home')
-  if (import.meta.env.DEV) {
-    const result = debugTap(debugTaps, performance.now())
-    debugTaps = result.state
-    if (result.triggered) act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits')
-  }
+  // Raccourci de test, actif aussi dans le jeu publié : 14 appuis rapides sur le logo.
+  const result = debugTap(debugTaps, performance.now())
+  debugTaps = result.state
+  if (result.triggered) { act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits'); sound('debugCredits') }
 }
 const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()

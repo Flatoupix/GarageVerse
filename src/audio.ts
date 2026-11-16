@@ -1,9 +1,9 @@
 type Track = 'garage' | 'race'
-type Sample = 'tear' | 'revealLegend' | 'nitro' | 'drift'
+type Sample = 'tear' | 'revealLegend' | 'nitro' | 'drift' | 'debugCredits'
 type Asset = Track | Sample
 
 const files = import.meta.glob<string>('./assets/audio/*.mp3', { eager: true, query: '?url', import: 'default' })
-const samples: Sample[] = ['tear', 'revealLegend', 'nitro', 'drift']
+const samples: Sample[] = ['tear', 'revealLegend', 'nitro', 'drift', 'debugCredits']
 const musicLevel = 0.24
 const transitionSeconds = 0.22
 const buffers = new Map<Asset, AudioBuffer>()
