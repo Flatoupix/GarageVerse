@@ -1,0 +1,52 @@
+
+/* ——— Thème Carnet de garage : papier kraft, fiches d'atelier, tampons et notes au stylo bleu. ——— */
+:root {
+  --night: #f3ead6; --ink: #2b2420; --background: #e9dfc9; --panel: #d9cdb2; --slate: #b8ab90;
+  --text: #2b2420; --sand: #c0392b; --brown: #8a5a3a; --red: #c0392b;
+  --orange: #c8661f; --yellow: #e2b33c; --green: #3f7d3a; --blue: #2a5aa8;
+  --light-blue: #2a5aa8; --plum: #5a3d55; --rose: #c0392b; --outline: #2b2420;
+  --night-2: #fffaf0; --panel-2: #f3ead6; --sun: #9a5b10; --sun-2: #b23a1c; --line: #b8ab90; --muted: #6d6252;
+  --display: 'Archivo Black', 'Arial Black', sans-serif; --body: 'Special Elite', 'Courier New', monospace; --mono: 'Special Elite', 'Courier New', monospace;
+  --hand: 'Caveat', 'Bradley Hand', cursive;
+  --radius: 3px; --lift: 0 3px 8px #2b242033; --ease: cubic-bezier(.3, .8, .3, 1); --dz: 1.25;
+  color-scheme: light;
+}
+body { background: var(--background); }
+.sky { background: radial-gradient(#0000000d 1px, transparent 1px) 0 0 / 6px 6px, var(--background); }
+h1, h2, h3, .hero h1, .page-heading h1, .play-heading h1, .race-head h1, .race-end h1, .empty-state h1 { letter-spacing: -.01em; line-height: 1.1; }
+.topbar { background: var(--background); border-bottom: 2px dashed var(--slate); }
+.brand { font: 22px var(--display); letter-spacing: -.02em; color: var(--text); }
+.brand-accent { color: var(--text); }
+.brand-mark { background: var(--ink); color: var(--background); box-shadow: none; border-radius: 50%; font: 12px var(--display); transform: rotate(-8deg); }
+.credits { background: none; border: 0; color: var(--blue); font: 700 24px var(--hand); padding: 0 4px; }
+.settings-button { border: 2px solid var(--ink); background: var(--night-2); }
+button:not(.brand):not(.link):not(.back-link) { box-shadow: none; }
+.button { font: 15px var(--display); letter-spacing: .04em; text-transform: uppercase; border-radius: 3px; }
+.button.primary, .tabs button[aria-pressed="true"], .clash-nitro, .tile-tag { background: var(--ink); color: var(--night-2); border-color: var(--ink); }
+.button.primary:disabled { background: var(--panel); color: var(--muted); border-color: var(--slate); }
+.button.ghost { background: var(--night-2); color: var(--red); border: 2px solid var(--red); }
+.button.quiet { background: transparent; color: var(--text); border: 2px dashed var(--ink); }
+.daily-streak, .new-badge { background: none; color: var(--red); border: 3px solid var(--red); transform: rotate(-6deg); font-family: var(--display); }
+button:active:not(:disabled), .button.primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.tabbar { background: transparent; border: 0; gap: 4px; padding: 0 8px max(6px, env(safe-area-inset-bottom)); }
+.tabbar::before { content: ''; position: absolute; inset: 10px 0 0; z-index: -1; background: var(--panel); border-top: 2px solid var(--slate); }
+.tabbar button { background: #d4c6a6; color: #6d6252; border: 0; border-radius: 10px 10px 0 0; font: 13px var(--display); margin-top: 10px; }
+.tabbar button[aria-current] { background: var(--night-2); color: var(--text); margin-top: 0; box-shadow: 0 -3px 6px #2b242022; }
+.eyebrow { color: var(--blue); font: 700 20px var(--hand); text-transform: none; letter-spacing: 0; }
+.eyebrow > span { display: none; }
+.hero { border: 10px solid #fff; border-bottom-width: 54px; border-radius: 2px; box-shadow: 0 6px 16px #2b242044; transform: rotate(-1.2deg); min-height: 360px; background: #fff; overflow: visible; }
+.hero::before { content: ''; position: absolute; z-index: 3; top: -20px; left: 40%; width: 96px; height: 26px; background: #f3e3a0d0; transform: rotate(3deg); }
+.hero::after { inset: auto 0 0; height: 60%; background: linear-gradient(transparent, #1b1410cc); }
+.hero-content { padding-top: 0; }
+.hero h1 { color: #fffaf0; font-size: clamp(30px, 9vw, 50px); }
+.hero p { color: #f5ecd8; font-family: var(--body); }
+.page-heading h1, .play-heading h1, .race-head h1, .race-end h1, .empty-state h1 { font-size: clamp(24px, 7vw, 38px); color: var(--text); }
+.page-heading p { font-family: var(--body); }
+.tile, .how, .shop-item, .daily-panel, .sealed-stage, .stack-stage, .theme-option { border: 0; border-top: 2px dashed var(--slate); background: var(--night-2); box-shadow: 0 2px 6px #2b242026; border-radius: 2px; }
+.daily-panel { position: relative; }
+.modal { border: 0; background: var(--night-2); color: var(--text); box-shadow: 0 10px 30px #2b242066; }
+.theme-option.chosen { box-shadow: inset 0 0 0 2px var(--ink), 0 2px 6px #2b242026; }
+.notice { background: #f3e3a0; color: var(--text); border: 0; transform: rotate(-.6deg); }
+.toast { background: var(--ink); color: var(--night-2); }
+progress::-webkit-progress-value { background: var(--blue); }
+.settings-modal h2 { font-size: 24px; margin-bottom: 8px; }

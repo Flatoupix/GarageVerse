@@ -1,0 +1,31 @@
+{
+  "id": "garage-carte",
+  "title": "Garage : la carte d’abord, zoom et déplacement, couleurs de rareté, tri et filtres en un appui",
+  "brief": "Dans le garage, un appui sur une voiture ouvre aujourd’hui la fiche sur l’onglet Performances : le joueur veut voir la carte, la zoomer et la déplacer. Il veut aussi que les cartes aient la couleur de leur rareté (tout paraît bleu) et pouvoir trier et filtrer sans ouvrir des listes déroulantes. Points de départ dans le code : src/App.vue ligne ~143 `inspect(kind, id, circuit, suggestedStat)` ne force l’onglet Carte (`showCard`) que depuis l’écran booster ; src/views/CarSheet.vue choisit l’onglet initial avec `props.showCard` (`panel`) et enveloppe la carte dans `<div v-tilt>` dans `.sheet-card` ; la directive `vTilt` est dans src/game/fx.ts (inclinaison holographique au pointeur, à conserver) ; src/views/GarageView.vue a déjà un tri de treize critères (`sort`), un filtre de rareté (`rarityFilter`), une catégorie, une recherche, les puces Voitures possédées/Favoris/Écurie/Collection et la densité par ligne, mais en listes déroulantes ; les couleurs de rareté existent dans src/game/fx.ts (`rarityPalette`) et `--glow` dans les feuilles de thème. Les règles propres à un thème vont dans src/themes/base.css et src/themes/neon.css (deux feuilles complètes, à garder synchronisées), les styles communs dans src/themes/shared.css ; les huit thèmes de src/game/theme.ts doivent rester lisibles. Les sauvegardes existantes doivent rester valides : tout nouveau champ de src/game/save.ts est optionnel, avec la valeur par défaut qui garde le comportement actuel. Ajouter au lexique de src/game/help.ts une entrée pour chaque nouvelle notion. Tout le texte est en français, tutoiement. Ne pas modifier l’équilibrage des voitures ni les rivaux. IMPORTANT : le bac à sable interdit d’ouvrir un port (listen EPERM) et de lancer un navigateur. Ne tente aucune validation navigateur et ne rends pas le statut « blocked » pour cette raison : vérifie avec vue-tsc, les scripts .check.cjs et le build Vite (`--configLoader runner` vers /tmp), puis rends le statut « pass » en notant dans les constats que les captures sont laissées à l’étape de tests de l’orchestrateur.",
+  "requirements": [
+    "Un appui sur une voiture du garage (possédée ou manquante) ouvre la fiche sur l’onglet Carte, pas sur Performances. Les onglets Performances, Atelier et Carte restent accessibles. Les ouvertures depuis la course (circuit, stat suggérée) gardent leur comportement actuel.",
+    "La carte de la fiche (`.sheet-card`) se zoome et se déplace : pincement à deux doigts, double appui ou double clic pour alterner entre 1× et environ 2,5×, molette sur ordinateur, et glisser pour déplacer la carte quand elle est zoomée. Le zoom va de 1× à 3× et le déplacement est borné pour que la carte ne sorte jamais entièrement de son cadre. L’inclinaison holographique de `vTilt` reste active même zoomé. Le zoom revient à 1× quand on change de voiture ou ferme la fiche. Des boutons accessibles « Zoomer » et « Réinitialiser le zoom » existent pour qui n’a pas de geste. La page de la fiche continue de défiler normalement tant que la carte n’est pas zoomée (`touch-action` géré). Avec le mouvement réduit (`reducedMotion`), pas de transition animée mais le zoom fonctionne. Les calculs (bornes du zoom et du déplacement) sont isolés dans une fonction pure testée par un fichier .check.cjs sur le modèle de src/game/recycle.check.cjs.",
+    "Dans le garage, chaque carte possédée, chaque carte manquante (`.missing-card`) et l’étiquette de rareté prennent la couleur de leur rareté (cadre, halo ou liseré, et étiquette), au lieu d’un bleu uniforme, dans les huit thèmes. La rareté reste écrite en toutes lettres, jamais portée par la couleur seule. La puce « Nouveau » et les étiquettes Écurie, ×N restent lisibles sur chaque couleur.",
+    "Le filtre de rareté devient une rangée de puces touchables (Toutes + une puce par rareté, chacune dans sa couleur, `aria-pressed`) placée sous la barre de recherche, à la place de la liste déroulante. Le tri a des puces rapides visibles (au moins Collection, Rareté, Puissance, Nom, Doublons) plus une liste « Autres tris » qui garde tous les critères existants (coût, accélération, vitesse, maniabilité, endurance, année, niveau). Le choix de tri et de rareté est conservé quand on quitte puis revient dans le garage et se remet à zéro à une partie neuve ; s’il est sauvegardé, c’est dans un champ optionnel de `Preferences` (par exemple `garageSort`). Le compteur « N voitures » reste affiché.",
+    "À 320 et 390 px, aucun débordement horizontal : les rangées de puces défilent ou passent à la ligne proprement. La fiche à l’onglet Carte, le garage et ses filtres restent lisibles dans au moins Synthwave et Rétro pixel. Aucune erreur dans la console. docs/meta.md décrit l’ouverture sur la carte, le zoom et le déplacement, les couleurs de rareté et les puces de tri et de filtre."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tab": "Garage"
+    },
+    {
+      "expect": "Mon garage"
+    },
+    {
+      "capture": "garage-filtres"
+    }
+  ]
+}

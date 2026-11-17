@@ -1,0 +1,29 @@
+
+/* ——— Thème Console 16 bits (à débloquer) : fenêtres bleues de jeu de rôle, double liseré blanc, curseur clignotant. ——— */
+:root {
+  --night: #0b1030; --background: #0f1640; --panel: #24318f; --slate: #5566c8;
+  --text: #ffffff; --sand: #ffd84a; --red: #ff5a6a; --orange: #ff9a3c; --yellow: #ffd84a;
+  --green: #6ee77a; --blue: #4c7dff; --light-blue: #7cd0ff; --plum: #3a2f7a; --rose: #ff8ad8; --outline: #10142e;
+  --night-2: #1a2470; --panel-2: #2a3ab0; --line: #c8d0ff; --muted: #c8d0ff;
+  --radius: 6px; --lift: 4px 5px 0 #0007; --dz: 1;
+  --window: linear-gradient(#3a52c8, #1a2470 70%, #141b55);
+  --frame: 0 0 0 2px #c8d0ff, 0 0 0 4px #fff, 0 0 0 6px #10142e;
+}
+body { background: var(--background); }
+.sky { background: repeating-conic-gradient(var(--background) 0 25%, var(--night) 0 50%) 0 0 / 8px 8px; }
+.topbar, .tabbar { background: var(--window); border: 0; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--outline); }
+.tile, .how, .shop-item, .daily-panel, .sealed-stage, .stack-stage, .modal, .theme-option, .rival-row, .notice, .hero {
+  background: var(--window); border: 0; border-radius: 6px; box-shadow: var(--frame), var(--lift); }
+.tile, .how, .shop-item, .daily-panel, .rival-row, .theme-option { margin: 4px; }
+.hero::after { display: none; }
+.hero h1 { color: #fff; text-shadow: 3px 3px 0 var(--outline), -2px -2px 0 var(--outline); }
+.hero-content { padding-top: 0; }
+.button.primary, .tabs button[aria-pressed="true"], .daily-streak, .clash-nitro, .new-badge, .tile-tag { background: var(--yellow); color: var(--outline); }
+.button.ghost { background: #fff; color: var(--panel); border-color: #fff; }
+.tabbar button { background: none; border: 0; color: var(--muted); box-shadow: none; }
+.tabbar button[aria-current] { background: none; color: var(--yellow); }
+.tabbar button[aria-current]::before, .button.primary:not(:disabled)::before { content: '▶' / ''; position: absolute; left: 6px; top: 50%; translate: 0 -50%; color: #fff; animation: console-cursor .5s steps(2) infinite; }
+.button.primary { position: relative; padding-left: 28px; }
+@keyframes console-cursor { 50% { translate: 3px -50%; } }
+.theme-option.chosen { box-shadow: 0 0 0 2px var(--yellow), 0 0 0 4px #fff, 0 0 0 6px var(--outline); }
+.motion-reduced .tabbar button[aria-current]::before, .motion-reduced .button.primary::before { animation: none; }

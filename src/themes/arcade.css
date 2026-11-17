@@ -1,0 +1,40 @@
+
+/* ——— Thème Borne d'arcade (à débloquer) : écran noir à balayage, contours jaune et rouge, boutons ronds de borne. ——— */
+:root {
+  --night: #000000; --background: #050505; --panel: #141414; --slate: #3a3a3a;
+  --text: #ffffff; --sand: #ffe100; --red: #ff3b3b; --orange: #ff7a00; --yellow: #ffe100;
+  --green: #33ff66; --blue: #33bbff; --light-blue: #33bbff; --plum: #6a2bd9; --rose: #ff3b3b; --outline: #000000;
+  --night-2: #0d0d0d; --panel-2: #1c1c1c; --line: #ff3b3b; --muted: #bdbdbd;
+  --radius: 0; --lift: 0 0 0 transparent; --dz: 1;
+}
+body, .sky { background: #000; }
+.app-shell::after { content: ''; position: fixed; inset: 0; z-index: 30; pointer-events: none;
+  background: repeating-linear-gradient(#0000 0 2px, #0005 2px 3px), radial-gradient(ellipse at center, #0000 60%, #000a 100%); }
+.topbar { background: #000; border-bottom: 3px solid var(--yellow); }
+.brand { color: var(--yellow); }
+.brand-accent { color: var(--red); }
+.credits { background: none; border: 0; color: var(--red); }
+.credits::before { content: '1UP '; color: var(--red); }
+.tile, .how, .shop-item, .daily-panel, .sealed-stage, .stack-stage, .modal, .theme-option, .rival-row {
+  background: #0a0a0a; border: 3px solid var(--line); box-shadow: none; }
+.daily-panel { border-style: dashed; }
+.hero { border: 4px solid var(--yellow); box-shadow: 0 0 0 4px var(--red); }
+.hero::after { display: none; }
+.hero h1 { color: var(--yellow); text-shadow: 0 3px 0 var(--orange), 0 6px 0 var(--red), 0 9px 0 #000, 3px 0 #000, -3px 0 #000; }
+.hero-content { padding-top: 0; }
+.eyebrow { color: var(--blue); }
+.page-heading h1, .play-heading h1, .race-head h1, .race-end h1, .empty-state h1 { color: var(--yellow); }
+.button.primary, .tabs button[aria-pressed="true"], .clash-nitro, .tile-tag { background: var(--red); color: #fff; border-color: #000; }
+.daily-streak, .new-badge { background: var(--yellow); color: #000; }
+.button.ghost { background: var(--blue); color: #000; border-color: var(--blue); }
+.tabbar { background: #000; border-top: 3px solid var(--yellow); }
+.tabbar button { background: none; border: 0; box-shadow: none; color: var(--muted); font-size: 9px; }
+.tabbar .tab-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-size: 0; color: transparent;
+  box-shadow: inset -3px -4px 0 #0006, inset 3px 3px 0 #fff6, 0 4px 0 #0009, 0 0 0 2px #333; }
+.tabbar button:nth-child(1) .tab-icon { background: var(--red); }
+.tabbar button:nth-child(2) .tab-icon { background: var(--yellow); }
+.tabbar button:nth-child(3) .tab-icon { background: var(--green); }
+.tabbar button:nth-child(4) .tab-icon { background: var(--blue); }
+.tabbar button[aria-current] { background: none; color: #fff; }
+.tabbar button[aria-current] .tab-icon { translate: 0 3px; box-shadow: inset -3px -4px 0 #0006, inset 3px 3px 0 #fff6, 0 1px 0 #0009, 0 0 0 2px #fff; }
+.theme-option.chosen { border-color: var(--yellow); }

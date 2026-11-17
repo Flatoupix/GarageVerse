@@ -1,0 +1,34 @@
+{
+  "id": "boosters-styles",
+  "title": "Des sachets de boosters plus stylés, et une couverture légendaire",
+  "brief": "Retour de playtest : les couvertures des boosters manquent de style, et un sachet qui contient une carte légendaire doit avoir une couverture différente. Les nouvelles illustrations existent déjà : src/assets/pixel/packs/<id>.px.webp et src/assets/packs/<id>.webp pour la couverture normale, <id>-legend pour la couverture légendaire (id = neon, night, overdrive), servies par art.pack(id) de src/game/art.ts (art.pack('neon-legend') fonctionne). 1) Refaire src/components/PackArt.vue, utilisé par la boutique (src/views/ShopView.vue) et le sachet à déchirer (src/components/TearPack.vue), pour qu’il ressemble à un vrai sachet métallisé de cartes à collectionner : bords haut et bas sertis en dents de scie (clip-path ou mask), cadre métallisé aux couleurs de chaque collection (Neon Drive : magenta et orange ; After Hours : violet et bleu nuit ; Overdrive : or et rouge), reflet holographique qui balaie la surface en continu (immobile en mouvement réduit), logo du jeu en haut du sachet avec le composant src/components/GameLogo.vue (size=\"pack\" ; tubes néon rose et cyan, ses styles sont dans src/themes/shared.css), nom de la collection en grand avec une typographie forte, bandeau « Collection 001 · 5 cartes ». Le texte reste lisible sur l’illustration (dégradé ou bandeau) et le sachet garde ses couleurs propres dans les huit thèmes (src/themes/*.css). La prop booster reste ; ajouter une prop legend (booléen). 2) Couverture légendaire : tirer les cartes dès que le sachet est scellé (buyBooster de src/game/save.ts, achat ou ticket) et les garder dans la sauvegarde (par exemple save.sealedPulls), l’ouverture réutilise ce tirage au lieu d’en refaire un, sans changer les probabilités ni le nombre de cartes ; une sauvegarde avec un sachet scellé sans tirage enregistré tire à l’ouverture comme aujourd’hui. Exposer sealedHasLegend(save). Si le sachet scellé contient une Légendaire, TearPack affiche PackArt avec legend : illustration <id>-legend, cadre doré, halo et étincelles dorées, ruban « Édition légendaire », léger frémissement du sachet toutes les quelques secondes (absent en mouvement réduit), et la déchirure joue le son 'legend' de src/feedback.ts avec les effets dorés de src/game/fx.ts. La boutique montre toujours la couverture normale. 3) Ajouter au lexique (src/game/help.ts) une entrée « Sachet légendaire ». 4) Ajouter un contrôle node src/game/booster.check.cjs (même principe que src/game/endless.check.cjs) qui vérifie : tirage conservé du scellé à l’ouverture, cinq cartes, reprise après rechargement sans retirage, sealedHasLegend vrai si et seulement si une Légendaire est tirée, ancienne sauvegarde sans tirage chargée sans erreur. Mettre à jour docs/meta.md (boosters). Les règles propres aux thèmes vont dans src/themes/base.css et src/themes/neon.css, les styles communs dans src/themes/shared.css. Texte en français, tutoiement.",
+  "requirements": [
+    "La boutique et l’écran d’ouverture montrent un sachet métallisé aux bords sertis, au cadre aux couleurs de sa collection, avec reflet holographique animé, logo néon du jeu (GameLogo), nom de la collection et bandeau « Collection 001 · 5 cartes », lisible dans les huit thèmes.",
+    "Les cartes sont tirées au moment où le sachet est scellé et conservées dans la sauvegarde ; l’ouverture donne exactement ce tirage, cinq cartes, avec les mêmes probabilités qu’avant, et un rechargement ne refait pas le tirage.",
+    "Quand le sachet scellé contient une Légendaire, sa couverture est différente : illustration légendaire, cadre doré, halo, ruban « Édition légendaire » et frémissement ; la déchirure joue une mise en scène dorée. Un sachet sans Légendaire garde la couverture normale ; la boutique montre toujours la couverture normale.",
+    "node src/game/booster.check.cjs passe ; le lexique contient « Sachet légendaire » ; docs/meta.md décrit les sachets.",
+    "Mouvement réduit respecté (pas de reflet animé ni de frémissement). Lisible et sans débordement horizontal à 320 et 390 px, aucune erreur console ; le parcours complet passe."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "tab": "Boosters"
+    },
+    {
+      "capture": "boutique-sachets"
+    },
+    {
+      "tap": "Lexique : comprendre les règles"
+    },
+    {
+      "expect": "Sachet légendaire"
+    },
+    {
+      "capture": "lexique-sachet"
+    }
+  ]
+}

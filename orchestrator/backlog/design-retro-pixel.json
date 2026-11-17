@@ -1,0 +1,54 @@
+{
+  "id": "design-retro-pixel",
+  "title": "Refaire le design du jeu en rétro pixel, sans synthwave",
+  "brief": "Le joueur veut abandonner la direction synthwave (néons magenta et cyan, grille en perspective, soleil rayé, titres chromés, halos flous) au profit d’un rétro jeu vidéo pixel art des années 16 bits : menus de Super Nintendo, de Mega Drive ou de borne d’arcade de course. Refaire toute l’interface dans cette direction, sans changer le comportement du jeu, les textes des commandes ni la structure des écrans. Les illustrations des cartes passent aussi en pixel art (générées à part) : prévoir une classe utilitaire `.pixelated` (image-rendering: pixelated) qui sera posée plus tard sur ces images. Tout le texte reste en français.\n\nDirection imposée :\n- Polices Google Fonts : « Press Start 2P » pour les titres, les chiffres et les étiquettes courtes (tailles modestes, elle est très large), « Pixelify Sans » pour le texte courant (au moins 15 px). Remplacer Orbitron et Chakra Petch dans index.html et dans les variables CSS.\n- Palette (variables sur :root, inspirée d’Endesga 32) : nuit #181425, fond #262b44, panneau #3a4466, gris bleu #5a6988, crème #ead4aa (texte), sable #e4a672, brun #b86f50, rouge #e43b44, orange #f77622, jaune #feae34, vert #63c74d, bleu #0099db, bleu clair #2ce8f5, prune #68386c, rose #b55088, contour #0b0a12. Plus aucun dégradé néon, aucun flou (blur, backdrop-filter, ombre floue) ni halo lumineux.\n- Formes : contours pleins de 2 à 4 px, coins en escalier ou carrés (pas d’arrondis doux), ombres pleines décalées sans flou (par exemple 0 4px 0 contour), boutons épais qui s’enfoncent au toucher (l’ombre diminue, le bouton descend), cases et jauges en blocs segmentés.\n- Fond de l’application : remplacer le ciel et la grille animée par un fond sobre de jeu rétro (motif tramé ou damier discret en dégradés CSS durs), sans animation continue.\n- Cartes : cadre épais par rareté (Courante gris bleu, Rare bleu, Épique rose, Légendaire jaune or avec un reflet animé par paliers steps()), pastille de coût en pièce pixel, statistiques en barres segmentées en blocs, titres en Press Start 2P.\n- Effets (src/game/fx.ts) : particules en carrés pleins à coordonnées entières (étincelles, confettis carrés, lignes de vitesse en traits pixel), anneaux remplacés par des carrés qui s’agrandissent, garder flash et secousse. Animations CSS plutôt par paliers (steps) pour le côté rétro. Le mouvement réduit coupe tout comme avant.\n- Garder les sons et la logique. Ne pas renommer les classes ou libellés utilisés par les tests du parcours (boutons, onglets, .tabbar, .engage, .round-result, .race-end, .card-stack, .recap-grid, .garage-grid, .rival-row, .shop-item, .sealed-actions, .stack-actions, .credits…).",
+  "requirements": [
+    "Plus aucun élément synthwave visible : pas de grille en perspective, de soleil rayé, de titre chromé en dégradé, de lueur néon floue, de dégradé magenta-cyan, et src/style.css ne contient plus de filter: blur, backdrop-filter, ni d’ombre à flou non nul (box-shadow ou text-shadow avec un rayon de flou).",
+    "index.html charge Press Start 2P et Pixelify Sans, et n’appelle plus Orbitron ni Chakra Petch ; la couleur theme-color correspond au nouveau fond.",
+    "Toutes les couleurs de l’interface viennent des variables de palette définies sur :root ; le texte courant crème sur fond sombre a un contraste d’au moins 4,5:1.",
+    "Chaque écran est restylé de façon cohérente : accueil (avec le défi du jour), boutique, sachet et ouverture, pile de révélation, récapitulatif, garage (onglets, filtres, recherche, grille), fiche voiture (Performances, Atelier, Carte), fiche pièce, liste des rivaux, écurie, course (piste, choix de voiture, nitro, duel de secteur, verdict, arrivée), réglages, notifications et barre d’onglets.",
+    "Les cartes ont un cadre pixel par rareté, une pastille de coût, des statistiques en barres segmentées et un reflet animé par paliers pour les légendaires ; la classe utilitaire .pixelated existe.",
+    "Les boutons et onglets ont un état enfoncé visible au toucher, et un focus clavier visible en contour pixel.",
+    "Les particules et effets de src/game/fx.ts sont dessinés en carrés pixel, et le mouvement réduit les coupe toujours.",
+    "Le parcours complet du jeu fonctionne comme avant, sans débordement horizontal ni texte tronqué à 320 et 390 px, et docs/meta.md décrit la nouvelle direction artistique à la place de la section synthwave."
+  ],
+  "paths": [
+    "src/style.css",
+    "src/App.vue",
+    "src/components/",
+    "src/views/",
+    "src/game/fx.ts",
+    "index.html",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tab": "Accueil"
+    },
+    {
+      "expect": "Défi du jour"
+    },
+    {
+      "capture": "accueil-defi"
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "capture": "reglages"
+    },
+    {
+      "tap": "Fermer les réglages"
+    },
+    {
+      "tab": "Garage"
+    },
+    {
+      "capture": "garage-pixel"
+    }
+  ]
+}

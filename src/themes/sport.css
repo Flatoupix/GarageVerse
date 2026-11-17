@@ -1,0 +1,52 @@
+
+/* ——— Thème Sport auto : papier clair, panneaux noirs, bandes rouge-jaune-bleu, italiques condensées. ——— */
+:root {
+  --night: #ebe6da; --ink: #121212; --background: #f4f1ea; --panel: #e6e1d6; --slate: #c9c2b4;
+  --text: #121212; --sand: #e63322; --brown: #7a5a3a; --red: #e63322;
+  --orange: #f07a1a; --yellow: #f2b01e; --green: #1f9d55; --blue: #1d5fd1;
+  --light-blue: #1d5fd1; --plum: #3d2b56; --rose: #e63322; --outline: #121212;
+  --night-2: #ffffff; --panel-2: #ece7dc; --sun: #b86e00; --sun-2: #c2410c; --line: #cfc8b9; --muted: #5d5a54;
+  --display: 'Barlow Condensed', 'Arial Narrow', sans-serif; --body: 'Barlow Condensed', 'Arial Narrow', sans-serif; --mono: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --radius: 0; --lift: 0 3px 0 #1212121f; --ease: cubic-bezier(.3, .9, .3, 1); --dz: 1.55;
+  --stripes: linear-gradient(90deg, var(--red) 0 33%, var(--night) 33% 34.5%, var(--yellow) 34.5% 66%, var(--night) 66% 67.5%, var(--blue) 67.5%);
+  color-scheme: light;
+  font-size: 17px;
+}
+body, .sky { background: var(--background); }
+h1, h2, h3, .hero h1, .page-heading h1, .play-heading h1, .race-head h1, .race-end h1, .empty-state h1 { font-style: italic; font-weight: 800; text-transform: uppercase; letter-spacing: 0; line-height: 1; }
+.topbar { background: var(--ink); color: #fff; border: 0; box-shadow: 0 6px 0 0 transparent; position: sticky; }
+.topbar::after { content: ''; position: absolute; left: 0; right: 0; bottom: -6px; height: 6px; background: var(--stripes); }
+.brand { color: #fff; font: italic 800 22px var(--display); letter-spacing: .01em; }
+.brand-accent { color: var(--red); }
+.brand-mark { background: var(--red); color: #fff; box-shadow: none; font: italic 800 15px var(--display); clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%); width: 38px; }
+.credits { background: none; border: 0; color: #fff; font: 800 20px var(--display); }
+.settings-button { border-color: #444; color: #fff; }
+button:not(.brand):not(.link):not(.back-link) { box-shadow: none; }
+.button { text-transform: uppercase; font: italic 800 18px var(--display); letter-spacing: .02em; clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%); border: 0; }
+.button.primary, .tabs button[aria-pressed="true"], .clash-nitro, .tile-tag { background: var(--ink); color: #fff; }
+.button.primary:disabled { background: var(--panel); color: var(--muted); }
+.daily-streak, .new-badge { background: var(--yellow); color: var(--ink); }
+.button.ghost { background: var(--red); color: #fff; }
+.button.quiet { background: var(--night-2); color: var(--text); box-shadow: inset 0 0 0 2px var(--ink); }
+button:active:not(:disabled), .button.primary:active:not(:disabled) { transform: translateX(2px); box-shadow: none; }
+.tabbar { background: var(--ink); border: 0; padding-top: 0; }
+.tabbar button { background: none; border: 0; color: #9a9a9a; font: 700 15px var(--display); text-transform: uppercase; letter-spacing: .06em; }
+.tabbar button[aria-current] { background: var(--red); color: #fff; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); }
+.eyebrow { color: var(--red); font: 700 13px var(--display); letter-spacing: .18em; }
+.eyebrow > span { width: 18px; height: 4px; transform: none; box-shadow: none; }
+.hero { border: 0; box-shadow: none; min-height: 380px; background: var(--ink); }
+.hero::after { inset: auto 0 0; height: 55%; background: linear-gradient(transparent, #000c); }
+.hero-content { padding-top: 0; }
+.hero h1 { display: inline-block; color: #fff; background: var(--red); padding: 4px 22px 4px 12px; font-size: clamp(34px, 11vw, 60px); clip-path: polygon(0 0, 100% 0, 94% 100%, 0 100%); }
+.hero p { color: #f0f0f0; }
+.page-heading h1, .play-heading h1, .race-head h1, .race-end h1, .empty-state h1 { font-size: clamp(30px, 9vw, 46px); color: var(--text); }
+.tile, .how, .shop-item, .daily-panel, .sealed-stage, .stack-stage, .theme-option { border: 0; border-bottom: 4px solid var(--ink); background: var(--night-2); box-shadow: 0 1px 0 var(--line); }
+.tile:nth-child(3n+1), .shop-item:nth-child(3n+1) { border-bottom-color: var(--red); }
+.tile:nth-child(3n+2), .shop-item:nth-child(3n+2) { border-bottom-color: var(--yellow); }
+.tile:nth-child(3n), .shop-item:nth-child(3n) { border-bottom-color: var(--blue); }
+.modal { border: 0; border-top: 6px solid var(--red); background: var(--background); color: var(--text); }
+.theme-option.chosen { border-bottom-color: var(--red); background: #fff6f4; }
+.notice { background: var(--yellow); color: var(--ink); border: 0; }
+.how h2, .daily-head h2, h2 { color: var(--text); }
+.toast { background: var(--ink); color: #fff; }
+.settings-modal h2 { font-size: 24px; margin-bottom: 8px; }

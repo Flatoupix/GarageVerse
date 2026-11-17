@@ -1,6 +1,6 @@
 # GarageVerse
 
-## Bible de conception · v0.1
+## Bible de conception · v0.5.0
 
 GarageVerse est un jeu mobile de cartes automobiles à collectionner, avec une progression RPG et des duels tactiques. Une Clio III diesel peut devenir la voiture à laquelle on tient le plus dans un garage qui contient aussi une Venom F5. On la collectionne pour ce qu’elle représente, on la prépare pour le rôle qu’on veut lui donner et on la joue quand ses qualités font la différence.
 
@@ -75,6 +75,61 @@ Pour construire le deck, comparer un format centré sur une voiture et ses pièc
 | Évolutions Lotus · 2 | 23 Lotus Elise 111S · 24 Lotus Elise Sport 190 |
 | Éditions spéciales et fiction · 8 | 25 DeLorean temporelle (*Retour vers le futur*) · 26 KITT (*K2000*) · 27 Nissan Skyline de Brian (*2 Fast 2 Furious*) · 28 Choupette, Coccinelle nº 53 · 29 Lotus Esprit de James Bond · 30 Taxi de Korben Dallas (*Le Cinquième Élément*) · 31 Ecto-1 (*Ghostbusters*) · 32 Batmobile du film de 1989 |
 
+#### Véhicules candidats pour de futures cartes
+
+Les numéros de cette liste servent au repérage. Les renvois indiquent les liens avec les cartes de la Collection 001.
+
+1. Abarth 500
+2. Acura NSX
+3. Alpine A110 (1973)
+4. Aston Martin DB7
+5. Audi R8 V10
+6. Bentley Continental GT
+7. BMW M3 E46
+8. BMW M5 E60
+9. BRABUS XLP 800 6×6
+10. Bugatti Veyron
+11. BYD Yangwang U9 Xtreme
+12. Cadillac Escalade
+13. Chevrolet Corvette C6 ZR1
+14. Citroën C1
+15. Dacia Logan
+16. De Tomaso Pantera
+17. Dodge Challenger SRT Demon 170
+18. Ferrari Enzo
+19. Fiat Punto
+20. Ford Mustang Shelby GT500
+21. GMC Sierra 3500HD
+22. Hennessey Venom F5 — version à préciser par rapport à la Revolution Evolution (carte 12)
+23. Honda Civic Type R EK9
+24. Hummer H1
+25. Hyundai i30 N
+26. Jaguar F-Type
+27. Jeep Grand Cherokee Trackhawk
+28. Koenigsegg Agera
+29. Koenigsegg One:1
+30. KTM X-Bow
+31. Lamborghini Aventador SV
+32. Lancia Delta HF Integrale
+33. Lexus IS 200
+34. Lotus Elise — version à préciser par rapport aux cartes 16, 23 et 24
+35. Mazda MX-5 NA
+36. McLaren Senna
+37. Mercedes-Benz CLR (1999)
+38. Mercedes-Benz SLR McLaren
+39. Mitsubishi Lancer Evolution VIII
+40. Nissan Skyline GT-R R34 V-Spec — finition à examiner pour la carte 11 ou une carte dédiée
+41. Opel Zafira OPC
+42. Pagani Zonda R
+43. Porsche Carrera GT
+44. RAM 1500 TRX
+45. Renault Master
+46. RUF CTR « Yellowbird »
+47. SEAT Ibiza 6L
+48. Tesla Model S
+49. Toyota Supra Mk4 — déjà référencée comme carte 10
+50. Volkswagen Passat B5
+
 ### 6. Direction artistique et design des cartes
 
 **Direction établie.** Rétro premium en 2D et 2.5D. Des silhouettes fidèles, des cadrages d’illustration automobile et une énergie de jeu rétro. Les aplats, les contours, les reflets et les éléments de décor donnent du volume. La lisibilité des cartes à l’écran prime sur la quantité d’effets. Le rendu low-poly générique est écarté.
@@ -139,3 +194,36 @@ Le prototype est prêt à être évalué quand on peut, sur smartphone, ouvrir u
 ---
 
 Document de départ · [Master Prompt GarageVerse](https://chatgpt.com/library?file_id=libfile_f9e9b0c4a8a88191a3bb500cf26bf419&account_id=personal)
+
+## Lancer le prototype mobile
+
+Prérequis local : Node.js 22 ou plus récent et Yarn 4.5.3 via Corepack. Si Corepack est absent, l’installer avec `npm install --global corepack`.
+
+```sh
+corepack yarn install --immutable
+corepack yarn dev
+```
+
+Ouvrir l’adresse affichée par Vite. Sur un téléphone connecté au même Wi-Fi privé, lancer `corepack yarn dev --host 0.0.0.0` et ouvrir l’adresse **Network** affichée par Vite. Pour vérifier le typage et produire le build, lancer `corepack yarn build`.
+
+La version **Neon Drive** est jouable de bout en bout : 50 voitures, 24 cartes Mécanique, trois boosters, un garage de préparation et six rivaux en course en secteurs. Les règles et la direction synthwave sont décrites dans [docs/meta.md](docs/meta.md). La sauvegarde (`garageverse:v2`) est propre au navigateur. Les cartes collectées dans le prototype précédent sont reprises automatiquement. Pour rejouer à zéro, utiliser une fenêtre privée ou effacer les données du site.
+
+### Premier essai joueur
+
+1. Laisser la personne ouvrir seule ses deux tickets Neon Drive. Observer le geste de déchirure et le moment où elle passe au bouton.
+2. La laisser préparer une voiture au garage (Stage 1, une pièce) sans explication, puis défier Lola Minitel.
+3. Lui demander pourquoi elle a engagé chaque voiture sur chaque secteur, puis si elle a envie de rouvrir un booster ou de retourner au garage.
+
+### Production des contenus
+
+| Commande | Rôle |
+| --- | --- |
+| `corepack yarn art` | Génère les illustrations manquantes (voitures, pièces, rivaux, boosters, accueil). Codex d’abord, Antigravity en relais. |
+| `corepack yarn art:review` | Revue artistique par Antigravity dans `pipeline/art-review.json`. `node pipeline/art.mjs --redo` régénère les refus. |
+| `corepack yarn balance` | Simulation d’équilibrage dans `pipeline/balance-report.json`. Ajouter `--review` pour l’avis d’Antigravity. |
+
+Les images sont dans `src/assets/<cars|parts|rivals|packs|ui>/<id>.webp`. Une illustration absente est remplacée par un visuel de repli et ne bloque pas le jeu. Les éditions Classic et Pixel Art du prototype restent collectionnables comme variantes rares.
+
+### Orchestrateur local
+
+Voir [l’installation, les commandes et les rapports](orchestrator/README.md).

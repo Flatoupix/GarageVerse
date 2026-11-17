@@ -1,0 +1,32 @@
+{
+  "id": "defi-du-jour",
+  "title": "Ajouter un défi du jour et un booster quotidien",
+  "brief": "Donner une raison de revenir chaque jour. L’accueil propose un défi du jour : une course en cinq secteurs contre un adversaire généré, avec un circuit, une météo et une contrainte d’écurie tirés de la date du jour (même défi pour tout le monde ce jour-là, tirage déterministe à partir de la date locale AAAA-MM-JJ). L’accueil propose aussi un booster gratuit par jour. Réutiliser le moteur de course existant (src/game/rules.ts, src/game/save.ts, src/views/RaceView.vue) et le style synthwave existant (src/style.css). Ne pas modifier l’équilibrage des voitures ni les rivaux existants. Tout le texte est en français.",
+  "requirements": [
+    "L’accueil affiche une section « Défi du jour » avec le nom du circuit, la contrainte du jour et la récompense, et un bouton dont le nom accessible commence par « Défi du jour ». Ce bouton ouvre l’écran du défi dans l’onglet Course.",
+    "La contrainte du jour est tirée parmi au moins trois types (par exemple plafond de coût réduit, catégorie imposée, rareté imposée) et s’affiche dans un bloc intitulé « Contrainte ». L’adversaire, le circuit et la météo viennent du même tirage déterministe : deux chargements le même jour donnent le même défi.",
+    "Le défi reste jouable avec le garage de départ d’une sauvegarde neuve : si trois voitures possédées ne peuvent pas satisfaire la contrainte tirée, elle est remplacée par un plafond de coût que le garage de départ respecte. L’écran du défi préremplit une écurie valide, et le bouton « Lancer le défi » démarre alors directement la course (l’écran affiche « Secteur 1/5 »).",
+    "Une écurie qui ne respecte pas la contrainte ne peut pas lancer le défi, et le bouton en donne la raison.",
+    "Gagner le défi donne une récompense en crédits une seule fois par jour ; le défi peut être rejoué sans nouvelle récompense, et l’accueil indique alors « Défi réussi ». Une série de jours consécutifs réussis est comptée et affichée.",
+    "L’accueil propose un bouton « Récupérer le booster du jour » qui ajoute un ticket Neon Drive une seule fois par jour ; après récupération, l’accueil affiche « Reviens demain » à la place du bouton.",
+    "L’état quotidien (date, défi réussi, booster récupéré, série) est sauvegardé dans la sauvegarde existante, survit à un rechargement, se remet à zéro au changement de date, et une ancienne sauvegarde sans ces champs se charge sans erreur.",
+    "La course du défi utilise la même mise en scène que les autres courses (duel de secteur, verdict, écran d’arrivée) et les courses contre les six rivaux fonctionnent comme avant.",
+    "Les nouveaux éléments restent lisibles et sans débordement horizontal à 320 et 390 px, respectent le mouvement réduit, et docs/meta.md décrit la boucle quotidienne."
+  ],
+  "paths": ["src/", "docs/"],
+  "browser": "neon",
+  "flow": [
+    { "reset": true },
+    { "tab": "Accueil" },
+    { "expect": "Défi du jour" },
+    { "capture": "defi-accueil" },
+    { "tap": "Récupérer le booster du jour" },
+    { "expect": "Reviens demain" },
+    { "tap": "Défi du jour" },
+    { "expect": "Contrainte" },
+    { "capture": "defi" },
+    { "tap": "Lancer le défi" },
+    { "expect": "Secteur 1/5" },
+    { "capture": "defi-course" }
+  ]
+}
