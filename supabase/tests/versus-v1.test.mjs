@@ -51,7 +51,7 @@ export async function run(db, { assert, as, user }) {
   await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake, seed, rematch_of) values ('REMATCH2', '${HOST}', 15, 100, 's', gen_random_uuid())`, /foreign key/)
   const move = (sector, car, stance) => `insert into gv_moves (room, sector, player, car, stance, nitro) values ('${ROOM}', ${sector}, '${THIRD}', ${car}, '${stance}', false)`
   for (const [sector, car, stance] of [[5, 0, 'normal'], [-1, 0, 'normal'], [2, 3, 'normal'], [2, -1, 'normal'], [2, 0, 'prudence']]) await rejects('service_role', null, move(sector, car, stance), /check constraint/)
-  await rejects('service_role', null, `insert into gv_rounds (room, sector, result) values ('${ROOM}', 5, '{}')`, /check constraint/)
+  for (const sector of [5, -1]) await rejects('service_role', null, `insert into gv_rounds (room, sector, result) values ('${ROOM}', ${sector}, '{}')`, /check constraint/)
   await rejects('service_role', null, `insert into gv_players (id, nickname, friend_code) values ('${FOURTH}', 'Double', 'HOST01')`, /unique constraint "gv_players_friend_code_key"/)
   for (const code of ['abc123', 'ABC12', 'ABC-12', 'ABC1234']) await rejects('service_role', null, `update gv_players set friend_code = '${code}' where id = '${THIRD}'`, /check constraint/)
   for (const nickname of ['A', 'A'.repeat(21)]) await rejects('service_role', null, `update gv_players set nickname = '${nickname}' where id = '${THIRD}'`, /check constraint/)
@@ -100,7 +100,7 @@ export async function run(db, { assert, as, user }) {
   assert.deepEqual(await moves(HOST), [`0:${HOST}`])
   assert.deepEqual(await moves(GUEST), [`0:${GUEST}`, `1:${GUEST}`])
   await service(`insert into gv_rounds (room, sector, result) values ('${ROOM}', 0, '{"winner": "A"}')`)
-  assert.deepEqual(await moves(HOST), [`0:${HOST}`, `0:${GUEST}`], 'secteur 1 résolu, secteur 2 encore caché')
+  assert.deepEqual(await moves(HOST), [`0:${HOST}`, `0:${GUEST}`], 'secteur 0 résolu, secteur 1 encore caché')
   assert.deepEqual(await moves(GUEST), [`0:${HOST}`, `0:${GUEST}`, `1:${GUEST}`])
   assert.equal((await rows('authenticated', THIRD, `select * from gv_moves`)).length, 0, 'tiers : coups invisibles même résolus')
   for (const id of [HOST, GUEST]) assert.equal((await rows('authenticated', id, `select * from gv_rounds`)).length, 1)
