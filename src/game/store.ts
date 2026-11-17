@@ -49,6 +49,11 @@ export const systemReduced = ref(systemMotion.matches)
 systemMotion.addEventListener('change', event => { systemReduced.value = event.matches })
 export const reducedMotion = computed(() => systemReduced.value || save.preferences.reducedMotion)
 
+// Téléphone (moins de 650 px de large) : 4 et 5 voitures par ligne passent en vue planche.
+const phone = window.matchMedia('(max-width: 649px)')
+export const narrow = ref(phone.matches)
+phone.addEventListener('change', event => { narrow.value = event.matches })
+
 export const ownedCount = computed(() => vehicles.filter(v => save.cars[v.id]).length)
 
 export const dailySelected = ref(false)

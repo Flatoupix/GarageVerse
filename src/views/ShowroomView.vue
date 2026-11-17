@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
 import CarCard from '../components/CarCard.vue'
+import CarThumb from '../components/CarThumb.vue'
+import { narrow, save } from '../game/store'
 import { rarities, rarityClass, rarityMark, styleLabel, stylesOf, vehicleById, vehicles, type EditionStyle, type Rarity } from '../game/data'
 
 // Showroom caché (7 appuis sur la version, dans les Réglages) : toutes les cartes du jeu et toutes leurs éditions,
@@ -15,6 +17,10 @@ const list = computed(() => {
     words.every(word => plain(`${v.number} ${v.name} ${v.version} ${v.year} ${v.tags.join(' ')}`).includes(word)))
 })
 const editionCount = vehicles.reduce((n, v) => n + stylesOf(v.id).length, 0)
+// Par ligne : part du réglage du garage, sans jamais l'écrire. 4 et 5 sur téléphone passent en vue planche.
+const cols = ref(Math.min(5, save.preferences.garageCols ?? 0))
+const colOptions = [0, 1, 2, 3, 4, 5]
+const sheet = computed(() => cols.value >= 4 && narrow.value)
 
 const dialog = ref<HTMLDialogElement>()
 const strip = ref<HTMLElement>()
@@ -56,13 +62,21 @@ function onScroll() {
         <span aria-hidden="true">{{ rarityMark[r] }}</span> {{ r }}
       </button>
     </div>
-    <p class="showroom-count" role="status">{{ list.length }} voiture{{ list.length > 1 ? 's' : '' }}</p>
+    <div class="showroom-bar">
+      <p class="showroom-count" role="status">{{ list.length }} voiture{{ list.length > 1 ? 's' : '' }}</p>
+      <div class="showroom-filters showroom-cols" role="group" aria-label="Nombre de voitures par ligne">
+        <button v-for="n in colOptions" :key="n" type="button" :aria-pressed="cols === n"
+          :aria-label="n === 0 ? 'Nombre de colonnes automatique' : `${n} voiture${n > 1 ? 's' : ''} par ligne`" @click="cols = n">{{ n === 0 ? 'Auto' : n }}</button>
+      </div>
+    </div>
 
-    <div class="garage-grid">
+    <div class="garage-grid" :class="{ 'grid-custom': cols > 0, 'grid-single': cols === 1, 'grid-dense': cols >= 4, 'grid-sheet': sheet }"
+      :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined">
       <div v-for="v in list" :key="v.id" class="garage-tile">
         <button type="button" class="card-tile" :aria-label="`Éditions de ${v.name} ${v.version}`" @click="open(v.id)">
-          <CarCard :id="v.id" compact />
-          <span class="tile-tag showroom-tag">{{ stylesOf(v.id).length }} éditions</span>
+          <CarThumb v-if="sheet" :id="v.id" />
+          <CarCard v-else :id="v.id" :compact="cols !== 1" />
+          <span v-if="!sheet" class="tile-tag showroom-tag">{{ stylesOf(v.id).length }} éditions</span>
         </button>
       </div>
     </div>
