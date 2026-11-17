@@ -50,6 +50,10 @@ const EDITION_LOOKS = {
   abandonnee: 'Scene: an abandoned barn find, the same car left for decades in a collapsed wooden barn, covered in dust and light rust, flat tyres, ' +
     'ivy and weeds growing through it, shafts of golden light through the broken roof, floating dust. ' +
     'Style: moody cinematic illustrated painting, muted earthy palette with the faded paint still recognisable, melancholic and nostalgic, not photorealistic.',
+  // Japonaises seulement (origine Japon, hors cartes déjà illustrées en anime).
+  anime: 'Scene: a Japanese mountain pass road at dusk, guardrails, cedar trees, a vending machine glowing at a bend, the city lights of a valley far below. ' +
+    'Style: 1990s Japanese anime cel illustration in the spirit of street racing anime, crisp clean ink outlines, flat cel shading with sharp highlights, ' +
+    'hand-painted background, dramatic speed lines, nostalgic dusk gradient sky, not photorealistic.',
 }
 // Abandonnée : chaque voiture raconte comment on l'a retrouvée, selon son genre (succession, villa, saisie, planque…).
 // Le style reste commun ; seuls le lieu, les objets et la lumière changent d'une histoire à l'autre.
@@ -175,6 +179,7 @@ function jobs() {
         ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
         : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
       for (const style of styles) {
+        if (style === 'anime' && (v.origin !== 'Japon' || v.look === 'anime')) continue
         const story = style === 'abandonnee' && abandonStory(v.id)
         list.push({ kind: 'cars', id: `${v.id}-${style}`, size: [640, 960], prompt:
           `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +

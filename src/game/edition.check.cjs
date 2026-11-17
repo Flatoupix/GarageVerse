@@ -17,6 +17,10 @@ for (const v of require('../data/roster.json').vehicles) {
   const files = fs.existsSync(path.join(cars, `${v.id}-solarpunk.webp`)) && fs.existsSync(path.join(cars, `${v.id}-abandonnee.webp`))
   const styles = stylesOf(v.id)
   assert.equal(styles.includes('Solarpunk') && styles.includes('Abandonnée'), files, `éditions de ${v.id}`)
+  // Édition Anime : japonaises hors cartes déjà illustrées en anime, et son image existe.
+  const anime = v.origin === 'Japon' && v.look !== 'anime'
+  assert.equal(styles.includes('Anime'), anime, `édition Anime de ${v.id}`)
+  if (anime) assert.ok(fs.existsSync(path.join(cars, `${v.id}-anime.webp`)), `image Anime de ${v.id}`)
 }
 
 const save = newSave()

@@ -5958,5 +5958,125 @@
     "tokens": 24,
     "prompt": "762568612d",
     "at": "2026-11-17T09:26:39.925Z"
+  },
+  "cars/r34-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 56,
+    "tokens": 20,
+    "prompt": "38bef68b72",
+    "at": "2026-11-17T10:37:00.594Z"
+  },
+  "cars/mx5nb-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 20,
+    "prompt": "f5bb3b3575",
+    "at": "2026-11-17T10:37:03.981Z"
+  },
+  "cars/supra-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 41,
+    "prompt": "ae04fd74fa",
+    "at": "2026-11-17T10:37:06.029Z"
+  },
+  "cars/ek9-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 48,
+    "tokens": 27,
+    "prompt": "bc4e8c1dca",
+    "at": "2026-11-17T10:37:51.713Z"
+  },
+  "cars/s15-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 57,
+    "tokens": 19,
+    "prompt": "e0be517b47",
+    "at": "2026-11-17T10:37:57.409Z"
+  },
+  "cars/mx5na-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 30,
+    "prompt": "f98306ecfa",
+    "at": "2026-11-17T10:38:13.149Z"
+  },
+  "cars/nsx-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 53,
+    "tokens": 21,
+    "prompt": "56e4fb12da",
+    "at": "2026-11-17T10:38:50.268Z"
+  },
+  "cars/evo8-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 65,
+    "tokens": 24,
+    "prompt": "281aea6c9e",
+    "at": "2026-11-17T10:38:56.789Z"
+  },
+  "cars/hilux-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 25,
+    "prompt": "97e3c9ebc5",
+    "at": "2026-11-17T10:38:59.694Z"
+  },
+  "cars/impreza-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 47,
+    "tokens": 20,
+    "prompt": "25ab385d05",
+    "at": "2026-11-17T10:39:37.597Z"
+  },
+  "cars/celica-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 55,
+    "tokens": 20,
+    "prompt": "f0a02a4ae3",
+    "at": "2026-11-17T10:39:51.459Z"
+  },
+  "cars/swift10-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 67,
+    "tokens": 21,
+    "prompt": "6158b37c0f",
+    "at": "2026-11-17T10:40:07.032Z"
+  },
+  "cars/impreza16-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 18,
+    "prompt": "c60208f309",
+    "at": "2026-11-17T10:40:43.706Z"
+  },
+  "cars/lancer16-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 69,
+    "tokens": 33,
+    "prompt": "b4ec4b7cbc",
+    "at": "2026-11-17T10:41:00.739Z"
+  },
+  "cars/celica18-anime": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 15,
+    "prompt": "a35fdda441",
+    "at": "2026-11-17T10:41:13.220Z"
   }
 }

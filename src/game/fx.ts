@@ -82,6 +82,7 @@ export function mountFx(el: HTMLCanvasElement) {
   try { if ('showPopover' in el) { el.setAttribute('popover', 'manual'); el.showPopover() } } catch { el.removeAttribute('popover') }
   resize()
   window.addEventListener('resize', resize)
+  el.style.visibility = 'hidden'
 }
 
 function resize() {
@@ -94,8 +95,17 @@ function resize() {
   ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
 }
 
+// Hors animation, le canevas est masqué : certains navigateurs mobiles (Brave sur Android, au-dessus d'une fiche ouverte)
+// gardaient affichée la dernière image dessinée même après l'effacement, comme un « −80 » figé sous le porte-monnaie.
+function rest() {
+  raf = 0; flashAlpha = 0
+  ctx?.clearRect(0, 0, width, height)
+  if (canvas) canvas.style.visibility = 'hidden'
+}
+
 function start() {
   if (!canvas || !ctx || reducedMotion.value) return false
+  canvas.style.visibility = ''
   try {
     if (document.querySelector('dialog[open]') && canvas.hasAttribute('popover')) { canvas.hidePopover(); canvas.showPopover() }
   } catch { /* le canevas reste sous le dialogue */ }
@@ -139,8 +149,8 @@ function drawSmooth(ctx: CanvasRenderingContext2D, p: Particle, t: number, dt: n
 function frame(now: number) {
   if (!ctx) return
   if (reducedMotion.value) {
-    particles.length = 0; flashAlpha = 0; raf = 0
-    ctx.clearRect(0, 0, width, height)
+    particles.length = 0
+    rest()
     return
   }
   const dt = Math.min(0.05, (now - last) / 1000)
@@ -189,7 +199,7 @@ function frame(now: number) {
   }
   ctx.globalAlpha = 1
   if (particles.length || flashAlpha > 0.01) raf = requestAnimationFrame(frame)
-  else { raf = 0; flashAlpha = 0; ctx.clearRect(0, 0, width, height) }
+  else rest()
 }
 
 export function point(target: Target) {

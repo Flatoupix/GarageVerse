@@ -4,6 +4,20 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.11.0] — 2026-11-17
+
+### Ajouté
+
+- **Édition Anime pour les voitures japonaises.** Quinze japonaises (Supra, Skyline R34, NSX, Silvia S15, MX-5, Impreza, Lancer, Celica…) ont une nouvelle illustration façon anime de course des années 90, sur une route de col au crépuscule. Elle sort des boosters ou se débloque dans la fiche, comme les autres éditions. Les japonaises déjà dessinées en anime gardent leur illustration.
+
+### Modifié
+
+- **Spéciales plus lisibles.** Les récompenses des paliers s’affichent avec le symbole ₡, comme ton porte-monnaie.
+
+### Corrigé
+
+- **Montants qui restaient à l’écran.** Sur certains téléphones, le montant dépensé (par exemple « −80 » après une amélioration) restait affiché par-dessus la fiche de la voiture. Il disparaît désormais à la fin de son animation.
+
 ## [0.10.0] — 2026-11-17
 
 ### Ajouté

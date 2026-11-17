@@ -149,7 +149,7 @@ export const sectorIcons: Record<Sector, string> = { depart: '⇧', virage: '↝
 export const conditionLabels: Record<Condition, string> = { sec: 'Sec', pluie: 'Pluie', nuit: 'Nuit', terre: 'Terre', ville: 'Ville' }
 export const conditionIcons: Record<Condition, string> = { sec: '☀', pluie: '☂', nuit: '☾', terre: '⛰', ville: '▦' }
 
-export type EditionStyle = 'Pixel 16 bits' | 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique' | 'Solarpunk' | 'Abandonnée'
+export type EditionStyle = 'Pixel 16 bits' | 'Synthwave' | 'Classic' | 'Pixel Art' | 'Photo' | 'Gouache' | 'Rallye argentique' | 'Solarpunk' | 'Abandonnée' | 'Anime'
 // Le pixel art 16 bits est l'édition par défaut de toutes les cartes ; l'illustration précédente devient une édition à collectionner.
 export const PIXEL: EditionStyle = 'Pixel 16 bits'
 const formerStyles: Record<string, EditionStyle> = { clio: 'Photo', twingo: 'Gouache', panda: 'Rallye argentique' }
@@ -168,9 +168,12 @@ const altStyles: Record<string, EditionStyle[]> = {
 // Éditions Solarpunk et Abandonnée : toutes les voitures disposent de leurs deux illustrations (`src/assets/cars/<id>-solarpunk.webp` et `-abandonnee.webp`).
 const extraStyles: EditionStyle[] = ['Solarpunk', 'Abandonnée']
 const editionCars = new Set(vehicles.map(v => v.id))
+// Édition Anime : les voitures japonaises dont l'illustration n'est pas déjà de style anime (`src/assets/cars/<id>-anime.webp`).
+export const hasAnimeEdition = (v: Vehicle) => v.origin === 'Japon' && v.look !== 'anime'
 export function stylesOf(id: string): EditionStyle[] {
   const former = formerStyle(id)
   const styles: EditionStyle[] = [PIXEL, former]
   if (former !== 'Synthwave') styles.push('Synthwave')
-  return styles.concat(altStyles[id] ?? [], editionCars.has(id) ? extraStyles : [])
+  const v = vehicleById.get(id)
+  return styles.concat(altStyles[id] ?? [], editionCars.has(id) ? extraStyles : [], v && hasAnimeEdition(v) ? ['Anime'] : [])
 }

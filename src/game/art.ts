@@ -44,6 +44,7 @@ export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edi
   // Éditions supplémentaires : fichiers src/assets/cars/<id>-solarpunk.webp et <id>-abandonnee.webp.
   if (style === 'Solarpunk') return { style, art: carArt[`${id}-solarpunk`] }
   if (style === 'Abandonnée') return { style, art: carArt[`${id}-abandonnee`] }
+  if (style === 'Anime') return { style, art: carArt[`${id}-anime`] }
   const former = formerStyle(id)
   if (style === 'Photo') return { style, art: carArt[`${id}-portrait`] }
   if (style === former && former !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }

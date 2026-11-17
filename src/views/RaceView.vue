@@ -612,7 +612,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
                   :disabled="!unlockedSpecials(save).includes(r.id)" @click="chosen = r.id">
                   <span aria-hidden="true">{{ !unlockedSpecials(save).includes(r.id) ? '🔒' : save.record[r.id]?.wins ? '✓' : '◆' }}</span>
                   <span v-help="'specialTier'">{{ r.title }}</span>
-                  <small>{{ save.record[r.id]?.wins ? r.replay : r.reward }} crédits</small>
+                  <small :aria-label="`${save.record[r.id]?.wins ? r.replay : r.reward} crédits`">₡ {{ save.record[r.id]?.wins ? r.replay : r.reward }}</small>
                 </GvButton>
               </li>
             </ol>
