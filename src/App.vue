@@ -21,11 +21,12 @@ import HomeView from './views/HomeView.vue'
 import PartSheet from './views/PartSheet.vue'
 import RaceView from './views/RaceView.vue'
 import ShopView from './views/ShopView.vue'
+import ShowroomView from './views/ShowroomView.vue'
 
 import { offlineReady } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
-type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race'
+type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom'
 type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 const screen = ref<Screen>(save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
@@ -114,6 +115,16 @@ function brandClick() {
   const result = debugTap(debugTaps, performance.now())
   debugTaps = result.state
   if (result.triggered) { act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits'); sound('debugCredits') }
+}
+// Showroom caché : 7 appuis rapides sur le numéro de version, en bas des Réglages.
+let showroomTaps: DebugTaps = { count: 0, lastTap: null }
+function versionTap() {
+  const result = debugTap(showroomTaps, performance.now(), 7)
+  showroomTaps = result.state
+  if (!result.triggered) return
+  settings.value?.close()
+  go('showroom')
+  sound('legend')
 }
 const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
@@ -331,6 +342,7 @@ function toggleSetting(key: Setting) {
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
     <BoosterView v-else-if="screen === 'booster'" @garage="go('garage')" @shop="go('shop')" @inspect="inspect" />
     <GarageView v-else-if="screen === 'garage'" @inspect="inspect" />
+    <ShowroomView v-else-if="screen === 'showroom'" @close="go('home')" />
     <RaceView v-else @inspect="inspect" @go="go" />
 
     <nav class="tabbar" aria-label="Navigation principale">
@@ -384,7 +396,7 @@ function toggleSetting(key: Setting) {
           <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
           <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
           <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
-          <p class="setting-note app-version">GarageVerse v{{ appVersion }} · <button type="button" class="link" @click="showReleaseNotes">Notes de version</button></p>
+          <p class="setting-note app-version"><span @click="versionTap">GarageVerse v{{ appVersion }}</span> · <button type="button" class="link" @click="showReleaseNotes">Notes de version</button></p>
         </div>
         <div v-show="settingsTab === 'themes'" id="settings-panel-themes" role="tabpanel" aria-labelledby="settings-tab-themes">
           <fieldset class="theme-picker">

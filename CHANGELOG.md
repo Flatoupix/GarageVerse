@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.10.0] — 2026-11-17
+
+### Ajouté
+
+- **Une surprise se cache dans les Réglages.** Les collectionneurs les plus curieux sauront la trouver… Indice : il faut parfois insister.
+
 ## [0.9.0] — 2026-11-17
 
 ### Ajouté

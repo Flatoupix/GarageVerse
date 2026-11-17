@@ -22,4 +22,9 @@ assert.equal(restart.state.count, 1)
 assert.equal(debugTap(state, 2701).state.count, 1)
 assert.equal(debugTap(state, 2700).triggered, true)
 assert.equal(debugTap(state, 100).state.count, 1)
-console.log('Raccourci de debug : OK')
+// Showroom : 7 appuis rapides sur la version.
+let showroom = { count: 0, lastTap: null }
+for (let i = 0; i < 6; i++) { const r = debugTap(showroom, i * 200, 7); assert.equal(r.triggered, false); showroom = r.state }
+assert.equal(debugTap(showroom, 1200, 7).triggered, true)
+assert.equal(debugTap(showroom, 3000, 7).triggered, false)
+console.log('Raccourcis de debug et du Showroom : OK')
