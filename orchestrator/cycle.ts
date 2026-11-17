@@ -268,6 +268,7 @@ async function cycle(directory: string, resume: boolean) {
             detail: result.problem ?? redact((result.stderr || result.stdout).slice(-3400)) }
           if (result.problem) throw new Error('Build · ' + failure(result))
           // Vérifications hors réseau du jeu (src/game/*.check.cjs, pipeline/check-daily.cjs) : un échec compte comme un build en échec.
+          let checksSummary = ''
           if (state.tests.build === 'pass') {
             const checks = [...(await readdir(join(checkout, 'src/game'))).filter(file => file.endsWith('.check.cjs')).sort().map(file => join('src/game', file)),
               ...(await readFile(join(checkout, 'pipeline/check-daily.cjs')).then(() => ['pipeline/check-daily.cjs'], () => []))]
@@ -279,6 +280,7 @@ async function cycle(directory: string, resume: boolean) {
             }
             await writeJson(join(step, 'checks.json'), { run: checks, failed })
             if (failed.length) state.tests = { build: 'fail', browser: 'skipped', detail: 'Vérifications en échec : ' + failed.join(' ; ') }
+            else checksSummary = `Build réussi. ${checks.length} vérifications passées (node) : ${checks.join(', ')}. `
           }
           if (state.tests.build === 'pass') {
             const browser = await execute(process.execPath, [join(here, 'browser.ts'), join(checkout, 'dist'), step, state.config.cli.chrome,
@@ -293,7 +295,7 @@ async function cycle(directory: string, resume: boolean) {
             if (!Array.isArray(evidence.checks) || evidence.checks.length !== 3 || !Array.isArray(evidence.screenshots)) throw new Error('Preuves navigateur incomplètes')
             state.tests.browser = evidence.checks.every((check: { status: string }) => check.status === 'pass') ? 'pass' : 'fail'
             await writeJson(join(step, 'browser.json'), evidence)
-            state.tests.detail = redact(JSON.stringify(evidence.checks))
+            state.tests.detail = checksSummary + 'Navigateur : ' + redact(JSON.stringify(evidence.checks))
           }
           await writeJson(join(step, 'tests.json'), state.tests)
         } else if (stage === 'finish') {
