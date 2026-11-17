@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/Flatoupix/GarageVerse.git",
-  "base": "prototype/mobile-tcg",
+  "base": "dev",
   "cli": {
     "claude": "claude",
     "codex": "codex",

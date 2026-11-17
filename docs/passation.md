@@ -4,10 +4,13 @@ Note de reprise pour une nouvelle session. À lire avec `docs/meta.md` (règles 
 
 ## Où en est le projet
 
-- Dépôt public `Flatoupix/GarageVerse`, branche de travail `prototype/mobile-tcg`, site https://flatoupix.github.io/GarageVerse/ (déployé par GitHub Actions à chaque push).
+- Dépôt public `Flatoupix/GarageVerse`, site https://flatoupix.github.io/GarageVerse/. **Deux branches depuis le 17 novembre 2026** :
+  - `master` : la seule branche publiée. Chaque push sur `master` déploie le site (GitHub Actions, environnement `github-pages` limité à `master`). `deploy.yml` cite encore `prototype/mobile-tcg`, branche supprimée : sans effet, à retirer lors d'une prochaine modification du fichier (le jeton de l'agent n'a pas le droit `workflow`).
+  - `dev` : le travail en cours, sauvegardé sur GitHub mais jamais déployé. Publier une version = fusionner `dev` dans `master` (avec sa note de version, voir `CHANGELOG.md`).
+  - Les anciennes branches (`prototype/mobile-tcg`, `prototype/booster`, `ccr-f24d04f7-jr6tpb`, `docs/tickets-futures-20261117`) sont supprimées ; leur dernier état est gardé par les étiquettes `archive/*`. Sur un clone existant : `git fetch --prune` puis `git switch dev` (ou `master`).
 - Version 0.5.0 en ligne (commit `133501c` d’Antigravity, sans tag ni release GitHub ; la dernière release est v0.4.0). Projet personnel : pas de rappel sur les droits, pas de diffusion prévue.
 - Publié : 8 thèmes (Synthwave par défaut, Rétro pixel, Sobre, Sport auto, Carnet, et trois à débloquer : Borne d’arcade, Console 16 bits, Atelier PC), hasard en course, aide rapide et lexique (« ? »), course miroir, victoire parfaite, booster tactile, éditions choisies au tirage, vente de voitures, tutoriel du mécano, séries de collection, Nuit sans fin, hors-ligne avec export/import de sauvegarde, logo néon et icône, sachets métallisés avec couverture légendaire, mini-course des secteurs.
-- Autres contributeurs : le propriétaire pousse aussi sur `prototype/mobile-tcg` (v0.2.0, bande-son), et une session Claude sur le web (branches `ccr-…`). Toujours `git ls-remote --heads origin` avant de pousser.
+- Autres contributeurs : le propriétaire et d’autres agents poussent aussi. Toujours `git fetch` avant de pousser, et travailler sur `dev` (ou une branche courte fusionnée dans `dev`).
 
 ## Organisation de travail voulue
 
