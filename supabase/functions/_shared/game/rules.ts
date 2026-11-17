@@ -301,11 +301,18 @@ export function playVersusRound(duel: Duel, a: Choice, b: Choice, rng: Rng): Rou
     winner = x > y ? 'player' : y > x ? 'rival' : 'tie'
   }
   const round: Round = { sector: duel.sectors[index], condition: duel.conditions[index], player, rival, winner }
-  for (const [who, play] of [['player', player], ['rival', rival]] as const) {
+  commitRound(duel, round)
+  return round
+}
+
+// Applique un secteur résolu à la course : secteurs d'endurance, nitro, points, vainqueur final. Sans hasard : sert aussi à
+// reconstruire une course versus à partir des secteurs publiés par le serveur (rebuildVersus).
+export function commitRound(duel: Duel, round: Round) {
+  for (const [who, play] of [['player', round.player], ['rival', round.rival]] as const) {
     duel[who].used[play.car] += stances[play.stance ?? 'normal'].uses
     if (play.nitro) duel[who].nitro--
   }
-  if (winner !== 'tie') duel[winner].points++
+  if (round.winner !== 'tie') duel[round.winner].points++
   duel.rounds.push(round)
   if (duel.rounds.length === duel.sectors.length) {
     const p = duel.player.points, r = duel.rival.points
@@ -315,7 +322,6 @@ export function playVersusRound(duel: Duel, a: Choice, b: Choice, rng: Rng): Rou
       duel.winner = total('player') > total('rival') ? 'player' : total('rival') > total('player') ? 'rival' : 'tie'
     }
   }
-  return round
 }
 
 export function lineupCost(ids: string[]) {
@@ -399,6 +405,20 @@ export function versusCircuit(seed: string): Rival['circuit'] {
 // Course versus : camp player = hôte (a), camp rival = invité (b). Les conditions et la chance viennent du flux principal de la graine.
 export function createVersusRace(seed: string, a: VersusEntry[], b: VersusEntry[]): Duel {
   return createRace(`versus:${seed}`, versusCircuit(seed), a, b, seededRng(seed))
+}
+
+// Ce que les joueurs peuvent savoir d'une salle sans sa graine : le circuit et la météo de chaque secteur. Le serveur le publie ;
+// la graine, qui fixe aussi la chance des secteurs, reste secrète jusqu'à l'arrivée.
+export function versusRaceInfo(seed: string): { circuit: Rival['circuit']; conditions: Condition[] } {
+  const circuit = versusCircuit(seed)
+  return { circuit, conditions: createRace(`versus:${seed}`, circuit, [], [], seededRng(seed)).conditions }
+}
+
+// Reconstruit une course versus à partir des secteurs publiés, sans la graine : même état que replayVersus.
+export function rebuildVersus(input: { circuit: Rival['circuit']; conditions: Condition[]; a: VersusEntry[]; b: VersusEntry[]; rounds: Round[] }): Duel {
+  const duel: Duel = { rivalId: 'versus', sectors: [...input.circuit.sectors], conditions: [...input.conditions], player: side(input.a), rival: side(input.b), rounds: [] }
+  for (const round of input.rounds) commitRound(duel, round)
+  return duel
 }
 
 export interface VersusMove { a: Choice | null; b: Choice | null }

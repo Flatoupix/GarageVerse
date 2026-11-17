@@ -91,6 +91,24 @@ assert.ok(winners.has('player') && winners.has('rival'), 'chaque camp peut gagne
   assert.deepEqual(rules.autoChoice(duel, 'cle', 'rival'), expected)
 }
 
+// Sans la graine : le circuit et la météo publiés plus les secteurs publiés reconstruisent exactement la course,
+// à chaque secteur intermédiaire comme à l'arrivée (seul l'identifiant interne du rival diffère).
+{
+  const strip = duel => JSON.stringify({ ...duel, rivalId: undefined })
+  for (let n = 1; n <= 200; n++) {
+    const seed = `reconstruction-${n}`
+    const info = rules.versusRaceInfo(seed)
+    const full = rules.replayVersus({ seed, a: host, b: guest, moves: movesFor(n) })
+    assert.deepEqual(info.circuit, rules.versusCircuit(seed))
+    assert.deepEqual(info.conditions, full.conditions)
+    for (let k = 0; k <= full.rounds.length; k++) {
+      const partial = rules.replayVersus({ seed, a: host, b: guest, moves: movesFor(n).slice(0, k) })
+      const rebuilt = rules.rebuildVersus({ ...info, a: host, b: guest, rounds: JSON.parse(JSON.stringify(full.rounds.slice(0, k))) })
+      assert.equal(strip(rebuilt), strip(partial), `reconstruction ${seed} après ${k} secteur(s)`)
+    }
+  }
+}
+
 // Écuries versus.
 const ok = rules.checkVersusLineup
 assert.equal(ok(host, 9), undefined)
