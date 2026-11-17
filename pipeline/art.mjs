@@ -192,16 +192,17 @@ function jobs() {
       ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
       : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`
     const alt = v.look && v.look !== 'synthwave' && LOOKS[v.look]
+    const textRule = v.allowText ?? NO_TEXT
     if (pixel) {
       list.push({ kind: 'cars', id: v.id, size: [160, 240], prompt:
         `Pixel art collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible and large, ` +
-        `centered in the lower two thirds, wheels on the ground unless it flies. Scene: ${v.setting ? placeOnly(v.setting) : PIXEL_SCENES[v.scene]}. ${PIXEL_STYLE} ${NO_TEXT}` })
+        `centered in the lower two thirds, wheels on the ground unless it flies. Scene: ${v.setting ? placeOnly(v.setting) : PIXEL_SCENES[v.scene]}. ${PIXEL_STYLE} ${textRule}` })
       continue
     }
     list.push({ kind: 'cars', id: v.id, size: [640, 960], prompt:
       `Collectible car card illustration, portrait 2:3. Subject: ${subject}. Three-quarter front view, the whole car visible, ` +
       `centered in the lower two thirds, slight low camera angle, wheels on the ground unless it flies. ` +
-      (alt ? `Scene: ${v.setting}. ${alt} ${NO_TEXT}` : `Scene: ${SCENES[v.scene]}. ${v.anim ? LEGEND_STYLE : STYLE} ${NO_TEXT}`) })
+      (alt ? `Scene: ${v.setting}. ${alt} ${textRule}` : `Scene: ${SCENES[v.scene]}. ${v.anim ? LEGEND_STYLE : STYLE} ${textRule}`) })
   }
   if (anim) {
     // Décors de course, un par condition : `--set anim --kind tracks`.

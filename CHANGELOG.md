@@ -32,7 +32,8 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 ### Ajouté
 
-- **Éditions Solarpunk et Abandonnée complètes.** Les 129 voitures du jeu disposent désormais toutes de leurs deux illustrations alternatives *Solarpunk* et *Abandonnée*.
+- **Clio 2 Ceramicool (n° 130).** Carte Épique (`1.2 Rose Bonbon`, coût 3, capacité *Toucher Ceramicool : +2 en Ville, +1 la Nuit*) avec son illustration Synthwave (`CERAMICOOL` sur le pare-brise et couronne de fleurs roses au rétroviseur) et son édition *Photo* d’origine.
+- **Éditions Solarpunk et Abandonnée complètes.** Les 129 voitures précédentes du jeu disposent désormais toutes de leurs deux illustrations alternatives *Solarpunk* et *Abandonnée*.
 - **Parcours des rivaux en trois étapes.** Chaque rival se joue en trois courses progressives (*Étape 1 · Essais*, *Étape 2 · Qualifs*, *Étape 3 · Finale*). Les étapes d’approche offrent des tickets de caisse et le duel final offre la voiture signature du rival à la première victoire.
 - **Deux nouvelles caisses en boutique** : la **Caisse Bricole** (75 crédits, voitures courantes et jusqu’à trois pièces du quotidien) et la **Caisse Mécanique** (180 crédits, cinq pièces mécaniques garanties).
 - **Sept nouvelles séries de collection** (14 séries au total) : *Bombinettes GTI*, *Fourgons & Familiales cultes*, *Baroudeurs tout-terrain*, *Du quotidien au circuit*, *Courses-poursuites à l’écran*, *Icônes d’outre-Rhin* et *Dolce Vita & V12*.

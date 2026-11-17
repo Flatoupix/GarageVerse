@@ -45,6 +45,7 @@ export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edi
   if (style === 'Solarpunk') return { style, art: carArt[`${id}-solarpunk`] }
   if (style === 'Abandonnée') return { style, art: carArt[`${id}-abandonnee`] }
   const former = formerStyle(id)
+  if (style === 'Photo') return { style, art: carArt[`${id}-portrait`] }
   if (style === former && former !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
   return legacyArt[id]?.[style] ?? { style: 'Synthwave', art: carArt[id] }
 }
