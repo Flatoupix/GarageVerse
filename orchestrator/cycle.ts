@@ -44,7 +44,7 @@ async function writeJson(path: string, data: unknown) {
 function validate(task: Task, config: Config) {
   const safePath = (path: string) => /^[a-zA-Z0-9][a-zA-Z0-9_./-]*$/.test(path) &&
     !path.split('/').some(segment => segment.startsWith('.')) &&
-    (path.startsWith('src/') || path.startsWith('docs/') || path.startsWith('public/') || path === 'README.md' || path === 'index.html')
+    (path.startsWith('src/') || path.startsWith('docs/') || path.startsWith('public/') || path.startsWith('supabase/') || path === 'README.md' || path === 'index.html')
   const safeStep = (step: FlowStep) => {
     const entries = Object.entries(step ?? {})
     if (entries.length !== 1) return false

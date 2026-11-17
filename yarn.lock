@@ -40,6 +40,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@electric-sql/pglite@npm:0.5.16":
+  version: 0.5.16
+  resolution: "@electric-sql/pglite@npm:0.5.16"
+  checksum: 10c0/33262e864d2b288a133f27d18f7def9a92666729a65dc2fa5828d16b5e0f0c8cd2484b27386d7f8cf933573aa57f13eb1e9da4803d3aa6d8829182d30e000fd0
+  languageName: node
+  linkType: hard
+
 "@esbuild/aix-ppc64@npm:0.25.12":
   version: 0.25.12
   resolution: "@esbuild/aix-ppc64@npm:0.25.12"
@@ -788,6 +795,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "garageverse@workspace:."
   dependencies:
+    "@electric-sql/pglite": "npm:0.5.16"
     "@vitejs/plugin-vue": "npm:5.2.4"
     typescript: "npm:5.9.3"
     vite: "npm:6.4.3"
