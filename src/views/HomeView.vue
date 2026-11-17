@@ -29,17 +29,19 @@ const nextRival = computed(() => {
         <span class="eyebrow"><span></span> Collection 001 · Neon Drive</span>
         <h1 id="home-title" tabindex="-1"><GameLogo /></h1>
         <p>Collectionne 100 voitures, prépare-les pièce par pièce et bats les rivaux de la nuit en cinq secteurs.</p>
-        <button v-if="save.night" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la Nuit sans fin · manche {{ save.night.round }}</button>
-        <button v-else-if="save.duel" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la course <span aria-hidden="true">⟶</span></button>
-        <button v-else-if="pending" type="button" class="button primary" @click="emit('go', 'booster')">Reprendre le booster <span aria-hidden="true">↗</span></button>
-        <button v-else-if="tickets.length" type="button" class="button primary" @click="emit('go', 'shop')">
-          Ouvrir {{ boosterById.get(tickets[0][0])!.name }} <span aria-hidden="true">↗</span>
-        </button>
-        <button v-else type="button" class="button primary" @click="emit('go', 'race')">Défier {{ nextRival.name }} <span aria-hidden="true">⟶</span></button>
+        <div class="home-hero-actions">
+          <button v-if="save.night" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la Nuit sans fin · manche {{ save.night.round }}</button>
+          <button v-else-if="save.duel" type="button" class="button primary" @click="emit('go', 'race')">Reprendre la course <span aria-hidden="true">⟶</span></button>
+          <button v-else-if="pending" type="button" class="button primary" @click="emit('go', 'booster')">Reprendre le booster <span aria-hidden="true">↗</span></button>
+          <button v-else-if="tickets.length" type="button" class="button primary" @click="emit('go', 'shop')">
+            Ouvrir {{ boosterById.get(tickets[0][0])!.name }} <span aria-hidden="true">↗</span>
+          </button>
+          <button v-else type="button" class="button primary" @click="emit('go', 'race')">Défier {{ nextRival.name }} <span aria-hidden="true">⟶</span></button>
+          <button type="button" class="button ghost" @click="emit('go', 'versus')">{{ save.versus?.active ? 'Reprendre le duel Versus' : 'Versus · Défier un ami' }}</button>
+        </div>
       </div>
     </section>
 
-    <button type="button" class="button primary wide" @click="emit('go', 'versus')">{{ save.versus?.active ? 'Reprendre le duel Versus' : 'Versus · Défier un ami' }}</button>
 
     <section class="daily-panel" :class="{ done: save.daily.won }" aria-labelledby="daily-title">
       <div class="daily-head">
@@ -88,3 +90,7 @@ const nextRival = computed(() => {
     </section>
   </main>
 </template>
+
+<style scoped>
+.home-hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+</style>
