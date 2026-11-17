@@ -136,7 +136,7 @@ onUnmounted(() => {
 
 <template>
   <section class="versus">
-    <button class="button quiet" @click="emit('back')">← Course</button>
+    <button class="button quiet" @click="emit('back')">← Accueil</button>
     <h1>Versus</h1>
     <p role="status" v-if="!online">Connexion nécessaire</p>
     <p role="alert" v-if="error">{{ error }}</p>
