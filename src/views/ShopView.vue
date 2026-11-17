@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { boosters } from '../game/data'
-import { buyBooster } from '../game/save'
+import { buyBooster, buyBoosters } from '../game/save'
 import { act, save, sound } from '../game/store'
 import PackArt from '../components/PackArt.vue'
 
@@ -13,6 +13,11 @@ const partOdds = (booster: (typeof boosters)[number]) => Math.round(100 * ((boos
 
 function buy(id: string) {
   if (act(s => buyBooster(s, id))) { sound('whoosh'); emit('open') }
+}
+// Achat groupé : les boosters payés deviennent des tickets et le premier s'ouvre aussitôt.
+const bulk = [5, 10]
+function buyMany(id: string, count: number) {
+  if (act(s => buyBoosters(s, id, count), `${count} boosters achetés`)) { sound('whoosh'); emit('open') }
 }
 </script>
 
@@ -40,6 +45,12 @@ function buy(id: string) {
             <template v-else>{{ booster.price }} crédits</template>
             <span aria-hidden="true">↗</span>
           </button>
+          <div class="bulk-buy" role="group" :aria-label="`Acheter plusieurs ${booster.name}`">
+            <button v-for="count in bulk" :key="count" type="button" class="button ghost" :disabled="save.credits < booster.price * count"
+              :aria-label="`Acheter ${count} ${booster.name} pour ${booster.price * count} crédits`" @click="buyMany(booster.id, count)">
+              ×{{ count }} · ₡ {{ booster.price * count }}
+            </button>
+          </div>
         </div>
       </article>
     </div>

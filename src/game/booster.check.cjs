@@ -5,7 +5,7 @@ const ts = require('typescript')
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
-const { newSave, readSave, buyBooster, drawPulls, tear, collect, sealedHasLegend } = require('./save.ts')
+const { newSave, readSave, buyBooster, buyBoosters, drawPulls, tear, collect, sealedHasLegend } = require('./save.ts')
 const { boosters, vehicleById, partById } = require('./data.ts')
 const legendary = pulls => pulls.some(p => (p.kind === 'car' ? vehicleById : partById).get(p.id).rarity === 'Légendaire')
 const rngFor = seed => () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296 }
@@ -80,3 +80,23 @@ const lot = JSON.parse(JSON.stringify(legacy.sealedPulls))
 const historical = readSave(JSON.stringify(legacy))
 tear(historical, () => { throw new Error('Retirage du lot historique') })
 assert.deepEqual(historical.opening.pulls, lot)
+
+// Achat groupé : prix × quantité, tickets ajoutés, premier sachet scellé, refus propres.
+{
+  const neon = boosters.find(b => b.id === 'neon')
+  const save = newSave()
+  save.tickets = {}
+  save.credits = neon.price * 5
+  assert.equal(buyBoosters(save, 'neon', 5, rngFor(7)), undefined)
+  assert.equal(save.credits, 0)
+  assert.equal(save.sealed, 'neon')
+  assert.equal(save.tickets.neon, 4)
+  assert.equal(buyBoosters(save, 'neon', 5), 'Termine d’abord le booster en cours')
+  const poor = newSave()
+  poor.credits = neon.price * 10 - 1
+  assert.equal(buyBoosters(poor, 'neon', 10), 'Il manque 1 crédits')
+  assert.equal(poor.credits, neon.price * 10 - 1)
+  assert.equal(buyBoosters(poor, 'neon', 1), 'Quantité invalide')
+  assert.equal(buyBoosters(poor, 'neon', 11), 'Quantité invalide')
+  console.log('Achat groupé de boosters : OK')
+}

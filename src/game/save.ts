@@ -225,6 +225,19 @@ export function buyBooster(save: Save, id: string, rng: Rng = Math.random): stri
   save.opening = null
 }
 
+// Achat groupé : `count` boosters payés d'un coup deviennent des tickets, puis le premier est scellé pour l'ouverture.
+export function buyBoosters(save: Save, id: string, count: number, rng: Rng = Math.random): string | undefined {
+  const booster = boosterById.get(id)
+  if (!booster) return 'Booster inconnu'
+  if (!Number.isInteger(count) || count < 2 || count > 10) return 'Quantité invalide'
+  if (save.sealed || (save.opening && !save.opening.collected)) return 'Termine d’abord le booster en cours'
+  const price = booster.price * count
+  if (save.credits < price) return `Il manque ${price - save.credits} crédits`
+  save.credits -= price
+  save.tickets[id] = (save.tickets[id] ?? 0) + count
+  return buyBooster(save, id, rng)
+}
+
 function weighted<T>(items: T[], weight: (item: T) => number, rng: Rng): T {
   let roll = rng() * items.reduce((n, item) => n + weight(item), 0)
   for (const item of items) if ((roll -= weight(item)) < 0) return item

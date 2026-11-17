@@ -3,8 +3,8 @@ import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { edition } from '../game/art'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
-import { collect, sealedHasLegend, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
-import { buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
+import { buyBooster, collect, sealedHasLegend, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
+import { act, buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
 import PullCard from '../components/PullCard.vue'
 import RevealStack from '../components/RevealStack.vue'
 import TearPack from '../components/TearPack.vue'
@@ -26,6 +26,12 @@ function showEdition() {
 const recapPulls = computed(() => opening.value?.pulls.map(pull => pull.kind === 'car'
   ? { ...pull, style: save.cars[pull.id]?.shown ?? pull.style } : pull) ?? [])
 const tearing = ref(false)
+// Après un achat groupé (ou avec des tickets), le récapitulatif propose d'enchaîner sur le sachet suivant.
+const remaining = computed(() => boosterId.value ? save.tickets[boosterId.value] ?? 0 : 0)
+function openNext() {
+  const id = boosterId.value
+  if (id && act(s => buyBooster(s, id))) { sound('whoosh'); window.scrollTo(0, 0) }
+}
 const legendaryTear = ref(false)
 const legendary = computed(() => sealedHasLegend(save) || (tearing.value && legendaryTear.value))
 const stackEntering = ref(false)
@@ -182,7 +188,10 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
         </button>
       </div>
       <div class="recap-actions">
-        <button type="button" class="button primary" @click="emit('garage')">Voir le garage <span aria-hidden="true">→</span></button>
+        <button v-if="remaining" type="button" class="button primary" @click="openNext">
+          Ouvrir le suivant · encore {{ remaining }} <span aria-hidden="true">↗</span>
+        </button>
+        <button type="button" class="button" :class="remaining ? 'ghost' : 'primary'" @click="emit('garage')">Voir le garage <span aria-hidden="true">→</span></button>
         <button type="button" class="button quiet" @click="emit('shop')">Autre booster</button>
       </div>
     </div>
