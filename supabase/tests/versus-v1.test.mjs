@@ -106,6 +106,13 @@ export async function run(db, { assert, as, user }) {
   for (const id of [HOST, GUEST]) assert.equal((await rows('authenticated', id, `select * from gv_rounds`)).length, 1)
   assert.equal((await rows('authenticated', THIRD, `select * from gv_rounds`)).length, 0)
 
+  const snapshot = async id => (await rows('authenticated', id, `select gv_snapshot('${ROOM}') as value`))[0].value
+  assert.equal(await snapshot(THIRD), null)
+  assert.deepEqual((await snapshot(HOST)).rounds, [{ winner: 'A' }])
+  assert.deepEqual((await snapshot(GUEST)).settlement, { claimed: false, delta: 0 })
+  assert.equal((await snapshot(HOST)).settlement.delta, 180)
+  await rejects('anon', null, `select gv_snapshot('${ROOM}')`, /permission denied/)
+
   // service_role écrit partout.
   await service(`update gv_rooms set sector = 1, state = 'done', winner = '${HOST}' where id = '${ROOM}'`)
   await service(`update gv_settlements set claimed_at = now() where room = '${ROOM}'`)

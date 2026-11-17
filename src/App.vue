@@ -29,7 +29,12 @@ import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom'
 type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
-const screen = ref<Screen>(save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
+function initialScreen(): Screen {
+  if (save.duel && !save.night || save.versus?.active || new URLSearchParams(location.search).has('versus')) return 'race'
+  if (save.sealed || (save.opening && save.opening.view !== 'recap')) return 'booster'
+  return 'home'
+}
+const screen = ref<Screen>(initialScreen())
 const settings = ref<HTMLDialogElement>()
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
@@ -73,7 +78,7 @@ async function importSave(event: Event) {
     applyTheme(save.preferences.theme)
     themeFx(save.preferences.theme)
     inspected.value = null
-    screen.value = save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home'
+    screen.value = initialScreen()
     transferFeedback('Ta sauvegarde a été importée.')
   } catch { transferFeedback('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.', true) }
 }
@@ -114,7 +119,7 @@ function brandClick() {
   // Raccourci de test, actif aussi dans le jeu publié : 14 appuis rapides sur le logo.
   const result = debugTap(debugTaps, performance.now())
   debugTaps = result.state
-  if (result.triggered) { act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits'); sound('debugCredits') }
+  if (result.triggered && !save.versus) { act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits'); sound('debugCredits') }
 }
 // Showroom caché : 7 appuis rapides sur le numéro de version, en bas des Réglages.
 let showroomTaps: DebugTaps = { count: 0, lastTap: null }

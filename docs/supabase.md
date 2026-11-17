@@ -1,6 +1,6 @@
 # Supabase · préparation du multijoueur
 
-Statut : **préparation, rien n'est encore créé côté serveur** (17 novembre 2026). Ce document complète [`docs/versus.md`](versus.md), qui décrit le jeu. Ici : le projet Supabase, le schéma, les fonctions serveur, la sécurité et le déploiement. Tickets liés : `tickets/003` (serveur), `004` (mises), `005` (client temps réel), `007` (amis), `008` (échange).
+Statut : **serveur et client V1 implémentés et testés localement**. Ce document complète [`docs/versus.md`](versus.md), qui décrit le jeu. Ici : le projet Supabase, le schéma, les fonctions serveur, la sécurité et le déploiement. Tickets liés : `tickets/003` (serveur), `004` (mises), `005` (client temps réel), `007` (amis), `008` (échange).
 
 ## 1. Le projet
 
@@ -39,18 +39,22 @@ La clé **service_role** ne quitte jamais Supabase : les fonctions serveur la re
 - Pseudo choisi au premier passage, code ami à 6 caractères attribué par le serveur.
 - Hors ligne ou serveur en pause : message clair, aucune donnée de la sauvegarde touchée.
 
-## 4. Arborescence prévue
+## 4. Arborescence
 
 ```
 supabase/
   config.toml                     # projet lié, fonctions, auth anonyme
+  sync-rules.mjs                  # génère la copie des règles
   migrations/
     20261118000000_versus_v1.sql  # tables, index, RLS, publication Realtime
+    20261118010000_versus_snapshot.sql  # lecture cohérente de la salle
+  scheduler/resolve-due.sql         # installation du rattrapage après déploiement
   functions/
     _shared/
       game/                       # copie générée de src/game (règles et données), ne pas éditer à la main
-      supabase.ts                 # client service_role, réponses JSON, erreurs
-      auth.ts                     # joueur courant depuis le jeton de l'appel
+      http.ts                     # authentification, connexion SQL, réponses JSON
+      versus.ts                   # logique du duel et des règlements
+    register/index.ts
     create-room/index.ts
     join-room/index.ts
     submit-move/index.ts
@@ -62,8 +66,8 @@ supabase/
 
 Le serveur doit résoudre les secteurs **avec exactement le même code** que le jeu (`docs/versus.md` § 4).
 
-- Les fonctions tournent sous Deno et ne peuvent embarquer que des fichiers situés sous `supabase/functions/`. Un script `pipeline/sync-supabase-rules.mjs` copie donc `src/game/rules.ts`, `src/game/data.ts` et `src/data/{roster,garage}.json` dans `supabase/functions/_shared/game/`, en adaptant les imports JSON (`with { type: 'json' }`).
-- Une vérification (`src/game/versus.check.cjs`) échoue si la copie diffère de la source : impossible de déployer un serveur dont les règles ont dérivé du jeu.
+- Les fonctions tournent sous Deno et ne peuvent embarquer que des fichiers situés sous `supabase/functions/`. Un script `supabase/sync-rules.mjs` copie donc `src/game/rules.ts`, `src/game/data.ts` et `src/data/{roster,garage}.json` dans `supabase/functions/_shared/game/`, en adaptant les imports JSON (`with { type: 'json' }`).
+- Une vérification (`node src/game/supabase.check.cjs`) échoue si la copie diffère de la source : impossible de déployer un serveur dont les règles ont dérivé du jeu.
 - Le moteur expose `playVersusRound(duel, choiceA, choiceB, rng)` (ticket 002) ; `playRound` contre l'IA s'appuiera dessus.
 - La graine de la salle est tirée par le serveur ; tout le hasard de la course en découle (`dailyRng(graine)`).
 
@@ -154,17 +158,20 @@ Un coup adverse devient lisible dès qu'une ligne `gv_rounds` existe pour cette 
 
 ## 7. Fonctions serveur
 
-Toutes reçoivent le jeton du joueur (connexion anonyme), répondent en JSON `{ ok, data }` ou `{ ok: false, error }` avec un code stable, et sont **idempotentes** : rejouer le même appel ne double rien.
+Les points d'entrée Deno vérifient le jeton du joueur et ouvrent une connexion SQL via `SUPABASE_DB_URL`. Ils répondent en JSON `{ ok: true, data }` ou `{ ok: false, error }` avec un code stable. Les secteurs sont numérotés de 0 à 4. Les écritures se font dans une transaction et les opérations sur une salle verrouillent sa ligne.
 
 | Fonction | Entrée | Effet | Erreurs principales |
 | --- | --- | --- | --- |
-| `create-room` | plafond, mise, écurie | vérifie l'écurie, crée la salle `open`, renvoie code et lien | `INVALID_LINEUP`, `STAKE_TOO_HIGH` |
-| `join-room` | code, écurie | vérifie l'écurie et la mise, passe la salle en `racing`, fixe le délai du secteur 1 | `ROOM_NOT_FOUND`, `ROOM_FULL`, `ROOM_EXPIRED`, `OWN_ROOM` |
-| `submit-move` | salle, secteur, voiture, consigne, nitro | enregistre le coup ; si les deux coups sont là, résout le secteur et publie `gv_rounds` | `NOT_YOUR_ROOM`, `WRONG_SECTOR`, `ALREADY_PLAYED`, `INVALID_MOVE` |
-| `resolve-due` | salle | après le délai, fait jouer l'IA (`aiChoice`) pour le joueur absent et résout ; deux absences ou 60 s de déconnexion : abandon | `NOT_DUE` |
-| `claim-settlement` | salle | renvoie le montant à appliquer à la sauvegarde et marque la ligne réclamée | `NOT_FINISHED`, `ALREADY_CLAIMED` |
+| `register` | `nickname` | crée le joueur et son code ami, ou renvoie le joueur existant | `INVALID_NICKNAME` |
+| `create-room` | `cap`, `stake`, `lineup`, `credits`, `rematch_of` facultatif | crée une salle ouverte et renvoie son code d'invitation. Une revanche reprend le plafond et la mise de la salle d'origine | `INVALID_LINEUP`, `STAKE_TOO_HIGH`, `RATE_LIMITED` |
+| `join-room` | `code`, `lineup`, `credits` | vérifie l'écurie et la mise, lance le secteur 0 avec un délai de 20 s | `ROOM_NOT_FOUND`, `ROOM_FULL`, `ROOM_EXPIRED`, `OWN_ROOM` |
+| `submit-move` | `room`, `sector`, `car`, `stance`, `nitro` | enregistre le coup. Le second coup résout le secteur et publie `gv_rounds` | `NOT_YOUR_ROOM`, `WRONG_SECTOR`, `ALREADY_PLAYED`, `INVALID_MOVE`, `DEADLINE_PASSED` |
+| `resolve-due` | `room` | à l'échéance, `autoChoice` joue pour chaque absent. Deux absences valent abandon. Si les deux joueurs abandonnent au même secteur, chacun récupère sa mise | `NOT_DUE` |
+| `claim-settlement` | `room` | renvoie le montant à appliquer à la sauvegarde et marque la ligne réclamée | `NOT_FINISHED`, `ALREADY_CLAIMED` |
 
-**Délais sans serveur permanent.** Chaque jeu appelle `resolve-due` quand le compte à rebours de 20 s arrive à zéro. Une tâche planifiée (`pg_cron`, chaque minute) rattrape les salles oubliées : secteurs dépassés, salles `open` expirées (`expired`, remboursement).
+**Délais sans serveur permanent.** Le client appelle `resolve-due` à la fin du compte à rebours. Un appel avec le jeton `service_role` et un corps `{}` traite jusqu'à 100 salles en retard, dont les salles ouvertes expirées à rembourser. Le script `supabase/scheduler/resolve-due.sql` installe le rattrapage chaque minute avec Supabase Cron, pg_net et Vault. Il se lance après le déploiement des fonctions, une fois les extensions activées et les valeurs `gv_project_url` et `gv_scheduler_token` provisionnées dans Vault. Le même jeton dédié (au moins 32 caractères) se configure dans le secret Edge `GV_SCHEDULER_TOKEN`. Les fonctions vérifient elles-mêmes l'identité avec Auth.
+
+**Reprise du client.** Une invitation ouvre `?versus=CODE`. Le client vérifie le plafond et la mise avant de rejoindre. Il réserve la mise et sauvegarde la demande avec l’identifiant de salle avant l’appel réseau. Il peut ainsi rejouer une création ou une acceptation après une réponse perdue. La fonction SQL `gv_snapshot` renvoie l’état, l’heure du serveur, les secteurs révélés et le reçu du joueur sous les politiques de lecture existantes. Le client relit cet état au retour au premier plan, aux notifications Realtime et toutes les cinq secondes pendant le duel.
 
 **Mise côté jeu.** À la création ou à l'acceptation, le jeu retire la mise de la sauvegarde et la note comme *mise en cours* (identifiant de salle). À l'arrivée, `claim-settlement` donne le montant ; le jeu l'applique une seule fois et retire la mise en cours. Le jeu se contente d'afficher ce que le serveur a calculé : vainqueur, pot, commission de 10 %.
 

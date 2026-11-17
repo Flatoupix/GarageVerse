@@ -1,0 +1,1800 @@
+{
+  "version": 1,
+  "families": {
+    "pneus": "Pneumatiques", "suspension": "Suspension", "freins": "Freinage", "transmission": "Transmission",
+    "suralim": "Suralimentation", "moteur": "Gestion moteur", "chassis": "Châssis", "special": "Spécial"
+  },
+  "parts": [
+    { "id": "pneus-route", "name": "Pneus route premium", "family": "pneus", "rarity": "Courante", "cost": 1,
+      "stats": { "man": 1 }, "text": "+1 Maniabilité.", "art": "a stack of premium road tires" },
+    { "id": "pneus-pluie", "name": "Gommes pluie", "family": "pneus", "rarity": "Courante", "cost": 1,
+      "effects": [{ "type": "boost", "value": 2, "condition": "pluie" }], "text": "+2 sous la Pluie.", "art": "a deep-groove rain tire splashing water" },
+    { "id": "pneus-semi", "name": "Semi-slicks", "family": "pneus", "rarity": "Rare", "cost": 2,
+      "stats": { "acc": 1, "man": 1 }, "effects": [{ "type": "boost", "value": -1, "condition": "pluie" }], "text": "+1 Accélération, +1 Maniabilité, −1 sous la Pluie.", "art": "a semi-slick track tire with glowing hot tread" },
+    { "id": "pneus-terre", "name": "Pneus à crampons", "family": "pneus", "rarity": "Rare", "cost": 1,
+      "effects": [{ "type": "boost", "value": 2, "condition": "terre" }], "text": "+2 sur Terre.", "art": "an aggressive gravel rally tire kicking up dust" },
+    { "id": "susp-filetes", "name": "Combinés filetés", "family": "suspension", "rarity": "Courante", "cost": 1,
+      "stats": { "man": 1 }, "text": "+1 Maniabilité.", "art": "a pair of red coilover shock absorbers" },
+    { "id": "susp-drift", "name": "Kit angle drift", "family": "suspension", "rarity": "Rare", "cost": 2,
+      "requires": { "drive": ["Propulsion"] }, "stats": { "man": 2 }, "effects": [{ "type": "boost", "value": 1, "condition": "nuit" }],
+      "text": "Propulsion uniquement. +2 Maniabilité, +1 la Nuit.", "art": "a drift steering angle kit with extended knuckles" },
+    { "id": "susp-rallye", "name": "Suspension rallye longue course", "family": "suspension", "rarity": "Rare", "cost": 2,
+      "stats": { "end": 1 }, "effects": [{ "type": "boost", "value": 2, "condition": "terre" }], "text": "+1 Endurance, +2 sur Terre.", "art": "a long-travel rally suspension strut with gold spring" },
+    { "id": "freins-endurance", "name": "Plaquettes endurance", "family": "freins", "rarity": "Courante", "cost": 1,
+      "stats": { "end": 1 }, "text": "+1 Endurance.", "art": "racing brake pads and a vented disc" },
+    { "id": "freins-carbone", "name": "Freins carbone-céramique", "family": "freins", "rarity": "Épique", "cost": 2,
+      "stats": { "man": 2 }, "text": "+2 Maniabilité.", "art": "a glowing carbon-ceramic brake disc with yellow caliper" },
+    { "id": "boite-courte", "name": "Boîte rapports courts", "family": "transmission", "rarity": "Courante", "cost": 1,
+      "stats": { "acc": 2, "vit": -1 }, "text": "+2 Accélération, −1 Vitesse.", "art": "a short-ratio gearbox with exposed gears" },
+    { "id": "boite-seq", "name": "Boîte séquentielle", "family": "transmission", "rarity": "Rare", "cost": 2,
+      "requires": { "notEngine": ["Électrique"] }, "stats": { "acc": 1, "man": 1 }, "text": "+1 Accélération, +1 Maniabilité.", "art": "a sequential shifter lever with neon gate" },
+    { "id": "autobloquant", "name": "Différentiel autobloquant", "family": "transmission", "rarity": "Rare", "cost": 1,
+      "requires": { "drive": ["Traction", "Propulsion"] }, "stats": { "acc": 1, "man": 1 }, "text": "Traction ou propulsion. +1 Accélération, +1 Maniabilité.", "art": "a limited-slip differential cutaway" },
+    { "id": "kit-turbo", "name": "Kit turbo", "family": "suralim", "rarity": "Rare", "cost": 2,
+      "requires": { "notEngine": ["Électrique", "Turbo"] }, "stats": { "acc": 1, "vit": 2, "end": -1 }, "text": "Moteur atmosphérique ou diesel. +1 Accélération, +2 Vitesse, −1 Endurance.", "art": "a turbocharger with glowing hot housing" },
+    { "id": "turbo-hybride", "name": "Gros turbo hybride", "family": "suralim", "rarity": "Épique", "cost": 3,
+      "requires": { "engine": ["Turbo"] }, "stats": { "vit": 3 }, "text": "Moteur turbo uniquement. +3 Vitesse.", "art": "an oversized hybrid turbocharger with titanium blades" },
+    { "id": "compresseur", "name": "Compresseur volumétrique", "family": "suralim", "rarity": "Rare", "cost": 2,
+      "requires": { "engine": ["V8", "V10", "V12"] }, "stats": { "acc": 2, "vit": 1 }, "text": "V8, V10 ou V12. +2 Accélération, +1 Vitesse.", "art": "a chrome supercharger blower on top of a V8 engine" },
+    { "id": "admission", "name": "Admission directe et ligne inox", "family": "moteur", "rarity": "Courante", "cost": 1,
+      "requires": { "notEngine": ["Électrique"] }, "stats": { "vit": 1 }, "text": "+1 Vitesse.", "art": "a cone air filter and polished stainless exhaust" },
+    { "id": "stage1", "name": "Reprogrammation Stage 1", "family": "moteur", "rarity": "Rare", "cost": 2,
+      "requires": { "notEngine": ["Électrique"] }, "stats": { "acc": 1, "vit": 1 }, "text": "+1 Accélération, +1 Vitesse.", "art": "an engine control unit chip with neon circuit traces" },
+    { "id": "k9k", "name": "Fiabilité K9K", "family": "moteur", "rarity": "Rare", "cost": 2,
+      "requires": { "engine": ["Diesel"] }, "stats": { "end": 2 }, "effects": [{ "type": "stamina", "value": 1 }], "text": "Diesel uniquement. +2 Endurance et un secteur de plus.", "art": "a clean rebuilt diesel engine block on a stand" },
+    { "id": "batterie", "name": "Pack batterie haute décharge", "family": "moteur", "rarity": "Épique", "cost": 2,
+      "requires": { "engine": ["Électrique"] }, "stats": { "acc": 2, "vit": 1 }, "text": "Électrique uniquement. +2 Accélération, +1 Vitesse.", "art": "a high-discharge battery pack with cyan glowing cells" },
+    { "id": "eco-croisiere", "name": "Éco-Croisière", "family": "chassis", "rarity": "Rare", "cost": 1,
+      "requires": { "tagsAny": ["Citadine", "Diesel", "Berline"] }, "effects": [{ "type": "stamina", "value": 1 }, { "type": "boost", "value": 1, "sectors": ["endurance"] }],
+      "text": "Citadine, diesel ou berline. Un secteur de plus, +1 en Endurance.", "art": "a retro digital trip computer dashboard with an eco leaf icon" },
+    { "id": "allegement", "name": "Allègement carbone", "family": "chassis", "rarity": "Épique", "cost": 2,
+      "stats": { "acc": 1, "vit": 1, "man": 1 }, "text": "+1 Accélération, +1 Vitesse, +1 Maniabilité.", "art": "a carbon fiber bucket seat and carbon hood panel" },
+    { "id": "aileron", "name": "Aileron GT", "family": "chassis", "rarity": "Rare", "cost": 1,
+      "stats": { "man": 2, "vit": -1 }, "text": "+2 Maniabilité, −1 Vitesse.", "art": "a tall GT rear wing" },
+    { "id": "nitro", "name": "Kit nitro N₂O", "family": "special", "rarity": "Épique", "cost": 2,
+      "requires": { "notEngine": ["Électrique"] }, "effects": [{ "type": "nitro", "value": 1 }], "text": "+1 charge de Nitro.", "art": "two blue nitrous oxide bottles with purge vapor" },
+    { "id": "underglow", "name": "Néons underglow", "family": "special", "rarity": "Courante", "cost": 1,
+      "effects": [{ "type": "boost", "value": 1, "condition": "nuit" }], "text": "+1 la Nuit.", "art": "a magenta neon underglow light kit coiled" }
+  ],
+  "progression": {
+    "stages": [
+      { "stage": 1, "credits": 80, "duplicates": 0, "text": "+1 potentiel" },
+      { "stage": 2, "credits": 200, "duplicates": 1, "text": "+1 potentiel, +1 à la meilleure stat" },
+      { "stage": 3, "credits": 450, "duplicates": 2, "text": "+1 potentiel, débloque les évolutions" }
+    ],
+    "scrap": { "Courante": 10, "Rare": 30, "Épique": 80, "Légendaire": 200 },
+    "start": { "credits": 300, "tickets": { "neon": 2 }, "vehicles": ["clio", "twingo", "panda"], "parts": ["pneus-route", "underglow", "eco-croisiere"] }
+  },
+  "boosters": [
+    { "id": "neon", "name": "Neon Drive", "tagline": "Collection 001", "price": 150,
+      "maxParts": 2, "slots": [
+        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.15 },
+        { "Courante": 90, "Rare": 9, "Épique": 1, "partChance": 0.15 },
+        { "Courante": 85, "Rare": 13, "Épique": 2, "partChance": 0.15 },
+        { "Courante": 70, "Rare": 25, "Épique": 5, "partChance": 0.15 },
+        { "Rare": 82, "Épique": 16, "Légendaire": 2, "partChance": 0 }
+      ], "altChance": 0.08 },
+    { "id": "night", "name": "After Hours", "tagline": "Édition de nuit · Culture", "price": 250, "favorTags": ["Cinéma", "Série", "Tuning", "Drift"], "favorWeight": 4,
+      "maxParts": 2, "slots": [
+        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.18 },
+        { "Courante": 80, "Rare": 18, "Épique": 2, "partChance": 0.18 },
+        { "Courante": 65, "Rare": 30, "Épique": 5, "partChance": 0.18 },
+        { "Courante": 40, "Rare": 47, "Épique": 12, "Légendaire": 1, "partChance": 0.18 },
+        { "Rare": 50, "Épique": 43, "Légendaire": 7, "partChance": 0 }
+      ], "altChance": 0.12 },
+    { "id": "overdrive", "name": "Overdrive", "tagline": "Hypercars et pièces rares", "price": 400, "favorTags": ["Hypercar", "Supercar", "Record"], "favorWeight": 3,
+      "maxParts": 2, "slots": [
+        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.22 },
+        { "Courante": 55, "Rare": 36, "Épique": 9, "partChance": 0.22 },
+        { "Courante": 40, "Rare": 44, "Épique": 15, "Légendaire": 1, "partChance": 0.22 },
+        { "Courante": 25, "Rare": 49, "Épique": 23, "Légendaire": 3, "partChance": 0.22 },
+        { "Épique": 82, "Légendaire": 18, "partChance": 0 }
+      ], "altChance": 0.15 },
+    { "id": "starter", "name": "Booster Bricole", "tagline": "Voitures courantes et pièces du quotidien", "price": 60,
+      "maxParts": 3, "slots": [
+        { "Courante": 96, "Rare": 4, "partChance": 0.35 },
+        { "Courante": 96, "Rare": 4, "partChance": 0.35 },
+        { "Courante": 94, "Rare": 6, "partChance": 0.35 },
+        { "Courante": 90, "Rare": 10, "partChance": 0.35 },
+        { "Courante": 82, "Rare": 17, "Épique": 1, "partChance": 0.25 }
+      ], "altChance": 0.04 },
+    { "id": "atelier", "name": "Booster Mécanique", "tagline": "5 pièces d’atelier garanties", "price": 240,
+      "maxParts": 5, "slots": [
+        { "Courante": 82, "Rare": 16, "Épique": 2, "partChance": 1 },
+        { "Courante": 78, "Rare": 19, "Épique": 3, "partChance": 1 },
+        { "Courante": 68, "Rare": 26, "Épique": 6, "partChance": 1 },
+        { "Courante": 50, "Rare": 38, "Épique": 12, "partChance": 1 },
+        { "Rare": 72, "Épique": 28, "partChance": 1 }
+      ], "altChance": 0 }
+  ],
+  "leagues": [
+    { "id": "neon", "name": "Ligue Néon", "cap": 9, "reward": 100, "ticket": "neon" },
+    { "id": "chrome", "name": "Ligue Chrome", "cap": 15, "reward": 160, "ticket": "night" },
+    { "id": "overdrive", "name": "Ligue Overdrive", "cap": 22, "reward": 260, "ticket": "overdrive" }
+  ],
+  "rivals": [
+    { "id": "lola", "name": "Lola Minitel", "title": "Reine des parkings", "league": "neon", "simple": true, "rewardCar": "p205gl",
+      "bio": "J’ai appris la mécanique dans le parking de ma résidence, avec les voisins comme premiers supporters. Depuis, je retape des petites voitures pour qu’on puisse tous prendre le départ.",
+      "style": "Débrouillarde",
+      "likes": "les citadines",
+      "intro": "Hé, t’as ramené ta petite merveille ? Viens, on va réveiller le quartier !",
+      "win": "Ah ouais, tu m’as bien coiffée ! Les voisins vont parler de toi !",
+      "lose": "Allez, fais pas cette tête ! Tu reviens et on remet ça ?",
+      "perfect": "Mais t’as tout raflé ! Même ma klaxonnette t’applaudit !",
+      "circuit": { "name": "Boulevard Minitel", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "ville": 4, "sec": 3, "nuit": 2, "pluie": 1 } },
+      "lineup": [{ "id": "twingo", "stage": 0, "parts": [] }, { "id": "deuch", "stage": 0, "parts": [] }, { "id": "beetle", "stage": 0, "parts": [] }],
+      "art": "a cheerful young woman with a teal bob haircut and oversized 80s jacket, synthwave portrait" },
+    { "id": "cassette", "name": "DJ Cassette", "title": "Roi du roadster", "league": "neon", "rewardCar": "mx5na",
+      "bio": "Le jour, je répare des platines dans une radio associative. La nuit, je roule décapoté : le vent pose les basses et les virages font le reste.",
+      "style": "Showman",
+      "likes": "les roadsters",
+      "intro": "Installe-toi dans le groove, tu vas entendre chanter les pneus.",
+      "win": "Tu m’as remixé la ligne d’arrivée, tranquille. Beau morceau !",
+      "lose": "T’as décalé ton tempo, mais le prochain refrain est pour toi.",
+      "perfect": "Aucune fausse note ! Tu viens de graver un classique sur ma bande.",
+      "circuit": { "name": "Corniche Laser", "sectors": ["virage", "ligne", "endurance", "virage", "depart"], "conditions": { "sec": 4, "ville": 3, "pluie": 2, "nuit": 1 } },
+      "lineup": [{ "id": "mx5na", "stage": 0, "parts": [], "upgrades": { "acc": 1 } }, { "id": "panda", "stage": 0, "parts": [] }, { "id": "logan", "stage": 0, "parts": [] }],
+      "art": "a laid-back DJ with headphones around his neck, mirrored aviator sunglasses and a mullet, synthwave portrait" },
+    { "id": "kenji", "name": "Kenji Vapor", "title": "Drift de minuit", "league": "chrome", "rewardCar": "civiceg",
+      "bio": "J’ai quitté les podiums pour reprendre l’atelier de mon père. Chaque nuit, je règle une voiture, puis je cherche une trajectoire plus juste.",
+      "style": "Sang-froid",
+      "likes": "les japonaises",
+      "intro": "Respire. Tu as le temps de bien faire.",
+      "win": "Tu as trouvé la ligne. Respect.",
+      "lose": "Tu freines trop tard. Observe encore.",
+      "perfect": "Tout est juste. Tu n’as rien laissé au hasard.",
+      "circuit": { "name": "Wangan Vapor", "sectors": ["depart", "virage", "virage", "ligne", "endurance"], "conditions": { "nuit": 5, "pluie": 2, "sec": 2, "ville": 1 } },
+      "lineup": [{ "id": "s15", "stage": 3, "parts": ["susp-drift", "boite-seq", "underglow", "turbo-hybride"], "upgrades": { "man": 2, "acc": 2, "vit": 1 } }, { "id": "ek9", "stage": 3, "parts": ["stage1", "pneus-semi", "kit-turbo", "freins-endurance"], "upgrades": { "acc": 2, "man": 2 } }, { "id": "mx5nb", "stage": 2, "parts": ["autobloquant", "aileron"], "upgrades": { "man": 2, "end": 2 } }],
+      "art": "a calm Japanese street racer in a racing jacket with a toothpick, neon city reflections, synthwave portrait" },
+    { "id": "roxy", "name": "Roxy Turbo", "title": "Pilote de spéciales", "league": "chrome", "rewardCar": "delta16",
+      "bio": "J’ai commencé copilote, un carnet sur les genoux et de la boue jusqu’au casque. Après une saison à réparer pour les autres, j’ai enfin monté mon propre équipage.",
+      "style": "Tenace",
+      "likes": "les voitures de rallye",
+      "intro": "Serre ton harnais. Tu vas devoir tenir jusqu’au dernier virage.",
+      "win": "Tu as tenu bon jusqu’au bout. Victoire méritée !",
+      "lose": "Tu lâches du terrain à la relance. Travaille ça et reviens !",
+      "perfect": "Tous les secteurs ! Tu pourrais ouvrir la route de mon prochain rallye.",
+      "circuit": { "name": "Col des Spectres", "sectors": ["depart", "virage", "endurance", "virage", "ligne"], "conditions": { "terre": 2, "pluie": 3, "sec": 2, "nuit": 1 } },
+      "lineup": [{ "id": "delta", "stage": 3, "parts": ["pneus-terre", "susp-rallye"], "upgrades": { "man": 2, "end": 1 } }, { "id": "a110", "stage": 3, "parts": ["pneus-terre", "autobloquant"], "upgrades": { "man": 2 } }, { "id": "h1", "stage": 2, "parts": ["k9k"], "upgrades": { "end": 2 } }],
+      "art": "a rally driver woman with braided red hair holding an open-face helmet, dust and neon dusk, synthwave portrait" },
+    { "id": "baron", "name": "Le Baron Chrome", "title": "Collectionneur fortuné", "league": "overdrive", "rewardCar": "p911sc",
+      "bio": "J’ai hérité d’une collection sous des housses et d’un nom sur une grille. J’ai choisi de salir les pneus : une mécanique admirable mérite mieux qu’un salon.",
+      "style": "Raffiné",
+      "likes": "les classiques de prestige",
+      "intro": "Approche, je te réserve une place au départ. Tâche d’en faire bon usage.",
+      "win": "Tu as du mérite. Je devrai donc apprendre à prononcer ton nom.",
+      "lose": "Tu comprendras avec le temps : la distinction se cultive aussi au volant.",
+      "perfect": "Une démonstration sans défaut. Tu m’obliges à incliner la tête, c’est fort rare.",
+      "circuit": { "name": "Autodrome Chromé", "sectors": ["ligne", "virage", "depart", "ligne", "endurance"], "conditions": { "sec": 5, "nuit": 2, "pluie": 2, "ville": 1 } },
+      "lineup": [{ "id": "f40", "stage": 3, "parts": ["admission", "freins-carbone", "pneus-semi"], "upgrades": { "vit": 2, "acc": 2, "man": 1 } }, { "id": "p930", "stage": 2, "parts": ["turbo-hybride", "aileron"], "upgrades": { "acc": 2, "man": 2 } }, { "id": "kitt", "stage": 3, "parts": ["compresseur", "underglow", "freins-endurance", "susp-filetes"], "upgrades": { "end": 2, "vit": 2 } }],
+      "art": "an elegant older gentleman with silver hair, white suit and driving gloves, chrome reflections, synthwave portrait" },
+    { "id": "nyx", "name": "Nyx", "title": "Reine de la Nuit", "league": "overdrive", "rewardCar": "dmc",
+      "bio": "Avant de courir, je réglais les lumières d’un théâtre condamné à fermer. J’ai emporté ses projecteurs dans mon garage ; désormais, la ville entière me sert de scène.",
+      "style": "Énigmatique",
+      "likes": "les hypercars",
+      "intro": "Les lampadaires s’éteignent. Entre en scène, si tu oses.",
+      "win": "Tu m’as volé le dernier acte. Garde cette lumière, elle est fragile.",
+      "lose": "Le rideau tombe sur tes phares. Entends-tu déjà l’appel de la prochaine nuit ?",
+      "perfect": "Pas une ombre dans ta course… Tu as traversé mon royaume sans y laisser ton âme.",
+      "circuit": { "name": "Périphérique Infini", "sectors": ["depart", "ligne", "virage", "endurance", "ligne"], "conditions": { "nuit": 5, "pluie": 2, "ville": 2, "sec": 1 } },
+      "lineup": [{ "id": "venom", "stage": 3, "parts": ["nitro"], "upgrades": { "vit": 2, "acc": 2 } }, { "id": "batmobile", "stage": 3, "parts": ["underglow", "freins-endurance"], "upgrades": { "end": 2, "man": 1 } }, { "id": "mx5na", "stage": 3, "parts": ["susp-drift", "underglow", "boite-courte", "allegement"], "upgrades": { "man": 2, "acc": 2 } }],
+      "art": "a mysterious woman with violet hair, a black leather racing suit and visor glowing magenta, synthwave portrait" }
+  ],
+  "series": [
+    {"id": "depart", "name": "Premiers tours de roue", "description": "Commence ta collection avec tes trois premières voitures.", "vehicles": ["clio", "twingo", "panda"], "reward": {"credits": 150}},
+    {"id": "bombinettes", "name": "Bombinettes GTI", "description": "Réunis les petites sportives nerveuses des années 80 et 90.", "vehicles": ["p205", "golf1", "r5gt", "saxo", "p106", "ax"], "reward": {"credits": 350, "ticket": "neon"}},
+    {"id": "famille", "name": "Fourgons & Familiales cultes", "description": "Des vacances en famille aux virées improvisées.", "vehicles": ["r4l", "mehari", "espace", "kangoo", "combi", "multipla"], "reward": {"credits": 300, "ticket": "starter"}},
+    {"id": "baroudeurs", "name": "Baroudeurs tout-terrain", "description": "Affronte la boue, le sable et les sentiers escarpés.", "vehicles": ["niva", "duster", "defender", "wrangler", "hilux", "h1"], "reward": {"credits": 350, "ticket": "atelier"}},
+    {"id": "lignees", "name": "Du quotidien au circuit", "description": "Collectionne les versions d’origine et leurs évolutions sportives.", "vehicles": ["p205gl", "p205", "golf11", "golf1", "e30316", "m3e30"], "reward": {"credits": 400, "ticket": "neon"}},
+    {"id": "cinema", "name": "Stars de cinéma", "description": "Réunis les vedettes de tes films cultes.", "vehicles": ["bttf", "kitt", "ecto1", "batmobile", "taxi", "herbie"], "reward": {"credits": 600, "ticket": "overdrive"}},
+    {"id": "poursuite", "name": "Courses-poursuites à l’écran", "description": "Les bolides d’action qui brûlent l’asphalte au cinéma.", "vehicles": ["brian", "eleanor", "domcharger", "jpjeep", "interceptor"], "reward": {"credits": 650, "ticket": "overdrive"}},
+    {"id": "rallye", "name": "Reines du rallye", "description": "Retrouve les championnes des routes sinueuses.", "vehicles": ["stratos", "delta", "evo8", "impreza"], "reward": {"credits": 350}},
+    {"id": "allemandes", "name": "Icônes d’outre-Rhin", "description": "Rassemble l’élite des sportives allemandes.", "vehicles": ["m3e30", "evo2", "quattro", "p930", "golf2", "ruf"], "reward": {"credits": 500, "ticket": "night"}},
+    {"id": "italiennes", "name": "Dolce Vita & V12", "description": "Des ruelles de Turin aux circuits de Modène.", "vehicles": ["fiat500", "abarth", "countach", "testarossa", "f40", "zonda"], "reward": {"credits": 650, "ticket": "overdrive"}},
+    {"id": "lotus", "name": "La lignée Lotus", "description": "Explore la famille des sportives légères.", "vehicles": ["elise", "elise111s", "elise190", "esprit", "bond"], "reward": {"credits": 500, "ticket": "night"}},
+    {"id": "records", "name": "Hypercars de record", "description": "Repousse tes limites avec ces bolides.", "vehicles": ["venom", "veyron", "agera", "mf1"], "reward": {"credits": 700, "ticket": "overdrive"}},
+    {"id": "muscle", "name": "Muscle cars", "description": "Fais rugir les grands moteurs américains.", "vehicles": ["firebird", "gt500", "demon", "c4zr1"], "reward": {"credits": 400}},
+    {"id": "japon", "name": "Japonaises de légende", "description": "Rassemble tes icônes des routes japonaises.", "vehicles": ["supra", "r34", "nsx", "s15", "ek9", "mx5na"], "reward": {"credits": 500, "ticket": "night"}}
+  ]
+,
+  "specials": [
+  {
+    "id": "depart",
+    "name": "Départ",
+    "sector": "depart",
+    "tiers": [
+      {
+        "id": "special-depart-1",
+        "name": "Départ · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Départ — Bronze",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "r4l",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "elise",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "mehari",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-2",
+        "name": "Départ · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Départ — Argent",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "volvo240",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "countach",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "pneus-route"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "transit",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-3",
+        "name": "Départ · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Départ — Or",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "agera",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "evo8",
+            "stage": 2,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "defender",
+            "stage": 2,
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "nitro"
+            ],
+            "upgrades": {
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-4",
+        "name": "Départ · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Départ — Platine",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "f40",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "ruf",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "r34",
+            "stage": 3,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-depart-5",
+        "name": "Départ · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Départ — Légende",
+          "sectors": [
+            "depart",
+            "depart",
+            "virage",
+            "depart",
+            "depart"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "venom",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2
+            }
+          },
+          {
+            "id": "r34",
+            "stage": 3,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "interceptor",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "virage",
+    "name": "Virages",
+    "sector": "virage",
+    "tiers": [
+      {
+        "id": "special-virage-1",
+        "name": "Virages · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Virages — Bronze",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "duster",
+            "stage": 0,
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "nitro"
+            ],
+            "upgrades": {
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
+            }
+          },
+          {
+            "id": "ecto1",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "h1",
+            "stage": 0,
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "underglow"
+            ],
+            "upgrades": {
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-2",
+        "name": "Virages · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Virages — Argent",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "mini65",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "cgt",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2
+            }
+          },
+          {
+            "id": "panda",
+            "stage": 1,
+            "parts": [
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-3",
+        "name": "Virages · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Virages — Or",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "agera",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "twizy",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "batterie",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "vit": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "p205",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-4",
+        "name": "Virages · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Virages — Platine",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "p205",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "impreza",
+            "stage": 3,
+            "parts": [
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "zonda",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-virage-5",
+        "name": "Virages · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Virages — Légende",
+          "sectors": [
+            "virage",
+            "virage",
+            "depart",
+            "virage",
+            "virage"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "charger",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "demon",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "interceptor",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "ligne",
+    "name": "Ligne droite",
+    "sector": "ligne",
+    "tiers": [
+      {
+        "id": "special-ligne-1",
+        "name": "Ligne droite · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Ligne droite — Bronze",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "twizy",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "batterie",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "vit": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "ruf",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "hilux",
+            "stage": 0,
+            "parts": [
+              "k9k",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "underglow"
+            ],
+            "upgrades": {
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-2",
+        "name": "Ligne droite · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Ligne droite — Argent",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "zonda",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2
+            }
+          },
+          {
+            "id": "volvo240",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "p504",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-3",
+        "name": "Ligne droite · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Ligne droite — Or",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "beetle",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "demon",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "evo8",
+            "stage": 2,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-4",
+        "name": "Ligne droite · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Ligne droite — Platine",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "batmobile",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "taxi",
+            "stage": 3,
+            "parts": [
+              "batterie",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "underglow"
+            ],
+            "upgrades": {
+              "vit": 2,
+              "end": 2,
+              "man": 2,
+              "acc": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-ligne-5",
+        "name": "Ligne droite · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Ligne droite — Légende",
+          "sectors": [
+            "ligne",
+            "ligne",
+            "depart",
+            "ligne",
+            "ligne"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "brian",
+            "stage": 3,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "admission"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "eleanor",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "batmobile",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2
+            }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "endurance",
+    "name": "Endurance",
+    "sector": "endurance",
+    "tiers": [
+      {
+        "id": "special-endurance-1",
+        "name": "Endurance · Bronze",
+        "title": "Bronze",
+        "league": "",
+        "cap": 12,
+        "reward": 50,
+        "replay": 10,
+        "circuit": {
+          "name": "Endurance — Bronze",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "eleanor",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "pneus-route"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "rx7",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "p106",
+            "stage": 0,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-2",
+        "name": "Endurance · Argent",
+        "title": "Argent",
+        "league": "",
+        "cap": 15,
+        "reward": 100,
+        "replay": 20,
+        "circuit": {
+          "name": "Endurance — Argent",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "firebird",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "domcharger",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "ek9",
+            "stage": 1,
+            "parts": [
+              "autobloquant",
+              "eco-croisiere",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "nitro"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-3",
+        "name": "Endurance · Or",
+        "title": "Or",
+        "league": "",
+        "cap": 18,
+        "reward": 160,
+        "replay": 32,
+        "circuit": {
+          "name": "Endurance — Or",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "jpjeep",
+            "stage": 2,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "kit-turbo",
+              "admission"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "a110",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "ae86",
+            "stage": 2,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "kit-turbo",
+              "admission",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-4",
+        "name": "Endurance · Platine",
+        "title": "Platine",
+        "league": "",
+        "cap": 21,
+        "reward": 250,
+        "replay": 50,
+        "circuit": {
+          "name": "Endurance — Platine",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "brian",
+            "stage": 3,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "admission"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "countach",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "compresseur",
+              "allegement",
+              "susp-drift",
+              "pneus-route"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "vit": 2,
+              "end": 2,
+              "man": 2
+            }
+          },
+          {
+            "id": "scirocco",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "turbo-hybride",
+              "admission",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      },
+      {
+        "id": "special-endurance-5",
+        "name": "Endurance · Légende",
+        "title": "Légende",
+        "league": "",
+        "cap": 24,
+        "reward": 400,
+        "replay": 80,
+        "completionTicket": "overdrive",
+        "circuit": {
+          "name": "Endurance — Légende",
+          "sectors": [
+            "endurance",
+            "endurance",
+            "depart",
+            "endurance",
+            "endurance"
+          ],
+          "conditions": {
+            "sec": 1
+          }
+        },
+        "lineup": [
+          {
+            "id": "scirocco",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "turbo-hybride",
+              "admission",
+              "underglow"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "r34",
+            "stage": 3,
+            "parts": [
+              "allegement",
+              "pneus-route",
+              "susp-filetes",
+              "freins-endurance",
+              "boite-courte",
+              "turbo-hybride"
+            ],
+            "upgrades": {
+              "end": 2,
+              "man": 2,
+              "acc": 2,
+              "vit": 2
+            }
+          },
+          {
+            "id": "p930",
+            "stage": 3,
+            "parts": [
+              "autobloquant",
+              "allegement",
+              "susp-drift",
+              "pneus-route",
+              "freins-endurance",
+              "admission"
+            ],
+            "upgrades": {
+              "acc": 2,
+              "end": 2,
+              "man": 2,
+              "vit": 2
+            }
+          }
+        ]
+      }
+    ]
+  }
+]
+}
