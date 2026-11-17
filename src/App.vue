@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { VERSUS_OPEN } from './game/features'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
@@ -30,7 +31,7 @@ type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 've
 type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 function initialScreen(): Screen {
-  if (save.versus?.active || new URLSearchParams(location.search).has('versus')) return 'versus'
+  if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
   if (save.duel && !save.night) return 'race'
   if (save.sealed || (save.opening && save.opening.view !== 'recap')) return 'booster'
   return 'home'

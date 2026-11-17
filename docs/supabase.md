@@ -192,7 +192,12 @@ Les points d'entrée Deno vérifient le jeton du joueur et ouvrent une connexion
 2. vérifie que `_shared/game` est à jour (`node src/game/versus.check.cjs`) ;
 3. `supabase link --project-ref $SUPABASE_PROJECT_REF` ;
 4. `supabase db push` (migrations) ;
-5. `supabase functions deploy` (toutes les fonctions).
+5. `supabase functions deploy` (toutes les fonctions) ;
+6. `bash supabase/scheduler/activate.sh` **après** les fonctions : crée si nécessaire les secrets Vault `gv_project_url` et `gv_scheduler_token`, synchronise le jeton dédié vers `GV_SCHEDULER_TOKEN` dans les fonctions Edge, programme `gv-resolve-due` chaque minute et vérifie qu'une tâche active existe.
+
+Une PR touchant `supabase/**` ou le workflow lance seulement le job **validate** (syntaxe Bash et présence du SQL) : **aucun accès au projet hébergé depuis la PR**. Le job **deploy** est réservé à `master` et s'arrête si la planification échoue. Le script est conçu pour être relancé sans renouveler le jeton Vault existant.
+
+Pour désactiver le rattrapage en cas de problème, utiliser le SQL `select cron.unschedule('gv-resolve-due');` sur **le projet Supabase concerné**. Ne pas afficher dans les logs la valeur du jeton dédié ou celle des secrets GitHub.
 
 Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`. Comme pour le site, **seul `master` déploie** : le serveur de `dev` n'est jamais mis en ligne tout seul.
 
@@ -221,5 +226,5 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 - **Mises** : 0 (sans mise), 50, 100, 250, 500 ₡ ; au plus 25 % des crédits déclarés. La contrainte SQL `stake in (0, 50, 100, 250, 500)` du § 6 est la bonne.
 - **Plafonds** : 9, 15 ou 22 (`cap in (9, 15, 22)`).
 - **Revanche** : même mise et même plafond ; `create-room` accepte une salle d'origine pour recopier ses réglages.
-- **Mise en pause** : à éviter. Une tâche planifiée appelle le projet régulièrement (au moins tous les 3 jours) : soit `pg_cron` dans la base, soit une action GitHub planifiée qui interroge l'API. Choix au moment de la migration.
+- **Planification des salles** : retenue via `pg_cron` + `pg_net`. Le script `supabase/scheduler/activate.sh` est lancé automatiquement après déploiement de `resolve-due` depuis `master` ; voir § 9. Les essais sur Supabase hébergé restent nécessaires pour confirmer l'exécution réelle.
 - **Reste à confirmer** : la région du projet.
