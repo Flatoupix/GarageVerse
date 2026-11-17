@@ -1,0 +1,20 @@
+{
+  "id": "versus-serveur-base",
+  "title": "Versus V1 : migration Supabase (tables, sécurité, temps réel) testée hors ligne (ticket 003)",
+  "brief": "Écrire la première migration du serveur versus dédié (projet Supabase garage-verse), d'après docs/supabase.md § 6, § 8 et § 12 et docs/versus.md § 3 à § 5 et § 11. Aucune fonction serveur dans cette tâche (elles viendront ensuite) : uniquement le schéma, la sécurité ligne par ligne, les droits et la publication temps réel, plus des tests hors ligne. Les migrations sont appliquées et testées par node src/game/supabase.check.cjs dans un Postgres en mémoire (PGlite) par-dessus supabase/tests/supabase-stubs.sql, qui reproduit les rôles anon, authenticated et service_role, le schéma auth (auth.users, auth.uid()) et la publication supabase_realtime : ne pas modifier ce fichier de faux environnement ni src/game/supabase.check.cjs. N'utiliser que du SQL Postgres standard accepté par PGlite (pas d'extension comme pg_cron dans cette migration). Le jeu lui-même ne change pas : aucun fichier de src/ hors src/game/*.check.cjs, aucune version ni CHANGELOG.",
+  "requirements": [
+    "Nouveau fichier supabase/migrations/20261118000000_versus_v1.sql qui crée, dans le schéma public, le type gv_room_state ('open', 'ready', 'racing', 'done', 'expired', 'cancelled') et les tables gv_players, gv_rooms, gv_lineups, gv_moves, gv_rounds et gv_settlements avec les colonnes de docs/supabase.md § 6, plus une colonne gv_rooms.rematch_of (uuid, référence nullable vers gv_rooms) pour la revanche.",
+    "Contraintes : gv_rooms.stake parmi 0, 50, 100, 250, 500 ; gv_rooms.cap parmi 9, 15, 22 ; gv_rooms.code unique ; gv_players.friend_code unique et de 6 caractères majuscules ou chiffres ; pseudo de 2 à 20 caractères ; gv_moves.stance parmi 'normal', 'attaque', 'gestion' et gv_moves.car entre 0 et 2 ; gv_moves.sector et gv_rounds.sector entre 0 et 4 ; clés primaires composées de docs/supabase.md § 6 ; index (code), (state, expires_at) et (state, sector_deadline) sur gv_rooms.",
+    "Sécurité : row level security activée sur les 6 tables ; aucun droit INSERT, UPDATE ou DELETE pour anon ni authenticated (seul service_role écrit) ; anon ne lit rien ; authenticated lit uniquement : sa ligne de gv_players et celles des joueurs avec qui il partage une salle ; les gv_rooms, gv_lineups et gv_rounds des salles dont il est l'hôte ou l'invité ; dans gv_moves, ses propres coups et ceux de l'adversaire seulement pour un secteur déjà résolu (une ligne gv_rounds existe pour cette salle et ce secteur) ; sa propre ligne de gv_settlements.",
+    "Temps réel : gv_rooms et gv_rounds sont ajoutées à la publication supabase_realtime ; gv_moves, gv_lineups, gv_players et gv_settlements n'y sont pas.",
+    "Nouveau fichier supabase/tests/versus-v1.test.mjs qui exporte async function run(db, { assert, as, user }) et vérifie au moins : chaque contrainte de mise et de plafond refuse une valeur hors liste ; anon ne lit aucune ligne ; l'hôte et l'invité lisent leur salle, un troisième joueur ne la voit pas ; le coup de l'adversaire est invisible avant la ligne gv_rounds du secteur puis visible après, alors que son propre coup est toujours visible ; authenticated ne peut ni insérer ni modifier dans aucune des 6 tables (erreur permission denied) ; service_role peut écrire ; la publication supabase_realtime contient gv_rooms et gv_rounds mais pas gv_moves.",
+    "node src/game/supabase.check.cjs passe et annonce 1 migration et au moins 1 suite de tests ; tous les autres src/game/*.check.cjs et corepack yarn build passent.",
+    "docs/supabase.md § 6 décrit le schéma tel qu'il est réellement créé (rematch_of compris) et § 9 mentionne node src/game/supabase.check.cjs comme vérification hors ligne des migrations."
+  ],
+  "paths": [
+    "supabase/",
+    "src/game/",
+    "docs/"
+  ],
+  "browser": "neon"
+}

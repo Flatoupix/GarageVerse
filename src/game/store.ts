@@ -16,6 +16,21 @@ watch(() => save.preferences.touchHelp, value => { touchHelpEnabled.value = valu
 export const toast = ref<{ text: string; tone: 'info' | 'error' } | null>(null)
 let toastTimer: ReturnType<typeof setTimeout> | undefined
 
+// Une autre fenêtre peut terminer une opération Versus pendant que celle-ci est suspendue.
+export function refreshVersusSave() {
+  const raw = localStorage.getItem(SAVE_KEY)
+  if (!raw) return
+  let stored: Save | null
+  try { stored = JSON.parse(raw) } catch { return }
+  if (!stored) return
+  if (stored.version === 2 && JSON.stringify(stored.versus ?? null) !== JSON.stringify(save.versus)) {
+    Object.assign(save, readSave(raw))
+  }
+}
+window.addEventListener('storage', event => {
+  if (event.key === SAVE_KEY) refreshVersusSave()
+})
+
 export function persist() {
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(save))
@@ -49,12 +64,21 @@ export const systemReduced = ref(systemMotion.matches)
 systemMotion.addEventListener('change', event => { systemReduced.value = event.matches })
 export const reducedMotion = computed(() => systemReduced.value || save.preferences.reducedMotion)
 
+// Téléphone (moins de 650 px de large) : 4 et 5 voitures par ligne passent en vue planche.
+const phone = window.matchMedia('(max-width: 649px)')
+export const narrow = ref(phone.matches)
+phone.addEventListener('change', event => { narrow.value = event.matches })
+
 export const ownedCount = computed(() => vehicles.filter(v => save.cars[v.id]).length)
 
 export const dailySelected = ref(false)
 // Passage de minuit : le défi et le booster du jour se renouvellent sans recharger la page.
 setInterval(() => { const before = save.daily.date; refreshDaily(save); if (before !== save.daily.date) persist() }, 30_000)
-window.addEventListener('focus', () => { refreshDaily(save); persist() })
+window.addEventListener('focus', () => {
+  try { refreshVersusSave() } catch { storageWarning.value = true; return }
+  refreshDaily(save)
+  persist()
+})
 
 export const completedSeries = computed(() => series.filter(entry => seriesComplete(save, entry)))
 export const pendingSeries = computed(() => completedSeries.value.filter(entry => !save.series.includes(entry.id)))

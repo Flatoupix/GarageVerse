@@ -188,8 +188,8 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
         </button>
       </div>
       <div class="recap-actions">
-        <button v-if="remaining" type="button" class="button primary" @click="openNext">
-          Ouvrir le suivant · encore {{ remaining }} <span aria-hidden="true">↗</span>
+        <button v-if="remaining" type="button" class="button primary next-booster" :aria-label="`Ouvrir le booster suivant, encore ${remaining}`" @click="openNext">
+          Ouvrir le suivant ({{ remaining }}) <span aria-hidden="true">↗</span>
         </button>
         <button type="button" class="button" :class="remaining ? 'ghost' : 'primary'" @click="emit('garage')">Voir le garage <span aria-hidden="true">→</span></button>
         <button type="button" class="button quiet" @click="emit('shop')">Autre booster</button>

@@ -4,6 +4,17 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.13.0] — 2026-11-17
+
+### Ajouté
+
+- **Vue planche au garage.** Sur téléphone, choisis 4 ou 5 voitures par ligne dans « Par ligne » : ton garage s’affiche comme une page de classeur, avec l’illustration, le numéro et la couleur de rareté de chaque voiture. Touche une vignette pour ouvrir sa fiche. Les voitures qui te manquent apparaissent en pointillés.
+
+### Corrigé
+
+- **Boutons après l’ouverture d’un booster.** Après un achat groupé, « Ouvrir le suivant » était écrasé à côté des autres boutons. Il occupe maintenant toute la largeur, au-dessus de « Voir le garage » et « Autre booster ».
+- **Ordre de la collection.** Les voitures n° 100 et plus se rangeaient entre la n° 10 et la n° 11. Elles suivent maintenant la n° 99.
+
 ## [0.12.0] — 2026-11-17
 
 ### Ajouté

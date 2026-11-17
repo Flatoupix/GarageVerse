@@ -3,10 +3,11 @@ import { computed, ref } from 'vue'
 import { boosterById, families, parts, rarities, rarityClass, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
 import { claimSeries, craftCheck, seriesComplete, seriesProgress, freeParts, prepOf, totalMountedParts, uninstallAll } from '../game/save'
-import { act, ownedCount, reducedMotion, save } from '../game/store'
+import { act, narrow, ownedCount, reducedMotion, save } from '../game/store'
 import { edition } from '../game/art'
 import { confetti, palettes } from '../game/fx'
 import CarCard from '../components/CarCard.vue'
+import CarThumb from '../components/CarThumb.vue'
 import GvButton from '../components/GvButton.vue'
 import PartCard from '../components/PartCard.vue'
 
@@ -55,6 +56,8 @@ const colOptions = [
   { value: 6, label: '6' },
 ] as const
 const cols = computed(() => save.preferences.garageCols ?? 0)
+// Vue planche : 4 ou 5 voitures par ligne sur téléphone, en vignettes.
+const sheet = computed(() => cols.value >= 4 && narrow.value)
 const categories = [...new Set(vehicles.flatMap(v => [...v.tags, ...(v.culture?.aura ?? [])]))].sort((a, b) => a.localeCompare(b, 'fr'))
 const normalize = (name: string) => name.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')
 const search = computed(() => normalize(query.value.trim()))
@@ -79,6 +82,9 @@ function setCols(value: number) {
   act(s => { s.preferences.garageCols = value })
 }
 
+// Ordre de collection numérique : « 11 » avant « 100 » (les numéros sont des textes à partir de 100).
+const byNumber = (a: Vehicle, b: Vehicle) => Number(a.number) - Number(b.number)
+
 const carList = computed(() => vehicles.filter(v => {
   const car = save.cars[v.id]
   if (garageFilter.value !== 'collection' && !car) return false
@@ -92,19 +98,19 @@ const carList = computed(() => vehicles.filter(v => {
     const favorite = Number(Boolean(save.cars[b.id]?.favorite)) - Number(Boolean(save.cars[a.id]?.favorite))
     if (favorite) return favorite
   }
-  if (sort.value === 'name') return a.name.localeCompare(b.name, 'fr') || a.number.localeCompare(b.number)
-  if (sort.value === 'cost') return a.cost - b.cost || a.number.localeCompare(b.number)
-  if (sort.value === 'cost-desc') return b.cost - a.cost || a.number.localeCompare(b.number)
-  if (sort.value === 'rarity') return rarities.indexOf(b.rarity) - rarities.indexOf(a.rarity) || a.number.localeCompare(b.number)
-  if (sort.value === 'power') return totalPower(b) - totalPower(a) || a.number.localeCompare(b.number)
-  if (sort.value === 'stage') return prepScore(b) - prepScore(a) || totalPower(b) - totalPower(a) || a.number.localeCompare(b.number)
-  if (sort.value === 'acc') return carStats(b).acc - carStats(a).acc || a.number.localeCompare(b.number)
-  if (sort.value === 'vit') return carStats(b).vit - carStats(a).vit || a.number.localeCompare(b.number)
-  if (sort.value === 'man') return carStats(b).man - carStats(a).man || a.number.localeCompare(b.number)
-  if (sort.value === 'end') return carStats(b).end - carStats(a).end || a.number.localeCompare(b.number)
-  if (sort.value === 'copies') return (save.cars[b.id]?.copies ?? 0) - (save.cars[a.id]?.copies ?? 0) || a.number.localeCompare(b.number)
-  if (sort.value === 'year') return b.year - a.year || a.number.localeCompare(b.number)
-  return a.number.localeCompare(b.number)
+  if (sort.value === 'name') return a.name.localeCompare(b.name, 'fr') || byNumber(a, b)
+  if (sort.value === 'cost') return a.cost - b.cost || byNumber(a, b)
+  if (sort.value === 'cost-desc') return b.cost - a.cost || byNumber(a, b)
+  if (sort.value === 'rarity') return rarities.indexOf(b.rarity) - rarities.indexOf(a.rarity) || byNumber(a, b)
+  if (sort.value === 'power') return totalPower(b) - totalPower(a) || byNumber(a, b)
+  if (sort.value === 'stage') return prepScore(b) - prepScore(a) || totalPower(b) - totalPower(a) || byNumber(a, b)
+  if (sort.value === 'acc') return carStats(b).acc - carStats(a).acc || byNumber(a, b)
+  if (sort.value === 'vit') return carStats(b).vit - carStats(a).vit || byNumber(a, b)
+  if (sort.value === 'man') return carStats(b).man - carStats(a).man || byNumber(a, b)
+  if (sort.value === 'end') return carStats(b).end - carStats(a).end || byNumber(a, b)
+  if (sort.value === 'copies') return (save.cars[b.id]?.copies ?? 0) - (save.cars[a.id]?.copies ?? 0) || byNumber(a, b)
+  if (sort.value === 'year') return b.year - a.year || byNumber(a, b)
+  return byNumber(a, b)
 }))
 const rarityCount = (rarity?: Rarity) => vehicles.filter(v => (!rarity || v.rarity === rarity) && (garageFilter.value === 'collection' || Boolean(save.cars[v.id])) && (garageFilter.value !== 'favorites' || save.cars[v.id]?.favorite) && (garageFilter.value !== 'lineup' || save.lineup.includes(v.id))).length
 const ownedParts = computed(() => parts.filter(p => (save.parts[p.id] ?? 0) > 0))
@@ -224,14 +230,15 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
       <div
         v-if="carList.length"
         class="garage-grid"
-        :class="{ 'grid-custom': cols > 0, 'grid-single': cols === 1, 'grid-dense': cols >= 4 }"
+        :class="{ 'grid-custom': cols > 0, 'grid-single': cols === 1, 'grid-dense': cols >= 4, 'grid-sheet': sheet }"
         :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined"
       >
         <div v-for="v in carList" :key="v.id" class="garage-tile">
           <template v-if="save.cars[v.id]">
             <button type="button" class="card-tile" :aria-label="`Voir ${v.name} ${v.version}`" @click="emit('inspect', 'car', v.id)">
               <span v-if="!save.seenCars?.includes(v.id)" class="new-car-badge">Nouveau</span>
-              <CarCard :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" :compact="cols !== 1" />
+              <CarThumb v-if="sheet" :id="v.id" :style-name="save.cars[v.id].shown" />
+              <CarCard v-else :id="v.id" :style-name="save.cars[v.id].shown" :prep="prepOf(save, v.id)" :compact="cols !== 1" />
               <span v-if="save.cars[v.id].copies > 1" class="copy-count">×{{ save.cars[v.id].copies }}</span>
               <span v-if="save.lineup.includes(v.id)" class="tile-tag lineup-tag">Écurie</span>
               <span v-else-if="hasReadyEvo(v.id)" class="tile-tag evo-tag">Évolution</span>
@@ -239,6 +246,9 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
             <button type="button" class="favorite-button" :aria-label="`Favori · ${v.name} ${v.version}`" :aria-pressed="save.cars[v.id].favorite"
               @click="act(s => { s.cars[v.id].favorite = !s.cars[v.id].favorite })"><span aria-hidden="true">{{ save.cars[v.id].favorite ? '★' : '☆' }}</span></button>
           </template>
+          <button v-else-if="sheet" type="button" class="card-tile" :aria-label="`${v.name} ${v.version}, pas encore dans ton garage`" @click="emit('inspect', 'car', v.id)">
+            <CarThumb :id="v.id" missing />
+          </button>
           <button v-else type="button" class="missing-card" :class="`rarity-${rarityClass[v.rarity]}`" @click="emit('inspect', 'car', v.id)">
             <span>{{ v.number }} / {{ vehicles.length }} · {{ v.rarity }}</span>
             <strong>{{ v.name }}</strong>

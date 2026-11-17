@@ -1,6 +1,6 @@
 // Règles de préparation et de course en secteurs. Fonctions pures, sans état d'interface.
 import {
-  partById, rivalById, sectorLabels, sectorStat, statLabels, vehicleById,
+  partById, rivalById, rivals, sectorLabels, sectorStat, statLabels, vehicleById,
   type Condition, type Effect, type Part, type Rival, type Sector, type StatKey, type Stats, type Vehicle,
 } from './data'
 
@@ -279,17 +279,26 @@ function applyLuck(play: Play, sector: Sector, condition: Condition, rng: Rng) {
   if (line) { play.lines.push(line); play.score += line.value }
 }
 
-export function playRound(duel: Duel, choice: { car: number; nitro: boolean; stance?: Stance }, rng: Rng): Round {
+export interface Choice { car: number; nitro: boolean; stance?: Stance }
+
+// Course contre l'IA : l'IA choisit d'abord (elle consomme le hasard en premier), puis le secteur se résout comme en versus.
+export function playRound(duel: Duel, choice: Choice, rng: Rng): Round {
   if (duel.winner || duel.rounds.length >= duel.sectors.length) throw new Error('Course terminée')
-  const ai = aiChoice(duel, 'rival', rng)
-  const player = evaluate(duel, 'player', choice.car, choice.nitro, ai.car, choice.stance)
-  const rival = evaluate(duel, 'rival', ai.car, ai.nitro, choice.car, ai.stance)
+  return playVersusRound(duel, choice, aiChoice(duel, 'rival', rng), rng)
+}
+
+// Un secteur entre deux choix déjà connus (deux joueurs, ou un joueur et l'IA) : `a` joue pour le camp player, `b` pour le camp
+// rival. Le hasard est consommé dans cet ordre fixe (chance de a, puis de b) : même graine et mêmes choix, même secteur partout.
+export function playVersusRound(duel: Duel, a: Choice, b: Choice, rng: Rng): Round {
+  if (duel.winner || duel.rounds.length >= duel.sectors.length) throw new Error('Course terminée')
+  const player = evaluate(duel, 'player', a.car, a.nitro, b.car, a.stance)
+  const rival = evaluate(duel, 'rival', b.car, b.nitro, a.car, b.stance)
   const index = duel.rounds.length
   for (const play of [player, rival]) applyLuck(play, duel.sectors[index], duel.conditions[index], rng)
   let winner: Round['winner'] = player.score > rival.score ? 'player' : rival.score > player.score ? 'rival' : 'tie'
   if (winner === 'tie') {
-    const a = duel.player.lineup[choice.car].stats.end, b = duel.rival.lineup[ai.car].stats.end
-    winner = a > b ? 'player' : b > a ? 'rival' : 'tie'
+    const x = duel.player.lineup[a.car].stats.end, y = duel.rival.lineup[b.car].stats.end
+    winner = x > y ? 'player' : y > x ? 'rival' : 'tie'
   }
   const round: Round = { sector: duel.sectors[index], condition: duel.conditions[index], player, rival, winner }
   for (const [who, play] of [['player', player], ['rival', rival]] as const) {
@@ -312,3 +321,106 @@ export function playRound(duel: Duel, choice: { car: number; nitro: boolean; sta
 export function lineupCost(ids: string[]) {
   return ids.reduce((n, id) => n + (vehicleById.get(id)?.cost ?? 0), 0)
 }
+
+// ——— Versus entre deux joueurs (docs/versus.md § 4) ———
+// Ce fichier et data.ts sont copiés tels quels côté serveur : aucune dépendance à l'interface ni à la sauvegarde.
+
+// Générateur pseudo-aléatoire reproductible à partir d'un texte (défi du jour, Nuit sans fin, salles versus).
+export function seededRng(key: string): Rng {
+  let seed = 2166136261
+  for (const c of key) seed = Math.imul(seed ^ c.charCodeAt(0), 16777619)
+  return () => { seed = Math.imul(seed ^ seed >>> 15, 1 | seed); seed ^= seed + Math.imul(seed ^ seed >>> 7, 61 | seed); return ((seed ^ seed >>> 14) >>> 0) / 4294967296 }
+}
+
+export const VERSUS_CAPS = [9, 15, 22] as const
+export const VERSUS_STAKES = [0, 50, 100, 250, 500] as const
+export const VERSUS_STAKE_SHARE = 0.25
+
+// Mise : 0 (pour la gloire) toujours permise ; sinon un palier connu, au plus 25 % des crédits.
+export function stakeCheck(stake: number, credits: number): string | undefined {
+  if (!(VERSUS_STAKES as readonly number[]).includes(stake)) return `Mise inconnue : choisis ${VERSUS_STAKES.join(', ')} crédits`
+  if (stake > 0 && stake > Math.floor(credits * VERSUS_STAKE_SHARE)) return `Mise trop haute : au plus ${Math.floor(credits * VERSUS_STAKE_SHARE)} crédits (25 % de tes crédits)`
+}
+
+export type VersusEntry = { id: string; prep: Prep }
+
+// Écurie versus revérifiée (le serveur ne fait pas confiance à la sauvegarde) : plafond, voitures, stage, ateliers, pièces, potentiel.
+export function checkVersusLineup(entries: VersusEntry[], cap: number): string | undefined {
+  if (!(VERSUS_CAPS as readonly number[]).includes(cap)) return `Plafond inconnu : choisis ${VERSUS_CAPS.join(', ')}`
+  if (!Array.isArray(entries) || entries.length !== 3) return 'Choisis trois voitures'
+  const ids = entries.map(e => e?.id)
+  if (new Set(ids).size !== 3) return 'Choisis trois voitures différentes'
+  for (const entry of entries) {
+    const v = vehicleById.get(entry.id)
+    if (!v) return `Voiture inconnue : ${entry.id}`
+    const problem = prepProblem(v, entry.prep)
+    if (problem) return `${v.name} ${v.version} · ${problem}`
+  }
+  const cost = lineupCost(ids)
+  if (cost > cap) return `Coût ${cost}/${cap} : l’écurie dépasse le plafond`
+}
+
+function prepProblem(v: Vehicle, prep: Prep): string | undefined {
+  if (!prep || typeof prep !== 'object') return 'préparation absente'
+  if (!Number.isInteger(prep.stage) || prep.stage < 0 || prep.stage > 3) return 'stage invalide'
+  const levels = upgradeKeys.map(key => prep.upgrades?.[key] ?? 0)
+  if (levels.some(level => !Number.isInteger(level) || level < 0 || level > partUnlockLevel)) return 'niveau d’atelier invalide'
+  if (prep.upgrades && Object.keys(prep.upgrades).some(key => !upgradeKeys.includes(key as StatKey))) return 'atelier inconnu'
+  if (prep.extraSlot !== undefined) {
+    if (!extraSlotFamily[prep.extraSlot]) return '3ᵉ emplacement impossible sur cet atelier'
+    if (prep.stage < 3 || levels.some(level => level < partUnlockLevel)) return '3ᵉ emplacement : Stage 3 et les 4 ateliers au niveau 2 requis'
+  }
+  if (!Array.isArray(prep.parts)) return 'pièces invalides'
+  if (new Set(prep.parts).size !== prep.parts.length) return 'la même pièce est montée deux fois'
+  // Objet simple plutôt qu'une Map : le même résultat quelle que soit la cible de compilation (jeu, tests, serveur Deno).
+  const perFamily: Record<string, number> = {}
+  for (const id of prep.parts) {
+    const part = partById.get(id)
+    if (!part) return `pièce inconnue : ${id}`
+    const reason = compatibility(part, v)
+    if (reason) return `${part.name} · ${reason}`
+    const key = upgradeForFamily(part.family)
+    if (key && (prep.upgrades?.[key] ?? 0) < partUnlockLevel) return `${part.name} · ${upgrades[key].label} niveau ${partUnlockLevel} requis`
+    perFamily[part.family] = (perFamily[part.family] ?? 0) + 1
+  }
+  for (const family of Object.keys(perFamily)) {
+    const room = prep.extraSlot && extraSlotFamily[prep.extraSlot] === family ? 2 : 1
+    if (perFamily[family] > room) return 'trop de pièces dans la même famille'
+  }
+  if (prepUsed(prep) > potential(v, prep.stage, prep.extraSlot)) return 'potentiel de préparation dépassé'
+}
+
+// Circuit d'une salle : celui d'un rival existant, tiré par la graine sur son propre flux.
+export function versusCircuit(seed: string): Rival['circuit'] {
+  const list = rivals.filter(r => r.circuit)
+  return list[Math.floor(seededRng(`${seed}:circuit`)() * list.length)].circuit
+}
+
+// Course versus : camp player = hôte (a), camp rival = invité (b). Les conditions et la chance viennent du flux principal de la graine.
+export function createVersusRace(seed: string, a: VersusEntry[], b: VersusEntry[]): Duel {
+  return createRace(`versus:${seed}`, versusCircuit(seed), a, b, seededRng(seed))
+}
+
+export interface VersusMove { a: Choice | null; b: Choice | null }
+
+// Coup d'un joueur absent : l'IA joue à sa place, sur un flux séparé qui ne décale pas le hasard de la course.
+// Clé du flux : `${graine}:ai:${secteur}:${camp}`, secteur de 0 à 4 (nombre de secteurs déjà joués), camp `player` ou `rival`.
+// Le serveur doit reproduire exactement cette clé.
+export function autoChoice(duel: Duel, seed: string, who: 'player' | 'rival'): Choice {
+  return aiChoice(duel, who, seededRng(`${seed}:ai:${duel.rounds.length}:${who}`))
+}
+
+// Rejoue toute une course versus à partir de la graine, des deux écuries et des coups secteur par secteur. Le serveur
+// et les deux jeux obtiennent ainsi exactement la même course.
+export function replayVersus(input: { seed: string; a: VersusEntry[]; b: VersusEntry[]; moves: VersusMove[] }): Duel {
+  const rng = seededRng(input.seed)
+  const duel = createRace(`versus:${input.seed}`, versusCircuit(input.seed), input.a, input.b, rng)
+  for (const move of input.moves) {
+    if (duel.winner || duel.rounds.length >= duel.sectors.length) break
+    const a = move.a ?? autoChoice(duel, input.seed, 'player')
+    const b = move.b ?? autoChoice(duel, input.seed, 'rival')
+    playVersusRound(duel, a, b, rng)
+  }
+  return duel
+}
+

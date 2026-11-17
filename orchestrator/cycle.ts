@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { realpathSync } from 'node:fs'
-import { appendFile, mkdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { invoke } from './agents.ts'
@@ -44,7 +44,7 @@ async function writeJson(path: string, data: unknown) {
 function validate(task: Task, config: Config) {
   const safePath = (path: string) => /^[a-zA-Z0-9][a-zA-Z0-9_./-]*$/.test(path) &&
     !path.split('/').some(segment => segment.startsWith('.')) &&
-    (path.startsWith('src/') || path.startsWith('docs/') || path.startsWith('public/') || path === 'README.md' || path === 'index.html')
+    (path.startsWith('src/') || path.startsWith('docs/') || path.startsWith('public/') || path.startsWith('supabase/') || path === 'README.md' || path === 'index.html')
   const safeStep = (step: FlowStep) => {
     const entries = Object.entries(step ?? {})
     if (entries.length !== 1) return false
@@ -267,6 +267,21 @@ async function cycle(directory: string, resume: boolean) {
           state.tests = { build: result.code === 0 && !result.problem ? 'pass' : 'fail', browser: 'skipped',
             detail: result.problem ?? redact((result.stderr || result.stdout).slice(-3400)) }
           if (result.problem) throw new Error('Build · ' + failure(result))
+          // Vérifications hors réseau du jeu (src/game/*.check.cjs, pipeline/check-daily.cjs) : un échec compte comme un build en échec.
+          let checksSummary = ''
+          if (state.tests.build === 'pass') {
+            const checks = [...(await readdir(join(checkout, 'src/game'))).filter(file => file.endsWith('.check.cjs')).sort().map(file => join('src/game', file)),
+              ...(await readFile(join(checkout, 'pipeline/check-daily.cjs')).then(() => ['pipeline/check-daily.cjs'], () => []))]
+            const failed: string[] = []
+            for (const check of checks) {
+              const run = await execute(process.execPath, [check], options())
+              if (run.problem) throw new Error('Vérification ' + check + ' · ' + failure(run))
+              if (run.code !== 0) failed.push(check + ' · ' + redact((run.stderr || run.stdout).split('\n').filter(Boolean).slice(0, 6).join(' | ')).slice(0, 600))
+            }
+            await writeJson(join(step, 'checks.json'), { run: checks, failed })
+            if (failed.length) state.tests = { build: 'fail', browser: 'skipped', detail: 'Vérifications en échec : ' + failed.join(' ; ') }
+            else checksSummary = `Build réussi. ${checks.length} vérifications passées (node) : ${checks.join(', ')}. `
+          }
           if (state.tests.build === 'pass') {
             const browser = await execute(process.execPath, [join(here, 'browser.ts'), join(checkout, 'dist'), step, state.config.cli.chrome,
               state.task.browser, JSON.stringify(state.task.flow ?? [])], options())
@@ -280,7 +295,7 @@ async function cycle(directory: string, resume: boolean) {
             if (!Array.isArray(evidence.checks) || evidence.checks.length !== 3 || !Array.isArray(evidence.screenshots)) throw new Error('Preuves navigateur incomplètes')
             state.tests.browser = evidence.checks.every((check: { status: string }) => check.status === 'pass') ? 'pass' : 'fail'
             await writeJson(join(step, 'browser.json'), evidence)
-            state.tests.detail = redact(JSON.stringify(evidence.checks))
+            state.tests.detail = checksSummary + 'Navigateur : ' + redact(JSON.stringify(evidence.checks))
           }
           await writeJson(join(step, 'tests.json'), state.tests)
         } else if (stage === 'finish') {
@@ -352,7 +367,8 @@ async function cycle(directory: string, resume: boolean) {
           const reply = await invoke(stage, state.config.cli, agentPrompt(stage, state, context), step, options(workspace),
             state.config.limits.claudeBudgetUsdPerCall, join(here, 'evidence.ts'))
           if (reply.tokens !== undefined) { state.tokens += reply.tokens; state.unknownUsage-- }
-          if (reply.relay) await log('Codex indisponible · Claude a pris le relais de l’implémentation')
+          if (reply.relay) await log(stage === 'ux' ? 'Antigravity indisponible · Claude a pris le relais de la revue visuelle' : 'Codex indisponible · Claude a pris le relais de l’implémentation')
+          if (reply.model && !reply.relay) await log(`Antigravity : modèle par défaut à court de quota, relais par ${reply.model}`)
           // La contre-revue est un avis : son absence (quota, session) ne bloque pas le cycle.
           if (stage === 'critique' && (!reply.report || reply.report.status === 'blocked')) {
             await log('Contre-revue Antigravity indisponible · ' + (reply.problem ?? reply.report?.summary ?? 'rapport absent'))

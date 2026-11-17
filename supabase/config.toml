@@ -1,1 +1,20 @@
 project_id = "wqfukxadzwxaypqebtqw"
+
+# Ce point vérifie lui-même le jeton du joueur ou le jeton dédié du planificateur.
+[functions.resolve-due]
+verify_jwt = false
+
+[functions.register]
+verify_jwt = false
+
+[functions.create-room]
+verify_jwt = false
+
+[functions.join-room]
+verify_jwt = false
+
+[functions.submit-move]
+verify_jwt = false
+
+[functions.claim-settlement]
+verify_jwt = false

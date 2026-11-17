@@ -1,4 +1,4 @@
-# GarageVerse · Méta « Neon Drive » v0.12.0
+# GarageVerse · Méta « Neon Drive » v0.13.0
 
 Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et §9) pour la version jouable. Les valeurs vivent dans `src/data/roster.json` et `src/data/garage.json`, les règles dans `src/game/rules.ts`. La simulation `node pipeline/balance.mjs` vérifie les ordres de grandeur.
 
@@ -250,7 +250,9 @@ Le jeu suit SemVer. La version vient de `package.json` (champ `version`), inject
 
 **Écran de lancement.** À chaque lancement, le splash GAMEDAVE repris de Crazy Popping Catz (`src/components/GameDaveSplash.vue`, logo `src/assets/ui/gamedave-logo.png`) recouvre le jeu : fond noir, logo centré dans un cadre 720 × 1550 en « scale-outer » et ancré en bas, fondu linéaire de 3 s, fin à 5 s. Un toucher, Entrée, Espace ou Échap le passent, et le toucher n'active pas le bouton situé dessous. En mouvement réduit, le logo s'affiche sans fondu. La fenêtre « Nouveautés » attend sa fin. Les navigateurs pilotés par un outil de test (`navigator.webdriver`, orchestrateur compris) ne l'affichent pas.
 
-**Showroom caché.** Sept appuis rapides (moins de 1,5 s d'écart) sur « GarageVerse vX » en bas des Réglages ouvrent l'écran `showroom` (`src/views/ShowroomView.vue`, compteur `debugTap(…, 7)` de `src/game/debug.ts`). Il montre les 131 cartes, possédées ou non, avec recherche et filtre par rareté ; une carte touchée ouvre toutes ses éditions (`stylesOf`) en défilement horizontal. Vitrine en lecture seule : rien n'est écrit dans la sauvegarde. La note de version 0.10.0 l'annonce sans le dévoiler. Tant que la version commence par 0 : le mineur apporte des nouveautés, le correctif ne corrige que des défauts.
+**Showroom caché.** Sept appuis rapides (moins de 1,5 s d'écart) sur « GarageVerse vX » en bas des Réglages ouvrent l'écran `showroom` (`src/views/ShowroomView.vue`, compteur `debugTap(…, 7)` de `src/game/debug.ts`). Il montre les 131 cartes, possédées ou non, avec recherche et filtre par rareté ; une carte touchée ouvre toutes ses éditions (`stylesOf`) en défilement horizontal. Vitrine en lecture seule : rien n'est écrit dans la sauvegarde. La note de version 0.10.0 l'annonce sans le dévoiler. Le Showroom a son propre choix « Par ligne » (Auto, 1 à 5), initialisé depuis celui du garage et jamais enregistré.
+
+**Vue planche.** Sur téléphone (moins de 650 px), 4 et 5 voitures par ligne affichent des vignettes (`src/components/CarThumb.vue`) au lieu des cartes complètes, illisibles à cette taille : illustration de l'édition affichée, numéro et cadre de rareté, voitures manquantes en pointillés. 6 par ligne reste réservé aux grands écrans. Sur tablette et ordinateur, les cartes complètes restent. Tant que la version commence par 0 : le mineur apporte des nouveautés, le correctif ne corrige que des défauts.
 
 ### Onglets des Réglages et raccourci de développement
 

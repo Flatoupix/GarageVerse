@@ -24,7 +24,10 @@ export interface Preferences { sound: boolean; music: boolean; reducedMotion: bo
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
+import type { VersusAccount } from './versus-wallet'
+
 export interface Save {
+  versus: VersusAccount | null
   seenCars?: string[]
   nightRecord: number
   night: Night | null
@@ -50,7 +53,7 @@ export interface Save {
 export function newSave(): Save {
   const start = progression.start
   const save: Save = {
-    nightRecord: 0, night: null, nightLineup: [...start.vehicles],
+    versus: null, nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
@@ -104,6 +107,11 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     return save
   }
 
+  const account = input.versus
+  if (account && typeof account.id === 'string' && typeof account.nickname === 'string' && typeof account.friend_code === 'string') {
+    const active = account.active
+    save.versus = { id: account.id, nickname: account.nickname, friend_code: account.friend_code, active: active && typeof active.room === 'string' && Number.isSafeInteger(active.stake) ? active : null }
+  }
   save.series = series.filter(s => Array.isArray(input.series) && input.series.includes(s.id)).map(s => s.id)
   if (input.daily) save.daily = {
     date: typeof input.daily.date === 'string' ? input.daily.date : localDate(),
