@@ -1,18 +1,36 @@
 name: Déploiement Supabase
 
 on:
+  pull_request:
+    branches: [master]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/supabase.yml"
   push:
     branches: [master]
     paths:
       - "supabase/**"
+      - ".github/workflows/supabase.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
+  # Cette étape tourne aussi sur PR, sans accès aux secrets ni à Supabase hébergé.
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Vérifier le planificateur Versus
+        run: |
+          bash -n supabase/scheduler/activate.sh
+          test -f supabase/scheduler/resolve-due.sql
+          grep -Fq "gv-resolve-due" supabase/scheduler/resolve-due.sql
+
   deploy:
-    if: github.ref == 'refs/heads/master'
+    needs: validate
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     environment: github-pages
     env:
@@ -41,3 +59,10 @@ jobs:
         run: |
           test -n "$SUPABASE_ACCESS_TOKEN"
           supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api --yes
+
+      - name: Activer et vérifier le planificateur Versus
+        if: hashFiles('supabase/scheduler/activate.sh') != ''
+        run: |
+          test -n "$SUPABASE_PROJECT_REF"
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          bash supabase/scheduler/activate.sh
