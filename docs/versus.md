@@ -62,6 +62,8 @@ La V1 seule est un jeu complet. V2 et V3 viennent ensuite.
 
 ## 6. Serveur Supabase dédié
 
+Détail technique (configuration, schéma SQL, fonctions, sécurité, déploiement) : [`docs/supabase.md`](supabase.md).
+
 **Projet.** Un nouveau projet Supabase « garageverse », séparé de celui de Crazy Popping Catz. Comptes **anonymes** (Supabase Auth anonyme) : aucun e-mail demandé, le compte est lié à l'appareil, avec un pseudo et un code ami à 6 caractères.
 
 **Tables (V1).**
