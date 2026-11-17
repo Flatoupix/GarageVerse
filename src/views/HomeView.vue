@@ -8,7 +8,7 @@ import { boosterById, conditionIcons, conditionLabels, rivalById, series, vehicl
 import { claimDailyBooster, prepareDaily, todayChallenge, unlockedRivals } from '../game/save'
 import { act, completedSeries, dailySelected, ownedCount, save } from '../game/store'
 
-const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race'] }>()
+const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race' | 'versus'] }>()
 const challenge = computed(() => todayChallenge(save))
 function openDaily() { discover('daily'); dailySelected.value = true; if (!save.duel) act(prepareDaily); emit('go', 'race') }
 const pending = computed(() => save.sealed || (save.opening && save.opening.view !== 'recap'))
@@ -38,6 +38,8 @@ const nextRival = computed(() => {
         <button v-else type="button" class="button primary" @click="emit('go', 'race')">Défier {{ nextRival.name }} <span aria-hidden="true">⟶</span></button>
       </div>
     </section>
+
+    <button type="button" class="button primary wide" @click="emit('go', 'versus')">{{ save.versus?.active ? 'Reprendre le duel Versus' : 'Versus · Défier un ami' }}</button>
 
     <section class="daily-panel" :class="{ done: save.daily.won }" aria-labelledby="daily-title">
       <div class="daily-head">
