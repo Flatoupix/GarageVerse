@@ -1,0 +1,42 @@
+name: Déploiement Supabase
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "supabase/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v3
+        with:
+          version: latest
+
+      - name: Vérifier la référence du projet
+        run: test -n "$SUPABASE_PROJECT_REF"
+
+      - name: Appliquer les migrations
+        if: hashFiles('supabase/migrations/*.sql') != ''
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_DB_PASSWORD"
+          supabase db push --remote="$SUPABASE_PROJECT_REF" --password="$SUPABASE_DB_PASSWORD" --yes
+
+      - name: Déployer les fonctions Edge
+        if: hashFiles('supabase/functions/*/index.ts') != ''
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          supabase functions deploy --remote="$SUPABASE_PROJECT_REF" --use-api --yes
