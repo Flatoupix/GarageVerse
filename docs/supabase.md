@@ -69,7 +69,7 @@ Le serveur doit résoudre les secteurs **avec exactement le même code** que le 
 
 ## 6. Schéma V1 (duels et mises)
 
-Esquisse de la première migration. Toutes les tables ont la RLS activée ; **aucune écriture directe depuis le jeu** : tout passe par les fonctions serveur.
+Première migration : `supabase/migrations/20261118000000_versus_v1.sql` (tables dans le schéma `public`, extrait ci-dessous). Toutes les tables ont la RLS activée ; **aucune écriture directe depuis le jeu** : tout passe par les fonctions serveur.
 
 ```sql
 create type gv_room_state as enum ('open', 'ready', 'racing', 'done', 'expired', 'cancelled');
@@ -77,7 +77,7 @@ create type gv_room_state as enum ('open', 'ready', 'racing', 'done', 'expired',
 create table gv_players (
   id uuid primary key references auth.users on delete cascade,
   nickname text not null check (char_length(nickname) between 2 and 20),
-  friend_code text not null unique,
+  friend_code text not null unique check (friend_code ~ '^[A-Z0-9]{6}$'),
   created_at timestamptz not null default now()
 );
 
@@ -90,10 +90,11 @@ create table gv_rooms (
   stake integer not null check (stake in (0, 50, 100, 250, 500)),
   seed text not null,
   state gv_room_state not null default 'open',
-  sector smallint not null default 0,              -- secteur en cours, 0 à 4
+  sector smallint not null default 0 check (sector between 0 and 4), -- secteur en cours
   sector_deadline timestamptz,                     -- fin des 20 secondes du secteur en cours
   missed jsonb not null default '{}',              -- secteurs sans réponse par joueur
   winner uuid references gv_players,               -- null : égalité ou pas encore fini
+  rematch_of uuid references gv_rooms on delete set null, -- salle d'origine d'une revanche (§ 12)
   expires_at timestamptz not null default now() + interval '10 minutes',
   created_at timestamptz not null default now()
 );
@@ -107,9 +108,11 @@ create table gv_lineups (
 
 create table gv_moves (
   room uuid references gv_rooms on delete cascade,
-  sector smallint not null,
+  sector smallint not null check (sector between 0 and 4),
   player uuid references gv_players,
-  car smallint not null, stance text not null, nitro boolean not null,
+  car smallint not null check (car between 0 and 2),
+  stance text not null check (stance in ('normal', 'attaque', 'gestion')),
+  nitro boolean not null,
   auto boolean not null default false,             -- joué par l'IA après le délai
   created_at timestamptz not null default now(),
   primary key (room, sector, player)
@@ -117,7 +120,7 @@ create table gv_moves (
 
 create table gv_rounds (
   room uuid references gv_rooms on delete cascade,
-  sector smallint not null,
+  sector smallint not null check (sector between 0 and 4),
   result jsonb not null,                           -- scores, lignes, chance, vainqueur du secteur
   primary key (room, sector)
 );
@@ -141,9 +144,13 @@ create table gv_settlements (
 | `gv_moves` | **son propre coup seulement** tant que le secteur n'est pas résolu, puis les deux |
 | `gv_settlements` | sa propre ligne |
 
+Un coup adverse devient lisible dès qu'une ligne `gv_rounds` existe pour cette salle et ce secteur. Les politiques passent par `gv_rooms` (et `gv_rounds` pour les coups), jamais l'inverse, et n'utilisent aucune fonction.
+
+**Droits.** `anon` n'a aucun droit sur ces tables (même pas `select`) ; `authenticated` n'a que `select`, filtré par la RLS ; seul `service_role` (fonctions serveur) insère, modifie et supprime.
+
 **Temps réel.** Publication Realtime sur `gv_rooms` (état, secteur, délai) et `gv_rounds` (résultats). Les coups (`gv_moves`) ne sont **jamais** diffusés.
 
-**Index.** `gv_rooms (code)`, `gv_rooms (state, expires_at)`, `gv_rooms (state, sector_deadline)` pour les délais.
+**Index.** `gv_rooms (code)` (celui de la contrainte unique), `gv_rooms (state, expires_at)`, `gv_rooms (state, sector_deadline)` pour les délais.
 
 ## 7. Fonctions serveur
 
@@ -184,6 +191,7 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 
 **Développement.** `supabase start` en local demande Docker, absent du conteneur de l'agent. On teste donc :
 - les règles et la résolution des secteurs sans serveur (tests Node, comme les autres `*.check.cjs`) ;
+- les migrations hors ligne avec `node src/game/supabase.check.cjs` : il les applique dans un Postgres en mémoire (PGlite) par-dessus un faux environnement Supabase (`supabase/tests/supabase-stubs.sql`), puis lance les suites `supabase/tests/*.test.mjs` (contraintes, droits, RLS, publication Realtime) ;
 - le serveur réel sur le projet, avec deux navigateurs (deux comptes anonymes) avant chaque publication.
 
 ## 10. Plan de tests
