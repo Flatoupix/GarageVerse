@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { VERSUS_OPEN } from '../game/features'
 import { computed } from 'vue'
 import GameLogo from '../components/GameLogo.vue'
 import { discover } from '../game/tutorial'
@@ -37,7 +38,7 @@ const nextRival = computed(() => {
             Ouvrir {{ boosterById.get(tickets[0][0])!.name }} <span aria-hidden="true">↗</span>
           </button>
           <button v-else type="button" class="button primary" @click="emit('go', 'race')">Défier {{ nextRival.name }} <span aria-hidden="true">⟶</span></button>
-          <button type="button" class="button ghost" @click="emit('go', 'versus')">{{ save.versus?.active ? 'Reprendre le duel Versus' : 'Versus · Défier un ami' }}</button>
+          <button v-if="VERSUS_OPEN || save.versus?.active" type="button" class="button ghost" @click="emit('go', 'versus')">{{ save.versus?.active ? 'Reprendre le duel Versus' : 'Versus · Défier un ami' }}</button>
         </div>
       </div>
     </section>

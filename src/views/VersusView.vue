@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { VERSUS_OPEN } from '../game/features'
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import QRCode from 'qrcode'
 import { refreshVersusSave, save } from '../game/store'
@@ -140,7 +141,10 @@ onUnmounted(() => {
     <h1>Versus</h1>
     <p role="status" v-if="!online">Connexion nécessaire</p>
     <p role="alert" v-if="error">{{ error }}</p>
-    <template v-if="!save.versus">
+    <template v-if="!VERSUS_OPEN && !active">
+      <p>Le mode Versus revient bientôt. Tes crédits et ton garage ne sont pas touchés.</p>
+    </template>
+    <template v-else-if="!save.versus">
       <form @submit.prevent="run(connect)">
         <label>Ton pseudo <input v-model="nickname" required minlength="2" maxlength="20" autocomplete="nickname"></label>
         <button class="button primary" :disabled="busy || !online">Entrer dans Versus</button>
@@ -196,7 +200,7 @@ onUnmounted(() => {
         <h2>{{ room.state === 'expired' ? 'Invitation expirée' : !room.winner ? 'Égalité' : room.winner === save.versus.id ? 'Victoire !' : 'Défaite' }}</h2>
         <p>Mise {{ room.stake }} ₡ · Montant versé {{ active.payout }} ₡</p>
         <p v-if="room.guest">Pot {{ room.stake * 2 }} ₡ · Commission {{ room.winner && state.rounds.length === 5 && !Object.values(room.missed).some(n => n >= 2) ? room.stake * 2 * .1 : 0 }} ₡</p>
-        <button v-if="room.state === 'done'" class="button primary" :disabled="busy || !online" @click="run(() => start(room!.id))">Revanche</button>
+        <button v-if="VERSUS_OPEN && room.state === 'done'" class="button primary" :disabled="busy || !online" @click="run(() => start(room!.id))">Revanche</button>
         <button class="button quiet" @click="run(finish)">Retour aux défis</button>
       </template>
     </template>
