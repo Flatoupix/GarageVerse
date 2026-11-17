@@ -38,10 +38,17 @@ export function reportFrom(value: unknown, phase: Phase): Report {
     findings: r.findings.map(redact), evidence: r.evidence.map(redact), patch: phase === 'implement' ? r.patch : '' }
 }
 
+// Modèles Antigravity essayés dans l'ordre quand le modèle par défaut (Gemini 4 Argon) est à court de quota. Les quotas
+// sont propres à chaque famille : le cycle garde ainsi un second modèle, distinct de l'auteur, avant le relais Claude.
+export const AGY_FALLBACK_MODELS = ['gemini-4-hydrogen-high', 'gemini-3.8-flash-high']
+
 export async function invoke(
   phase: Phase, binaries: Record<'claude' | 'codex' | 'agy', string>, prompt: string,
   step: string, options: RunOptions, budget: number, evidenceProgram: string, engine: 'codex' | 'claude' = 'codex',
-): Promise<{ report?: Report; tokens?: number; problem?: string; relay?: boolean }> {
+  agyAttempt = 0,
+): Promise<{ report?: Report; tokens?: number; problem?: string; relay?: boolean; model?: string }> {
+  const agyModel = agyAttempt > 0 ? AGY_FALLBACK_MODELS[agyAttempt - 1] : undefined
+  const agyModelArgs = agyModel ? ['--model', agyModel] : []
   // engine 'codex' : agents principaux (Codex pour l'implémentation, Antigravity pour la revue visuelle) ; 'claude' : relais Claude.
   const schemaFile = join(step, 'report.schema.json')
   await writeFile(schemaFile, JSON.stringify(schema), { mode: 0o600 })
@@ -61,7 +68,7 @@ export async function invoke(
     cwd = join(step, 'critique')
     await mkdir(cwd, { recursive: true, mode: 0o700 })
     const settings = { permissions: { deny: ['command(*)', 'unsandboxed(*)', 'write_file(*)', 'read_file(*)', 'read_url(*)', 'execute_url(*)', 'download_url(*)', 'mcp(*)'] } }
-    args = ['--sandbox', '--mode', 'plan', '--disable-slash-commands', '--log-file', '/dev/null', '--settings', JSON.stringify(settings),
+    args = [...agyModelArgs, '--sandbox', '--mode', 'plan', '--disable-slash-commands', '--log-file', '/dev/null', '--settings', JSON.stringify(settings),
       '--print-timeout', `${Math.max(1, Math.floor(options.timeout / 1000) - 2)}s`,
       '--output-format', 'json', '--json-schema', schemaFile, '-p', prompt]
   } else if (phase === 'ux' && engine === 'claude') {
@@ -89,7 +96,7 @@ export async function invoke(
         allow: ['mcp(garageverse/inspect_capture)'],
       },
     }
-    args = ['--sandbox', '--mode', 'plan', '--disable-slash-commands', '--log-file', '/dev/null', '--settings', JSON.stringify(settings),
+    args = [...agyModelArgs, '--sandbox', '--mode', 'plan', '--disable-slash-commands', '--log-file', '/dev/null', '--settings', JSON.stringify(settings),
       '--print-timeout', `${Math.max(1, Math.floor(options.timeout / 1000) - 2)}s`,
       '--output-format', 'json', '--json-schema', schemaFile, '-p', prompt]
   } else {
@@ -139,7 +146,13 @@ export async function invoke(
     const reply = await invoke(phase, binaries, prompt, step, options, budget, evidenceProgram, 'claude')
     return { ...reply, tokens: (tokens ?? 0) + (reply.tokens ?? 0), relay: true }
   }
-  // Antigravity à court de quota ou de session pour la revue visuelle : Claude la reprend, avec les mêmes captures.
+  // Modèle Antigravity à court de quota : on essaie le modèle suivant de la liste, sur la même étape.
+  const agyPhase = (phase === 'ux' || phase === 'critique') && engine === 'codex'
+  if (agyPhase && !final && /quota|RESOURCE_EXHAUSTED|\b429\b/i.test(output) && agyAttempt < AGY_FALLBACK_MODELS.length) {
+    const reply = await invoke(phase, binaries, prompt, step, options, budget, evidenceProgram, engine, agyAttempt + 1)
+    return { ...reply, tokens: (tokens ?? 0) + (reply.tokens ?? 0), model: reply.model ?? AGY_FALLBACK_MODELS[agyAttempt] }
+  }
+  // Antigravity à court de quota ou de session pour la revue visuelle, tous modèles essayés : Claude la reprend, avec les mêmes captures.
   if (phase === 'ux' && engine === 'codex' && !final && /quota|RESOURCE_EXHAUSTED|\b429\b|not logged in|authentication/i.test(output)) {
     const reply = await invoke(phase, binaries, prompt, step, options, budget, evidenceProgram, 'claude')
     return { ...reply, tokens: (tokens ?? 0) + (reply.tokens ?? 0), relay: true }
@@ -155,6 +168,7 @@ export async function invoke(
   }
   try {
     const report = reportFrom(typeof final === 'string' ? JSON.parse(final) : final, phase)
+    if (agyModel) report.evidence.push(`Modèle Antigravity de relais : ${agyModel}`)
     if (phase === 'ux' && report.status !== 'blocked') {
       const observed = (await readFile(join(step, 'inspected.ndjson'), 'utf8').catch(() => '')).split('\n')
         .filter(Boolean).map(line => JSON.parse(line))

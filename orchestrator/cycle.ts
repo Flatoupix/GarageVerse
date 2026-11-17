@@ -368,6 +368,7 @@ async function cycle(directory: string, resume: boolean) {
             state.config.limits.claudeBudgetUsdPerCall, join(here, 'evidence.ts'))
           if (reply.tokens !== undefined) { state.tokens += reply.tokens; state.unknownUsage-- }
           if (reply.relay) await log(stage === 'ux' ? 'Antigravity indisponible · Claude a pris le relais de la revue visuelle' : 'Codex indisponible · Claude a pris le relais de l’implémentation')
+          if (reply.model && !reply.relay) await log(`Antigravity : modèle par défaut à court de quota, relais par ${reply.model}`)
           // La contre-revue est un avis : son absence (quota, session) ne bloque pas le cycle.
           if (stage === 'critique' && (!reply.report || reply.report.status === 'blocked')) {
             await log('Contre-revue Antigravity indisponible · ' + (reply.problem ?? reply.report?.summary ?? 'rapport absent'))
