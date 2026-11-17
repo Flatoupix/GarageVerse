@@ -1,6 +1,6 @@
 # Supabase · préparation du multijoueur
 
-Statut : **préparation, rien n'est encore créé côté serveur** (17 novembre 2026). Ce document complète [`docs/versus.md`](versus.md), qui décrit le jeu. Ici : le projet Supabase, le schéma, les fonctions serveur, la sécurité et le déploiement. Tickets liés : `tickets/003` (serveur), `004` (mises), `005` (client temps réel), `007` (amis), `008` (échange).
+Statut : **serveur et client V1 implémentés et testés localement**. Ce document complète [`docs/versus.md`](versus.md), qui décrit le jeu. Ici : le projet Supabase, le schéma, les fonctions serveur, la sécurité et le déploiement. Tickets liés : `tickets/003` (serveur), `004` (mises), `005` (client temps réel), `007` (amis), `008` (échange).
 
 ## 1. Le projet
 
@@ -47,6 +47,8 @@ supabase/
   sync-rules.mjs                  # génère la copie des règles
   migrations/
     20261118000000_versus_v1.sql  # tables, index, RLS, publication Realtime
+    20261118010000_versus_snapshot.sql  # lecture cohérente de la salle
+  scheduler/resolve-due.sql         # installation du rattrapage après déploiement
   functions/
     _shared/
       game/                       # copie générée de src/game (règles et données), ne pas éditer à la main
@@ -167,7 +169,9 @@ Les points d'entrée Deno vérifient le jeton du joueur et ouvrent une connexion
 | `resolve-due` | `room` | à l'échéance, `autoChoice` joue pour chaque absent. Deux absences valent abandon. Si les deux joueurs abandonnent au même secteur, chacun récupère sa mise | `NOT_DUE` |
 | `claim-settlement` | `room` | renvoie le montant à appliquer à la sauvegarde et marque la ligne réclamée | `NOT_FINISHED`, `ALREADY_CLAIMED` |
 
-**Délais sans serveur permanent.** Le client pourra appeler `resolve-due` à la fin du compte à rebours. Un appel avec le jeton `service_role` et un corps `{}` traite jusqu'à 100 salles en retard, dont les salles ouvertes expirées à rembourser. La configuration de la tâche planifiée et l'intégration au client restent à faire.
+**Délais sans serveur permanent.** Le client appelle `resolve-due` à la fin du compte à rebours. Un appel avec le jeton `service_role` et un corps `{}` traite jusqu'à 100 salles en retard, dont les salles ouvertes expirées à rembourser. Le script `supabase/scheduler/resolve-due.sql` installe le rattrapage chaque minute avec Supabase Cron, pg_net et Vault. Il se lance après le déploiement des fonctions, une fois les extensions activées et les valeurs `gv_project_url` et `gv_scheduler_token` provisionnées dans Vault. Le même jeton dédié (au moins 32 caractères) se configure dans le secret Edge `GV_SCHEDULER_TOKEN`. Les fonctions vérifient elles-mêmes l'identité avec Auth.
+
+**Reprise du client.** Une invitation ouvre `?versus=CODE`. Le client vérifie le plafond et la mise avant de rejoindre. Il réserve la mise et sauvegarde la demande avec l’identifiant de salle avant l’appel réseau. Il peut ainsi rejouer une création ou une acceptation après une réponse perdue. La fonction SQL `gv_snapshot` renvoie l’état, l’heure du serveur, les secteurs révélés et le reçu du joueur sous les politiques de lecture existantes. Le client relit cet état au retour au premier plan, aux notifications Realtime et toutes les cinq secondes pendant le duel.
 
 **Mise côté jeu.** À la création ou à l'acceptation, le jeu retire la mise de la sauvegarde et la note comme *mise en cours* (identifiant de salle). À l'arrivée, `claim-settlement` donne le montant ; le jeu l'applique une seule fois et retire la mise en cours. Le jeu se contente d'afficher ce que le serveur a calculé : vainqueur, pot, commission de 10 %.
 

@@ -192,7 +192,7 @@ async function expire(ctx: Context, room: Row) {
 }
 
 // Les deux coups du secteur en cours sont enregistrés : résultat publié dans gv_rounds, puis secteur suivant, abandon ou arrivée.
-async function resolveSector(ctx: Context, room: Row, race: Race, missed: Record<string, number>) {
+async function resolveSector(ctx: Context, room: Row, race: Race, missed: Record<string, number>, sectorEnd = ctx.now().getTime()) {
   const duel = replay(race, room.sector + 1)
   const round: RoundResult = { ...duel.rounds[room.sector], points: { player: duel.player.points, rival: duel.rival.points } }
   await ctx.sql('insert into gv_rounds (room, sector, result) values ($1, $2, $3::text::jsonb)', [room.id, room.sector, JSON.stringify(round)])
@@ -201,7 +201,7 @@ async function resolveSector(ctx: Context, room: Row, race: Race, missed: Record
   if (quitters.length) next = await finish(ctx, room, missed, 'forfeit', quitters.length === 1 ? (quitters[0] === 'player' ? 'rival' : 'player') : null)
   else if (duel.rounds.length < duel.sectors.length) {
     next = (await ctx.sql('update gv_rooms set sector = $2, sector_deadline = $3, missed = $4::text::jsonb where id = $1 returning *',
-      [room.id, room.sector + 1, at(ctx, SECTOR_MS), JSON.stringify(missed)])).rows[0]
+      [room.id, room.sector + 1, new Date(sectorEnd + SECTOR_MS).toISOString(), JSON.stringify(missed)])).rows[0]
   } else next = await finish(ctx, room, missed, 'race', duel.winner === 'tie' || !duel.winner ? null : duel.winner)
   return { room: next, round }
 }
@@ -235,6 +235,11 @@ export async function createRoom(ctx: Context) {
     if (!await playerRow(ctx, true)) return unknownPlayer(ctx)
     const body = fields(ctx.body)
     if (!body) return fail('INVALID_REQUEST')
+    if (body.room_id !== undefined) {
+      if (!isUuid(body.room_id)) return fail('INVALID_REQUEST')
+      const previous = await lockRoom(ctx, body.room_id)
+      if (previous) return previous.host === ctx.player ? ok({ room: roomView(previous) }) : fail('INVALID_REQUEST')
+    }
     let { cap, stake } = body
     let rematch: string | null = null
     if (body.rematch_of != null) {
@@ -257,9 +262,9 @@ export async function createRoom(ctx: Context) {
     if (recent.count >= RATE_LIMIT.rooms) return fail('RATE_LIMITED', `Au plus ${RATE_LIMIT.rooms} salles par heure`)
     const seed = draw(SEED_ALPHABET, 20, ctx.random)
     for (let attempt = 0; attempt < DRAWS; attempt++) {
-      const { rows: [room] } = await ctx.sql(`insert into gv_rooms (code, host, cap, stake, seed, rematch_of, expires_at, created_at)
-        values ($1, $2, $3, $4, $5, $6, $7, $8) on conflict (code) do nothing returning *`,
-        [draw(INVITE_ALPHABET, 8, ctx.random), ctx.player, cap, stake, seed, rematch, at(ctx, ROOM_TTL_MS), at(ctx)])
+      const { rows: [room] } = await ctx.sql(`insert into gv_rooms (code, host, cap, stake, seed, rematch_of, expires_at, created_at, id)
+        values ($1, $2, $3, $4, $5, $6, $7, $8, coalesce($9::uuid, gen_random_uuid())) on conflict (code) do nothing returning *`,
+        [draw(INVITE_ALPHABET, 8, ctx.random), ctx.player, cap, stake, seed, rematch, at(ctx, ROOM_TTL_MS), at(ctx), body.room_id ?? null])
       if (!room) continue
       await ctx.sql('insert into gv_lineups (room, player, cars) values ($1, $2, $3::text::jsonb)', [room.id, ctx.player, JSON.stringify(lineup)])
       return ok({ room: roomView(room) })
@@ -270,7 +275,7 @@ export async function createRoom(ctx: Context) {
 
 // L'invité rejoint par le code : écurie et mise vérifiées, la course démarre, 20 s pour le premier secteur.
 export async function joinRoom(ctx: Context) {
-  return transaction(ctx.sql, async () => {
+  return transaction<unknown>(ctx.sql, async () => {
     if (!await playerRow(ctx)) return unknownPlayer(ctx)
     const body = fields(ctx.body)
     const code = typeof body?.code === 'string' ? body.code.trim().toUpperCase() : ''
@@ -278,11 +283,14 @@ export async function joinRoom(ctx: Context) {
     const { rows: [room] } = await ctx.sql('select * from gv_rooms where code = $1 for update', [code])
     if (!room) return fail('ROOM_NOT_FOUND')
     if (room.host === ctx.player) return fail('OWN_ROOM')
+    if (body.room_id !== undefined && body.room_id !== room.id) return fail('ROOM_NOT_FOUND')
+    if (body.room_id === room.id && room.guest === ctx.player) return ok({ room: roomView(room) })
     if (room.guest) return fail('ROOM_FULL')
     if (room.state !== 'open' || time(room.expires_at) <= ctx.now().getTime()) {
       if (room.state === 'open') await expire(ctx, room)
       return fail('ROOM_EXPIRED')
     }
+    if (body.preview === true) return ok({ id: room.id, cap: room.cap, stake: room.stake })
     const lineup = lineupOf(body.lineup, room.cap)
     if (typeof lineup === 'string') return fail('INVALID_LINEUP', lineup)
     const refused = stakeProblem(room.stake, body.credits)
@@ -325,7 +333,7 @@ export async function submitMove(ctx: Context) {
 }
 
 // Délai dépassé : l'IA joue pour chaque absent (coup auto, absence comptée), puis le secteur se résout. Salle ouverte expirée : close.
-async function resolveRoom(ctx: Context, id: string) {
+async function resolveRoom(ctx: Context, id: string): Promise<Result> {
   const room = await lockRoom(ctx, id)
   if (!room) return fail('ROOM_NOT_FOUND')
   if (ctx.player !== null && !inRoom(room, ctx.player)) return fail('NOT_YOUR_ROOM')
@@ -347,7 +355,9 @@ async function resolveRoom(ctx: Context, id: string) {
     played[camp] = choice
     missed[player] = (missed[player] ?? 0) + 1
   }
-  const next = await resolveSector(ctx, room, race, missed)
+  const next = await resolveSector(ctx, room, race, missed, time(room.sector_deadline))
+  // Le téléphone peut revenir après plusieurs délais. Chaque secteur est daté depuis son échéance initiale.
+  if (next.room.state === 'racing' && time(next.room.sector_deadline) <= now) return resolveRoom(ctx, id)
   return sectorView(next.room, next.round)
 }
 

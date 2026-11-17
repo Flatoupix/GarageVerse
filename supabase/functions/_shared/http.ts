@@ -27,8 +27,10 @@ export function handle(fn: (ctx: Context) => Promise<Result>, options: { schedul
     if (req.method !== 'POST') return reply({ ok: false, error: 'METHOD_NOT_ALLOWED' }, 405)
     const token = req.headers.get('Authorization')?.match(/^Bearer\s+(\S+)$/i)?.[1] ?? ''
     try {
-      const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-      const player = options.scheduled && service && token === service ? null : await playerOf(token)
+      const service = options.scheduled && Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+      const scheduler = options.scheduled && Deno.env.get('GV_SCHEDULER_TOKEN')
+      const scheduled = (service && token === service) || (scheduler && scheduler.length >= 32 && token === scheduler)
+      const player = scheduled ? null : await playerOf(token)
       if (player === undefined) return reply({ ok: false, error: 'UNAUTHORIZED' }, 401)
       let body: unknown
       try {

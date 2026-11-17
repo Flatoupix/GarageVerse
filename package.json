@@ -14,10 +14,13 @@
     "check:daily": "node pipeline/check-daily.cjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.119.0",
+    "qrcode": "1.5.4",
     "vue": "3.5.41"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16",
+    "@types/qrcode": "1.5.6",
     "@vitejs/plugin-vue": "5.2.4",
     "typescript": "5.9.3",
     "vite": "6.4.3",

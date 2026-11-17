@@ -1,7 +1,7 @@
 # T-005 · Versus V1 : client réseau, compte et reprise
 
 - **Priorité :** P1
-- **Statut :** Spécifié, non réalisé
+- **Statut :** Implémenté et testé localement. Validation sur Supabase hébergé et deux téléphones physiques en attente.
 - **Sources :** [docs/versus.md](../docs/versus.md) §3, §6 et §9
 
 **À faire**

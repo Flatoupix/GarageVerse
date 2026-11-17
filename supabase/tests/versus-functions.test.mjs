@@ -88,6 +88,23 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   await expectError('crédits invalides', 'INVALID_REQUEST', call(versus.createRoom, A, hostBody({ stake: 50, credits: 'beaucoup' })))
   assert.equal((await row('select count(*)::int as n from gv_rooms')).n, 0, 'aucune salle créée par un appel refusé')
 
+  // Après la perte d'une réponse, le même identifiant retrouve exactement le même engagement.
+  const request = hostBody({ room_id: uuid(700) })
+  const recovery = (await expectOk('création rejouable', call(versus.createRoom, D, request))).room
+  assert.equal(recovery.id, request.room_id)
+  assert.deepEqual((await expectOk('création rejouée', call(versus.createRoom, D, request))).room, recovery)
+  const join = { code: recovery.code, room_id: recovery.id, lineup: GUEST_CARS }
+  assert.deepEqual(await expectOk('aperçu sans engagement', call(versus.joinRoom, E, { code: join.code, preview: true })),
+    { id: recovery.id, cap: 9, stake: 0 })
+  await expectError('invitation remplacée', 'ROOM_NOT_FOUND', call(versus.joinRoom, E, { ...join, room_id: uuid(701) }))
+  const accepted = await expectOk('accepter', call(versus.joinRoom, E, join))
+  assert.deepEqual(await expectOk('acceptation rejouée', call(versus.joinRoom, E, join)), accepted)
+  tick(61_000)
+  await expectOk('rattrapage après 61 secondes sans client', call(versus.resolveDue, null, { room: recovery.id }))
+  assert.equal((await row('select state from gv_rooms where id = $1', [recovery.id])).state, 'done')
+  assert.deepEqual(await settled(recovery.id), { [D]: [0, 'refund'], [E]: [0, 'refund'] })
+  await db.query('delete from gv_rooms where id = $1', [recovery.id])
+
   // ——— Règlements (montants purs) ———
   assert.deepEqual(versus.payouts(100, { kind: 'race', winner: 'player' }), { player: { delta: 180, reason: 'win' }, rival: { delta: 0, reason: 'loss' } })
   assert.deepEqual(versus.payouts(50, { kind: 'race', winner: null }), { player: { delta: 50, reason: 'tie' }, rival: { delta: 50, reason: 'tie' } })
