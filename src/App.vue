@@ -11,6 +11,7 @@ import type { CardBackId } from './game/save'
 import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
 import ReleaseNotes from './components/ReleaseNotes.vue'
+import GameDaveSplash from './components/GameDaveSplash.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
 import GameLogo from './components/GameLogo.vue'
@@ -208,6 +209,8 @@ async function toggleFullscreen() {
 // Version du jeu (semver), lue dans package.json au build et affichée en bas des Réglages.
 const appVersion = __APP_VERSION__
 const releaseNotes = ref<InstanceType<typeof ReleaseNotes>>()
+// Splash GAMEDAVE à chaque lancement ; les navigateurs pilotés par un outil de test (orchestrateur) le sautent.
+const splash = ref(!navigator.webdriver)
 function showReleaseNotes() {
   settings.value?.close()
   releaseNotes.value?.openAll()
@@ -321,7 +324,8 @@ function toggleSetting(key: Setting) {
     <p v-if="storageWarning" class="storage-warning" role="alert">La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.</p>
 
     <MechanicGuide />
-    <ReleaseNotes ref="releaseNotes" />
+    <ReleaseNotes ref="releaseNotes" :ready="!splash" />
+    <GameDaveSplash v-if="splash" @done="splash = false" />
 
     <HomeView v-if="screen === 'home'" @go="go" />
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />

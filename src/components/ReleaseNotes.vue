@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import changelog from '../../CHANGELOG.md?raw'
 import { firstLaunch } from '../game/store'
 import { formatDate, markVersionSeen, parseChangelog, readSeenVersion, releasesToShow, type Release } from '../game/releases'
 
 // Notes de version : ouvertes au lancement après une mise à jour, et à la demande depuis les Réglages.
+// `ready` passe à vrai à la fin du splash : une fenêtre modale passerait sinon au-dessus de lui.
+const props = defineProps<{ ready: boolean }>()
 const appVersion = __APP_VERSION__
 const releases = parseChangelog(changelog)
 const dialog = ref<HTMLDialogElement>()
@@ -21,13 +23,17 @@ function open(list: Release[], isUpdate: boolean) {
 function openAll() { open(releasesToShow(releases, appVersion, '0.0.0', releases.length), false) }
 defineExpose({ openAll })
 
-onMounted(() => {
+function showPending() {
   const seen = readSeenVersion()
   if (seen === appVersion) return
   // Le nouveau joueur commence par le tutoriel : sa version est simplement notée comme vue.
   const pending = firstLaunch ? [] : releasesToShow(releases, appVersion, seen)
   if (pending.length) open(pending, true)
   else markVersionSeen(appVersion)
+}
+onMounted(() => {
+  if (props.ready) showPending()
+  else { const stop = watch(() => props.ready, ready => { if (ready) { stop(); showPending() } }) }
 })
 </script>
 
