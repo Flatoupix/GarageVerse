@@ -1,4 +1,4 @@
-# GarageVerse · Méta « Neon Drive » v0.13.0
+# GarageVerse · Méta « Neon Drive » v0.13.1
 
 Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et §9) pour la version jouable. Les valeurs vivent dans `src/data/roster.json` et `src/data/garage.json`, les règles dans `src/game/rules.ts`. La simulation `node pipeline/balance.mjs` vérifie les ordres de grandeur.
 
