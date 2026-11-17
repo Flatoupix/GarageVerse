@@ -12,6 +12,7 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 ### Corrigé
 
+- **Boutons après l’ouverture d’un booster.** Après un achat groupé, « Ouvrir le suivant » était écrasé à côté des autres boutons. Il occupe maintenant toute la largeur, au-dessus de « Voir le garage » et « Autre booster ».
 - **Ordre de la collection.** Les voitures n° 100 et plus se rangeaient entre la n° 10 et la n° 11. Elles suivent maintenant la n° 99.
 
 ## [0.12.0] — 2026-11-17

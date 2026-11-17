@@ -879,3 +879,8 @@ main.race { animation-name: race-view-in; }
 .showroom-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0 6px; }
 .showroom-bar .showroom-count { margin: 0; }
 .showroom-cols button { min-width: 40px; }
+
+/* Récapitulatif d'un achat groupé : « Ouvrir le suivant » occupe sa propre ligne, au-dessus des deux autres boutons. */
+.recap-actions:has(.next-booster) { flex-wrap: wrap; }
+.recap-actions .next-booster.button { flex: 1 1 100%; white-space: normal; }
+.recap-actions:has(.next-booster) .button:not(.next-booster) { flex: 1 1 0; min-width: 0; }
