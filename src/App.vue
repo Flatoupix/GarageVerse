@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { VERSUS_OPEN } from './game/features'
+import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
 import type { Rival, StatKey } from './game/data'
@@ -26,10 +27,27 @@ import ShowroomView from './views/ShowroomView.vue'
 import { offlineReady } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
-type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom'
+type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus'
 type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
-const screen = ref<Screen>(save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home')
+function initialScreen(): Screen {
+  if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
+  if (save.duel && !save.night) return 'race'
+  if (save.sealed || (save.opening && save.opening.view !== 'recap')) return 'booster'
+  return 'home'
+}
+const VersusView = defineAsyncComponent(() => import('./views/VersusView.vue'))
+const networkAvailable = ref(navigator.onLine)
+function updateNetwork() { networkAvailable.value = navigator.onLine }
+onMounted(() => {
+  window.addEventListener('online', updateNetwork)
+  window.addEventListener('offline', updateNetwork)
+})
+onUnmounted(() => {
+  window.removeEventListener('online', updateNetwork)
+  window.removeEventListener('offline', updateNetwork)
+})
+const screen = ref<Screen>(initialScreen())
 const settings = ref<HTMLDialogElement>()
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
@@ -73,7 +91,7 @@ async function importSave(event: Event) {
     applyTheme(save.preferences.theme)
     themeFx(save.preferences.theme)
     inspected.value = null
-    screen.value = save.duel && !save.night ? 'race' : save.sealed || (save.opening && save.opening.view !== 'recap') ? 'booster' : 'home'
+    screen.value = initialScreen()
     transferFeedback('Ta sauvegarde a été importée.')
   } catch { transferFeedback('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.', true) }
 }
@@ -114,7 +132,7 @@ function brandClick() {
   // Raccourci de test, actif aussi dans le jeu publié : 14 appuis rapides sur le logo.
   const result = debugTap(debugTaps, performance.now())
   debugTaps = result.state
-  if (result.triggered) { act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits'); sound('debugCredits') }
+  if (result.triggered && !save.versus) { act(s => { s.credits += 1000 }, 'Debug : +1 000 crédits'); sound('debugCredits') }
 }
 // Showroom caché : 7 appuis rapides sur le numéro de version, en bas des Réglages.
 let showroomTaps: DebugTaps = { count: 0, lastTap: null }
@@ -189,6 +207,11 @@ function go(destination: Screen) {
   toast.value = null
   if (destination === 'shop' || destination === 'booster') tutorialAction(0, 1)
   if (destination === 'race') tutorialAction(2, 3)
+  if (screen.value === 'versus' && destination !== 'versus') {
+    const url = new URL(location.href)
+    url.searchParams.delete('versus')
+    history.replaceState(history.state, '', url)
+  }
   screen.value = destination
   window.scrollTo(0, 0)
   void nextTick(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))
@@ -343,10 +366,17 @@ function toggleSetting(key: Setting) {
     <BoosterView v-else-if="screen === 'booster'" @garage="go('garage')" @shop="go('shop')" @inspect="inspect" />
     <GarageView v-else-if="screen === 'garage'" @inspect="inspect" />
     <ShowroomView v-else-if="screen === 'showroom'" @close="go('home')" />
+    <main v-else-if="screen === 'versus'" class="race">
+      <VersusView v-if="networkAvailable" @back="go('home')" />
+      <section v-else>
+        <button class="button quiet" @click="go('home')">← Accueil</button>
+        <h1>Versus</h1><p role="status">Connexion nécessaire</p>
+      </section>
+    </main>
     <RaceView v-else @inspect="inspect" @go="go" />
 
     <nav class="tabbar" aria-label="Navigation principale">
-      <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
+      <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'home' && screen === 'versus') || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
         @click="go(tab.id)">
         <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="tab.icon" /></svg></span>{{ tab.label }}
         <span v-if="tab.id === 'garage' && pendingSeries.length" class="tab-dot" aria-label="Récompense de série à récupérer"></span>

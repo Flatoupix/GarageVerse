@@ -35,7 +35,7 @@ La V1 seule est un jeu complet. V2 et V3 viennent ensuite.
 
 ## 4. Course équitable : le serveur résout, les clients affichent
 
-- La salle tire une **graine** au démarrage. Toute la course (météo, chance, incidents) en découle, comme le défi du jour aujourd'hui (`dailyRng`).
+- La salle tire une **graine** au démarrage. Toute la course (météo, chance, incidents) en découle, comme le défi du jour aujourd'hui (`dailyRng`). Elle reste **secrète jusqu'à l'arrivée** : les joueurs voient le circuit, la météo et les secteurs résolus, jamais la chance à venir (voir `docs/supabase.md` § 5).
 - Le serveur garde les choix cachés tant que les deux ne sont pas arrivés. Personne ne peut répondre au coup de l'autre.
 - Le serveur résout chaque secteur avec **le même code de règles que le jeu** (`src/game/rules.ts` et `src/game/data.ts`, importés par la fonction Supabase).
 - À ajouter dans `rules.ts` : `playVersusRound(duel, choiceA, choiceB, rng)`. C'est `playRound` sans l'appel à l'IA, et elle doit consommer le hasard dans le même ordre (chance du joueur A, puis du joueur B). `playRound` s'appuiera sur elle pour que les deux modes ne divergent jamais.
@@ -137,9 +137,16 @@ Je ne peux pas créer le projet Supabase à ta place. Il faut :
 3. me transmettre l'**URL du projet** et la **clé anon**, qui sont publiques ;
 4. pour le déploiement des fonctions, ajouter en secret GitHub un **jeton d'accès Supabase** (`SUPABASE_ACCESS_TOKEN`) et la **référence du projet**. Je prépare l'action GitHub qui déploie les migrations et les fonctions.
 
-## 11. Questions encore ouvertes
+## 11. Décisions du 17 novembre 2026
 
-- Mise minimale et maximale absolues, en plus des 25 % ?
-- Faut-il des **ligues versus** par plafond (9, 15, 22) ou un plafond choisi librement à chaque défi ?
-- Revanche : mise identique imposée, ou nouvelle mise ?
-- Faut-il un **mode sans mise** (pour la gloire) à côté, pour tester ou jouer avec un ami qui a peu de crédits ?
+- **Mises** : paliers 50, 100, 250 et 500 ₡, au plus 25 % des crédits, **et un mode sans mise** (mise 0, pour la gloire).
+- **Plafonds** : 9, 15 ou 22, comme les ligues, choisi par celui qui lance le défi.
+- **Revanche** : même mise et mêmes réglages, en un geste.
+- **Serveur gratuit** : gardé éveillé par une tâche planifiée (voir `docs/supabase.md` § 12).
+- **Ordre de travail** : moteur versus d'abord (ticket 002), puis serveur.
+
+## 12. Réouverture du mode (après la pause de la 0.13.1)
+
+Le mode est en pause depuis la 0.13.1 (`src/game/features.ts`, `VERSUS_OPEN = false`) : plus de nouveau défi, mais un duel engagé se termine. Pour le rouvrir, passer `VERSUS_OPEN` à `true`, changer la version (mineure) et ajouter cette note pour les joueurs, encore jamais publiée :
+
+> - **Mode Versus : défie tes amis.** Depuis l’accueil, crée un défi avec ton écurie de trois voitures, choisis le plafond de coût (9, 15 ou 22) et ta mise (de 50 à 500 crédits, ou sans mise pour la gloire), puis envoie le lien ou le QR code à un ami. La course se joue en direct en cinq secteurs : vous choisissez en même temps votre voiture, votre consigne et la nitro, avec 20 secondes par secteur. Le gagnant empoche le pot, moins une commission de 10 % ; en cas d’égalité, chacun récupère sa mise. Une revanche se lance en un geste.

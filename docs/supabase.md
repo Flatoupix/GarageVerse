@@ -1,12 +1,16 @@
 # Supabase · préparation du multijoueur
 
-Statut : **préparation, rien n'est encore créé côté serveur** (17 novembre 2026). Ce document complète [`docs/versus.md`](versus.md), qui décrit le jeu. Ici : le projet Supabase, le schéma, les fonctions serveur, la sécurité et le déploiement. Tickets liés : `tickets/003` (serveur), `004` (mises), `005` (client temps réel), `007` (amis), `008` (échange).
+Statut : **serveur et client V1 implémentés et testés localement**. Ce document complète [`docs/versus.md`](versus.md), qui décrit le jeu. Ici : le projet Supabase, le schéma, les fonctions serveur, la sécurité et le déploiement. Tickets liés : `tickets/003` (serveur), `004` (mises), `005` (client temps réel), `007` (amis), `008` (échange).
 
 ## 1. Le projet
 
 | Élément | Valeur |
 | --- | --- |
 | Nom | `garage-verse` (créé par le propriétaire) |
+| Référence | `wqfukxadzwxaypqebtqw` |
+| URL (publique) | `https://wqfukxadzwxaypqebtqw.supabase.co` |
+| Clé publishable (publique) | `sb_publishable__Z5ER4kBYKflcgz2Q-wdcA_8UmRQhdh` |
+| Comptes anonymes | **activés** le 17 novembre (vérifié par une inscription anonyme de test) |
 | Région | Europe (Paris `eu-west-3` ou Francfort `eu-central-1`), au plus près des joueurs |
 | Offre | Gratuite au départ : largement suffisante pour des duels entre amis |
 | Séparation | Projet **dédié**, distinct de celui de Crazy Popping Catz. Les tables gardent quand même le préfixe `gv_` |
@@ -35,18 +39,22 @@ La clé **service_role** ne quitte jamais Supabase : les fonctions serveur la re
 - Pseudo choisi au premier passage, code ami à 6 caractères attribué par le serveur.
 - Hors ligne ou serveur en pause : message clair, aucune donnée de la sauvegarde touchée.
 
-## 4. Arborescence prévue
+## 4. Arborescence
 
 ```
 supabase/
   config.toml                     # projet lié, fonctions, auth anonyme
+  sync-rules.mjs                  # génère la copie des règles
   migrations/
     20261118000000_versus_v1.sql  # tables, index, RLS, publication Realtime
+    20261118010000_versus_snapshot.sql  # lecture cohérente de la salle
+  scheduler/resolve-due.sql         # installation du rattrapage après déploiement
   functions/
     _shared/
       game/                       # copie générée de src/game (règles et données), ne pas éditer à la main
-      supabase.ts                 # client service_role, réponses JSON, erreurs
-      auth.ts                     # joueur courant depuis le jeton de l'appel
+      http.ts                     # authentification, connexion SQL, réponses JSON
+      versus.ts                   # logique du duel et des règlements
+    register/index.ts
     create-room/index.ts
     join-room/index.ts
     submit-move/index.ts
@@ -58,14 +66,14 @@ supabase/
 
 Le serveur doit résoudre les secteurs **avec exactement le même code** que le jeu (`docs/versus.md` § 4).
 
-- Les fonctions tournent sous Deno et ne peuvent embarquer que des fichiers situés sous `supabase/functions/`. Un script `pipeline/sync-supabase-rules.mjs` copie donc `src/game/rules.ts`, `src/game/data.ts` et `src/data/{roster,garage}.json` dans `supabase/functions/_shared/game/`, en adaptant les imports JSON (`with { type: 'json' }`).
-- Une vérification (`src/game/versus.check.cjs`) échoue si la copie diffère de la source : impossible de déployer un serveur dont les règles ont dérivé du jeu.
+- Les fonctions tournent sous Deno et ne peuvent embarquer que des fichiers situés sous `supabase/functions/`. Un script `supabase/sync-rules.mjs` copie donc `src/game/rules.ts`, `src/game/data.ts` et `src/data/{roster,garage}.json` dans `supabase/functions/_shared/game/`, en adaptant les imports JSON (`with { type: 'json' }`).
+- Une vérification (`node src/game/supabase.check.cjs`) échoue si la copie diffère de la source : impossible de déployer un serveur dont les règles ont dérivé du jeu.
 - Le moteur expose `playVersusRound(duel, choiceA, choiceB, rng)` (ticket 002) ; `playRound` contre l'IA s'appuiera dessus.
-- La graine de la salle est tirée par le serveur ; tout le hasard de la course en découle (`dailyRng(graine)`).
+- La graine de la salle est tirée par le serveur ; tout le hasard de la course en découle (`dailyRng(graine)`). **Elle ne quitte jamais le serveur pendant la course** : elle vit dans `gv_room_secrets` (aucun droit pour les joueurs), la salle publie le circuit et la météo des secteurs (`versusRaceInfo`), le jeu reconstruit la course à partir des secteurs publiés (`rebuildVersus`), et la graine est recopiée dans `gv_rooms.revealed_seed` à l'arrivée pour vérification (migration `20261118020000_versus_secret_seed.sql`). Sans cela, un jeu modifié pourrait prévoir la chance d'un secteur et choisir sa consigne pour éviter un incident.
 
 ## 6. Schéma V1 (duels et mises)
 
-Esquisse de la première migration. Toutes les tables ont la RLS activée ; **aucune écriture directe depuis le jeu** : tout passe par les fonctions serveur.
+Première migration : `supabase/migrations/20261118000000_versus_v1.sql` (tables dans le schéma `public`, extrait ci-dessous). Toutes les tables ont la RLS activée ; **aucune écriture directe depuis le jeu** : tout passe par les fonctions serveur.
 
 ```sql
 create type gv_room_state as enum ('open', 'ready', 'racing', 'done', 'expired', 'cancelled');
@@ -73,7 +81,7 @@ create type gv_room_state as enum ('open', 'ready', 'racing', 'done', 'expired',
 create table gv_players (
   id uuid primary key references auth.users on delete cascade,
   nickname text not null check (char_length(nickname) between 2 and 20),
-  friend_code text not null unique,
+  friend_code text not null unique check (friend_code ~ '^[A-Z0-9]{6}$'),
   created_at timestamptz not null default now()
 );
 
@@ -86,10 +94,11 @@ create table gv_rooms (
   stake integer not null check (stake in (0, 50, 100, 250, 500)),
   seed text not null,
   state gv_room_state not null default 'open',
-  sector smallint not null default 0,              -- secteur en cours, 0 à 4
+  sector smallint not null default 0 check (sector between 0 and 4), -- secteur en cours
   sector_deadline timestamptz,                     -- fin des 20 secondes du secteur en cours
   missed jsonb not null default '{}',              -- secteurs sans réponse par joueur
   winner uuid references gv_players,               -- null : égalité ou pas encore fini
+  rematch_of uuid references gv_rooms on delete set null, -- salle d'origine d'une revanche (§ 12)
   expires_at timestamptz not null default now() + interval '10 minutes',
   created_at timestamptz not null default now()
 );
@@ -103,9 +112,11 @@ create table gv_lineups (
 
 create table gv_moves (
   room uuid references gv_rooms on delete cascade,
-  sector smallint not null,
+  sector smallint not null check (sector between 0 and 4),
   player uuid references gv_players,
-  car smallint not null, stance text not null, nitro boolean not null,
+  car smallint not null check (car between 0 and 2),
+  stance text not null check (stance in ('normal', 'attaque', 'gestion')),
+  nitro boolean not null,
   auto boolean not null default false,             -- joué par l'IA après le délai
   created_at timestamptz not null default now(),
   primary key (room, sector, player)
@@ -113,7 +124,7 @@ create table gv_moves (
 
 create table gv_rounds (
   room uuid references gv_rooms on delete cascade,
-  sector smallint not null,
+  sector smallint not null check (sector between 0 and 4),
   result jsonb not null,                           -- scores, lignes, chance, vainqueur du secteur
   primary key (room, sector)
 );
@@ -137,23 +148,30 @@ create table gv_settlements (
 | `gv_moves` | **son propre coup seulement** tant que le secteur n'est pas résolu, puis les deux |
 | `gv_settlements` | sa propre ligne |
 
+Un coup adverse devient lisible dès qu'une ligne `gv_rounds` existe pour cette salle et ce secteur. Les politiques passent par `gv_rooms` (et `gv_rounds` pour les coups), jamais l'inverse, et n'utilisent aucune fonction.
+
+**Droits.** `anon` n'a aucun droit sur ces tables (même pas `select`) ; `authenticated` n'a que `select`, filtré par la RLS ; seul `service_role` (fonctions serveur) insère, modifie et supprime.
+
 **Temps réel.** Publication Realtime sur `gv_rooms` (état, secteur, délai) et `gv_rounds` (résultats). Les coups (`gv_moves`) ne sont **jamais** diffusés.
 
-**Index.** `gv_rooms (code)`, `gv_rooms (state, expires_at)`, `gv_rooms (state, sector_deadline)` pour les délais.
+**Index.** `gv_rooms (code)` (celui de la contrainte unique), `gv_rooms (state, expires_at)`, `gv_rooms (state, sector_deadline)` pour les délais.
 
 ## 7. Fonctions serveur
 
-Toutes reçoivent le jeton du joueur (connexion anonyme), répondent en JSON `{ ok, data }` ou `{ ok: false, error }` avec un code stable, et sont **idempotentes** : rejouer le même appel ne double rien.
+Les points d'entrée Deno vérifient le jeton du joueur et ouvrent une connexion SQL via `SUPABASE_DB_URL`. Ils répondent en JSON `{ ok: true, data }` ou `{ ok: false, error }` avec un code stable. Les secteurs sont numérotés de 0 à 4. Les écritures se font dans une transaction et les opérations sur une salle verrouillent sa ligne.
 
 | Fonction | Entrée | Effet | Erreurs principales |
 | --- | --- | --- | --- |
-| `create-room` | plafond, mise, écurie | vérifie l'écurie, crée la salle `open`, renvoie code et lien | `INVALID_LINEUP`, `STAKE_TOO_HIGH` |
-| `join-room` | code, écurie | vérifie l'écurie et la mise, passe la salle en `racing`, fixe le délai du secteur 1 | `ROOM_NOT_FOUND`, `ROOM_FULL`, `ROOM_EXPIRED`, `OWN_ROOM` |
-| `submit-move` | salle, secteur, voiture, consigne, nitro | enregistre le coup ; si les deux coups sont là, résout le secteur et publie `gv_rounds` | `NOT_YOUR_ROOM`, `WRONG_SECTOR`, `ALREADY_PLAYED`, `INVALID_MOVE` |
-| `resolve-due` | salle | après le délai, fait jouer l'IA (`aiChoice`) pour le joueur absent et résout ; deux absences ou 60 s de déconnexion : abandon | `NOT_DUE` |
-| `claim-settlement` | salle | renvoie le montant à appliquer à la sauvegarde et marque la ligne réclamée | `NOT_FINISHED`, `ALREADY_CLAIMED` |
+| `register` | `nickname` | crée le joueur et son code ami, ou renvoie le joueur existant | `INVALID_NICKNAME` |
+| `create-room` | `cap`, `stake`, `lineup`, `credits`, `rematch_of` facultatif | crée une salle ouverte et renvoie son code d'invitation. Une revanche reprend le plafond et la mise de la salle d'origine | `INVALID_LINEUP`, `STAKE_TOO_HIGH`, `RATE_LIMITED` |
+| `join-room` | `code`, `lineup`, `credits` | vérifie l'écurie et la mise, lance le secteur 0 avec un délai de 20 s | `ROOM_NOT_FOUND`, `ROOM_FULL`, `ROOM_EXPIRED`, `OWN_ROOM` |
+| `submit-move` | `room`, `sector`, `car`, `stance`, `nitro` | enregistre le coup. Le second coup résout le secteur et publie `gv_rounds` | `NOT_YOUR_ROOM`, `WRONG_SECTOR`, `ALREADY_PLAYED`, `INVALID_MOVE`, `DEADLINE_PASSED` |
+| `resolve-due` | `room` | à l'échéance, `autoChoice` joue pour chaque absent. Deux absences valent abandon. Si les deux joueurs abandonnent au même secteur, chacun récupère sa mise | `NOT_DUE` |
+| `claim-settlement` | `room` | renvoie le montant à appliquer à la sauvegarde et marque la ligne réclamée | `NOT_FINISHED`, `ALREADY_CLAIMED` |
 
-**Délais sans serveur permanent.** Chaque jeu appelle `resolve-due` quand le compte à rebours de 20 s arrive à zéro. Une tâche planifiée (`pg_cron`, chaque minute) rattrape les salles oubliées : secteurs dépassés, salles `open` expirées (`expired`, remboursement).
+**Délais sans serveur permanent.** Le client appelle `resolve-due` à la fin du compte à rebours. Un appel avec le jeton `service_role` et un corps `{}` traite jusqu'à 100 salles en retard, dont les salles ouvertes expirées à rembourser. Le script `supabase/scheduler/resolve-due.sql` installe le rattrapage chaque minute avec Supabase Cron, pg_net et Vault. Après le déploiement des fonctions, un administrateur peut exécuter `bash supabase/scheduler/activate.sh` avec `SUPABASE_PROJECT_REF` et `SUPABASE_ACCESS_TOKEN` pour le projet cible. Il active les extensions, initialise la destination et le jeton dédié dans Vault, configure le secret Edge sur le même projet puis installe le job nommé. Une nouvelle exécution réutilise le jeton et actualise le même job. Les fonctions vérifient elles-mêmes l'identité avec Auth.
+
+**Reprise du client.** Une invitation ouvre `?versus=CODE`. Le client vérifie le plafond et la mise avant de rejoindre. Il réserve la mise et sauvegarde la demande avec l’identifiant de salle avant l’appel réseau. Il peut ainsi rejouer une création ou une acceptation après une réponse perdue. La fonction SQL `gv_snapshot` renvoie l’état, l’heure du serveur, les secteurs révélés et le reçu du joueur sous les politiques de lecture existantes. Le client relit cet état au retour au premier plan, aux notifications Realtime et toutes les cinq secondes pendant le duel.
 
 **Mise côté jeu.** À la création ou à l'acceptation, le jeu retire la mise de la sauvegarde et la note comme *mise en cours* (identifiant de salle). À l'arrivée, `claim-settlement` donne le montant ; le jeu l'applique une seule fois et retire la mise en cours. Le jeu se contente d'afficher ce que le serveur a calculé : vainqueur, pot, commission de 10 %.
 
@@ -174,12 +192,18 @@ Toutes reçoivent le jeton du joueur (connexion anonyme), répondent en JSON `{ 
 2. vérifie que `_shared/game` est à jour (`node src/game/versus.check.cjs`) ;
 3. `supabase link --project-ref $SUPABASE_PROJECT_REF` ;
 4. `supabase db push` (migrations) ;
-5. `supabase functions deploy` (toutes les fonctions).
+5. `supabase functions deploy` (toutes les fonctions) ;
+6. `bash supabase/scheduler/activate.sh` **après** les fonctions : crée si nécessaire les secrets Vault `gv_project_url` et `gv_scheduler_token`, synchronise le jeton dédié vers `GV_SCHEDULER_TOKEN` dans les fonctions Edge, programme `gv-resolve-due` chaque minute et vérifie qu'une tâche active existe.
+
+Une PR touchant `supabase/**` ou le workflow lance seulement le job **validate** (syntaxe Bash et présence du SQL) : **aucun accès au projet hébergé depuis la PR**. Le job **deploy** est réservé à `master` et s'arrête si la planification échoue. Le script est conçu pour être relancé sans renouveler le jeton Vault existant.
+
+Pour désactiver le rattrapage en cas de problème, utiliser le SQL `select cron.unschedule('gv-resolve-due');` sur **le projet Supabase concerné**. Ne pas afficher dans les logs la valeur du jeton dédié ou celle des secrets GitHub.
 
 Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`. Comme pour le site, **seul `master` déploie** : le serveur de `dev` n'est jamais mis en ligne tout seul.
 
 **Développement.** `supabase start` en local demande Docker, absent du conteneur de l'agent. On teste donc :
 - les règles et la résolution des secteurs sans serveur (tests Node, comme les autres `*.check.cjs`) ;
+- les migrations hors ligne avec `node src/game/supabase.check.cjs` : il les applique dans un Postgres en mémoire (PGlite) par-dessus un faux environnement Supabase (`supabase/tests/supabase-stubs.sql`), puis lance les suites `supabase/tests/*.test.mjs` (contraintes, droits, RLS, publication Realtime) ;
 - le serveur réel sur le projet, avec deux navigateurs (deux comptes anonymes) avant chaque publication.
 
 ## 10. Plan de tests
@@ -197,10 +221,10 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 - **V2 · Amis et palmarès** : `gv_friends (player, friend, created_at)`, vue `gv_head_to_head` (victoires et défaites entre deux joueurs).
 - **V3 · Échange de cartes** : `gv_trades (id, from, to, state, expires_at)` et `gv_trade_items (trade, side, kind 'car'|'credits', car_id, prep, amount)`, fonctions `propose-trade`, `answer-trade`, `claim-trade`, avec le même principe de réception unique que les mises (`docs/versus.md` § 7).
 
-## 12. Questions à trancher avant la migration
+## 12. Décisions et points restants
 
-1. Région du projet (déjà choisie à la création : à me confirmer).
-2. Mises : minimum et maximum absolus en plus des 25 % ? Mise `0` (sans mise) autorisée dès la V1 ?
-3. Plafonds versus : 9, 15 et 22 seulement, ou libre ?
-4. Revanche : même mise imposée ?
-5. Le projet gratuit peut se mettre en pause : acceptable, ou prévoir une petite activité régulière (tâche planifiée) pour le garder éveillé ?
+- **Mises** : 0 (sans mise), 50, 100, 250, 500 ₡ ; au plus 25 % des crédits déclarés. La contrainte SQL `stake in (0, 50, 100, 250, 500)` du § 6 est la bonne.
+- **Plafonds** : 9, 15 ou 22 (`cap in (9, 15, 22)`).
+- **Revanche** : même mise et même plafond ; `create-room` accepte une salle d'origine pour recopier ses réglages.
+- **Planification des salles** : retenue via `pg_cron` + `pg_net`. Le script `supabase/scheduler/activate.sh` est lancé automatiquement après déploiement de `resolve-due` depuis `master` ; voir § 9. Les essais sur Supabase hébergé restent nécessaires pour confirmer l'exécution réelle.
+- **Reste à confirmer** : la région du projet.

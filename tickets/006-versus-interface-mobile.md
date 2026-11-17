@@ -1,7 +1,7 @@
 # T-006 · Versus V1 : interface de duel entre amis
 
 - **Priorité :** P1
-- **Statut :** Spécifié, non réalisé
+- **Statut :** Implémenté et testé localement. Validation sur Supabase hébergé et deux téléphones physiques en attente.
 - **Sources :** [docs/versus.md](../docs/versus.md) §3 et §8
 
 **À faire**

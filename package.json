@@ -1,6 +1,6 @@
 {
   "name": "garageverse",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "private": true,
   "type": "module",
   "packageManager": "yarn@4.5.3",
@@ -15,9 +15,13 @@
     "check:daily": "node pipeline/check-daily.cjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.119.0",
+    "qrcode": "1.5.4",
     "vue": "3.5.41"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "0.5.16",
+    "@types/qrcode": "1.5.6",
     "@vitejs/plugin-vue": "5.2.4",
     "fflate": "0.8.2",
     "typescript": "5.9.3",

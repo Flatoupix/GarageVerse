@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.13.1] — 2026-11-18
+
+### Modifié
+
+- **Le mode Versus fait une pause.** On ne peut plus lancer de nouveau défi pour l’instant ; il reviendra bientôt. Si tu as déjà un duel en cours, tu peux le terminer depuis l’accueil et récupérer ta mise ou ton gain normalement.
+
 ## [0.13.0] — 2026-11-17
 
 ### Ajouté

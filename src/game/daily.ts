@@ -1,6 +1,6 @@
 // Tirage quotidien indépendant du hasard des courses et des boosters.
 import { leagueById, progression, rivals, vehicleById, vehicles, type Rival } from './data'
-import { createRace, lineupCost } from './rules'
+import { createRace, lineupCost, seededRng } from './rules'
 
 export const DAILY_REWARD = 180
 export const localDate = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
@@ -8,11 +8,8 @@ export function previousDate(key: string) {
   const [year, month, day] = key.split('-').map(Number)
   return localDate(new Date(year, month - 1, day - 1))
 }
-export function dailyRng(key: string) {
-  let seed = 2166136261
-  for (const c of key) seed = Math.imul(seed ^ c.charCodeAt(0), 16777619)
-  return () => { seed = Math.imul(seed ^ seed >>> 15, 1 | seed); seed ^= seed + Math.imul(seed ^ seed >>> 7, 61 | seed); return ((seed ^ seed >>> 14) >>> 0) / 4294967296 }
-}
+// Même générateur que les salles versus (rules.ts), sous son nom historique.
+export const dailyRng = seededRng
 export type Constraint = { type: 'cost'; cap: number } | { type: 'category' | 'rarity'; value: string }
 export const constraintCap = (rule: Constraint) => rule.type === 'cost' ? rule.cap : leagueById.get('neon')!.cap
 export function constraintText(rule: Constraint) {
