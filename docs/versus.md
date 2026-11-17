@@ -137,9 +137,10 @@ Je ne peux pas créer le projet Supabase à ta place. Il faut :
 3. me transmettre l'**URL du projet** et la **clé anon**, qui sont publiques ;
 4. pour le déploiement des fonctions, ajouter en secret GitHub un **jeton d'accès Supabase** (`SUPABASE_ACCESS_TOKEN`) et la **référence du projet**. Je prépare l'action GitHub qui déploie les migrations et les fonctions.
 
-## 11. Questions encore ouvertes
+## 11. Décisions du 17 novembre 2026
 
-- Mise minimale et maximale absolues, en plus des 25 % ?
-- Faut-il des **ligues versus** par plafond (9, 15, 22) ou un plafond choisi librement à chaque défi ?
-- Revanche : mise identique imposée, ou nouvelle mise ?
-- Faut-il un **mode sans mise** (pour la gloire) à côté, pour tester ou jouer avec un ami qui a peu de crédits ?
+- **Mises** : paliers 50, 100, 250 et 500 ₡, au plus 25 % des crédits, **et un mode sans mise** (mise 0, pour la gloire).
+- **Plafonds** : 9, 15 ou 22, comme les ligues, choisi par celui qui lance le défi.
+- **Revanche** : même mise et mêmes réglages, en un geste.
+- **Serveur gratuit** : gardé éveillé par une tâche planifiée (voir `docs/supabase.md` § 12).
+- **Ordre de travail** : moteur versus d'abord (ticket 002), puis serveur.

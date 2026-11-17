@@ -201,10 +201,10 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 - **V2 · Amis et palmarès** : `gv_friends (player, friend, created_at)`, vue `gv_head_to_head` (victoires et défaites entre deux joueurs).
 - **V3 · Échange de cartes** : `gv_trades (id, from, to, state, expires_at)` et `gv_trade_items (trade, side, kind 'car'|'credits', car_id, prep, amount)`, fonctions `propose-trade`, `answer-trade`, `claim-trade`, avec le même principe de réception unique que les mises (`docs/versus.md` § 7).
 
-## 12. Questions à trancher avant la migration
+## 12. Décisions et points restants
 
-1. Région du projet (déjà choisie à la création : à me confirmer).
-2. Mises : minimum et maximum absolus en plus des 25 % ? Mise `0` (sans mise) autorisée dès la V1 ?
-3. Plafonds versus : 9, 15 et 22 seulement, ou libre ?
-4. Revanche : même mise imposée ?
-5. Le projet gratuit peut se mettre en pause : acceptable, ou prévoir une petite activité régulière (tâche planifiée) pour le garder éveillé ?
+- **Mises** : 0 (sans mise), 50, 100, 250, 500 ₡ ; au plus 25 % des crédits déclarés. La contrainte SQL `stake in (0, 50, 100, 250, 500)` du § 6 est la bonne.
+- **Plafonds** : 9, 15 ou 22 (`cap in (9, 15, 22)`).
+- **Revanche** : même mise et même plafond ; `create-room` accepte une salle d'origine pour recopier ses réglages.
+- **Mise en pause** : à éviter. Une tâche planifiée appelle le projet régulièrement (au moins tous les 3 jours) : soit `pg_cron` dans la base, soit une action GitHub planifiée qui interroge l'API. Choix au moment de la migration.
+- **Reste à confirmer** : la région du projet.
