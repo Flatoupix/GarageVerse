@@ -165,9 +165,9 @@ export const styleLabel = (v: Vehicle, style: EditionStyle) => style === 'Synthw
 const altStyles: Record<string, EditionStyle[]> = {
   clio: ['Classic'], elise: ['Classic'], r34: ['Classic'], venom: ['Classic', 'Pixel Art'], brian: ['Classic'], ceramicool: ['Photo'],
 }
-// Éditions Solarpunk et Abandonnée : les 129 voitures hors Ceramicool disposent de leurs deux illustrations (`src/assets/cars/<id>-solarpunk.webp` et `-abandonnee.webp`).
+// Éditions Solarpunk et Abandonnée : toutes les voitures disposent de leurs deux illustrations (`src/assets/cars/<id>-solarpunk.webp` et `-abandonnee.webp`).
 const extraStyles: EditionStyle[] = ['Solarpunk', 'Abandonnée']
-const editionCars = new Set(vehicles.filter(v => v.id !== 'ceramicool').map(v => v.id))
+const editionCars = new Set(vehicles.map(v => v.id))
 export function stylesOf(id: string): EditionStyle[] {
   const former = formerStyle(id)
   const styles: EditionStyle[] = [PIXEL, former]

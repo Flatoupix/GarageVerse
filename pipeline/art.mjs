@@ -69,7 +69,8 @@ const ABANDON_STORIES = {
       'glass walls, dry palm fronds and bougainvillea creeping in, an empty swimming pool with stagnant green water visible outside, ' +
       'sun-bleached pastel walls, warm late-afternoon Mediterranean light.' },
   // Voitures qui jurent avec leur lieu d'abandon : chacune a son propre décor.
-  decalee: { cars: ['tesla', 'gt500', 'demon', 'h1', 'mustangeco', 'challsxt', 'm3e46', 'evo2', 'p930', 'c4'], scenes: {
+  decalee: { cars: ['tesla', 'gt500', 'demon', 'h1', 'mustangeco', 'challsxt', 'm3e46', 'evo2', 'p930', 'c4', 'ceramicool'], scenes: {
+    ceramicool: 'absurdly parked on the empty dance floor of a closed-down provincial nightclub: a dusty mirror ball, a DJ booth with speakers stacked high, faded pink and violet neon tubes switched off, scattered plastic cups, coloured light leaking through boarded windows.',
     tesla: 'absurdly left inside the great hall of an abandoned medieval castle: stone walls, a huge cold fireplace, faded tapestries, dusty suits of armour, light through tall gothic windows.',
     gt500: 'absurdly parked at the bottom of an empty, drained indoor swimming pool of an abandoned 1970s municipal baths: cracked blue tiles, a rusty diving board above, skylight beams.',
     demon: 'absurdly parked in the middle of the ballroom of an abandoned grand hotel: a dusty crystal chandelier overhead, peeling gilded mouldings, stacked chairs, a grand piano under a sheet.',
@@ -101,7 +102,7 @@ const ABANDON_STORIES = {
   plateau: { cars: ['bttf', 'kitt', 'brian', 'herbie', 'bond', 'taxi', 'ecto1', 'batmobile', 'eleanor', 'domcharger', '1000tipla'],
     scene: 'forgotten in the back of a closed-down film studio prop warehouse after the shooting ended: dusty stage spotlights on stands, rolled canvas backdrops, ' +
       'wooden flight cases, a director\'s chair with a torn seat, a beam of light from a high window across the dust.' },
-  parking: { cars: ['clio', 'twingo', 'smart', 'twizy', 'p206', 'golf4', 'micra', 'logan', 'multipla', 'fiat500b', 'r5five', 'uno45'],
+  parking: { cars: ['clio', 'clio2', 'twingo', 'smart', 'twizy', 'p206', 'golf4', 'micra', 'logan', 'multipla', 'fiat500b', 'r5five', 'uno45'],
     scene: 'abandoned for years on the lowest level of a closed underground car park: water puddles on the concrete, numbered pillars without readable numbers, ' +
       'a single flickering neon tube, a broken parking barrier, a fine layer of dust and dead leaves blown in, cold blue-grey light.' },
 }
@@ -211,11 +212,13 @@ function jobs() {
       `Scene: ${setting}. A flat road runs horizontally across the bottom fifth of the image, from edge to edge. ` +
       `No vehicles, no people in the foreground. ${PIXEL_STYLE} ${NO_TEXT}` })
     // Voitures détourées de la mini-course, pour toutes les cartes qui n'ont pas de scène animée : `--set anim --kind sprites`.
-    if (kinds.includes('sprites')) for (const v of roster.vehicles.filter(v => !v.anim)) list.push({ kind: 'anim', id: `${v.id}-car`, size: [128, 64], post: 'key', prompt:
+    // Fond de détourage magenta, ou vert pour une voiture rose : le magenta effacerait une partie de sa carrosserie.
+    const keyFor = v => /pink|magenta/i.test(v.paint ?? '') ? { key: '00FF00', name: 'green' } : { key: 'FF00FF', name: 'magenta' }
+    if (kinds.includes('sprites')) for (const v of roster.vehicles.filter(v => !v.anim)) list.push({ kind: 'anim', id: `${v.id}-car`, size: [128, 64], post: 'key', key: keyFor(v).key, prompt:
       `Pixel art game sprite, wide 2:1. Subject: ${v.culture ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
         : `a ${v.year} ${v.name} ${v.version}, faithful real-world body shape and proportions, ${v.paint} paint`}, seen in exact side profile facing right, as if driving to the right. ` +
       `The whole car fills about 92% of the image width, wheels touching the bottom edge. ` +
-      `Background: one flat uniform pure magenta color #FF00FF everywhere around the car, no shadow, no ground, no scenery, no magenta on the car itself. ${PIXEL_STYLE} ${NO_TEXT}` })
+      `Background: one flat uniform pure ${keyFor(v).name} color #${keyFor(v).key} everywhere around the car, no shadow, no ground, no scenery, no ${keyFor(v).name} on the car itself. ${PIXEL_STYLE} ${NO_TEXT}` })
     for (const v of roster.vehicles.filter(v => v.anim)) {
       const subject = v.culture
         ? `the iconic screen-accurate vehicle "${v.name}" from ${v.culture.work} (${v.year}): ${v.paint}`
@@ -283,7 +286,7 @@ function run(command, commandArgs, options = {}) {
 }
 
 const target = job => join(root, 'src/assets', ...(pixel ? ['pixel'] : []), job.kind, `${job.id}${pixel ? '.px' : ''}.webp`)
-// Calques animés : décor dupliqué en miroir pour boucler sans raccord, voiture détourée du fond magenta.
+// Calques animés : décor dupliqué en miroir pour boucler sans raccord, voiture détourée du fond magenta (vert pour une voiture rose).
 const key = job => (pixel ? 'pixel/' : '') + `${job.kind}/${job.id}`
 
 // Moteurs d'image : Codex enregistre ./out.png dans un dossier isolé ; Antigravity dépose l'image dans son
@@ -362,7 +365,7 @@ async function convert(file, job) {
     if (job.post === 'key') {
       const keyed = file.replace(/\.\w+$/, '-key.png')
       const made = await run('ffmpeg', ['-y', '-loglevel', 'error', '-i', file, '-vf',
-        `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},colorkey=0xFF00FF:0.32:0.08,scale=${tw}:${th}:flags=area,format=rgba,` +
+        `crop=${cw}:${ch}:${Math.floor((w - cw) / 2)}:${Math.floor((h - ch) / 2)},colorkey=0x${job.key ?? 'FF00FF'}:0.32:0.08,scale=${tw}:${th}:flags=area,format=rgba,` +
         "geq=r='r(X,Y)':g='g(X,Y)':b='b(X,Y)':a='if(gte(alpha(X,Y),120),255,0)'", keyed])
       if (made.code !== 0) return made
       return run('cwebp', ['-quiet', '-lossless', '-exact', keyed, '-o', out])

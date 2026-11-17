@@ -4,6 +4,13 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.9.0] — 2026-11-17
+
+### Ajouté
+
+- **Renault Clio II 1.2** (n° 131). Une petite citadine increvable, +2 en Endurance.
+- **Clio 2 Ceramicool** (n° 130), son évolution. Rose de la tête aux pieds avec le toit noir, enjoliveurs BMW, caches roses à la place des antibrouillards et caisson de basse : plus de 300 000 km au compteur, 100 % éthanol, un échappement qui fait beaucoup de bruit… pour une voiture qui reste lente. Prépare ta Clio II au Stage 3, puis débloque-la à l’atelier pour 800 crédits. Elle sort aussi des boosters, avec une édition Photo de la vraie voiture.
+
 ## [0.8.0] — 2026-11-17
 
 ### Ajouté
@@ -32,8 +39,7 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 ### Ajouté
 
-- **Clio 2 Ceramicool (n° 130).** Carte Épique (`1.2 Rose Bonbon`, coût 3, capacité *Toucher Ceramicool : +2 en Ville, +1 la Nuit*) avec son illustration Synthwave (`CERAMICOOL` sur le pare-brise et couronne de fleurs roses au rétroviseur) et son édition *Photo* d’origine.
-- **Éditions Solarpunk et Abandonnée complètes.** Les 129 voitures précédentes du jeu disposent désormais toutes de leurs deux illustrations alternatives *Solarpunk* et *Abandonnée*.
+- **Éditions Solarpunk et Abandonnée complètes.** Les 129 voitures du jeu disposent désormais toutes de leurs deux illustrations alternatives *Solarpunk* et *Abandonnée*.
 - **Parcours des rivaux en trois étapes.** Chaque rival se joue en trois courses progressives (*Étape 1 · Essais*, *Étape 2 · Qualifs*, *Étape 3 · Finale*). Les étapes d’approche offrent des tickets de caisse et le duel final offre la voiture signature du rival à la première victoire.
 - **Deux nouvelles caisses en boutique** : la **Caisse Bricole** (75 crédits, voitures courantes et jusqu’à trois pièces du quotidien) et la **Caisse Mécanique** (180 crédits, cinq pièces mécaniques garanties).
 - **Sept nouvelles séries de collection** (14 séries au total) : *Bombinettes GTI*, *Fourgons & Familiales cultes*, *Baroudeurs tout-terrain*, *Du quotidien au circuit*, *Courses-poursuites à l’écran*, *Icônes d’outre-Rhin* et *Dolce Vita & V12*.

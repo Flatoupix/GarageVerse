@@ -5878,5 +5878,85 @@
     "tokens": 8,
     "prompt": "5dcfa76f06",
     "at": "2026-11-17T01:09:44.357Z"
+  },
+  "cars/clio2": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 62,
+    "tokens": 27,
+    "prompt": "9b8d232e0f",
+    "at": "2026-11-17T09:19:54.212Z"
+  },
+  "cars/ceramicool": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 88,
+    "tokens": 21,
+    "prompt": "f9c1995361",
+    "at": "2026-11-17T09:20:19.943Z"
+  },
+  "pixel/cars/ceramicool": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 21,
+    "prompt": "aa67ec8fdf",
+    "at": "2026-11-17T09:21:25.750Z"
+  },
+  "pixel/cars/clio2": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 66,
+    "tokens": 16,
+    "prompt": "d2c3477a24",
+    "at": "2026-11-17T09:21:26.074Z"
+  },
+  "cars/ceramicool-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 69,
+    "tokens": 16,
+    "prompt": "126e26f833",
+    "at": "2026-11-17T09:22:34.784Z"
+  },
+  "cars/ceramicool-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 95,
+    "tokens": 16,
+    "prompt": "0da7081e7b",
+    "at": "2026-11-17T09:23:00.803Z"
+  },
+  "cars/clio2-solarpunk": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 84,
+    "tokens": 20,
+    "prompt": "4d6b0b4cf8",
+    "at": "2026-11-17T09:23:58.806Z"
+  },
+  "cars/clio2-abandonnee": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 71,
+    "tokens": 20,
+    "prompt": "8e57084cc0",
+    "at": "2026-11-17T09:24:12.265Z"
+  },
+  "pixel/anim/clio2-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 58,
+    "tokens": 16,
+    "prompt": "c1bc4e269f",
+    "at": "2026-11-17T09:25:10.240Z"
+  },
+  "pixel/anim/ceramicool-car": {
+    "status": "ok",
+    "engine": "codex",
+    "seconds": 60,
+    "tokens": 24,
+    "prompt": "762568612d",
+    "at": "2026-11-17T09:26:39.925Z"
   }
 }
