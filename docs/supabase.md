@@ -169,7 +169,7 @@ Les points d'entrée Deno vérifient le jeton du joueur et ouvrent une connexion
 | `resolve-due` | `room` | à l'échéance, `autoChoice` joue pour chaque absent. Deux absences valent abandon. Si les deux joueurs abandonnent au même secteur, chacun récupère sa mise | `NOT_DUE` |
 | `claim-settlement` | `room` | renvoie le montant à appliquer à la sauvegarde et marque la ligne réclamée | `NOT_FINISHED`, `ALREADY_CLAIMED` |
 
-**Délais sans serveur permanent.** Le client appelle `resolve-due` à la fin du compte à rebours. Un appel avec le jeton `service_role` et un corps `{}` traite jusqu'à 100 salles en retard, dont les salles ouvertes expirées à rembourser. Le script `supabase/scheduler/resolve-due.sql` installe le rattrapage chaque minute avec Supabase Cron, pg_net et Vault. Il se lance après le déploiement des fonctions, une fois les extensions activées et les valeurs `gv_project_url` et `gv_scheduler_token` provisionnées dans Vault. Le même jeton dédié (au moins 32 caractères) se configure dans le secret Edge `GV_SCHEDULER_TOKEN`. Les fonctions vérifient elles-mêmes l'identité avec Auth.
+**Délais sans serveur permanent.** Le client appelle `resolve-due` à la fin du compte à rebours. Un appel avec le jeton `service_role` et un corps `{}` traite jusqu'à 100 salles en retard, dont les salles ouvertes expirées à rembourser. Le script `supabase/scheduler/resolve-due.sql` installe le rattrapage chaque minute avec Supabase Cron, pg_net et Vault. Après le déploiement des fonctions, un administrateur peut exécuter `bash supabase/scheduler/activate.sh` avec `SUPABASE_PROJECT_REF` et `SUPABASE_ACCESS_TOKEN` pour le projet cible. Il active les extensions, initialise la destination et le jeton dédié dans Vault, configure le secret Edge sur le même projet puis installe le job nommé. Une nouvelle exécution réutilise le jeton et actualise le même job. Les fonctions vérifient elles-mêmes l'identité avec Auth.
 
 **Reprise du client.** Une invitation ouvre `?versus=CODE`. Le client vérifie le plafond et la mise avant de rejoindre. Il réserve la mise et sauvegarde la demande avec l’identifiant de salle avant l’appel réseau. Il peut ainsi rejouer une création ou une acceptation après une réponse perdue. La fonction SQL `gv_snapshot` renvoie l’état, l’heure du serveur, les secteurs révélés et le reçu du joueur sous les politiques de lecture existantes. Le client relit cet état au retour au premier plan, aux notifications Realtime et toutes les cinq secondes pendant le duel.
 
@@ -192,7 +192,12 @@ Les points d'entrée Deno vérifient le jeton du joueur et ouvrent une connexion
 2. vérifie que `_shared/game` est à jour (`node src/game/versus.check.cjs`) ;
 3. `supabase link --project-ref $SUPABASE_PROJECT_REF` ;
 4. `supabase db push` (migrations) ;
-5. `supabase functions deploy` (toutes les fonctions).
+5. `supabase functions deploy` (toutes les fonctions) ;
+6. `bash supabase/scheduler/activate.sh` **après** les fonctions : crée si nécessaire les secrets Vault `gv_project_url` et `gv_scheduler_token`, synchronise le jeton dédié vers `GV_SCHEDULER_TOKEN` dans les fonctions Edge, programme `gv-resolve-due` chaque minute et vérifie qu'une tâche active existe.
+
+Une PR touchant `supabase/**` ou le workflow lance seulement le job **validate** (syntaxe Bash et présence du SQL) : **aucun accès au projet hébergé depuis la PR**. Le job **deploy** est réservé à `master` et s'arrête si la planification échoue. Le script est conçu pour être relancé sans renouveler le jeton Vault existant.
+
+Pour désactiver le rattrapage en cas de problème, utiliser le SQL `select cron.unschedule('gv-resolve-due');` sur **le projet Supabase concerné**. Ne pas afficher dans les logs la valeur du jeton dédié ou celle des secrets GitHub.
 
 Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_REF`. Comme pour le site, **seul `master` déploie** : le serveur de `dev` n'est jamais mis en ligne tout seul.
 
@@ -221,5 +226,5 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 - **Mises** : 0 (sans mise), 50, 100, 250, 500 ₡ ; au plus 25 % des crédits déclarés. La contrainte SQL `stake in (0, 50, 100, 250, 500)` du § 6 est la bonne.
 - **Plafonds** : 9, 15 ou 22 (`cap in (9, 15, 22)`).
 - **Revanche** : même mise et même plafond ; `create-room` accepte une salle d'origine pour recopier ses réglages.
-- **Mise en pause** : à éviter. Une tâche planifiée appelle le projet régulièrement (au moins tous les 3 jours) : soit `pg_cron` dans la base, soit une action GitHub planifiée qui interroge l'API. Choix au moment de la migration.
+- **Planification des salles** : retenue via `pg_cron` + `pg_net`. Le script `supabase/scheduler/activate.sh` est lancé automatiquement après déploiement de `resolve-due` depuis `master` ; voir § 9. Les essais sur Supabase hébergé restent nécessaires pour confirmer l'exécution réelle.
 - **Reste à confirmer** : la région du projet.
