@@ -7,6 +7,10 @@ Statut : **préparation, rien n'est encore créé côté serveur** (17 novembre 
 | Élément | Valeur |
 | --- | --- |
 | Nom | `garage-verse` (créé par le propriétaire) |
+| Référence | `wqfukxadzwxaypqebtqw` |
+| URL (publique) | `https://wqfukxadzwxaypqebtqw.supabase.co` |
+| Clé publishable (publique) | `sb_publishable__Z5ER4kBYKflcgz2Q-wdcA_8UmRQhdh` |
+| Comptes anonymes | **désactivés au 17 novembre** (à activer, étape 1 du § 2) |
 | Région | Europe (Paris `eu-west-3` ou Francfort `eu-central-1`), au plus près des joueurs |
 | Offre | Gratuite au départ : largement suffisante pour des duels entre amis |
 | Séparation | Projet **dédié**, distinct de celui de Crazy Popping Catz. Les tables gardent quand même le préfixe `gv_` |
