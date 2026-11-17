@@ -84,6 +84,13 @@ assert.ok(winners.has('player') && winners.has('rival'), 'chaque camp peut gagne
   assert.equal(JSON.stringify(rules.replayVersus({ seed: 'absence', a: host, b: guest, moves: explicit })), JSON.stringify(withAbsence))
 }
 
+// Clé du flux de l'IA d'un absent (convention partagée avec le serveur) : secteur de 0 à 4, puis le camp.
+{
+  const duel = rules.createVersusRace('cle', host, guest)
+  const expected = rules.aiChoice(duel, 'rival', rules.seededRng('cle:ai:0:rival'))
+  assert.deepEqual(rules.autoChoice(duel, 'cle', 'rival'), expected)
+}
+
 // Écuries versus.
 const ok = rules.checkVersusLineup
 assert.equal(ok(host, 9), undefined)

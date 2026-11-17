@@ -73,7 +73,8 @@ try {
       await page.evaluate(() => document.fonts.ready)
       await capture('accueil')
       await tab('Boosters')
-      await page.locator('.shop-item').first().locator('button').tap()
+      // Bouton principal (prix ou ticket) : la carte a aussi les boutons d'achat groupé ×5 et ×10 depuis la v0.12.0.
+      await page.locator('.shop-item').first().locator('button.primary').tap()
       await capture('sachet')
       await swipe(.12)
       await page.getByTestId('tear-zone').waitFor()

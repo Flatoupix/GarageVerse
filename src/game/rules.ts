@@ -404,6 +404,8 @@ export function createVersusRace(seed: string, a: VersusEntry[], b: VersusEntry[
 export interface VersusMove { a: Choice | null; b: Choice | null }
 
 // Coup d'un joueur absent : l'IA joue à sa place, sur un flux séparé qui ne décale pas le hasard de la course.
+// Clé du flux : `${graine}:ai:${secteur}:${camp}`, secteur de 0 à 4 (nombre de secteurs déjà joués), camp `player` ou `rival`.
+// Le serveur doit reproduire exactement cette clé.
 export function autoChoice(duel: Duel, seed: string, who: 'player' | 'rival'): Choice {
   return aiChoice(duel, who, seededRng(`${seed}:ai:${duel.rounds.length}:${who}`))
 }

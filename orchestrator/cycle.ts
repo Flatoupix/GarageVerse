@@ -1,6 +1,6 @@
 import { createHash, randomUUID } from 'node:crypto'
 import { realpathSync } from 'node:fs'
-import { appendFile, mkdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
+import { appendFile, mkdir, readdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { invoke } from './agents.ts'
@@ -267,6 +267,19 @@ async function cycle(directory: string, resume: boolean) {
           state.tests = { build: result.code === 0 && !result.problem ? 'pass' : 'fail', browser: 'skipped',
             detail: result.problem ?? redact((result.stderr || result.stdout).slice(-3400)) }
           if (result.problem) throw new Error('Build · ' + failure(result))
+          // Vérifications hors réseau du jeu (src/game/*.check.cjs, pipeline/check-daily.cjs) : un échec compte comme un build en échec.
+          if (state.tests.build === 'pass') {
+            const checks = [...(await readdir(join(checkout, 'src/game'))).filter(file => file.endsWith('.check.cjs')).sort().map(file => join('src/game', file)),
+              ...(await readFile(join(checkout, 'pipeline/check-daily.cjs')).then(() => ['pipeline/check-daily.cjs'], () => []))]
+            const failed: string[] = []
+            for (const check of checks) {
+              const run = await execute(process.execPath, [check], options())
+              if (run.problem) throw new Error('Vérification ' + check + ' · ' + failure(run))
+              if (run.code !== 0) failed.push(check + ' · ' + redact((run.stderr || run.stdout).split('\n').filter(Boolean).slice(0, 6).join(' | ')).slice(0, 600))
+            }
+            await writeJson(join(step, 'checks.json'), { run: checks, failed })
+            if (failed.length) state.tests = { build: 'fail', browser: 'skipped', detail: 'Vérifications en échec : ' + failed.join(' ; ') }
+          }
           if (state.tests.build === 'pass') {
             const browser = await execute(process.execPath, [join(here, 'browser.ts'), join(checkout, 'dist'), step, state.config.cli.chrome,
               state.task.browser, JSON.stringify(state.task.flow ?? [])], options())
@@ -352,7 +365,7 @@ async function cycle(directory: string, resume: boolean) {
           const reply = await invoke(stage, state.config.cli, agentPrompt(stage, state, context), step, options(workspace),
             state.config.limits.claudeBudgetUsdPerCall, join(here, 'evidence.ts'))
           if (reply.tokens !== undefined) { state.tokens += reply.tokens; state.unknownUsage-- }
-          if (reply.relay) await log('Codex indisponible · Claude a pris le relais de l’implémentation')
+          if (reply.relay) await log(stage === 'ux' ? 'Antigravity indisponible · Claude a pris le relais de la revue visuelle' : 'Codex indisponible · Claude a pris le relais de l’implémentation')
           // La contre-revue est un avis : son absence (quota, session) ne bloque pas le cycle.
           if (stage === 'critique' && (!reply.report || reply.report.status === 'blocked')) {
             await log('Contre-revue Antigravity indisponible · ' + (reply.problem ?? reply.report?.summary ?? 'rapport absent'))
