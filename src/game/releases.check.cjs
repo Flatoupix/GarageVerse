@@ -16,6 +16,8 @@ assert.ok(releases.some(r => r.version === version), `CHANGELOG.md sans entrée 
 for (const r of releases) {
   assert.match(r.date, /^\d{4}-\d{2}-\d{2}$/, `date de ${r.version}`)
   assert.ok(r.sections.some(s => s.items.length), `aucune note pour ${r.version}`)
+  // Mise en forme imbriquée (italique dans du gras…) : l'analyse ne la gère pas et le joueur verrait les astérisques.
+  for (const s of r.sections) for (const item of s.items) assert.ok(item.every(part => !part.text.includes('*')), `astérisque visible dans les notes de ${r.version}`)
 }
 assert.equal(new Set(releases.map(r => r.version)).size, releases.length, 'version en double')
 

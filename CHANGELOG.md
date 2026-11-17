@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.7.0] — 2026-11-17
+
+### Modifié
+
+- **Nouvelles illustrations pour l’édition Abandonnée.** Les 129 voitures ont chacune une histoire d’abandon qui leur ressemble : oubliée à la ferme sous le hangar à foin, cachée dans une planque après un casse, remisée au fond d’un studio de cinéma, au bout d’un chemin forestier, dans le stand d’un circuit fermé, près d’une station-service du désert ou au dernier sous-sol d’un parking, et parfois là où on ne l’attend pas, comme un roller disco ou un centre commercial désert. Les voitures restent intactes, juste couvertes de poussière.
+
 ## [0.6.0] — 2026-11-16
 
 ### Ajouté
