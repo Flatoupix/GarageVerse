@@ -45,6 +45,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 |---|---|---|
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | P2 |
 | [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
+| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : couleur de rareté différente entre garage et plein écran | P2 |
 | [T-022](022-android-pwa-premier-lancement.md) | Android, PWA et accueil | P3 |
 | [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil | P3 |
 | [T-024](024-verification-donnees-et-droits.md) | Fiches, histoires et provenance | P3 |
