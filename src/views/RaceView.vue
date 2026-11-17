@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref } from 'vue'
 import { NIGHT_CAP, nightRival } from '../game/endless'
 import { createNightRound, finishNight, nightLineupCheck, settleNight, startNight } from '../game/save'
 import { constraintCap, constraintText } from '../game/daily'
@@ -17,25 +17,6 @@ import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
 import CarCard from '../components/CarCard.vue'
 import SectorRun from '../components/SectorRun.vue'
-
-const VersusView = defineAsyncComponent(() => import('./VersusView.vue'))
-const versusOpen = ref(Boolean(save.versus?.active || new URLSearchParams(location.search).has('versus')))
-const networkAvailable = ref(navigator.onLine)
-function updateNetwork() { networkAvailable.value = navigator.onLine }
-onMounted(() => {
-  window.addEventListener('online', updateNetwork)
-  window.addEventListener('offline', updateNetwork)
-})
-onUnmounted(() => {
-  window.removeEventListener('online', updateNetwork)
-  window.removeEventListener('offline', updateNetwork)
-})
-function closeVersus() {
-  versusOpen.value = false
-  const url = new URL(location.href)
-  url.searchParams.delete('versus')
-  history.replaceState(history.state, '', url)
-}
 
 // Les mesures suivent aussi les changements de thème, de police et de zone sûre.
 const raceRoot = ref<HTMLElement | null>(null)
@@ -359,12 +340,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 
 <template>
   <main ref="raceRoot" class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
-    <section v-if="versusOpen && !networkAvailable">
-      <button class="button quiet" @click="closeVersus">← Course</button>
-      <h1>Versus</h1><p role="status">Connexion nécessaire</p>
-    </section>
-    <VersusView v-else-if="versusOpen" @back="closeVersus" />
-    <section v-else-if="nightEnd" class="race-end night-panel">
+    <section v-if="nightEnd" class="race-end night-panel">
       <h1 tabindex="-1">Nuit terminée</h1>
       <p><span v-help="'nightRound'">Manches gagnées</span> : {{ nightEnd.wins }}</p>
       <p>{{ nightEnd.credits }} crédits versés</p>
@@ -622,7 +598,6 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           </button>
         </li>
       </ul>
-      <button class="button primary wide" @click="versusOpen = true">{{ save.versus?.active ? 'Reprendre le duel Versus' : 'Versus · Défier un ami' }}</button>
       <section class="specials">
         <h2 v-help="'special'">Spéciales</h2>
         <p v-if="!specialsOpen(save)" v-help="'specialUnlock'">Bats toute la Ligue Néon pour les ouvrir.</p>
