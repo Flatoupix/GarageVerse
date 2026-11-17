@@ -77,10 +77,17 @@ jobs:
           path: artifacts
       - name: Extraire le package HTML5
         run: mkdir dist-itch && unzip -q artifacts/garageverse-itch.zip -d dist-itch
-      - name: Installer butler officiel
+      # butler figé et vérifié : l'étape reçoit la clé d'API itch.io, elle n'exécute qu'un binaire connu.
+      # Pour changer de version : télécharger la nouvelle archive, calculer son SHA-256 et mettre à jour les deux valeurs.
+      - name: Installer butler officiel (version figée, empreinte vérifiée)
+        env:
+          BUTLER_VERSION: 15.32.0
+          BUTLER_SHA256: 2335971394ef6596f95ded0833e85ee28755e13761716ef4c91d6b11f69162f5
         run: |
-          curl --fail --silent --show-error --location https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default --output /tmp/butler.zip
+          curl --fail --silent --show-error --location "https://broth.itch.zone/butler/linux-amd64/$BUTLER_VERSION/archive/default" --output /tmp/butler.zip
+          echo "$BUTLER_SHA256  /tmp/butler.zip" | sha256sum --check --strict
           unzip -q /tmp/butler.zip -d /tmp/butler
           chmod +x /tmp/butler/butler
+          /tmp/butler/butler -V
       - name: Publier sur le canal html5
         run: /tmp/butler/butler push --if-changed dist-itch "$ITCHIO_TARGET:html5"
