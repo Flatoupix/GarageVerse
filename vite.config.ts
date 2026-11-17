@@ -12,4 +12,9 @@ if (!changelog.split(/\r?\n/).some(line => line.startsWith(`## [${version}] — 
 }
 
 // Base relative : le même build sert en local et sous /GarageVerse/ sur GitHub Pages.
-export default defineConfig({ base: './', plugins: [vue()], define: { __APP_VERSION__: JSON.stringify(version) } })
+export default defineConfig({
+  // Both GitHub Pages (/GarageVerse/) and itch.io's extracted ZIP need relative assets.
+  base: './',
+  plugins: [vue()],
+  define: { __APP_VERSION__: JSON.stringify(version) },
+})
