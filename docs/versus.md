@@ -35,7 +35,7 @@ La V1 seule est un jeu complet. V2 et V3 viennent ensuite.
 
 ## 4. Course équitable : le serveur résout, les clients affichent
 
-- La salle tire une **graine** au démarrage. Toute la course (météo, chance, incidents) en découle, comme le défi du jour aujourd'hui (`dailyRng`).
+- La salle tire une **graine** au démarrage. Toute la course (météo, chance, incidents) en découle, comme le défi du jour aujourd'hui (`dailyRng`). Elle reste **secrète jusqu'à l'arrivée** : les joueurs voient le circuit, la météo et les secteurs résolus, jamais la chance à venir (voir `docs/supabase.md` § 5).
 - Le serveur garde les choix cachés tant que les deux ne sont pas arrivés. Personne ne peut répondre au coup de l'autre.
 - Le serveur résout chaque secteur avec **le même code de règles que le jeu** (`src/game/rules.ts` et `src/game/data.ts`, importés par la fonction Supabase).
 - À ajouter dans `rules.ts` : `playVersusRound(duel, choiceA, choiceB, rng)`. C'est `playRound` sans l'appel à l'IA, et elle doit consommer le hasard dans le même ordre (chance du joueur A, puis du joueur B). `playRound` s'appuiera sur elle pour que les deux modes ne divergent jamais.

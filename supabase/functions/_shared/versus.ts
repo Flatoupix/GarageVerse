@@ -4,7 +4,7 @@
 // lèvent jamais d'exception ; seule une panne de la base remonte. Les points d'entrée supabase/functions/<nom>/index.ts
 // l'appellent en production, supabase/tests/versus-functions.test.mjs dans une base PGlite.
 import {
-  autoChoice, canAttack, checkVersusLineup, extraSlotFamily, replayVersus, stakeCheck, stances, VERSUS_STAKES,
+  autoChoice, canAttack, checkVersusLineup, extraSlotFamily, replayVersus, stakeCheck, stances, VERSUS_STAKES, versusRaceInfo,
   type Choice, type Duel, type Round, type Stance, type VersusEntry,
 } from './game/rules.ts'
 
@@ -79,11 +79,13 @@ async function lockRoom(ctx: Context, id: string): Promise<Row | undefined> {
 
 const playerView = (row: Row, created: boolean) => ({ id: row.id, nickname: row.nickname, friend_code: row.friend_code, created })
 
-// La graine reste cachée tant que la salle attend son invité : elle fixe toute la chance de la course.
+// La graine ne sort jamais pendant la course (elle fixe toute la chance) : la salle publie le circuit et la météo,
+// et la graine seulement à l'arrivée (revealed_seed), pour vérification.
 function roomView(room: Row) {
   return {
     id: room.id, code: room.code, host: room.host, guest: room.guest ?? null, cap: room.cap, stake: room.stake, state: room.state,
-    seed: room.state === 'open' ? null : room.seed, sector: room.sector, sector_deadline: iso(room.sector_deadline),
+    circuit: json(room.circuit) ?? null, conditions: json(room.conditions) ?? null, revealed_seed: room.revealed_seed ?? null,
+    sector: room.sector, sector_deadline: iso(room.sector_deadline),
     missed: json(room.missed) ?? {}, winner: room.winner ?? null, rematch_of: room.rematch_of ?? null, expires_at: iso(room.expires_at),
   }
 }
@@ -140,13 +142,29 @@ function choiceOf(body: Row): Choice | undefined {
 
 // ——— Course ———
 
+// Graine de la salle, lue dans gv_room_secrets (serveur seulement). Une salle créée avant la graine secrète reçoit au passage
+// son circuit et sa météo publics.
+async function seedOf(ctx: Context, room: Row): Promise<string> {
+  const { rows: [secret] } = await ctx.sql('select seed from gv_room_secrets where room = $1', [room.id])
+  if (!secret) throw new Error(`Graine absente pour la salle ${room.id}`)
+  if (room.circuit == null || room.conditions == null) {
+    const info = versusRaceInfo(secret.seed)
+    await ctx.sql('update gv_rooms set circuit = $2::text::jsonb, conditions = $3::text::jsonb where id = $1',
+      [room.id, JSON.stringify(info.circuit), JSON.stringify(info.conditions)])
+    room.circuit = info.circuit
+    room.conditions = info.conditions
+  }
+  return secret.seed
+}
+
 async function loadRace(ctx: Context, room: Row): Promise<Race> {
+  const seed = await seedOf(ctx, room)
   const { rows: lineups } = await ctx.sql('select player, cars from gv_lineups where room = $1', [room.id])
   const cars = (player: string) => json(lineups.find(l => l.player === player)?.cars) as VersusEntry[]
   const { rows } = await ctx.sql('select sector, player, car, stance, nitro from gv_moves where room = $1 and sector <= $2', [room.id, room.sector])
   const moves: Race['moves'] = Array.from({ length: room.sector + 1 }, () => ({}))
   for (const move of rows) moves[move.sector][campOf(room, move.player)] = { car: move.car, nitro: move.nitro, stance: move.stance }
-  return { seed: room.seed, a: cars(room.host), b: cars(room.guest), moves }
+  return { seed, a: cars(room.host), b: cars(room.guest), moves }
 }
 
 // Rejoue les `sectors` premiers secteurs avec le moteur du jeu : la course du serveur est par construction celle de replayVersus.
@@ -174,7 +192,8 @@ export function payouts(stake: number, outcome: { kind: 'race' | 'forfeit'; winn
 }
 
 async function finish(ctx: Context, room: Row, missed: Record<string, number>, kind: 'race' | 'forfeit', winner: Camp | null) {
-  const { rows: [done] } = await ctx.sql(`update gv_rooms set state = 'done', winner = $2, sector_deadline = null, missed = $3::text::jsonb where id = $1 returning *`,
+  const { rows: [done] } = await ctx.sql(`update gv_rooms set state = 'done', winner = $2, sector_deadline = null, missed = $3::text::jsonb,
+    revealed_seed = (select seed from gv_room_secrets where room = $1) where id = $1 returning *`,
     [room.id, winner ? playerOf(room, winner) : null, JSON.stringify(missed)])
   const amounts = payouts(room.stake, { kind, winner })
   for (const camp of CAMPS) {
@@ -186,7 +205,8 @@ async function finish(ctx: Context, room: Row, missed: Record<string, number>, k
 
 // Salle ouverte sans invité au-delà de son expiration : close, l'hôte récupère sa mise.
 async function expire(ctx: Context, room: Row) {
-  const { rows: [expired] } = await ctx.sql(`update gv_rooms set state = 'expired', sector_deadline = null where id = $1 returning *`, [room.id])
+  const { rows: [expired] } = await ctx.sql(`update gv_rooms set state = 'expired', sector_deadline = null,
+    revealed_seed = (select seed from gv_room_secrets where room = $1) where id = $1 returning *`, [room.id])
   await ctx.sql(`insert into gv_settlements (room, player, delta, reason) values ($1, $2, $3, 'refund') on conflict do nothing`, [room.id, room.host, room.stake])
   return expired
 }
@@ -261,11 +281,14 @@ export async function createRoom(ctx: Context) {
       [ctx.player, new Date(now - RATE_LIMIT.windowMs).toISOString()])
     if (recent.count >= RATE_LIMIT.rooms) return fail('RATE_LIMITED', `Au plus ${RATE_LIMIT.rooms} salles par heure`)
     const seed = draw(SEED_ALPHABET, 20, ctx.random)
+    const info = versusRaceInfo(seed)
     for (let attempt = 0; attempt < DRAWS; attempt++) {
-      const { rows: [room] } = await ctx.sql(`insert into gv_rooms (code, host, cap, stake, seed, rematch_of, expires_at, created_at, id)
-        values ($1, $2, $3, $4, $5, $6, $7, $8, coalesce($9::uuid, gen_random_uuid())) on conflict (code) do nothing returning *`,
-        [draw(INVITE_ALPHABET, 8, ctx.random), ctx.player, cap, stake, seed, rematch, at(ctx, ROOM_TTL_MS), at(ctx), body.room_id ?? null])
+      const { rows: [room] } = await ctx.sql(`insert into gv_rooms (code, host, cap, stake, circuit, conditions, rematch_of, expires_at, created_at, id)
+        values ($1, $2, $3, $4, $5::text::jsonb, $6::text::jsonb, $7, $8, $9, coalesce($10::uuid, gen_random_uuid())) on conflict (code) do nothing returning *`,
+        [draw(INVITE_ALPHABET, 8, ctx.random), ctx.player, cap, stake, JSON.stringify(info.circuit), JSON.stringify(info.conditions),
+          rematch, at(ctx, ROOM_TTL_MS), at(ctx), body.room_id ?? null])
       if (!room) continue
+      await ctx.sql('insert into gv_room_secrets (room, seed) values ($1, $2)', [room.id, seed])
       await ctx.sql('insert into gv_lineups (room, player, cars) values ($1, $2, $3::text::jsonb)', [room.id, ctx.player, JSON.stringify(lineup)])
       return ok({ room: roomView(room) })
     }
@@ -370,9 +393,13 @@ export async function resolveDue(ctx: Context) {
     const now = at(ctx)
     const { rows } = await ctx.sql(`select id from gv_rooms where (state = 'racing' and sector_deadline <= $1) or (state = 'open' and expires_at <= $1)
       order by created_at limit 100`, [now])
-    const rooms: string[] = []
-    for (const { id } of rows) if ((await transaction(ctx.sql, () => resolveRoom(ctx, id))).ok) rooms.push(id)
-    return ok({ rooms })
+    const rooms: string[] = [], failed: string[] = []
+    // Une salle en erreur ne bloque pas les suivantes : elle sera retentée à la prochaine minute.
+    for (const { id } of rows) {
+      try { if ((await transaction(ctx.sql, () => resolveRoom(ctx, id))).ok) rooms.push(id) }
+      catch (error) { (globalThis as { console?: { error(...args: unknown[]): void } }).console?.error(`resolve-due ${id}`, error); failed.push(id) }
+    }
+    return ok({ rooms, failed })
   }
   if (!isUuid(body.room)) return fail('INVALID_REQUEST')
   const id = body.room

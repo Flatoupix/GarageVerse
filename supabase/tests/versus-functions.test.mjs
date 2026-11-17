@@ -2,7 +2,7 @@
 // Duel complet identique à replayVersus, coups refusés, délais et absences, règlements, réclamation unique, revanche,
 // limite de salles par heure, écuries et mises invalides. Lancé par node src/game/supabase.check.cjs.
 import * as versus from '../functions/_shared/versus.ts'
-import { autoChoice, replayVersus, VERSUS_STAKES } from '../functions/_shared/game/rules.ts'
+import { autoChoice, rebuildVersus, replayVersus, VERSUS_STAKES, versusRaceInfo } from '../functions/_shared/game/rules.ts'
 import { vehicles } from '../functions/_shared/game/data.ts'
 
 const uuid = n => `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`
@@ -27,6 +27,8 @@ export async function run(db, { assert, user }) {
 }
 
 async function scenarios(db, assert, { A, B, C, D, E }) {
+  // Graine d'une salle : seulement dans gv_room_secrets, lue ici avec les droits du serveur.
+  const secret = async room => (await db.query('select seed from gv_room_secrets where room = $1', [room])).rows[0]?.seed
   let clock = Date.parse('2026-11-18T10:00:00.000Z')
   const tick = ms => { clock += ms }
   let state = 7
@@ -119,9 +121,12 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   const first = (await expectOk('createRoom', call(versus.createRoom, A, hostBody(), () => 0))).room
   assert.equal(first.state, 'open')
   assert.equal(first.code, 'AAAAAAAA')
-  assert.equal(first.seed, null, 'graine cachée tant que la salle attend')
+  assert.equal(first.seed, undefined, 'la salle ne publie jamais la graine')
+  assert.equal(first.revealed_seed, null, 'graine révélée seulement à l’arrivée')
+  assert.equal(first.conditions.length, 5, 'météo des 5 secteurs publiée')
+  assert.deepEqual(first.circuit, versusRaceInfo('a'.repeat(20)).circuit, 'circuit publié')
   assert.equal(first.expires_at, iso(clock + 10 * 60_000))
-  assert.equal((await row('select seed from gv_rooms where id = $1', [first.id])).seed, 'a'.repeat(20), 'graine tirée par le hasard injecté')
+  assert.equal(await secret(first.id), 'a'.repeat(20), 'graine tirée par le hasard injecté, gardée dans gv_room_secrets')
   assert.deepEqual((await row('select cars from gv_lineups where room = $1 and player = $2', [first.id, A])).cars, HOST_CARS)
   // Code d'invitation déjà pris : nouveau tirage, toujours sans caractère ambigu.
   const second = (await expectOk('createRoom, collision de code', call(versus.createRoom, A, hostBody({ stake: 50, credits: 400 }), zeros(28)))).room
@@ -152,7 +157,8 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   await expectError('mise trop haute pour l’invité', 'STAKE_TOO_HIGH', call(versus.joinRoom, B, { code: duelRoom.code, lineup: GUEST_CARS, credits: 300 }))
   const started = (await expectOk('joinRoom', call(versus.joinRoom, B, { code: duelRoom.code.toLowerCase(), lineup: GUEST_CARS, credits: 400 }))).room
   assert.deepEqual([started.state, started.guest, started.sector, started.sector_deadline], ['racing', B, 0, iso(clock + 20_000)])
-  assert.equal(typeof started.seed, 'string')
+  assert.equal(started.seed, undefined, 'graine jamais publiée pendant la course')
+  assert.equal(started.revealed_seed, null)
   await expectError('salle pleine', 'ROOM_FULL', call(versus.joinRoom, D, { code: duelRoom.code, lineup: GUEST_CARS }))
   await expectError('coup d’un tiers', 'NOT_YOUR_ROOM', call(versus.submitMove, D, { room: duelRoom.id, sector: 0, car: 0 }))
   await expectError('réclamation en course', 'NOT_FINISHED', call(versus.claimSettlement, A, { room: duelRoom.id }))
@@ -162,7 +168,7 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   }
   await expectError('Attaque impossible', 'INVALID_MOVE', call(versus.submitMove, A, { room: duelRoom.id, sector: 0, car: 2, stance: 'attaque' }))
 
-  const seed = started.seed
+  const seed = await secret(duelRoom.id)
   const legal = (duel, camp, want) => ({ car: want.car, nitro: want.nitro && duel[camp].nitro > 0, stance: want.stance })
   const HOST_PLAN = [
     { car: 0, stance: 'attaque', nitro: true }, { car: 1, stance: 'normal', nitro: false }, { car: 2, stance: 'gestion', nitro: true },
@@ -195,6 +201,12 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   const final = replayVersus({ seed, a: HOST_CARS, b: GUEST_CARS, moves })
   const stored = (await db.query('select sector, result from gv_rounds where room = $1 order by sector', [duelRoom.id])).rows
   assert.deepEqual(stored.map(r => r.result), final.rounds.map((_, i) => roundOf(final)(i)), 'gv_rounds identique à replayVersus')
+  // Sans la graine, le jeu reconstruit la même course à partir de ce que la salle publie.
+  const published = await row('select circuit, conditions, revealed_seed from gv_rooms where id = $1', [duelRoom.id])
+  const rebuilt = rebuildVersus({ circuit: published.circuit, conditions: published.conditions, a: HOST_CARS, b: GUEST_CARS, rounds: stored.map(r => r.result) })
+  assert.deepEqual([rebuilt.player.points, rebuilt.rival.points, rebuilt.winner, rebuilt.player.used, rebuilt.rival.nitro],
+    [final.player.points, final.rival.points, final.winner, final.player.used, final.rival.nitro], 'reconstruction sans graine identique')
+  assert.equal(published.revealed_seed, seed, 'graine révélée à l’arrivée')
   const ended = await row('select state, winner, sector_deadline from gv_rooms where id = $1', [duelRoom.id])
   const winnerId = final.winner === 'player' ? A : final.winner === 'rival' ? B : null
   assert.deepEqual([ended.state, ended.winner, ended.sector_deadline], ['done', winnerId, null])
@@ -219,7 +231,8 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   // ——— Délais : l'IA joue pour l'absent, deux absences valent abandon ———
   tick(60 * 60_000)
   const late = (await expectOk('createRoom mise 250', call(versus.createRoom, A, hostBody({ stake: 250, credits: 1000 })))).room
-  const lateSeed = (await expectOk('joinRoom', call(versus.joinRoom, B, { code: late.code, lineup: GUEST_CARS, credits: 1000 }))).room.seed
+  await expectOk('joinRoom', call(versus.joinRoom, B, { code: late.code, lineup: GUEST_CARS, credits: 1000 }))
+  const lateSeed = await secret(late.id)
   const hostMove = { car: 1, stance: 'normal', nitro: false }
   await expectOk('coup de l’hôte', call(versus.submitMove, A, { room: late.id, sector: 0, ...hostMove }))
   tick(19_999)
@@ -265,7 +278,7 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   tick(60 * 60_000)
   const tie = (await expectOk('createRoom égalité', call(versus.createRoom, A, hostBody({ stake: 50, credits: 200, lineup: GUEST_CARS }), spelled(tieSeed)))).room
   await expectOk('joinRoom égalité', call(versus.joinRoom, B, { code: tie.code, lineup: GUEST_CARS, credits: 200 }))
-  assert.equal((await row('select seed from gv_rooms where id = $1', [tie.id])).seed, tieSeed)
+  assert.equal(await secret(tie.id), tieSeed)
   await playOut(tie.id, tieSeed, GUEST_CARS, GUEST_CARS)
   assert.deepEqual(await row('select state, winner from gv_rooms where id = $1', [tie.id]), { state: 'done', winner: null })
   assert.deepEqual(await settled(tie.id), { [A]: [50, 'tie'], [B]: [50, 'tie'] })
@@ -273,7 +286,8 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
 
   // ——— Mise 0 : rien à verser ———
   const free = (await expectOk('createRoom mise 0', call(versus.createRoom, A, hostBody()))).room
-  const freeSeed = (await expectOk('joinRoom mise 0', call(versus.joinRoom, B, { code: free.code, lineup: GUEST_CARS }))).room.seed
+  await expectOk('joinRoom mise 0', call(versus.joinRoom, B, { code: free.code, lineup: GUEST_CARS }))
+  const freeSeed = await secret(free.id)
   const freeRace = await playOut(free.id, freeSeed, HOST_CARS, GUEST_CARS)
   const freeRow = await row('select state, winner from gv_rooms where id = $1', [free.id])
   assert.deepEqual(freeRow, { state: 'done', winner: freeRace.winner === 'player' ? A : freeRace.winner === 'rival' ? B : null })
@@ -287,4 +301,24 @@ async function scenarios(db, assert, { A, B, C, D, E }) {
   clock = start + 60 * 60_000 + 1
   await expectOk('la 1re salle sort de la fenêtre', call(versus.createRoom, E, hostBody()))
   await expectError('fenêtre de nouveau pleine', 'RATE_LIMITED', call(versus.createRoom, E, hostBody()))
+
+  // ——— La graine ne quitte jamais le serveur ———
+  assert.equal((await db.query(`select 1 from information_schema.columns where table_name = 'gv_rooms' and column_name = 'seed'`)).rows.length, 0,
+    'plus de colonne seed dans gv_rooms (ni lecture directe, ni Realtime)')
+  await db.exec('reset role')
+  await db.exec('set role authenticated')
+  await db.query(`select set_config('request.jwt.claim.sub', $1, false)`, [A])
+  try {
+    let refused = false
+    try { await db.query('select seed from gv_room_secrets') } catch (error) { refused = /permission denied/.test(error.message) }
+    assert.ok(refused, 'un joueur ne lit pas gv_room_secrets')
+    const snap = (await db.query('select gv_snapshot($1) as s', [duelRoom.id])).rows[0].s
+    assert.ok(!('seed' in snap.room), 'gv_snapshot ne contient pas la graine')
+    assert.equal(snap.room.revealed_seed, seed, 'gv_snapshot donne la graine révélée d’une salle terminée')
+    assert.equal(snap.room.conditions.length, 5)
+  } finally {
+    await db.query(`select set_config('request.jwt.claim.sub', '', false)`)
+    await db.exec('reset role')
+    await db.exec('set role service_role')
+  }
 }

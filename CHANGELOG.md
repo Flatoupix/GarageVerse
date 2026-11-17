@@ -4,6 +4,16 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.14.0] — 2026-11-18
+
+### Ajouté
+
+- **Mode Versus : défie tes amis.** Depuis l’accueil, crée un défi avec ton écurie de trois voitures, choisis le plafond de coût (9, 15 ou 22) et ta mise (de 50 à 500 crédits, ou sans mise pour la gloire), puis envoie le lien ou le QR code à un ami. La course se joue en direct en cinq secteurs : vous choisissez en même temps votre voiture, votre consigne et la nitro, avec 20 secondes par secteur. Le gagnant empoche le pot, moins une commission de 10 % ; en cas d’égalité, chacun récupère sa mise. Une revanche se lance en un geste.
+
+### Corrigé
+
+- **Courses Versus plus équitables.** La chance de chaque secteur (forme du jour, secteur parfait, incident) n’est plus devinable pendant la course : elle n’est dévoilée qu’à l’arrivée.
+
 ## [0.13.0] — 2026-11-17
 
 ### Ajouté

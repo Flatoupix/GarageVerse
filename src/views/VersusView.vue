@@ -6,7 +6,7 @@ import { prepOf } from '../game/save'
 import { vehicleById, sectorLabels, conditionLabels } from '../game/data'
 import { carSprite, trackBackdrop } from '../game/art'
 import SectorRun from '../components/SectorRun.vue'
-import { canAttack, checkVersusLineup, replayVersus, stakeCheck, versusCircuit, VERSUS_CAPS, VERSUS_STAKES, type Stance } from '../game/rules'
+import { canAttack, checkVersusLineup, rebuildVersus, stakeCheck, VERSUS_CAPS, VERSUS_STAKES, type Stance } from '../game/rules'
 import { dismiss, engage, identify, move, preview, resolve, snapshot, subscribe, type Snapshot } from '../game/versus'
 import type { Invitation } from '../game/versus-wallet'
 
@@ -37,9 +37,9 @@ const side = computed(() => room.value?.host === save.versus?.id ? 'player' : 'r
 const opponent = computed(() => side.value === 'player' ? room.value?.guest : room.value?.host)
 const duel = computed(() => {
   const s = state.value
-  if (!s?.room.guest) return null
-  return replayVersus({ seed: s.room.seed, a: s.lineups[s.room.host], b: s.lineups[s.room.guest],
-    moves: s.rounds.map(r => ({ a: r.player, b: r.rival })) })
+  if (!s?.room.guest || !s.room.circuit || !s.room.conditions) return null
+  // Course reconstruite à partir des secteurs publiés par le serveur : la graine reste secrète jusqu'à l'arrivée.
+  return rebuildVersus({ circuit: s.room.circuit, conditions: s.room.conditions, a: s.lineups[s.room.host], b: s.lineups[s.room.guest], rounds: s.rounds })
 })
 const last = computed(() => state.value?.rounds.at(-1))
 const link = computed(() => {
@@ -173,7 +173,7 @@ onUnmounted(() => {
         <label>Lien d’invitation <input readonly :value="link" @focus="($event.target as HTMLInputElement).select()"></label>
       </template>
       <template v-if="duel && opponent">
-        <h2>{{ versusCircuit(room.seed).name }} · contre {{ state.players[opponent] }}</h2>
+        <h2>{{ room.circuit?.name ?? 'Circuit' }} · contre {{ state.players[opponent] }}</h2>
         <p>{{ state.lineups[opponent].map(e => name(e.id)).join(' · ') }}</p>
         <p>{{ duel.sectors.map((s,i) => sectorLabels[s] + ' (' + conditionLabels[duel!.conditions[i]] + ')').join(' · ') }}</p>
         <template v-if="room.state === 'racing'">

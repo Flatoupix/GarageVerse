@@ -69,7 +69,7 @@ Le serveur doit résoudre les secteurs **avec exactement le même code** que le 
 - Les fonctions tournent sous Deno et ne peuvent embarquer que des fichiers situés sous `supabase/functions/`. Un script `supabase/sync-rules.mjs` copie donc `src/game/rules.ts`, `src/game/data.ts` et `src/data/{roster,garage}.json` dans `supabase/functions/_shared/game/`, en adaptant les imports JSON (`with { type: 'json' }`).
 - Une vérification (`node src/game/supabase.check.cjs`) échoue si la copie diffère de la source : impossible de déployer un serveur dont les règles ont dérivé du jeu.
 - Le moteur expose `playVersusRound(duel, choiceA, choiceB, rng)` (ticket 002) ; `playRound` contre l'IA s'appuiera dessus.
-- La graine de la salle est tirée par le serveur ; tout le hasard de la course en découle (`dailyRng(graine)`).
+- La graine de la salle est tirée par le serveur ; tout le hasard de la course en découle (`dailyRng(graine)`). **Elle ne quitte jamais le serveur pendant la course** : elle vit dans `gv_room_secrets` (aucun droit pour les joueurs), la salle publie le circuit et la météo des secteurs (`versusRaceInfo`), le jeu reconstruit la course à partir des secteurs publiés (`rebuildVersus`), et la graine est recopiée dans `gv_rooms.revealed_seed` à l'arrivée pour vérification (migration `20261118020000_versus_secret_seed.sql`). Sans cela, un jeu modifié pourrait prévoir la chance d'un secteur et choisir sa consigne pour éviter un incident.
 
 ## 6. Schéma V1 (duels et mises)
 

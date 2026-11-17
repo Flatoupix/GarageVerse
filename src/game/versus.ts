@@ -1,11 +1,14 @@
 import { createClient } from '@supabase/supabase-js'
+import type { Condition, Rival } from './data'
 import type { Round, VersusEntry } from './rules'
 import { persist, save, storageWarning } from './store'
 import { reserve, settle, type Engagement, type Invitation, type VersusAccount } from './versus-wallet'
 
 export interface Snapshot {
   now: string
-  room: Invitation & { code: string; state: string; host: string; guest: string | null; winner: string | null; missed: Record<string, number>; sector: number; sector_deadline: string | null; expires_at: string; seed: string }
+  room: Invitation & { code: string; state: string; host: string; guest: string | null; winner: string | null; missed: Record<string, number>; sector: number; sector_deadline: string | null; expires_at: string
+    // Graine secrète pendant la course (elle fixe la chance) : le serveur publie le circuit et la météo, et la graine à l'arrivée.
+    circuit: Rival['circuit'] | null; conditions: Condition[] | null; revealed_seed: string | null }
   players: Record<string, string>
   lineups: Record<string, VersusEntry[]>
   rounds: Round[]
