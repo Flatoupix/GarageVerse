@@ -167,9 +167,6 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
 .is-torn .foil-body { animation: foil-drop 405ms var(--ease) both; }
 @keyframes foil-fly { 0% { opacity: 1; } 75% { opacity: .8; } 100% { transform: translate(31%, -35%) rotate(32deg); opacity: 0; } }
 @keyframes foil-drop { 23% { transform: translateY(-4%) rotate(-2deg); } 100% { transform: translateY(36%) rotate(7deg); opacity: 0; } }
-.sealed-actions { text-align: center; margin-top: 17px; }
-.sealed-actions p { color: var(--muted); font-size: 15px; margin-bottom: 11px; }
-.actions-hidden { visibility: hidden; }
 .reveal { text-align: center; }
 .stack-stage { padding: 15px 12px 20px; }
 .card-stack { position: relative; width: clamp(170px, min(74vw, 40svh), 290px); aspect-ratio: .72; perspective: 820px; container-type: inline-size; }
@@ -1043,12 +1040,6 @@ button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow
 .swipe-hint { margin: 8px auto; max-width: 28ch; padding-inline: 8px; color: var(--muted); font-size: .8rem; line-height: 1.4; }
 .motion-reduced .swipe-card { transition: none; }
 @media (prefers-reduced-motion: reduce) { .swipe-card { transition: none; } }
-
-/* Choix d’apparence au tirage, indépendant des actions de progression. */
-.pull-edition { width: min(100%, 420px); min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--night); text-align: center; }
-.pull-edition p { margin: 0 0 8px; }
-.pull-edition-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.pull-edition-actions .button { flex: 1 1 160px; min-width: 0; white-space: normal; }
 
 /* Vente : les commandes se replient sur les petits écrans. */
 .car-sale { min-width: 0; overflow-wrap: anywhere; }

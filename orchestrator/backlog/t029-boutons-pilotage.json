@@ -1,0 +1,39 @@
+{
+  "id": "t029-boutons-pilotage",
+  "title": "Choix automatique / manuel : de vrais boutons au style du jeu",
+  "brief": "Ticket T-029 (tickets/029-boutons-pilotage-automatique.md, à lire en entier). Retour du joueur : « je veux des boutons propres pour l'automatique, là c'est dégueulasse ». Le sélecteur « Pilotage » de src/views/RaceView.vue (haut de l'onglet Course, visible quand le mode timing expérimental est activé dans les Réglages) est fait de cases rondes de formulaire (`input[name=race-pilot]`) dans un cadre, avec un paragraphe d'explication ; le bouton « Passer en automatique pour la suite » (`.pilot-switch`) est discret. Les remplacer par un sélecteur à deux gros boutons de type commutateur segmenté, au style des filtres et boutons du jeu (src/components/GvButton.vue, variante filtre ou équivalent, voir les puces de rareté du garage pour le langage visuel), avec un état actif très visible, libellés courts « Automatique » et « Manuel », et l'explication en sous-titre ou texte d'aide sous le sélecteur plutôt qu'en paragraphe lourd. Cibles tactiles d'au moins 44 px, utilisables au pouce, lisibles à 320 et 390 px, état distinct sans reposer sur la couleur seule, groupe de choix exclusif accessible (rôle radiogroup ou boutons avec aria-pressed, annoncé au lecteur d'écran), clavier préservé. Le bouton de bascule en cours de course reprend le même langage visuel. Ne rien changer à la logique de pilotage (src/game/pilot.ts), seulement à la présentation. CONTRAINTES COMMUNES : `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier, ne rien changer sous supabase/. Le projet est bilingue : tout texte visible passe par `t('…')` / `tp(…)` (import de '../i18n'), avec sa traduction anglaise dans `src/i18n/en/` (règles dans docs/i18n.md) ; `node src/i18n/i18n.check.cjs` doit passer, ainsi que toutes les vérifications existantes de src/game/ et le typage. Textes français, tutoiement. Les sauvegardes existantes restent valides. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Les huit thèmes (src/game/theme.ts) restent cohérents : règles communes dans src/themes/shared.css, règles propres à un thème dans base.css et neon.css (gardées synchronisées).",
+  "requirements": [
+    "Le choix automatique / manuel n'utilise plus de cases rondes brutes : deux boutons au style du jeu, état actif évident, cibles d'au moins 44 px, libellés « Automatique » et « Manuel », explication discrète.",
+    "Le bouton « Passer en automatique pour la suite » reprend le même style et ne masque pas le secteur en cours.",
+    "Rendu cohérent dans les huit thèmes, lisible à 320, 390 et 1280 px sans débordement horizontal ; état annoncé aux lecteurs d'écran et clavier préservé.",
+    "Aucune modification de la logique de pilotage ni de la préférence mémorisée ; node src/game/pilot.check.cjs et toutes les vérifications existantes passent ; textes français et anglais (i18n.check.cjs passe) ; aucune erreur dans la console."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "tap": "Mode timing (expérimental)"
+    },
+    {
+      "tap": "Fermer les réglages"
+    },
+    {
+      "tab": "Course"
+    },
+    {
+      "expect": "Pilotage"
+    },
+    {
+      "capture": "pilotage"
+    }
+  ]
+}

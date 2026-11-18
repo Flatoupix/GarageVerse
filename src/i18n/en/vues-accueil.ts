@@ -70,6 +70,7 @@ export const vuesAccueil: Dict = {
   'Année': 'Year',
   'Nom (A-Z)': 'Name (A-Z)',
   'Famille': 'Family',
+  'Éditions manquantes': 'Missing editions',
   'Pièces manquantes': 'Missing parts',
   'Confirmer': 'Confirm',
   'Annuler': 'Cancel',
@@ -106,7 +107,7 @@ export const vuesAccueil: Dict = {
 
   // Showroom
   'Accès caché': 'Hidden access',
-  '{cars} voitures · {editions} éditions. Touche une carte pour voir toutes ses éditions.': '{cars} cars · {editions} editions. Tap a card to see all its editions.',
+  '{cars} voitures · {editions} éditions. Touche une carte pour voir ses éditions.': '{cars} cars · {editions} editions. Tap a card to see its editions.',
   'Quitter le Showroom': 'Leave the Showroom',
   'Rechercher (nom, numéro, année, catégorie…)': 'Search (name, number, year, category…)',
   'Éditions de {name} {version}': 'Editions of {name} {version}',

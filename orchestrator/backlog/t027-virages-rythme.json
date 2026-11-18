@@ -1,0 +1,35 @@
+{
+  "id": "t027-virages-rythme",
+  "title": "Virages en jeu de rythme : deux pistes gauche/droite et virages qui arrivent (refonte de la variante T-027)",
+  "brief": "Retour du joueur sur la variante T-027 déjà présente dans la base de ce cycle (src/game/turn.ts, src/components/TurnControl.vue, intégration dans src/views/RaceView.vue, démo « Démo des virages », ticket tickets/027-prototype-direction-virages.md) : ce n'est pas ce qu'il imagine. Il voit un JEU DE RYTHME : les DEUX flèches (← gauche et droite →) sont toujours visibles, chacune sur sa piste avec une cible fixe, et les virages à venir ARRIVENT vers les cibles comme des notes ; il faut appuyer sur la bonne flèche au bon moment, quand la note est dans la cible. Refondre la mécanique en ce sens. Un secteur de type `virage` devient une courte séquence de virages (3 par défaut, paramétrable) dont les sens et les instants sont déterministes : déduits du circuit, de l'index du secteur et du rival par un petit hachage stable, sans tirage caché ni consommation du Rng de course. Les virages à venir sont visibles assez tôt pour être anticipés (environ 2,5 s à l'avance, réglable selon la difficulté) et descendent vers deux cibles étiquetées « Maintenant ». Chaque note est jugée selon l'écart de temps entre l'appui et la cible : Parfait, Bien, Trop tôt / Trop tard, Mauvais côté (appui sur la mauvaise piste) ou Raté (note passée sans appui). Le modificateur de chaque note est paramétrable ; leur somme est BORNÉE sur le secteur (par défaut entre −2 et +2) et s'ajoute au score de référence : le détail du score affiche une ligne « Direction » avec le nombre de Parfait / Bien / Ratés, puis score de base + direction = score du secteur. La difficulté (vitesse de défilement, largeur de la fenêtre de jugement) dépend du rival et reste réglable ; les stats MAN et les pièces ne servent pas à rendre le bon côté automatique. Deux grands boutons tactiles côte à côte sous les pistes (libellés accessibles « Tourner à gauche » et « Tourner à droite », zone de toucher généreuse au pouce, aussi la piste elle-même), touches ← et → au clavier seulement pendant le mini-jeu, répétitions et doubles appuis ignorés, horloge monotone (pas de comptage d'images), chrono suspendu si l'onglet est masqué, une seule résolution par secteur, rechargement avant résolution = reprise depuis la sélection. Tout doit rester lisible sans couleur (flèches de formes distinctes, libellés, motifs) et en mouvement réduit (les notes avancent alors par paliers ou sont annoncées par un compte à rebours textuel plutôt qu'un défilement continu). Adapter la démo « Démo des virages » (Réglages › Paramètres) pour montrer la séquence avec des virages des deux sens ; l'option « Direction dans les virages (expérimental) » et sa dépendance au mode timing du T-026 restent identiques. Le compteur de vitesse du T-026 ne change pas. CONTRAINTES COMMUNES : prototype solo réversible. Le mode expérimental reste désactivé par défaut et rien ne change pour le mode de course actuel ni pour le Versus. `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier, ne rien changer sous supabase/. Le projet est bilingue : tout texte visible passe par `t('…')` / `tp(…)` (import de '../i18n'), avec sa traduction anglaise dans `src/i18n/en/` (règles dans docs/i18n.md) ; `node src/i18n/i18n.check.cjs` doit passer, ainsi que toutes les vérifications existantes de src/game/ et le typage. Textes français, tutoiement. Sauvegardes existantes valides (champs optionnels). Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français.",
+  "requirements": [
+    "`src/game/turn.ts` (module pur, sans Vue) : génération déterministe de la séquence de virages d'un secteur (sens et instants) à partir du circuit, de l'index du secteur et du rival ; jugement d'une note selon l'écart de temps et la piste pressée (Parfait, Bien, Trop tôt, Trop tard, Mauvais côté, Raté) ; modificateur par note paramétrable ; somme bornée sur le secteur. `src/game/turn.check.cjs` mis à jour : déterminisme, bornes des fenêtres, mauvais côté, note sans appui, double appui, plafond de la somme ; elle passe avec toutes les vérifications existantes.",
+    "`src/components/TurnControl.vue` refondu en vue de jeu de rythme : deux pistes ← et → toujours visibles avec leur cible « Maintenant », les virages à venir qui arrivent visiblement vers les cibles, retour immédiat à chaque note, deux grands boutons côte à côte au pouce, clavier ← et →, lisible sans couleur, mouvement réduit géré, un seul résultat remonté par secteur, chrono suspendu si l'onglet est masqué.",
+    "Intégration solo dans `src/views/RaceView.vue` pour les secteurs `virage` quand l'option est activée : séquence jouée avant la résolution du secteur, ligne « Direction » dans le détail du score (nombre de Parfait / Bien / Ratés), aucun secteur validé deux fois, rechargement avant résolution = reprise depuis la sélection ; option désactivée : le virage garde le passage de vitesses du T-026 ; le rival garde sa résolution habituelle.",
+    "Démo « Démo des virages » mise à jour : séquence jouable avec virages à gauche et à droite, rejouable, lisible à 320 et 390 px.",
+    "Aucune modification de rules.ts, data.ts ni de supabase/ ; Versus inchangé ; traduction anglaise complète (i18n.check.cjs passe) ; typage propre ; docs/meta.md décrit la mécanique de rythme, le barème, le plafond et les réglages de difficulté.",
+    "Aucune erreur dans la console ; pistes, flèches, cibles et boutons lisibles sans débordement horizontal à 320 et 390 px, y compris en mouvement réduit."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Démo des virages"
+    },
+    {
+      "tap": "Démo des virages"
+    },
+    {
+      "capture": "virages"
+    }
+  ]
+}

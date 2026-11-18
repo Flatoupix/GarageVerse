@@ -1,0 +1,35 @@
+{
+  "id": "t026-passage-vitesses",
+  "title": "Prototype de course : passage de vitesses au bon régime (mode expérimental solo)",
+  "brief": "Ticket T-026 (tickets/026-prototype-passage-vitesses-timing.md, à lire en entier). Prototyper un nouveau mode de résolution des secteurs, plus actif et moins dépendant de la chance : au lieu de la « forme du jour » aléatoire (±12 %, voir applyLuck dans src/game/rules.ts), le joueur arrête une aiguille de compte-tours dans une fenêtre rouge → orange → vert → orange → rouge, et son timing donne un modificateur lisible : rouge −2, orange −1, vert 0, centre du vert +1 (barème paramétrable). Le score de référence (stat de secteur, météo, pièces, capacité, consigne, nitro, surchauffe) reste calculé par les règles actuelles ; l'affichage montre « score de référence + timing = final ». Une meilleure voiture, un Stage plus haut et des pièces adaptées élargissent la fenêtre de façon bornée (coefficients simples et plafonnés, documentés). La position de la fenêtre peut varier d'un secteur à l'autre mais se déduit d'une graine connue (course, secteur) : aucun tirage caché. Vitesse de l'aiguille et largeur du vert varient selon le secteur (départ, ligne droite, endurance ; le virage garde le passage de vitesses dans cette tâche) et le rival. Un passage par secteur, solo contre l'IA uniquement. Pour que le composant soit visible sans jouer une course, ajouter dans Réglages › Paramètres un bouton « Démo du passage de vitesses » qui ouvre une démonstration du compteur. CONTRAINTES COMMUNES : prototype solo réversible. Le mode expérimental est désactivé par défaut et rien ne change pour le mode de course actuel ni pour le Versus. `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier, ne rien changer sous supabase/. Réutiliser les fonctions exportées de rules.ts ; ce qui manque s'écrit dans de nouveaux modules du client. Le projet est bilingue : tout texte visible passe par `t('…')` / `tp(…)` (import de '../i18n'), avec sa traduction anglaise dans un nouveau fichier `src/i18n/en/<zone>.ts` branché dans `src/i18n/en/index.ts` (règles dans docs/i18n.md) ; `node src/i18n/i18n.check.cjs` doit passer. Textes français, tutoiement. Les sauvegardes existantes restent valides (champs optionnels avec valeur par défaut dans src/game/save.ts). Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français.",
+  "requirements": [
+    "Module pur et testable `src/game/timing.ts` (sans Vue) : classification d'un appui dans la fenêtre rouge–orange–vert–orange–rouge, barème paramétrable (−2/−1/0/+1), largeur de fenêtre élargie de façon plafonnée par la stat pertinente, le Stage et les pièces, position de la fenêtre déduite d'une graine. Vérification `src/game/timing.check.cjs` (bornes des zones, centre du vert, hors fenêtre, déterminisme, plafonds) dans le style des autres .check.cjs ; elle doit passer ainsi que toutes les vérifications existantes de src/game/.",
+    "Composant `src/components/TimingGauge.vue` : compteur à aiguille lisible, zones distinguées aussi par texte ou motif (pas seulement par la couleur), grand bouton tactile « Passer la vitesse » utilisable à une main, touche Espace ou Entrée au clavier, temps mesuré avec une horloge monotone (pas de comptage d'images), animation réduite respectée, retour immédiat Parfait / Bon / Moyen / Raté, aucune double validation d'un même passage.",
+    "Réglage expérimental « Mode timing (expérimental) » dans Réglages › Paramètres (préférence optionnelle de src/game/save.ts, désactivée par défaut), et bouton « Démo du passage de vitesses » qui ouvre la démonstration du compteur dans une boîte de dialogue lisible à 320 et 390 px.",
+    "Intégration solo dans src/views/RaceView.vue quand le mode est activé : un passage par secteur avant la résolution, le modificateur remplace la forme du jour du joueur (le rival garde sa résolution habituelle), le bilan du secteur affiche score de référence, zone atteinte, modificateur et total. Pause, changement d'onglet et rechargement ne valident jamais un secteur deux fois ni ne corrompent la sauvegarde. Mode désactivé : comportement actuel strictement inchangé.",
+    "Aucune modification de rules.ts, data.ts ni de supabase/ ; Versus inchangé ; `node src/game/supabase.check.cjs` et toutes les autres vérifications passent ; typage propre.",
+    "docs/meta.md décrit le mode expérimental (barème, coefficients, réglage, démo) et ce qui reste à décider après playtest ; aucune erreur dans la console ; Garage, Course et Réglages restent lisibles sans débordement horizontal à 320, 390 et 1280 px."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Démo du passage de vitesses"
+    },
+    {
+      "tap": "Démo du passage de vitesses"
+    },
+    {
+      "capture": "timing"
+    }
+  ]
+}

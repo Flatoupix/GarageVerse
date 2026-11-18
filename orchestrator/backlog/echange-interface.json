@@ -1,0 +1,56 @@
+{
+  "id": "echange-interface",
+  "title": "Échanges, étape 5 : interface (vitrine, composition d'offre, offres reçues et envoyées, contre-offre, historique)",
+  "brief": "Interface des échanges de cartes (docs/echanges.md §5 et §7), dans l'écran « Échanges » du Garage créé à l'étape echange-amis (onglet Amis existant), en s'appuyant sur le client de l'étape echange-client. Onglets à ajouter : « Vitrine » (choisir les voitures visibles par ses amis pour l'échange ; une voiture engagée dans une course en cours ne peut pas y figurer), « Offres » (reçues et envoyées : les deux côtés en cartes complètes avec édition affichée, Stage, niveaux d'atelier, rareté, et montant de crédits ; temps restant avant expiration ; Accepter / Refuser / Contre-proposer pour une offre reçue, Annuler pour une offre envoyée), « Historique » (échanges terminés, rendus ou expirés). Composition d'une offre depuis la vitrine d'un ami (onglet Amis → ami → « Proposer un échange ») : mes cartes + crédits optionnels contre ses cartes de vitrine + crédits optionnels, avec les interdits affichés clairement avant l'envoi (garage sous trois voitures, crédits au-delà du solde, voiture engagée, plus de 10 offres ouvertes). Une contre-offre reprend l'offre reçue inversée pour la modifier. Les voitures en transit sont visibles mais marquées « En transit » dans le Garage et absentes des choix de course. Réutiliser les composants existants de cartes et de boutons (GvButton, cartes du Garage) et les variables des thèmes ; lisible sans couleur. Deux choix laissés ouverts par l'étape des règles, à traiter ici : (1) avant d'échanger une voiture qui porte des pièces montées, afficher que ces pièces retournent au stock ; (2) l'historique affiche au plus les 50 derniers échanges terminés (les marqueurs de trade.ts ne changent pas). CONTRAINTES COMMUNES : spécification de référence docs/echanges.md (règles et découpage §8), ticket tickets/008-echanges-de-cartes.md ; ne pas réinventer les règles déjà écrites. Les règles pures existent déjà dans src/game/trade.ts (validateTradeOffer, openTrade, transitTrade, completeTrade, receiveTrade, returnTrade, acknowledgeTrade, readTrades) avec src/game/trade.check.cjs : les réutiliser, ne pas les dupliquer. Les échanges sont INDÉPENDANTS du Versus (en pause, VERSUS_OPEN = false dans src/game/features.ts) : réutiliser le compte anonyme et le code ami (gv_players, fonction register, client src/game/versus.ts) sans rouvrir le Versus ni modifier ses tables, fonctions ou écrans. Les migrations sont ADDITIVES (nouveau fichier daté dans supabase/migrations/, aucune table existante modifiée), avec RLS sur chaque nouvelle table, aucune écriture directe pour anon/authenticated (seul service_role écrit via les Edge Functions), et des tests dans supabase/tests/ sur le modèle de versus-v1.test.mjs et versus-functions.test.mjs. Le déploiement Supabase ne se fait que depuis master, après relecture des migrations par le propriétaire : ne rien supposer déployé côté hébergé ; le jeu doit fonctionner normalement quand le serveur ne répond pas ou que les tables n'existent pas (message « Connexion nécessaire » ou « Serveur indisponible », aucune donnée de la sauvegarde touchée). Toute l'interface des échanges est cachée derrière un réglage « Échanges entre amis (expérimental) » dans Réglages › Paramètres, désactivé par défaut (préférence optionnelle de la sauvegarde) ; aucun appel réseau tant qu'il est désactivé. `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier. Bilingue : tout texte visible passe par t('…') / tp(…) avec sa traduction dans src/i18n/en/ (docs/i18n.md) ; node src/i18n/i18n.check.cjs, toutes les vérifications de src/game/, les tests supabase/tests/ et le typage passent. Textes français, tutoiement. Sauvegardes existantes valides (champs optionnels). Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Mettre à jour docs/echanges.md (statut de l'étape) et docs/supabase.md (tables et fonctions).",
+  "requirements": [
+    "Onglets Vitrine, Offres (reçues / envoyées) et Historique dans l'écran Échanges, avec cartes complètes (édition affichée, Stage, ateliers, rareté) et crédits, temps restant et actions Accepter, Refuser, Contre-proposer, Annuler.",
+    "Composition d'offre depuis un ami, contre-offre pré-remplie, interdits affichés avant l'envoi, avertissement pour les pièces montées qui retournent au stock.",
+    "Voitures en transit marquées « En transit » dans le Garage et exclues des choix de course et de la vente.",
+    "États hors ligne / serveur indisponible / liste vide traités avec des messages clairs ; aucun appel réseau tant que le réglage expérimental est désactivé.",
+    "Lisible sans débordement horizontal à 320, 390 et 1280 px dans le style des écrans existants ; aucune erreur dans la console ; traduction anglaise complète ; typage et vérifications verts ; aucune modification de rules.ts, data.ts, supabase/ ni du Versus ; docs/echanges.md et docs/meta.md à jour."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Échanges entre amis (expérimental)"
+    },
+    {
+      "tap": "Échanges entre amis (expérimental)"
+    },
+    {
+      "tab": "Garage"
+    },
+    {
+      "expect": "Échanges"
+    },
+    {
+      "tap": "Échanges"
+    },
+    {
+      "capture": "amis-interface"
+    },
+    {
+      "tap": "Vitrine"
+    },
+    {
+      "capture": "vitrine"
+    },
+    {
+      "tap": "Offres"
+    },
+    {
+      "capture": "offres"
+    }
+  ],
+  "profile": "heavy"
+}

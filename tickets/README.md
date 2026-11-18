@@ -20,15 +20,17 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-004](004-versus-mises-et-reglement.md) | Mises et règlement unique | P1 |
 | [T-005](005-versus-client-temps-reel.md) | Client Versus et reprise | P1 |
 | [T-006](006-versus-interface-mobile.md) | Interface de duel mobile | P1 |
-| [T-007](007-versus-amis-palmares-v2.md) | Amis et palmarès V2 | P2 |
-| [T-008](008-versus-echange-cartes-v3.md) | Échanges de cartes V3 | P2 |
+| [T-007](007-versus-amis-palmares-v2.md) | Palmarès V2 (la liste d'amis passe dans [T-008](008-echanges-de-cartes.md)) | P2 |
+| [T-008](008-echanges-de-cartes.md) | Échanges de cartes entre amis, dissociés du Versus et livrés avant lui | P2 |
 
 ## Gameplay, collection et économie
 
 | Ticket | Sujet | Priorité |
 |---|---|---|
 | [T-026](026-prototype-passage-vitesses-timing.md) | Prototype de course au timing : passage des vitesses, zones de réussite et préparation auto | P2 |
-| [T-027](027-prototype-direction-virages.md) | Prototype de course : guidage et commandes gauche/droite dans les virages | P2 |
+| [T-027](027-prototype-direction-virages.md) | Prototype de course : virages en jeu de rythme (deux pistes gauche/droite) | P2 |
+| [T-028](028-pilotage-automatique-ou-manuel.md) | Prototype de course : choisir entre course automatique (hasard) et pilotage manuel | P2 |
+| [T-032](032-etoile-victoire-parfaite-par-etape.md) | Étoile de victoire parfaite sur chaque étape d'un rival (Essais, Qualifs, Finale) | P3 |
 | [T-009](009-modes-duel-alternatifs.md) | Modèles de duel alternatifs | P3 |
 | [T-010](010-deck-et-evolution-en-duel.md) | Deck et évolution tactique | P3 |
 | [T-011](011-fusion-de-cartes-doublons.md) | Fusion des doublons | P3 |
@@ -37,6 +39,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-014](014-catalogue-futures-voitures.md) | 50 candidats de la bible à réconcilier avec le roster | P2 |
 | [T-015](015-equilibrage-overdrive.md) | Playtest réel Overdrive | P2 |
 | [T-016](016-economie-booster-bricole-mecanique.md) | Ressenti Bricole/Mécanique (déjà rééquilibrés en v0.6) | P2 |
+| [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-019](019-nouveaux-rivaux-overdrive.md) | Personnages et rivaux Overdrive | P3 |
 | [T-020](020-series-speciales-extension.md) | Variantes futures de spéciales | P3 |
 | [T-021](021-demontage-voiture.md) | Démontage de véhicule, distinct du retrait des pièces | P3 |
@@ -48,6 +51,9 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | P2 |
 | [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : couleur de rareté différente entre garage et plein écran | P2 |
+| [T-029](029-boutons-pilotage-automatique.md) | Boutons propres pour le choix automatique / manuel (dépend des prototypes T-026/T-027) | P2 |
+| [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
+| [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
 | [T-022](022-android-pwa-premier-lancement.md) | Android, PWA et accueil | P3 |
 | [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil | P3 |
 | [T-024](024-verification-donnees-et-droits.md) | Fiches, histoires et provenance | P3 |

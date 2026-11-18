@@ -3,11 +3,12 @@ import { computed, nextTick, ref } from 'vue'
 import { t, tp } from '../i18n'
 import CarCard from '../components/CarCard.vue'
 import CarThumb from '../components/CarThumb.vue'
+import { showroomStyles } from '../game/save'
 import { narrow, save } from '../game/store'
-import { rarities, rarityClass, rarityMark, styleLabel, stylesOf, vehicleById, vehicles, type EditionStyle, type Rarity } from '../game/data'
+import { rarities, rarityClass, rarityMark, styleLabel, vehicleById, vehicles, type EditionStyle, type Rarity } from '../game/data'
 
-// Showroom caché (7 appuis sur la version, dans les Réglages) : toutes les cartes du jeu et toutes leurs éditions,
-// possédées ou non. Simple vitrine en lecture seule : rien n'est ajouté à la sauvegarde.
+// Showroom caché (7 appuis sur la version, dans les Réglages) : toutes les voitures du jeu et les éditions possédées pour celles du garage.
+// Les voitures hors garage présentent leurs éditions du catalogue. Simple vitrine en lecture seule : rien n'est ajouté à la sauvegarde.
 const emit = defineEmits<{ close: [] }>()
 const query = ref('')
 const rarity = ref<Rarity | null>(null)
@@ -17,7 +18,7 @@ const list = computed(() => {
   return vehicles.filter(v => (!rarity.value || v.rarity === rarity.value) &&
     words.every(word => plain(`${v.number} ${v.name} ${v.version} ${v.year} ${v.tags.join(' ')}`).includes(word)))
 })
-const editionCount = vehicles.reduce((n, v) => n + stylesOf(v.id).length, 0)
+const editionCount = computed(() => vehicles.reduce((n, v) => n + showroomStyles(v.id, save.cars[v.id]).length, 0))
 // Par ligne : part du réglage du garage, sans jamais l'écrire. 4 et 5 sur téléphone passent en vue planche.
 const cols = ref(Math.min(5, save.preferences.garageCols ?? 0))
 const colOptions = [0, 1, 2, 3, 4, 5]
@@ -28,7 +29,7 @@ const strip = ref<HTMLElement>()
 const shownId = ref<string | null>(null)
 const index = ref(0)
 const shown = computed(() => shownId.value ? vehicleById.get(shownId.value) : undefined)
-const styles = computed<EditionStyle[]>(() => shownId.value ? stylesOf(shownId.value) : [])
+const styles = computed<EditionStyle[]>(() => shownId.value ? showroomStyles(shownId.value, save.cars[shownId.value]) : [])
 async function open(id: string) {
   shownId.value = id
   index.value = 0
@@ -52,7 +53,7 @@ function onScroll() {
     <div class="page-heading">
       <span class="eyebrow"><span></span> {{ t('Accès caché') }}</span>
       <h1 tabindex="-1">Showroom</h1>
-      <p>{{ t('{cars} voitures · {editions} éditions. Touche une carte pour voir toutes ses éditions.', { cars: vehicles.length, editions: editionCount }) }}</p>
+      <p>{{ t('{cars} voitures · {editions} éditions. Touche une carte pour voir ses éditions.', { cars: vehicles.length, editions: editionCount }) }}</p>
       <button type="button" class="button ghost showroom-close" @click="emit('close')">{{ t('Quitter le Showroom') }}</button>
     </div>
 
@@ -75,9 +76,9 @@ function onScroll() {
       :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined">
       <div v-for="v in list" :key="v.id" class="garage-tile">
         <button type="button" class="card-tile" :aria-label="t('Éditions de {name} {version}', { name: v.name, version: v.version })" @click="open(v.id)">
-          <CarThumb v-if="sheet" :id="v.id" />
-          <CarCard v-else :id="v.id" :compact="cols !== 1" />
-          <span v-if="!sheet" class="tile-tag showroom-tag">{{ tp('{n} édition', '{n} éditions', stylesOf(v.id).length) }}</span>
+          <CarThumb v-if="sheet" :id="v.id" :style-name="save.cars[v.id]?.shown" />
+          <CarCard v-else :id="v.id" :style-name="save.cars[v.id]?.shown" :compact="cols !== 1" />
+          <span v-if="!sheet" class="tile-tag showroom-tag">{{ tp('{n} édition', '{n} éditions', showroomStyles(v.id, save.cars[v.id]).length) }}</span>
         </button>
       </div>
     </div>

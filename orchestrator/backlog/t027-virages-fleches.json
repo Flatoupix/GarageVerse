@@ -1,0 +1,35 @@
+{
+  "id": "t027-virages-fleches",
+  "title": "Prototype de course : prendre les virages avec les flèches gauche et droite (variante solo)",
+  "brief": "Ticket T-027 (tickets/027-prototype-direction-virages.md, à lire en entier), qui prolonge le mode expérimental du T-026 déjà présent dans la base de ce cycle (réutiliser son réglage, son module `src/game/timing.ts`, son composant et sa démo). Sur un secteur de type `virage`, le joueur appuie sur « ← Gauche » ou « Droite → » quand la voiture atteint l'entrée du virage ; le circuit fixe le sens (stable pour un circuit et un secteur donnés, déduit de leur identifiant, sans tirage caché). Phases : annonce (grande flèche et libellé « Virage à gauche », boutons désactivés), approche (un repère avance vers une zone marquée « Maintenant »), fenêtre de réussite, résultat « Bien placé » (+1), « Trop tôt » (0), « Mauvais côté » (−1), « Trop tard » (−1). Les secteurs depart, ligne et endurance gardent le compteur du T-026. Le détail du score affiche score de base + direction = score du secteur (plafonds habituels) ; le rival garde sa résolution. Tout reste lisible sans couleur, au tactile à une main (boutons côte à côte au pouce, libellés accessibles « Tourner à gauche » et « Tourner à droite »), au clavier (touches ← et → seulement pendant le mini-jeu, répétitions et doubles appuis ignorés) et en mouvement réduit. Pour la démonstration sans course, ajouter dans Réglages › Paramètres un bouton « Démo des virages ». CONTRAINTES COMMUNES : prototype solo réversible. Le mode expérimental est désactivé par défaut et rien ne change pour le mode de course actuel ni pour le Versus. `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier, ne rien changer sous supabase/. Réutiliser les fonctions exportées de rules.ts ; ce qui manque s'écrit dans de nouveaux modules du client. Le projet est bilingue : tout texte visible passe par `t('…')` / `tp(…)` (import de '../i18n'), avec sa traduction anglaise dans un nouveau fichier `src/i18n/en/<zone>.ts` branché dans `src/i18n/en/index.ts` (règles dans docs/i18n.md) ; `node src/i18n/i18n.check.cjs` doit passer. Textes français, tutoiement. Les sauvegardes existantes restent valides (champs optionnels avec valeur par défaut dans src/game/save.ts). Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français.",
+  "requirements": [
+    "Module pur et testable `src/game/turn.ts` : direction attendue d'un virage (déduite du circuit et de l'index du secteur), classification du geste (bon côté dans la fenêtre, trop tôt, mauvais côté, trop tard) à partir de la direction attendue, de l'entrée du joueur et du temps écoulé, barème +1/0/−1/−1 paramétrable. Vérification `src/game/turn.check.cjs` couvrant les bornes de la fenêtre, les deux sens, l'expiration, le double appui et le déterminisme ; elle doit passer avec toutes les vérifications existantes.",
+    "Composant `src/components/TurnControl.vue` : phases annonce → approche → fenêtre → résultat, flèche et libellé de direction, repère et zone « Maintenant » lisibles sans couleur, boutons Gauche et Droite côte à côte au même endroit pendant toute la séquence, horloge monotone, chrono suspendu si l'onglet est masqué, une seule validation par secteur, touches ← et → au clavier.",
+    "Réglage « Direction dans les virages (expérimental) » dans Réglages › Paramètres, dépendant du mode timing du T-026 (désactivé par défaut, préférence optionnelle), et bouton « Démo des virages » avec au moins un virage à gauche et un à droite jouables dans la démonstration.",
+    "Intégration solo dans src/views/RaceView.vue pour les secteurs `virage` quand l'option est activée : geste avant la résolution du secteur, ligne « Direction » dans le détail du score, rechargement avant résolution = reprise depuis la sélection, aucun secteur validé deux fois ; option désactivée : le virage garde le passage de vitesses du T-026.",
+    "Aucune modification de rules.ts, data.ts ni de supabase/ ; Versus inchangé ; toutes les vérifications existantes passent ; typage propre ; docs/meta.md décrit la variante et le barème.",
+    "Aucune erreur dans la console ; flèches, libellés et boutons lisibles sans débordement horizontal à 320 et 390 px, y compris avec animations réduites."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Démo des virages"
+    },
+    {
+      "tap": "Démo des virages"
+    },
+    {
+      "capture": "virages"
+    }
+  ]
+}

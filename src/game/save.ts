@@ -1,6 +1,7 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import { t, tp } from '../i18n'
 import { ruleText } from './rules-text'
+import { inTransit, readTrades, TRADE_CREDIT_LIMIT, TRADE_INVENTORY_LIMIT, type TradeRecord } from './trade'
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
@@ -8,7 +9,9 @@ import {
   type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
 import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, extraSlotFamily, lineupCost, partUnlockLevel, potential, prepUsed, racer,
-  STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
+  STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Prep, type Rng } from './rules'
+import type { PilotMode } from './pilot'
+import type { SoloDuel } from './timing'
 
 export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
@@ -22,13 +25,15 @@ export type ThemeId = (typeof themeIds)[number]
 // Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; friendsEnabled?: boolean; pilotMode?: PilotMode }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
 import type { VersusAccount } from './versus-wallet'
 
 export interface Save {
+  trades?: Record<string, TradeRecord>
+  tradeHistory?: string[]
   versus: VersusAccount | null
   seenCars?: string[]
   nightRecord: number
@@ -37,6 +42,7 @@ export interface Save {
   series: string[]
   tutorial: Tutorial
   version: 2
+  exactEditions: true
   daily: { date: string; won: boolean; booster: boolean; streak: number; lastWin: string }
   credits: number
   tickets: Record<string, number>
@@ -48,7 +54,7 @@ export interface Save {
   dailyLineup?: string[]
   lineup: string[]
   record: Record<string, { wins: number; losses: number; perfect: boolean }>
-  duel: Duel | null
+  duel: SoloDuel | null
   preferences: Preferences
 }
 
@@ -58,8 +64,8 @@ export function newSave(): Save {
     versus: null, nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
-    version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false },
+    version: 2, exactEditions: true, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false, turnMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
@@ -109,6 +115,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     return save
   }
 
+  readTrades(save, input.trades, input.tradeHistory)
   const account = input.versus
   if (account && typeof account.id === 'string' && typeof account.nickname === 'string' && typeof account.friend_code === 'string') {
     const active = account.active
@@ -121,7 +128,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     streak: int(input.daily.streak, 0, 100000, 0), lastWin: typeof input.daily.lastWin === 'string' ? input.daily.lastWin : '',
   }
   refreshDaily(save)
-  save.credits = int(input.credits, 0, 1e7, save.credits)
+  save.credits = int(input.credits, 0, TRADE_CREDIT_LIMIT, save.credits)
   save.tickets = Object.fromEntries(Object.entries(input.tickets ?? {}).filter(([id]) => boosterById.has(id)).map(([id, n]) => [id, int(n, 0, 99, 0)]))
   save.cars = {}
   let refunds = 0
@@ -130,10 +137,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     if (!v || !car) continue
     const styles = stylesOf(id)
     const editions = Array.isArray(car.editions) ? car.editions.filter(s => styles.includes(s)) : []
-    // Offre l’édition par défaut sans remplacer une apparence déjà choisie.
     const primary = defaultStyle(id)
-    const usesOldDefault = !editions.includes(primary)
-    if (usesOldDefault) editions.unshift(primary)
+    // Les anciennes sauvegardes pouvaient représenter une légendaire à image fixe par le seul style pixel.
+    const legacyLegend = input.exactEditions !== true && primary !== PIXEL && editions.length === 1 && editions[0] === PIXEL && car.shown === PIXEL
+    if (!editions.length || legacyLegend) editions.unshift(primary)
     const stage = int(car.stage, 0, 3, 0)
     const levels = { acc: 0, vit: 0, man: 0, end: 0 }
     for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
@@ -149,15 +156,13 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       const sameFamily = installed.filter(p => partById.get(p)?.family === part.family).length
       if (sameFamily < (part.family === doubled ? 2 : 1)) installed.push(partId)
     }
-    // Une légendaire restée sur l'ancien défaut pixel prend sa nouvelle image fixe ; un autre choix du joueur est gardé.
-    const shownBefore = editions.includes(car.shown) ? car.shown : editions[0]
-    save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
-      shown: primary !== PIXEL && usesOldDefault && shownBefore === PIXEL ? primary : shownBefore,
+    save.cars[id] = { copies: int(car.copies, 1, TRADE_INVENTORY_LIMIT, 1), stage, parts: installed, editions,
+      shown: !legacyLegend && editions.includes(car.shown) ? car.shown : editions[0],
       favorite: car.favorite === true, upgrades: levels, ...(extraSlot ? { extraSlot } : {}) }
   }
-  save.credits = Math.min(1e7, save.credits + refunds)
+  save.credits = Math.min(TRADE_CREDIT_LIMIT, save.credits + refunds)
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
-  save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, 999, 0)]))
+  save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, TRADE_INVENTORY_LIMIT, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
   if (save.sealed && Array.isArray(input.sealedPulls) && input.sealedPulls.length === 5 &&
       input.sealedPulls.every(p => p && (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))) {
@@ -193,6 +198,27 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const duel = input.duel
     if (duel && (rivalById.has(duel.rivalId) || (save.night && duel.rivalId === `night:${save.night.seed}:${save.night.round}`) || /^daily:\d{4}-\d{2}-\d{2}$/.test(duel.rivalId)) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
       for (const who of ['player', 'rival'] as const) duel[who].lineup = duel[who].lineup.map(r => racer(r.id, r.prep))
+      const choice = duel.timingChoice
+      if (choice && (duel.winner || duel.rounds.length >= duel.sectors.length || !Number.isInteger(choice.car)
+        || !duel.player.lineup[choice.car] || typeof choice.nitro !== 'boolean'
+        || (choice.stance !== 'normal' && choice.stance !== 'attaque' && choice.stance !== 'gestion'))) delete duel.timingChoice
+      if (rivalById.has(duel.rivalId)) {
+        const pilot = duel.pilot
+        if (pilot?.mode === 'manuel') {
+          const from = pilot.automaticFrom
+          duel.pilot = { mode: 'manuel', turn: pilot.turn === true }
+          if (from !== undefined && Number.isInteger(from) && from >= 0 && from <= duel.rounds.length) {
+            duel.pilot.automaticFrom = from
+          }
+        } else if (!pilot && duel.timingChoice) {
+          // Une ancienne course peut déjà attendre un passage de vitesse.
+          duel.pilot = { mode: 'manuel', turn: input.preferences?.turnMode === true }
+        } else {
+          duel.pilot = { mode: 'auto' }
+        }
+      }
+      // Les anciennes manches en attente reprennent aussi à la sélection.
+      delete duel.timingChoice
       save.duel = duel
     }
   } catch { save.duel = null }
@@ -207,6 +233,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   save.preferences = {
     // Les anciennes parties conservent l’aide tactile ; les nouvelles la désactivent.
     touchHelp: input.preferences?.touchHelp !== false,
+    timingMode: input.preferences?.timingMode === true,
+    turnMode: input.preferences?.turnMode === true,
+    ...(input.preferences?.friendsEnabled === true ? { friendsEnabled: true } : {}),
+    pilotMode: input.preferences?.pilotMode === 'manuel' ? 'manuel' : 'auto',
     sound: input.preferences?.sound !== false,
     music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,
@@ -292,6 +322,11 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
     seen.add(`edition:${v.id}:${style}`)
     return pull
   })
+}
+
+// Les voitures hors collection restent consultables dans le catalogue du Showroom.
+export function showroomStyles(id: string, car: OwnedCar | undefined): EditionStyle[] {
+  return car?.editions ?? stylesOf(id)
 }
 
 export function sealedHasLegend(save: Save): boolean {
@@ -513,6 +548,7 @@ export function sellPrice(save: Save, id: string): number {
 }
 
 export function sellCheck(save: Save, id: string): string | undefined {
+  if (inTransit(save, id)) return t('Tu ne peux pas vendre une voiture en transit.')
   if (!save.cars[id]) return t('Voiture absente du garage')
   if (save.night?.lineup.includes(id)) return t('Cette voiture est engagée dans ta Nuit sans fin en cours')
   if (save.nightLineup.includes(id)) return t('Retire cette voiture de l’écurie Nuit sans fin avant de la vendre')
@@ -765,7 +801,7 @@ export function lineupCheck(save: Save, ids: string[], rivalId: string): string 
   if (rival.baseRivalId && !unlockedRivalSteps(save, rival.baseRivalId).includes(rivalId)) return t('Étape verrouillée')
   const cap = rival.cap ?? league!.cap
   if (ids.length !== 3 || new Set(ids).size !== 3) return t('Choisis trois voitures différentes')
-  if (ids.some(id => !save.cars[id])) return t('Voiture absente du garage')
+  if (ids.some(id => !save.cars[id] || inTransit(save, id))) return t('Voiture absente du garage')
   const cost = lineupCost(ids)
   if (cost > cap) return t('Écurie trop chère : {cost} / {cap}', { cost, cap })
 }
@@ -775,6 +811,9 @@ export function startDuel(save: Save, rivalId: string, rng: Rng): string | undef
   const problem = lineupCheck(save, save.lineup, rivalId)
   if (problem) return problem
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
+  save.duel.pilot = save.preferences.timingMode && save.preferences.pilotMode === 'manuel'
+    ? { mode: 'manuel', turn: save.preferences.turnMode === true }
+    : { mode: 'auto' }
 }
 
 export interface Reward { credits: number; ticket?: string; perfect?: true; perfectTicket?: string; car?: string }
@@ -871,7 +910,7 @@ export const currentRivalStep = (save: Save, baseRivalId: string): string => {
 }
 
 // Défi du jour vu par ce joueur : la contrainte tient compte des voitures qu'il possède.
-export const todayChallenge = (save: Save, date = save.daily.date) => dailyChallenge(date, Object.keys(save.cars))
+export const todayChallenge = (save: Save, date = save.daily.date) => dailyChallenge(date, Object.keys(save.cars).filter(id => !inTransit(save, id)))
 
 export function refreshDaily(save: Save, date = localDate()) {
   if (save.daily.date === date) return
@@ -887,12 +926,12 @@ export function claimDailyBooster(save: Save) {
   save.tickets.neon = (save.tickets.neon ?? 0) + 1
 }
 export function dailyLineupCheck(save: Save) {
-  if ((save.dailyLineup ?? []).some(id => !save.cars[id])) return t('Voiture absente du garage')
+  if ((save.dailyLineup ?? []).some(id => !save.cars[id] || inTransit(save, id))) return t('Voiture absente du garage')
   return constraintCheck(save.dailyLineup ?? [], todayChallenge(save).constraint)
 }
 export function prepareDaily(save: Save) {
   refreshDaily(save)
-  save.dailyLineup = validDailyLineup(Object.keys(save.cars), todayChallenge(save).constraint) ?? []
+  save.dailyLineup = validDailyLineup(Object.keys(save.cars).filter(id => !inTransit(save, id)), todayChallenge(save).constraint) ?? []
 }
 export function startDaily(save: Save) {
   if (save.night || save.duel) return t('Termine d’abord la course en cours')
@@ -918,7 +957,7 @@ export function claimSeries(save: Save, id: string): string | undefined {
 
 // ——— Nuit sans fin ———
 export function nightLineupCheck(save: Save) {
-  if (save.nightLineup.some(id => !save.cars[id])) return t('Voiture absente du garage')
+  if (save.nightLineup.some(id => !save.cars[id] || inTransit(save, id))) return t('Voiture absente du garage')
   return constraintCheck(save.nightLineup, { type: 'cost', cap: NIGHT_CAP })
 }
 export function createNightRound(save: Save) {

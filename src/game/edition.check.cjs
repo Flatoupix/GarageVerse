@@ -5,8 +5,8 @@ const ts = require('typescript')
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
-const { newSave, readSave, unlockEdition, unlockEditionCheck, editionPrice, editionDuplicates } = require('./save.ts')
-const { stylesOf } = require('./data.ts')
+const { collect, newSave, readSave, showroomStyles, unlockEdition, unlockEditionCheck, editionPrice, editionDuplicates } = require('./save.ts')
+const { defaultStyle, PIXEL, stylesOf, vehicles } = require('./data.ts')
 
 assert.equal(editionDuplicates, 2)
 const id = 'clio'
@@ -58,3 +58,54 @@ const back = readSave(JSON.stringify(save))
 assert.ok(back.cars[id].editions.includes('Solarpunk'))
 assert.equal(back.cars[id].copies, 1)
 console.log('Éditions : 2 doublons + crédits, raisons chiffrées, éditions gardées : OK')
+
+function pullCar(save, id, style) {
+  const pull = { kind: 'car', id, style, isNew: !save.cars[id] }
+  save.opening = { booster: 'starter', pulls: [pull], revealed: 1, view: 'face', collected: false }
+  const before = save.cars[id]?.editions.slice() ?? []
+  collect(save)
+  const expected = before.includes(style) ? before : [...before, style]
+  assert.deepEqual(save.cars[id].editions, expected)
+  return readSave(JSON.stringify(save))
+}
+
+// Un premier tirage alternatif garde sa seule édition après rechargement.
+for (const style of ['Solarpunk', 'Abandonnée', 'Classic', 'Anime']) {
+  const fresh = newSave()
+  const { id } = vehicles.find(v => !v.anim && !fresh.cars[v.id] && stylesOf(v.id).includes(style))
+  const beforeCount = Object.keys(fresh.cars).length
+  const after = pullCar(fresh, id, style)
+  assert.equal(Object.keys(after.cars).length, beforeCount + 1)
+  assert.deepEqual(after.cars[id].editions, [style])
+  assert.deepEqual(showroomStyles(id, after.cars[id]), [style])
+  assert.ok(stylesOf(id).includes(PIXEL))
+  assert.notEqual(unlockEditionCheck(after, id, PIXEL), 'Style déjà débloqué')
+  assert.equal(after.cars[id].shown, style)
+  assert.equal(after.cars[id].copies, 1)
+  delete after.exactEditions
+  assert.deepEqual(readSave(JSON.stringify(after)).cars[id], after.cars[id])
+
+  const duplicate = pullCar(after, id, PIXEL)
+  assert.deepEqual(duplicate.cars[id].editions, [style, PIXEL])
+  assert.equal(duplicate.cars[id].shown, style)
+  assert.equal(duplicate.cars[id].copies, 2)
+  const sameEdition = pullCar(duplicate, id, PIXEL)
+  assert.deepEqual(sameEdition.cars[id].editions, [style, PIXEL])
+  assert.equal(sameEdition.cars[id].copies, 3)
+}
+
+// Une voiture de départ garde son 16 bits et gagne uniquement l'édition tirée.
+assert.deepEqual(showroomStyles(id, undefined), stylesOf(id))
+const starter = pullCar(newSave(), id, 'Solarpunk')
+assert.deepEqual(starter.cars[id].editions, [PIXEL, 'Solarpunk'])
+assert.equal(starter.cars[id].copies, 2)
+
+// Le défaut fixe d'une légendaire ne s'ajoute pas à un autre tirage.
+const legend = vehicles.find(v => v.anim).id
+for (const style of [defaultStyle(legend), PIXEL, 'Solarpunk']) {
+  const after = pullCar(newSave(), legend, style)
+  assert.deepEqual(after.cars[legend].editions, [style])
+  assert.equal(after.cars[legend].shown, style)
+  assert.equal(after.cars[legend].copies, 1)
+}
+console.log('Tirages : seules les éditions tirées sont ajoutées, même après rechargement : OK')

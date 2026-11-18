@@ -1,10 +1,15 @@
 # T-026 · Prototype de course : passage de vitesses au bon régime
 
 - **Priorité :** P2 (prototype gameplay à évaluer sur mobile)
-- **Statut :** À prototyper et playtester ; **ne remplace pas encore le système de course existant**
+- **Statut :** Prototype V0 présent dans `dev` (mode expérimental désactivé par défaut, démo dans Réglages › Paramètres) ; **à playtester sur mobile** ; **ne remplace pas le système de course existant**
 - **Origine :** idée de gameplay exprimée le 18 novembre 2026
 - **Contexte technique :** [docs/meta.md](../docs/meta.md) §5 ; [src/game/rules.ts](../src/game/rules.ts) ; [src/views/RaceView.vue](../src/views/RaceView.vue) ; [src/components/SectorRun.vue](../src/components/SectorRun.vue)
 - **Ticket lié :** [T-009, modes de duel alternatifs](009-modes-duel-alternatifs.md) (autre piste, indépendante)
+
+
+## Playtest du 18 novembre 2026 (téléphone)
+
+Les deux gestes fonctionnent mais sont trop lents, se jouent dans un bloc à part au lieu de la scène du duel et jurent avec le design. Le joueur veut le geste en temps réel pendant la course, plusieurs passages de rapport par secteur (un raté ne coûte que des points) et un habillage aux couleurs des thèmes. Tâche : `orchestrator/backlog/pilotage-temps-reel.json`.
 
 ## 1. Intention / ressenti
 

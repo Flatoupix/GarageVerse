@@ -36,9 +36,11 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 | Stage 2 · 200 crédits et 1 doublon | +1 potentiel, +1 à la meilleure statistique d’origine |
 | Stage 3 · 450 crédits et 2 doublons | +1 potentiel, débloque les évolutions |
 | 3ᵉ emplacement de pièce · 250 crédits | Sur une voiture au Stage 3 dont les quatre ateliers sont au niveau 2 : +2 potentiel et une 2ᵉ pièce dans une seule famille, celle où en cumuler deux a du sens — Spécial (Transmission et nitro), Gestion moteur (Moteur et turbo) ou Châssis (Freins et châssis). Pas de 3ᵉ pièce en Pneus et suspension, jamais deux fois la même pièce. Le déplacer vers un autre atelier coûte de nouveau 250 crédits, après avoir retiré la 2ᵉ pièce. Un emplacement acheté sur Pneus et suspension avant cette règle est remboursé au chargement (`extraSlotFamily` dans `src/game/rules.ts`, `src/game/extraslot.check.cjs`). |
-| Débloquer / changer un style | Bascule gratuitement entre les éditions déjà possédées ou débloque un style artistique disponible (Synthwave, Pixel 16 bits, Classic, Photo, Gouache, Rallye argentique, et Solarpunk et Abandonnée sur les 129 voitures du jeu, liste `editionCars` de `src/game/data.ts`…) contre 40, 75, 120 ou 200 crédits selon la rareté **et deux doublons de la carte** (`editionDuplicates` dans `src/game/save.ts` ; un exemplaire reste toujours). Quand il manque quelque chose, la fiche l’écrit : « Il te manque 1 doublon », « Il te manque 30 crédits ». Les éditions déjà débloquées sont gardées. Les images viennent de `node pipeline/art.mjs --set edition --only id,id` (fichiers `src/assets/cars/<id>-solarpunk.webp` et `<id>-abandonnee.webp`). |
+| Débloquer / changer un style | Un tirage débloque et affiche uniquement l’édition tirée. Le Pixel 16 bits ne s’ajoute pas en plus et se débloque comme les autres éditions. Bascule gratuitement entre les éditions déjà possédées ou débloque un style artistique disponible (Synthwave, Pixel 16 bits, Classic, Photo, Gouache, Rallye argentique, et Solarpunk et Abandonnée sur les 129 voitures du jeu, liste `editionCars` de `src/game/data.ts`…) contre 40, 75, 120 ou 200 crédits selon la rareté **et deux doublons de la carte** (`editionDuplicates` dans `src/game/save.ts` ; un exemplaire reste toujours). Quand il manque quelque chose, la fiche l’écrit : « Il te manque 1 doublon », « Il te manque 30 crédits ». Les éditions déjà débloquées sont gardées. Les images viennent de `node pipeline/art.mjs --set edition --only id,id` (fichiers `src/assets/cars/<id>-solarpunk.webp` et `<id>-abandonnee.webp`). |
 | Vendre une voiture | Retire tous ses exemplaires de la collection et libère ses pièces. Prix : 2 × progression.scrap[rareté] + 10 × Stage + ⌊crédits d’atelier dépensés / 2⌋ + progression.scrap[rareté] × (exemplaires − 1). Refus si engagée dans une écurie (défi du jour compris), dans une course en cours, ou si le garage passerait sous trois voitures différentes. Les évolutions peuvent aussi être vendues. |
 | Recycler un doublon | 10, 30, 80 ou 200 crédits selon la rareté. Moitié prix pour une pièce libre. |
+
+**Échanges entre amis.** Active le réglage expérimental pour accéder à la vitrine, aux offres et à l’historique depuis le Garage. Une voiture marquée « En transit » reste visible dans le Garage pendant l’échange. Elle est indisponible pour la vente et pour les écuries, défi du jour et Nuit sans fin compris. Voir [Échange de cartes entre amis](echanges.md).
 
 Les doublons alimentent la progression, comme le demande la bible. Le garage de départ contient la Clio III, la Twingo I et la Panda 4×4, trois pièces, 300 crédits et deux tickets Neon Drive.
 
@@ -83,6 +85,12 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 | Overdrive | 400 | Pondération ×3 sur hypercars, supercars et records |
 
 Chaque booster contient cinq cartes, dont au plus `maxParts` pièces mécaniques (2 pour les trois boosters actuels, 1 par défaut si le champ est absent). Le jeu détermine le type puis la rareté de chaque carte et choisit des pièces et des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé dès que le sachet est scellé, à l’achat ou avec un ticket. L’ouverture réutilise exactement ce tirage ; les anciens sachets sans tirage enregistré tirent encore à la déchirure. Une couverture légendaire (illustration dédiée, cadre et halo dorés, étincelles et ruban « Édition légendaire ») signale la présence d’au moins une Légendaire ; la boutique garde la couverture normale. Le sachet métallisé porte le logo néon et les couleurs de sa collection. Son reflet et son frémissement légendaire sont immobiles en mouvement réduit. Un rechargement retrouve le même lot sans retirage, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
+
+Pendant l’ouverture, deux rangées d’actions sont réservées en bas de la scène,
+au-dessus des onglets et de la zone sûre. Les messages disposent d’une hauteur
+fixe au-dessus et défilent si besoin. Les choix d’édition prennent la place du
+bouton principal. Le récapitulatif utilise la même zone d’actions et sa grille
+de cartes défile au-dessus. Le guide du mécano défile sous le sachet.
 
 ## 7. Direction artistique et thèmes d’interface
 
@@ -250,7 +258,7 @@ Le jeu suit SemVer. La version vient de `package.json` (champ `version`), inject
 
 **Écran de lancement.** À chaque lancement, le splash GAMEDAVE repris de Crazy Popping Catz (`src/components/GameDaveSplash.vue`, logo `src/assets/ui/gamedave-logo.png`) recouvre le jeu : fond noir, logo centré dans un cadre 720 × 1550 en « scale-outer » et ancré en bas, fondu linéaire de 3 s, fin à 5 s. Un toucher, Entrée, Espace ou Échap le passent, et le toucher n'active pas le bouton situé dessous. En mouvement réduit, le logo s'affiche sans fondu. La fenêtre « Nouveautés » attend sa fin. Les navigateurs pilotés par un outil de test (`navigator.webdriver`, orchestrateur compris) ne l'affichent pas.
 
-**Showroom caché.** Sept appuis rapides (moins de 1,5 s d'écart) sur « GarageVerse vX » en bas des Réglages ouvrent l'écran `showroom` (`src/views/ShowroomView.vue`, compteur `debugTap(…, 7)` de `src/game/debug.ts`). Il montre les 131 cartes, possédées ou non, avec recherche et filtre par rareté ; une carte touchée ouvre toutes ses éditions (`stylesOf`) en défilement horizontal. Vitrine en lecture seule : rien n'est écrit dans la sauvegarde. La note de version 0.10.0 l'annonce sans le dévoiler. Le Showroom a son propre choix « Par ligne » (Auto, 1 à 5), initialisé depuis celui du garage et jamais enregistré.
+**Showroom caché.** Sept appuis rapides (moins de 1,5 s d'écart) sur « GarageVerse vX » en bas des Réglages ouvrent l'écran `showroom` (`src/views/ShowroomView.vue`, compteur `debugTap(…, 7)` de `src/game/debug.ts`). Il montre les 131 cartes, possédées ou non, avec recherche et filtre par rareté ; une carte touchée ouvre ses éditions possédées en défilement horizontal, ou celles du catalogue si la voiture est absente du garage. Vitrine en lecture seule : rien n'est écrit dans la sauvegarde. La note de version 0.10.0 l'annonce sans le dévoiler. Le Showroom a son propre choix « Par ligne » (Auto, 1 à 5), initialisé depuis celui du garage et jamais enregistré.
 
 **Vue planche.** Sur téléphone (moins de 650 px), 4 et 5 voitures par ligne affichent des vignettes (`src/components/CarThumb.vue`) au lieu des cartes complètes, illisibles à cette taille : illustration de l'édition affichée, numéro et cadre de rareté, voitures manquantes en pointillés. 6 par ligne reste réservé aux grands écrans. Sur tablette et ordinateur, les cartes complètes restent. Tant que la version commence par 0 : le mineur apporte des nouveautés, le correctif ne corrige que des défauts.
 
@@ -300,3 +308,87 @@ Les six rivaux de ligue portent sept champs optionnels de type texte dans `garag
 La préparation affiche une carte compacte avec le portrait existant de `art.rival`, le titre, le style, « Aime … », la biographie et l’introduction entre guillemets. Le résultat affiche une seule réplique au-dessus des gains. La liste des rivaux ajoute le style au titre. Ces informations n’ajoutent aucun contrôle et ne modifient ni les écuries ni les récompenses. Chaque texte absent est masqué ; sans personnalité, l’affichage reste celui d’origine. Les spéciales, la Nuit sans fin et le défi du jour n’affichent aucune carte ni réplique de personnage.
 
 Vérification des données hors réseau : `node src/game/personnages.check.cjs`.
+
+## Pilotage des courses contre les rivaux (T-028)
+
+Active **Mode timing (expérimental)** dans **Réglages › Paramètres** pour afficher le choix
+**Pilotage** en haut de l’onglet **Course**. **Automatique**, le mode par défaut, conserve la
+forme du jour, les secteurs parfaits et les incidents. En **Manuel**, ton passage de vitesse
+ou ta direction en rythme, si tu as activé cette option, remplace ces tirages pour ta voiture.
+Le rival conserve ses tirages habituels.
+
+Ton choix est mémorisé pour les prochaines courses. Si tu désactives le mode timing, les nouvelles
+courses se jouent en automatique. En course manuelle, **Passer en automatique pour la suite**
+rétablit le hasard dès le premier secteur encore à résoudre. Tu continues à choisir tes voitures
+et la bascule reste acquise pour cette course, même après rechargement. Le bilan précise le mode
+de chaque secteur et celui de la course. Le Défi du jour, la Nuit sans fin et le Versus gardent
+leur fonctionnement habituel.
+
+## Passage de vitesses expérimental (T-026)
+
+Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** pour jouer le passage de vitesses
+en pilotage manuel contre les rivaux, ainsi que dans le Défi du jour et la Nuit sans fin.
+Le réglage est désactivé par défaut.
+**Démo du passage de vitesses** ouvre le compteur sans lancer de course ni changer le réglage.
+
+Dès que tu engages ta voiture, les deux voitures roulent dans la scène du duel. Touche la scène
+ou **Passer la vitesse**, ou utilise Espace ou Entrée sur le bouton, au moment où l’aiguille atteint
+la cible. À chaque passage, la voiture réagit, le jugement s’affiche près d’elle et le rapport avance.
+La dernière action déclenche immédiatement le décompte des lignes de score dans la même scène.
+
+| Secteur | Passages | Montée de base | Largeur verte de base |
+| --- | ---: | ---: | ---: |
+| Départ | 2 | 900 ms | 15 % |
+| Ligne droite | 3 | 1 000 ms | 13 %, puis 9,36 % au dernier passage |
+| Endurance | 2 | 1 200 ms | 19 % |
+| Virage | 2 si le rythme est désactivé | 1 050 ms | 14 % |
+
+La difficulté du rival raccourcit la montée jusqu’à 12 %, avec un plancher de 800 ms, et réduit
+la largeur verte jusqu’à 20 %. La préparation de la voiture peut élargir les zones de réussite.
+La graine de la course et les index du secteur et du passage déterminent la fenêtre sans tirer dans
+le générateur du duel. La cible est visible dès le départ de l’aiguille, qui redescend en 220 ms.
+Un passage sans appui est raté. Un raté laisse la fenêtre et la vitesse du passage suivant intactes.
+
+Chaque passage rapporte −2 (Raté), −1 (Moyen), 0 (Bon) ou +1 (Parfait). La ligne **Timing du passage**
+affiche la moyenne arrondie à l’entier le plus proche, avec les demis vers zéro, et le nombre de
+jugements de chaque type. Ce modificateur remplace les tirages de forme du jour, de secteur parfait
+et d’incident du joueur. Le rival conserve ses tirages habituels.
+
+Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aiguille avance par paliers
+et les voitures restent fixes pendant les gestes. Si tu recharges avant la résolution, tu retrouves
+la sélection du secteur. Un secteur validé revient à son bilan.
+
+## Direction expérimentale dans les virages (T-027)
+
+Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** puis **Direction dans les
+virages (expérimental)**. Ce deuxième réglage est désactivé par défaut. **Démo des virages**
+permet de jouer et de rejouer une séquence qui alterne gauche et droite.
+
+En solo, un secteur de type virage propose trois notes par défaut. Le circuit, l’index du secteur
+et l’identifiant du rival fixent les sens et les instants par un hachage stable. Les notes
+descendent sur les deux pistes superposées au décor du duel. Appuie sur la piste ou le bouton correspondant, ou utilise ← et →,
+quand la flèche atteint la cible **Maintenant**. Les commandes ignorent les répétitions de touche.
+Le mouvement réduit fait avancer les notes par paliers. Le chrono se suspend si tu changes
+d’onglet. Si tu recharges avant la résolution, tu reviens à la sélection du même secteur.
+
+| Geste | Résultat | Direction |
+| --- | --- | ---: |
+| Bon côté, jusqu’au seuil Parfait inclus | Parfait | +2 |
+| Bon côté, entre le seuil Parfait exclu et le seuil Bien inclus | Bien | +1 |
+| Bon côté, avant la fenêtre Bien et dans la fenêtre d’appui | Trop tôt | 0 |
+| Bon côté, après la fenêtre Bien et dans la fenêtre d’appui | Trop tard | −1 |
+| Mauvais côté dans la fenêtre d’appui | Mauvais côté | −1 |
+| Fenêtre d’appui expirée sans appui accepté | Raté | −1 |
+
+Les notes apparaissent jusqu’à 1,6 s à l’avance. Le profil du rival règle les fenêtres
+symétriques autour de l’instant cible. Par défaut, le seuil Parfait va de
+65 à 100 ms, le seuil Bien de 155 à 230 ms et la limite d’appui de 330 à 410 ms, de chaque côté
+de la cible. Les paramètres du module permettent d’ajuster ces seuils, l’avance, le nombre de
+notes, leur espacement, le barème et les bornes du total. Les fenêtres d’appui sont disjointes.
+La statistique MAN et les pièces agissent sur le score de base selon les règles habituelles.
+
+La ligne **Direction** indique le nombre de Parfaits, de Bien et de Ratés. La somme des
+modificateurs reste comprise entre **−2 et +2** par secteur. Le résultat affiche
+**score de base + direction = score du secteur**. Le rival garde sa résolution habituelle.
+Le départ, la ligne droite et l’endurance gardent le passage de vitesses, comme les virages
+quand l’option de direction est inactive.

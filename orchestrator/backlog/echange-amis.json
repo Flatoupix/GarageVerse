@@ -1,0 +1,45 @@
+{
+  "id": "echange-amis",
+  "title": "Échanges, étape 1 : liste d'amis par code (migration gv_friendships, request-friend, answer-friend, écran Amis)",
+  "brief": "Première étape du chantier des échanges de cartes (docs/echanges.md §4 et §8) : une vraie liste d'amis. Un joueur envoie une demande d'ami avec le code ami à 6 caractères de l'autre ; l'autre l'accepte ou la refuse ; chacun peut retirer un ami. Limites : 50 amis au plus, 10 demandes en attente au plus par joueur (envoyées), pas de demande à soi-même ni en double, une demande croisée (B demande A alors que A a déjà demandé B) vaut acceptation. Serveur : migration additive `gv_friendships` (demandeur, destinataire, état `pending` / `accepted`, création ; unicité de la paire quel que soit le sens), RLS (chacun lit seulement les lignes où il figure, avec le pseudo et le code ami de l'autre), Edge Functions `request-friend` (par code ami), `answer-friend` (accepter / refuser) et retrait d'un ami (fonction dédiée ou action de answer-friend), sur le modèle des fonctions existantes (supabase/functions/_shared/http.ts). Client : petit module réseau des amis (connexion anonyme et pseudo via le mécanisme de src/game/versus.ts, sans rouvrir le Versus). Interface : réglage « Échanges entre amis (expérimental) » ; entrée « Échanges » dans l'onglet Garage quand il est actif ; écran avec un onglet « Amis » : mon code ami (copiable), champ « Code ami » + bouton « Envoyer la demande », demandes reçues (Accepter / Refuser), demandes envoyées, liste d'amis (pseudo, retrait avec confirmation) ; les autres onglets de l'écran (Vitrine, Offres, Historique) n'existent pas encore. CONTRAINTES COMMUNES : spécification de référence docs/echanges.md (règles et découpage §8), ticket tickets/008-echanges-de-cartes.md ; ne pas réinventer les règles déjà écrites. Les règles pures existent déjà dans src/game/trade.ts (validateTradeOffer, openTrade, transitTrade, completeTrade, receiveTrade, returnTrade, acknowledgeTrade, readTrades) avec src/game/trade.check.cjs : les réutiliser, ne pas les dupliquer. Les échanges sont INDÉPENDANTS du Versus (en pause, VERSUS_OPEN = false dans src/game/features.ts) : réutiliser le compte anonyme et le code ami (gv_players, fonction register, client src/game/versus.ts) sans rouvrir le Versus ni modifier ses tables, fonctions ou écrans. Les migrations sont ADDITIVES (nouveau fichier daté dans supabase/migrations/, aucune table existante modifiée), avec RLS sur chaque nouvelle table, aucune écriture directe pour anon/authenticated (seul service_role écrit via les Edge Functions), et des tests dans supabase/tests/ sur le modèle de versus-v1.test.mjs et versus-functions.test.mjs. Le déploiement Supabase ne se fait que depuis master, après relecture des migrations par le propriétaire : ne rien supposer déployé côté hébergé ; le jeu doit fonctionner normalement quand le serveur ne répond pas ou que les tables n'existent pas (message « Connexion nécessaire » ou « Serveur indisponible », aucune donnée de la sauvegarde touchée). Toute l'interface des échanges est cachée derrière un réglage « Échanges entre amis (expérimental) » dans Réglages › Paramètres, désactivé par défaut (préférence optionnelle de la sauvegarde) ; aucun appel réseau tant qu'il est désactivé. `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier. Bilingue : tout texte visible passe par t('…') / tp(…) avec sa traduction dans src/i18n/en/ (docs/i18n.md) ; node src/i18n/i18n.check.cjs, toutes les vérifications de src/game/, les tests supabase/tests/ et le typage passent. Textes français, tutoiement. Sauvegardes existantes valides (champs optionnels). Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Mettre à jour docs/echanges.md (statut de l'étape) et docs/supabase.md (tables et fonctions).",
+  "requirements": [
+    "Migration additive supabase/migrations/<date>_echanges_amis.sql : table gv_friendships, unicité de la paire, contraintes d'état, RLS (lecture limitée aux deux joueurs, aucune écriture directe pour anon / authenticated) ; tests dans supabase/tests/ (droits, unicité, limites).",
+    "Edge Functions request-friend et answer-friend (+ retrait d'un ami) : code ami inconnu, demande à soi-même, doublon, demande croisée = acceptation, plafonds 50 amis et 10 demandes en attente, réponses d'erreur claires ; testées dans supabase/tests/.",
+    "Module client des amis dans src/game/ : connexion anonyme et pseudo réutilisant src/game/versus.ts, appels aux fonctions, lecture de la liste ; aucun appel réseau tant que le réglage expérimental est désactivé ; serveur indisponible = message clair sans toucher la sauvegarde.",
+    "Interface : réglage « Échanges entre amis (expérimental) » (désactivé par défaut), entrée « Échanges » dans le Garage, écran avec l'onglet « Amis » (code ami copiable, envoi d'une demande, demandes reçues et envoyées, liste et retrait), lisible à 320, 390 et 1280 px, dans le style des écrans existants.",
+    "Aucune modification de rules.ts, data.ts, des tables / fonctions / écrans du Versus ; traduction anglaise complète ; typage, vérifications de src/game/ et tests supabase/tests/ verts ; docs/echanges.md et docs/supabase.md à jour."
+  ],
+  "paths": [
+    "supabase/",
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Échanges entre amis (expérimental)"
+    },
+    {
+      "tap": "Échanges entre amis (expérimental)"
+    },
+    {
+      "tab": "Garage"
+    },
+    {
+      "expect": "Échanges"
+    },
+    {
+      "tap": "Échanges"
+    },
+    {
+      "capture": "amis"
+    }
+  ],
+  "profile": "heavy"
+}

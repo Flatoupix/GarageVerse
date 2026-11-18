@@ -4,6 +4,21 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.15.0] — 2026-11-18
+
+### Added
+
+- **Manual driving (experimental).** In Settings, on the Parameters tab, turn on "Timing mode (experimental)" and "Steering in corners (experimental)", then pick **Manual** under "Driving mode" on the Race tab. During the race, shift gears at the right moment on the rev counter and take the corners in rhythm with the left and right arrows: your skill replaces luck. **Automatic** mode stays as before, and you can switch back to it mid-race.
+- **Trading with friends (testing).** A first version of trading cars and credits with friends arrives behind the "Trading with friends (experimental)" setting. It is still being tested, so it may not work quite right yet.
+
+### Changed
+
+- **Opening boosters.** The button to flip cards now always stays in the same place, whatever messages appear around the card.
+
+### Fixed
+
+- **One pull, one tile.** A card pulled in a special edition no longer also adds the base Pixel 16-bit edition: you no longer get two tiles for a single pull.
+
 ## [0.14.0] — 2026-11-18
 
 ### Added

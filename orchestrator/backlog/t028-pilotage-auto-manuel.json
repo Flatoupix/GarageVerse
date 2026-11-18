@@ -1,0 +1,40 @@
+{
+  "id": "t028-pilotage-auto-manuel",
+  "title": "Choix entre course automatique (avec le hasard, comme avant) et pilotage manuel (adresse) pour chaque course",
+  "brief": "Retour du joueur sur les prototypes T-026 (compteur de vitesses, src/game/timing.ts, src/components/TimingGauge.vue) et T-027 (virages en jeu de rythme, src/game/turn.ts, src/components/TurnControl.vue), déjà présents dans la base de ce cycle avec leurs deux réglages expérimentaux dans Réglages › Paramètres : il veut pouvoir AUTOMATISER les matchs comme avant, au prix de l'aléatoire. Le principe : le pilotage manuel remplace le hasard par l'adresse du joueur (modificateur de timing, direction) ; la course automatique est exactement la résolution actuelle, avec sa « forme du jour », ses « secteurs parfaits » et ses incidents, sans aucun geste du joueur. Ajouter un choix de pilotage par course : un sélecteur « Pilotage » à deux options, « Automatique (avec le hasard, comme avant) » et « Manuel (ton adresse remplace le hasard) », placé en haut de l'onglet Course, avant le choix du rival, visible dès que le mode timing expérimental est activé dans les Réglages ; le choix est mémorisé (préférence optionnelle de src/game/save.ts) et la valeur par défaut est Automatique, donc rien ne change pour un joueur qui n'y touche pas. En Manuel, les mécaniques déjà activées dans les Réglages s'appliquent (compteur de vitesses, et virages en rythme si leur option est activée) ; en Automatique, aucune ne s'applique et la course se résout à l'identique de l'actuelle. Pendant une course manuelle, un bouton « Passer en automatique pour la suite » finit les secteurs restants en mode automatique (avec le hasard) ; le choix est conservé dans la course en cours (rechargement, reprise) et ne peut pas être annulé pour cette course. Le bilan d'une course et de chaque secteur indique le mode utilisé (« Automatique » ou « Manuel », et « Manuel puis automatique » le cas échéant). Les récompenses, adversaires et règles de victoire restent identiques dans les deux modes. Une courte explication, dans le sélecteur ou sous lui, dit ce que change chaque choix. CONTRAINTES COMMUNES : prototype solo réversible. `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier, ne rien changer sous supabase/. Le projet est bilingue : tout texte visible passe par `t('…')` / `tp(…)` (import de '../i18n'), avec sa traduction anglaise dans `src/i18n/en/` (règles dans docs/i18n.md) ; `node src/i18n/i18n.check.cjs` doit passer, ainsi que toutes les vérifications existantes de src/game/ et le typage. Textes français, tutoiement. Sauvegardes existantes valides (champs optionnels avec valeur par défaut). Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français.",
+  "requirements": [
+    "Module pur et testable (par exemple `src/game/pilot.ts` + `src/game/pilot.check.cjs`) qui décide, pour chaque secteur d'une course, quel mode s'applique (automatique, manuel ou bascule en automatique à partir d'un secteur) ; la vérification prouve que le chemin automatique est strictement identique à l'actuel (mêmes tirages, mêmes scores) et que la bascule en cours de course est conservée. Elle passe avec toutes les vérifications existantes.",
+    "Sélecteur « Pilotage » en haut de l'onglet Course, visible quand le mode timing expérimental est activé, avec les deux options et leur explication, choix mémorisé dans une préférence optionnelle (défaut Automatique), lisible et utilisable au pouce à 320 et 390 px.",
+    "Intégration dans src/views/RaceView.vue : Automatique = résolution actuelle sans geste ; Manuel = mécaniques expérimentales activées ; bouton « Passer en automatique pour la suite » pendant une course manuelle ; état conservé au rechargement et à la reprise, aucun secteur résolu deux fois, aucune sauvegarde corrompue.",
+    "Le bilan de secteur et de course affiche le mode utilisé ; récompenses, adversaires, règles de victoire et Versus inchangés ; aucune modification de rules.ts, data.ts ni supabase/.",
+    "Traduction anglaise complète (i18n.check.cjs passe), typage propre, docs/meta.md décrit les deux modes, la bascule et la préférence ; aucune erreur dans la console ; l'onglet Course reste lisible sans débordement horizontal à 320, 390 et 1280 px."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "tap": "Mode timing (expérimental)"
+    },
+    {
+      "tap": "Fermer les réglages"
+    },
+    {
+      "tab": "Course"
+    },
+    {
+      "expect": "Pilotage"
+    },
+    {
+      "capture": "pilotage"
+    }
+  ]
+}

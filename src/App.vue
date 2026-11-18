@@ -1,9 +1,13 @@
 <script setup lang="ts">
 import { locale, locales, setLocale, t, tp, type Locale } from './i18n'
 import { VERSUS_OPEN } from './game/features'
+import { syncTrades } from './game/trade-client'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
+import demoPlayerSprite from './assets/pixel/anim/r4l-car.px.webp?inline'
+import demoRivalSprite from './assets/pixel/anim/deuch-car.px.webp?inline'
+import demoBackdrop from './assets/pixel/anim/track-sec-bg.px.webp?inline'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
@@ -16,8 +20,15 @@ import ReleaseNotes from './components/ReleaseNotes.vue'
 import GameDaveSplash from './components/GameDaveSplash.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
+import SectorRun from './components/SectorRun.vue'
+import TimingGauge from './components/TimingGauge.vue'
+import TurnControl from './components/TurnControl.vue'
+import { turnSequence } from './game/turn'
+import { shiftsPerSector, timingWindow, type TimingResult } from './game/timing'
+import { timingFeedback } from './game/timing-text'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
+import FriendsView from './views/FriendsView.vue'
 import GarageView from './views/GarageView.vue'
 import HomeView from './views/HomeView.vue'
 import PartSheet from './views/PartSheet.vue'
@@ -28,8 +39,8 @@ import ShowroomView from './views/ShowroomView.vue'
 import { offlineReady } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
-type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus'
-type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
+type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus' | 'friends'
+type Setting = 'turnMode' | 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration' | 'friendsEnabled'
 
 function initialScreen(): Screen {
   if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
@@ -49,7 +60,58 @@ onUnmounted(() => {
   window.removeEventListener('offline', updateNetwork)
 })
 const screen = ref<Screen>(initialScreen())
+function resumeTrades() {
+  if (document.visibilityState !== 'visible' || save.preferences.friendsEnabled !== true) return
+  void syncTrades().catch(cause => {
+    const message = cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.')
+    if (save.preferences.friendsEnabled === true && screen.value !== 'friends' && message !== t('Connexion nécessaire')) notify(message, 'error')
+  })
+}
+onMounted(() => {
+  resumeTrades()
+  document.addEventListener('visibilitychange', resumeTrades)
+})
+onUnmounted(() => document.removeEventListener('visibilitychange', resumeTrades))
+watch([screen, networkAvailable, () => save.preferences.friendsEnabled], ([destination, online, enabled], [previous, wasOnline, wasEnabled]) => {
+  if ((destination === 'friends' && previous !== 'friends') || (online && !wasOnline) || (enabled && !wasEnabled)) resumeTrades()
+})
 const settings = ref<HTMLDialogElement>()
+const activeDemo = ref<'timing' | 'turn' | null>(null)
+const demoImagesReady = ref(false)
+let demoImageLoad: Promise<void> | undefined
+const demoWindows = Array.from({ length: shiftsPerSector.ligne }, (_, shift) =>
+  timingWindow('ligne', 'demo', 0, 6, 1, 0, 0, shift))
+const demoSprites = { player: demoPlayerSprite, rival: demoRivalSprite }
+function preloadDemoImages() {
+  demoImageLoad ??= Promise.allSettled([demoBackdrop, demoPlayerSprite, demoRivalSprite].map(url => {
+    const image = new Image()
+    image.src = url
+    return image.decode()
+  })).then(() => { demoImagesReady.value = true })
+}
+const demoGauge = ref<InstanceType<typeof TimingGauge>>()
+const timingDemo = ref<HTMLElement>()
+const settingsContent = ref<HTMLElement>()
+const demoFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
+function demoJudgment(result: TimingResult) {
+  demoFeedback.value = {
+    tag: timingFeedback(result.zone), good: result.modifier >= 0, count: (demoFeedback.value?.count ?? 0) + 1,
+  }
+}
+async function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
+  demoFeedback.value = null
+  activeDemo.value = activeDemo.value === demo ? null : demo
+  if (activeDemo.value !== 'timing') return
+  await nextTick()
+  const scene = timingDemo.value
+  const content = settingsContent.value
+  if (!scene || !content) return
+  // Garder la piste en haut de la zone défilante, même si le bouton est plus bas.
+  content.scrollTop += scene.getBoundingClientRect().top - content.getBoundingClientRect().top
+  demoGauge.value?.focusShift()
+}
+const demoTurns = turnSequence('demo', 0, 'demo', { perfect: 100, good: 230, acceptance: 410 })
+const turnAttempt = ref(0)
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
 function transferFeedback(text: string, error = false) {
@@ -88,7 +150,7 @@ async function importSave(event: Event) {
     if (!window.confirm(t('Importer cette sauvegarde ? Tu vas remplacer ta partie actuelle.'))) return
     // Écrire avant de remplacer la partie : un stockage indisponible laisse le garage intact.
     localStorage.setItem(SAVE_KEY, JSON.stringify(restored))
-    Object.assign(save, restored)
+    Object.assign(save, { trades: undefined, tradeHistory: undefined }, restored)
     applyTheme(save.preferences.theme)
     themeFx(save.preferences.theme)
     inspected.value = null
@@ -112,12 +174,14 @@ const settingsTabs: { id: SettingsTab; label: string }[] = [
 ]
 function showSettings(tab: SettingsTab = 'parameters') {
   openHelp.value = null
-  selectSettingsTab(tab)
   if (!settings.value?.open) settings.value?.showModal()
+  selectSettingsTab(tab)
 }
 function selectSettingsTab(tab: SettingsTab) {
+  if (tab === 'parameters') preloadDemoImages()
+  else activeDemo.value = null
   settingsTab.value = tab
-  document.getElementById('settings-content')?.scrollTo(0, 0)
+  settingsContent.value?.scrollTo(0, 0)
 }
 function settingsTabKey(event: KeyboardEvent, index: number) {
   const next = event.key === 'ArrowRight' ? (index + 1) % 3 : event.key === 'ArrowLeft' ? (index + 2) % 3 : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : -1
@@ -214,8 +278,11 @@ function go(destination: Screen) {
     history.replaceState(history.state, '', url)
   }
   screen.value = destination
-  window.scrollTo(0, 0)
-  void nextTick(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))
+  if (destination !== 'friends') window.scrollTo(0, 0)
+  void nextTick(() => {
+    if (destination === 'friends' && screen.value === destination) window.scrollTo(0, 0)
+    document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
+  })
 }
 
 function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
@@ -332,7 +399,12 @@ function toggleSetting(key: Setting) {
   save.preferences[key] = !save.preferences[key]
   if (save.preferences[key] && (key === 'music' || key === 'sound')) onAudioGesture()
   persist()
+  if (key === 'friendsEnabled' && save.preferences.friendsEnabled) settings.value?.close()
 }
+
+watch(() => save.preferences.friendsEnabled, enabled => {
+  if (!enabled && screen.value === 'friends') go('garage')
+})
 </script>
 
 <template>
@@ -365,7 +437,8 @@ function toggleSetting(key: Setting) {
     <HomeView v-if="screen === 'home'" @go="go" />
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
     <BoosterView v-else-if="screen === 'booster'" @garage="go('garage')" @shop="go('shop')" @inspect="inspect" />
-    <GarageView v-else-if="screen === 'garage'" @inspect="inspect" />
+    <GarageView v-else-if="screen === 'garage'" @inspect="inspect" @friends="go('friends')" />
+    <FriendsView v-else-if="screen === 'friends' && save.preferences.friendsEnabled" :online="networkAvailable" @back="go('garage')" />
     <ShowroomView v-else-if="screen === 'showroom'" @close="go('home')" />
     <main v-else-if="screen === 'versus'" class="race">
       <VersusView v-if="networkAvailable" @back="go('home')" />
@@ -377,7 +450,7 @@ function toggleSetting(key: Setting) {
     <RaceView v-else @inspect="inspect" @go="go" />
 
     <nav class="tabbar" :aria-label="t('Navigation principale')">
-      <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'home' && screen === 'versus') || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
+      <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'home' && screen === 'versus') || (tab.id === 'shop' && screen === 'booster') || (tab.id === 'garage' && screen === 'friends') ? 'page' : undefined"
         @click="go(tab.id)">
         <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="tab.icon" /></svg></span>{{ tab.label }}
         <span v-if="tab.id === 'garage' && pendingSeries.length" class="tab-dot" :aria-label="t('Récompense de série à récupérer')"></span>
@@ -399,7 +472,7 @@ function toggleSetting(key: Setting) {
     </div>
     </Teleport>
 
-    <dialog ref="settings" class="modal settings-modal" :aria-label="t('Réglages')">
+    <dialog ref="settings" class="modal settings-modal" :aria-label="t('Réglages')" @close="activeDemo = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer les réglages')">×</button></form>
       <h2>{{ t('Réglages') }}</h2>
       <div class="settings-tabs" role="tablist" :aria-label="t('Réglages')">
@@ -407,13 +480,32 @@ function toggleSetting(key: Setting) {
           :aria-selected="settingsTab === tab.id" :aria-controls="'settings-panel-' + tab.id" :tabindex="settingsTab === tab.id ? 0 : -1"
           @click="selectSettingsTab(tab.id)" @keydown="settingsTabKey($event, index)">{{ tab.label }}</button>
       </div>
-      <div id="settings-content" class="settings-content">
+      <div id="settings-content" ref="settingsContent" class="settings-content">
         <div v-show="settingsTab === 'parameters'" id="settings-panel-parameters" role="tabpanel" aria-labelledby="settings-tab-parameters">
+          <label class="setting"><span>{{ t('Échanges entre amis (expérimental)') }}</span><input type="checkbox"
+            :checked="save.preferences.friendsEnabled === true" @change="toggleSetting('friendsEnabled')" /></label>
           <fieldset class="language-picker">
             <legend>{{ t('Langue') }}</legend>
             <label v-for="l in locales" :key="l.id" class="setting"><span :lang="l.id">{{ l.name }}</span>
               <input type="radio" name="language" :value="l.id" :checked="locale === l.id" @change="setLocale(l.id as Locale)" /></label>
           </fieldset>
+          <label class="setting"><span>{{ t('Mode timing (expérimental)') }}</span><input type="checkbox" :checked="save.preferences.timingMode" @change="toggleSetting('timingMode')" /></label>
+          <label class="setting"><span>{{ t('Direction dans les virages (expérimental)') }}</span><input type="checkbox"
+            :checked="save.preferences.timingMode && save.preferences.turnMode" :disabled="!save.preferences.timingMode" @change="toggleSetting('turnMode')" /></label>
+          <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'timing'" :disabled="!demoImagesReady"
+            @click="toggleDemo('timing')">{{ t('Démo du passage de vitesses') }}</button>
+          <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'turn'"
+            @click="toggleDemo('turn')">{{ t('Démo des virages') }}</button>
+          <div v-if="activeDemo === 'timing'" ref="timingDemo" class="settings-timing-demo">
+            <SectorRun live="sec" demo :step="0" :running="false" :arts="demoSprites"
+              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
+              <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
+            </SectorRun>
+          </div>
+          <template v-else-if="activeDemo === 'turn'">
+            <TurnControl :key="turnAttempt" :sequence="demoTurns" demo />
+            <button type="button" class="button quiet wide turn-replay" @click="turnAttempt++">{{ t('Rejouer la séquence') }}</button>
+          </template>
           <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">{{ t('Revoir le tutoriel') }}</button>
           <section class="save-transfer" :aria-label="t('Sauvegarde')">
             <p v-if="offlineReady"><span v-help="'offline'">{{ t('Disponible hors ligne') }}</span></p>
@@ -478,3 +570,7 @@ function toggleSetting(key: Setting) {
     </dialog>
   </div>
 </template>
+
+<style scoped>
+.turn-replay { margin-top: 8px; }
+</style>

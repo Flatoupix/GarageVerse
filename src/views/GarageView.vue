@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { inTransit } from '../game/trade'
 import { locale, t, tp, tc } from '../i18n'
-import { boosterById, families, parts, rarities, rarityClass, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
+import { boosterById, families, parts, rarities, rarityClass, series, stylesOf, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
 import { claimSeries, craftCheck, seriesComplete, seriesProgress, freeParts, prepOf, totalMountedParts, uninstallAll } from '../game/save'
 import { act, narrow, ownedCount, reducedMotion, save } from '../game/store'
@@ -12,12 +13,13 @@ import CarThumb from '../components/CarThumb.vue'
 import GvButton from '../components/GvButton.vue'
 import PartCard from '../components/PartCard.vue'
 
-const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string] }>()
+const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string]; friends: [] }>()
 const tab = ref<'cars' | 'parts' | 'series'>('cars')
-const garageFilter = ref<'owned' | 'favorites' | 'lineup' | 'collection'>('owned')
+const garageFilter = ref<'owned' | 'favorites' | 'lineup' | 'collection' | 'missing-editions'>('owned')
 const garageFilters = [
   { id: 'owned', label: t('Mes voitures') }, { id: 'favorites', label: t('★ Favoris') },
   { id: 'lineup', label: t('Écurie') }, { id: 'collection', label: t('Collection') },
+  { id: 'missing-editions', label: t('Éditions manquantes') },
 ] as const
 const query = ref('')
 const category = computed({
@@ -86,11 +88,22 @@ function setCols(value: number) {
 // Ordre de collection numérique : « 11 » avant « 100 » (les numéros sont des textes à partir de 100).
 const byNumber = (a: Vehicle, b: Vehicle) => Number(a.number) - Number(b.number)
 
-const carList = computed(() => vehicles.filter(v => {
-  const car = save.cars[v.id]
+const transitCars = computed(() => Object.fromEntries(vehicles.flatMap(v => {
+  const car = inTransit(save, v.id)
+  return car ? [[v.id, car] as const] : []
+})))
+
+function matchesGarageFilter(id: string) {
+  const car = save.cars[id] ?? transitCars.value[id]
   if (garageFilter.value !== 'collection' && !car) return false
   if (garageFilter.value === 'favorites' && !car?.favorite) return false
-  if (garageFilter.value === 'lineup' && !save.lineup.includes(v.id)) return false
+  if (garageFilter.value === 'lineup' && !save.lineup.includes(id)) return false
+  if (garageFilter.value === 'missing-editions') return stylesOf(id).some(style => !car?.editions.includes(style))
+  return true
+}
+
+const carList = computed(() => vehicles.filter(v => {
+  if (!matchesGarageFilter(v.id)) return false
   if (rarityFilter.value && v.rarity !== rarityFilter.value) return false
   if (category.value && !v.tags.includes(category.value) && !v.culture?.aura.includes(category.value)) return false
   return normalize(`${v.name} ${v.version} ${v.year}`).includes(search.value)
@@ -113,7 +126,7 @@ const carList = computed(() => vehicles.filter(v => {
   if (sort.value === 'year') return b.year - a.year || byNumber(a, b)
   return byNumber(a, b)
 }))
-const rarityCount = (rarity?: Rarity) => vehicles.filter(v => (!rarity || v.rarity === rarity) && (garageFilter.value === 'collection' || Boolean(save.cars[v.id])) && (garageFilter.value !== 'favorites' || save.cars[v.id]?.favorite) && (garageFilter.value !== 'lineup' || save.lineup.includes(v.id))).length
+const rarityCount = (rarity?: Rarity) => vehicles.filter(v => (!rarity || v.rarity === rarity) && matchesGarageFilter(v.id)).length
 const ownedParts = computed(() => parts.filter(p => (save.parts[p.id] ?? 0) > 0))
 const partGroups = computed(() => Object.entries(families)
   .filter(([id]) => !family.value || family.value === id)
@@ -135,6 +148,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
   <main class="garage">
     <div class="page-heading">
       <h1 tabindex="-1">{{ t('Mon garage') }}</h1>
+      <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('friends')">{{ t('Échanges') }}</button>
     </div>
     <div class="tabs garage-tabs" :aria-label="t('Inventaire')">
       <button type="button" :aria-pressed="tab === 'cars'" @click="selectTab('cars')">{{ t('Voitures') }} <span>{{ ownedCount }}/{{ vehicles.length }}</span></button>
@@ -235,7 +249,13 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
         :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined"
       >
         <div v-for="v in carList" :key="v.id" class="garage-tile">
-          <template v-if="save.cars[v.id]">
+          <button v-if="transitCars[v.id]" type="button" class="card-tile"
+            :aria-label="t('{name} · En transit', { name: v.name })" @click="emit('inspect', 'car', v.id)">
+            <CarThumb v-if="sheet" :id="v.id" :style-name="transitCars[v.id].shown" />
+            <CarCard v-else :id="v.id" :style-name="transitCars[v.id].shown" :prep="transitCars[v.id]" :compact="cols !== 1" />
+            <span class="transit-tag">{{ t('En transit') }}</span>
+          </button>
+          <template v-else-if="save.cars[v.id]">
             <button type="button" class="card-tile" :aria-label="t('Voir {name} {version}', { name: v.name, version: v.version })" @click="emit('inspect', 'car', v.id)">
               <span v-if="!save.seenCars?.includes(v.id)" class="new-car-badge">{{ t('Nouveau') }}</span>
               <CarThumb v-if="sheet" :id="v.id" :style-name="save.cars[v.id].shown" />
@@ -301,3 +321,17 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
     </div>
   </main>
 </template>
+
+
+<style scoped>
+.transit-tag {
+  display: block;
+  padding: 3px;
+  background: var(--night);
+  color: var(--text);
+  font-size: .75rem;
+  font-weight: 700;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+</style>

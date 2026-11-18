@@ -1,8 +1,10 @@
-// Enveloppe Deno commune aux fonctions versus (docs/supabase.md § 7) : CORS, jeton du joueur, base, réponse JSON.
-// Aucune logique métier ici : tout est dans versus.ts, testé hors ligne avec Node.
+// Enveloppe Deno commune aux fonctions Versus et Échanges : CORS, jeton du joueur, base, réponse JSON.
+// La logique métier reste dans versus.ts et friends.ts, testés hors ligne avec Node.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import postgres from 'npm:postgres@3'
 import type { Context, Result } from './versus.ts'
+import type { TradeResult } from './trades.ts'
+import type { FriendResult } from './friends.ts'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -22,6 +24,18 @@ async function playerOf(token: string): Promise<string | undefined> {
 
 // `scheduled` : la tâche planifiée appelle avec la clé service_role, sans joueur (resolve-due seulement).
 export function handle(fn: (ctx: Context) => Promise<Result>, options: { scheduled?: boolean } = {}) {
+  return handleRequest(fn, options)
+}
+
+export function handleFriend(fn: (ctx: Context) => Promise<FriendResult>) {
+  return handleRequest(fn, {})
+}
+
+export function handleTrade(fn: (ctx: Context) => Promise<TradeResult>) {
+  return handleRequest(fn, {})
+}
+
+function handleRequest(fn: (ctx: Context) => Promise<Result | FriendResult | TradeResult>, options: { scheduled?: boolean }) {
   return async (req: Request): Promise<Response> => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
     if (req.method !== 'POST') return reply({ ok: false, error: 'METHOD_NOT_ALLOWED' }, 405)
@@ -42,7 +56,9 @@ export function handle(fn: (ctx: Context) => Promise<Result>, options: { schedul
       const db = postgres(Deno.env.get('SUPABASE_DB_URL')!, { max: 1, prepare: false })
       try {
         const sql = async (text: string, params: unknown[] = []) => ({ rows: [...await db.unsafe(text, params as never[])] })
-        return reply(await fn({ sql, player, body, now: () => new Date(), random }))
+        const result = await fn({ sql, player, body, now: () => new Date(), random })
+        if (!result.ok && 'status' in result) return reply({ ok: false, error: result.error }, result.status)
+        return reply(result)
       } finally {
         await db.end({ timeout: 2 })
       }

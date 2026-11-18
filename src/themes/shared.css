@@ -608,6 +608,10 @@
 .settings-content [role="tabpanel"] { min-width: 0; overflow-wrap: anywhere; padding: 2px 2px 12px; }
 .settings-content .button { max-width: 100%; min-width: 0; white-space: normal; }
 .settings-content .setting input { flex: none; }
+.settings-timing-demo .run-scenery { height: 48px; }
+.settings-timing-demo .run-lane { height: 44px; }
+.settings-timing-demo .run-mover { height: 38px; }
+.settings-timing-demo .sector-run.run-live .run-finish { top: 48px; height: 96px; }
 .theme-group-title button { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; padding: 6px;
   border: 0; border-bottom: 1px solid var(--line); background: var(--night); color: var(--text); font: inherit; text-align: left; }
 .theme-group-title button span { font: 700 1.2rem var(--body); }
@@ -650,6 +654,14 @@
 .gv-button-content { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
 .gv-button--filter .rarity-gem { color: var(--gv-tone); font-size: 1.2rem; text-shadow: 0 2px var(--night); }
 .gv-button--icon { padding-inline: 6px; }
+
+.race-pilot { min-width: 0; max-width: 24rem; margin-bottom: 16px; }
+.race-pilot h2 { margin: 0 0 6px; font-size: 1rem; }
+.race-pilot-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+.race-pilot-options .gv-button.gv-button { padding-inline: 6px; }
+.race-pilot-options .gv-button-content { white-space: nowrap; }
+.race-pilot small { display: block; margin-top: 6px; color: var(--muted); line-height: 1.4; }
+.pilot-switch { margin: 8px 0; white-space: normal; }
 @keyframes gv-sweep { 25% { opacity: 1; } to { opacity: 0; transform: translateX(65%); } }
 .garage-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
 .garage-sort-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }
@@ -876,10 +888,51 @@ main.race { animation-name: race-view-in; }
 .showroom-bar .showroom-count { margin: 0; }
 .showroom-cols button { min-width: 40px; }
 
-/* Récapitulatif d'un achat groupé : « Ouvrir le suivant » occupe sa propre ligne, au-dessus des deux autres boutons. */
-.recap-actions:has(.next-booster) { flex-wrap: wrap; }
-.recap-actions .next-booster.button { flex: 1 1 100%; white-space: normal; }
-.recap-actions:has(.next-booster) .button:not(.next-booster) { flex: 1 1 0; min-width: 0; }
+/* Ouverture : les messages et les cartes défilent dans leurs propres zones. */
+.app-shell:has(> .booster-play) { height: 100svh; display: flex; flex-direction: column; }
+.booster-play {
+  width: 100%; min-height: 0; flex: 1;
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  padding-bottom: 12px; animation-name: race-view-in;
+}
+.booster-stage {
+  display: grid; grid-template-rows: minmax(0, 1fr) 4.75rem auto;
+  gap: 8px; min-width: 0; text-align: center;
+}
+.booster-recap { grid-template-rows: minmax(0, 1fr) auto; }
+.booster-art {
+  min-width: 0; overflow: hidden auto; overscroll-behavior: contain; container-type: size;
+}
+.booster-art .stack-stage {
+  min-height: 100%; align-content: center; padding: 12px;
+}
+/* Le guide défile sous le sachet. Le sachet s'ajuste à la hauteur utile de son cadre. */
+.booster-sealed-art { display: grid; grid-template-rows: minmax(164px, 1fr) auto; }
+.booster-sealed-art .sealed-stage { container-type: size; align-content: center; padding: 12px; }
+.booster-sealed-art .tear-pack { width: min(55vw, 32svh, 252px, calc((100cqh - 10px) * .69)); }
+.booster-art .card-stack { width: clamp(120px, min(74vw, 40svh, 58cqh), 290px); }
+.booster-recap .booster-art { padding-inline: 4px; }
+.booster-messages {
+  min-width: 0; overflow: hidden auto; overscroll-behavior: contain;
+  color: var(--muted); font-size: .875rem; overflow-wrap: anywhere;
+}
+.booster-messages > p { margin: 4px auto; }
+.booster-messages .stack-indicators { margin: 4px 0; }
+
+/* Deux rangées réservées dès le sachet, au-dessus de la navigation. */
+.booster-stage .booster-actions {
+  display: grid; grid-template: repeat(2, 52px) / repeat(2, minmax(0, 1fr));
+  gap: 8px; width: 100%; max-width: 420px; margin: 0 auto;
+}
+.booster-actions > .button {
+  grid-column: 1 / -1; min-width: 0; margin: 0; padding: 4px 8px;
+  white-space: normal; overflow-wrap: anywhere; line-height: 1.15;
+}
+.booster-actions-split.stack-actions > .button:not(.quiet),
+.booster-actions-split.recap-actions > .button:not(.next-booster) { grid-column: auto; font-size: .875rem; }
+@media (min-width: 1024px) {
+  .booster-play { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
 
 /* Choix de la langue, en tête des Paramètres. */
 .language-picker { border: 0; padding: 0; margin: 0 0 12px; min-width: 0; }

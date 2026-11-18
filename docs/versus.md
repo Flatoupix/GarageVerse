@@ -4,7 +4,7 @@ Statut : **à valider avant toute implémentation**. Décisions du 17 novembre 2
 
 ## 1. Expérience recherchée
 
-Défier un ami sur une vraie course de cinq secteurs, avec ses propres voitures préparées, en misant des crédits. Plus tard, échanger des cartes avec lui. Le versus réutilise tout ce que le joueur connaît déjà : écurie de trois voitures sous un plafond de coût, consignes (attaque, normal, gestion), nitro, surchauffe, météo et incidents.
+Défier un ami sur une vraie course de cinq secteurs, avec ses propres voitures préparées, en misant des crédits. Les échanges de cartes ont leur propre chantier, livré avant le Versus : voir [`docs/echanges.md`](echanges.md). Le versus réutilise tout ce que le joueur connaît déjà : écurie de trois voitures sous un plafond de coût, consignes (attaque, normal, gestion), nitro, surchauffe, météo et incidents.
 
 | Moment | Ce que le joueur doit ressentir |
 | --- | --- |
@@ -18,10 +18,9 @@ Défier un ami sur une vraie course de cinq secteurs, avec ses propres voitures 
 | Étape | Contenu | Serveur |
 | --- | --- | --- |
 | **V1 · Duel en direct** | Invitation par lien ou QR code, écurie sous plafond, mise en crédits, course en direct, versement du pot, revanche | Supabase : comptes anonymes, salles, résolution des secteurs, mises bloquées |
-| **V2 · Amis et palmarès** | Liste d'amis par code, historique des duels, bilan victoires et défaites contre chaque ami | Tables d'amis et d'historique |
-| **V3 · Échange de cartes** | Toutes les cartes et des crédits, proposition, contre-proposition, validation simultanée | Échange tenu par le serveur |
+| **V2 · Palmarès** | Historique des duels, bilan victoires et défaites contre chaque ami (la liste d'amis vient du chantier des échanges) | Tables d'historique |
 
-La V1 seule est un jeu complet. V2 et V3 viennent ensuite.
+La V1 seule est un jeu complet. La V2 vient ensuite. Les échanges de cartes ne sont plus une étape du Versus : ils sont dissociés et livrés avant lui (décision du 18 novembre 2026).
 
 ## 3. Déroulement d'un duel (V1)
 
@@ -83,32 +82,9 @@ Détail technique (configuration, schéma SQL, fonctions, sécurité, déploieme
 
 **Hors ligne.** Le versus demande une connexion. Sans réseau, son entrée affiche « Connexion nécessaire » et le reste du jeu fonctionne comme avant.
 
-## 7. Échange de cartes (V3)
+## 7. Échange de cartes
 
-Décisions du 17 novembre 2026 : livré en **V3**, **toutes les cartes** échangeables (dernier exemplaire compris), **crédits** possibles dans l'offre, **aucun garde-fou d'équilibre** entre amis.
-
-**Déroulement.**
-1. **Proposition.** A compose son offre : des cartes de son garage et, s'il le veut, des crédits. Il choisit ce qu'il demande parmi les cartes que B rend visibles pour l'échange (vitrine d'échange, gérée par B).
-2. **Réponse.** B voit les deux côtés en cartes complètes (édition affichée, stage, ateliers, rareté) et le montant de crédits. Il accepte, refuse ou contre-propose. Une offre expire au bout de 24 heures. Une contre-proposition remplace l'offre précédente.
-3. **Validation simultanée.** À l'acceptation, les cartes et crédits des deux côtés passent **en transit** : retirés des écuries (rivaux, défi du jour, Nuit sans fin), ni vendables ni jouables. Le serveur enregistre l'échange accepté, puis chaque jeu reçoit ce que l'autre donne, **une seule fois** (identifiant d'échange mémorisé dans la sauvegarde, comme le règlement d'une mise). Si l'un des deux jeux ne confirme pas dans les 24 heures, tout revient à sa place.
-
-**Ce qui suit la carte.** Tous les exemplaires échangés de la voiture, son stage, ses niveaux d'atelier, son 3ᵉ emplacement et ses éditions débloquées passent au nouveau propriétaire. Les **pièces montées retournent au stock** de l'ancien propriétaire. L'édition affichée reste celle choisie avant l'échange. Une voiture reçue en doublon d'une voiture déjà possédée ajoute ses exemplaires, et garde le meilleur stage, les meilleurs ateliers et l'union des éditions.
-
-**Ce qui est permis.**
-- Toutes les cartes, y compris le dernier exemplaire d'une voiture et les évolutions.
-- Des crédits d'un côté, des deux côtés ou seuls contre des cartes (achat entre amis).
-- Aucun plafond quotidien et aucune limite d'écart de rareté : entre amis, le jeu fait confiance aux joueurs.
-
-**Ce qui reste interdit** (règles du jeu, pas d'équilibrage) :
-- une voiture engagée dans une course en cours, une mise ou une course versus en attente ;
-- un échange qui laisserait l'un des garages sous **trois voitures**, la règle de la vente ;
-- des crédits au-delà du solde du joueur au moment de l'acceptation.
-
-**Séries et collection.** Les récompenses de série déjà récupérées restent acquises. Une série complétée grâce à une carte reçue peut être récupérée normalement, une seule fois par joueur.
-
-**Serveur.** Tables `trades` (offre, état, expiration) et `trade_items` (côté, voiture ou crédits, préparation transmise), fonctions `propose-trade`, `answer-trade` et `claim-trade`, avec la même RLS que les salles : chacun ne voit que ses échanges.
-
-**Limite assumée.** Comme pour les mises, les garages vivent dans les sauvegardes locales. Le serveur garantit l'échange, pas l'honnêteté du garage d'origine.
+Déplacé : l'échange de cartes est **dissocié du Versus** et livré **avant lui** (décision du 18 novembre 2026). Spécification complète, règles décidées le 17 novembre 2026 comprises : [`docs/echanges.md`](echanges.md).
 
 ## 8. Interface
 
@@ -126,7 +102,6 @@ Décisions du 17 novembre 2026 : livré en **V3**, **toutes les cartes** échang
 | `versus-serveur` | Migrations SQL, RLS, Edge Functions, résolution partagée avec `rules.ts` | `supabase/` (nouveau) |
 | `versus-client` | `versus.ts` (connexion, salles, Realtime), mises en cours et règlements dans la sauvegarde | `src/game/` |
 | `versus-interface` | Onglet Versus, salle d'attente, course à minuteur, arrivée et revanche | `src/views/`, `src/components/` |
-| `echange` (V3) | Vitrine d'échange, offre et contre-offre, transit, réception unique, fusion des doublons | `src/game/`, `src/views/`, `supabase/` |
 
 ## 10. Prérequis côté propriétaire du compte
 
