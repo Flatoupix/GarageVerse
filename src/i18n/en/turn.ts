@@ -1,4 +1,7 @@
 export const turn = {
+  '← →': '← →',
+  'Au clavier, utilise les flèches ← et →.': 'On a keyboard, use the ← and → keys.',
+  'Les flèches descendent vers la cible : appuie sur le bon côté quand la flèche y arrive.': 'The arrows move down towards the target. Press the matching side when an arrow reaches it.',
   'Direction dans les virages (expérimental)': 'Steering in corners (experimental)',
   'Démo des virages': 'Cornering demo',
   'Rejouer la séquence': 'Replay the sequence',

@@ -14,6 +14,15 @@ const { playTimingRound } = require('./timing.ts')
 
 const initial = newSave()
 assert.equal(readSave(JSON.stringify(initial)).preferences.pilotMode, 'auto')
+// Les bulles du premier geste survivent au rechargement, y compris en plein tutoriel.
+assert.deepEqual(readSave(JSON.stringify({ ...initial, tutorial: { step: 7, status: 'active',
+  seen: ['stance', 'manuel', 'virages', 'inconnue', 'manuel'] } })).tutorial,
+{ step: 7, status: 'active', seen: ['stance', 'manuel', 'virages'] })
+for (const seen of [undefined, null, 'manuel', {}]) {
+  assert.deepEqual(readSave(JSON.stringify({ ...initial, tutorial: { step: 7, status: 'active', seen } })).tutorial,
+    { step: 7, status: 'active', seen: [] })
+}
+assert.deepEqual(readSave(JSON.stringify({ ...initial, tutorial: { ...initial.tutorial, seen: ['nitro'] } })).tutorial.seen, ['nitro'])
 const lineup = initial.lineup.map(id => ({ id, prep: prepOf(initial, id) }))
 const luck = new Set()
 for (const id of [...rivalById.keys()].slice(0, 9)) {

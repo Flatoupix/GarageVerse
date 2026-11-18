@@ -7,7 +7,7 @@ import { t } from '../i18n'
 
 // Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
-const props = defineProps<{ round?: Round | null; live?: Condition; demo?: boolean; feedback?: { tag: string; good: boolean; count: number } | null; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
+const props = defineProps<{ round?: Round | null; live?: Condition; demo?: boolean; waiting?: boolean; feedback?: { tag: string; good: boolean; count: number } | null; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
 const emit = defineEmits<{ skip: []; tap: [event: MouseEvent] }>()
 const sides = ['player', 'rival'] as const
 
@@ -27,10 +27,10 @@ function syncMotion() {
   hidden.value = document.hidden
   if (since !== undefined) banked += performance.now() - since
   since = undefined
-  if (!props.live || hidden.value || reducedMotion.value) return
+  if (!props.live || props.waiting || hidden.value || reducedMotion.value) return
   frame = requestAnimationFrame(tick)
 }
-watch(() => [props.live, reducedMotion.value], () => {
+watch(() => [props.live, props.waiting, reducedMotion.value], () => {
   syncMotion()
   if (!props.live) liveTime.value = banked = 0
 }, { immediate: true })
@@ -41,7 +41,7 @@ onUnmounted(() => {
 })
 function touchScene(event: MouseEvent) {
   if (event.target instanceof Element && event.target.closest('.run-controls')) return
-  if (props.live && props.tappable) emit('tap', event)
+  if (props.live && !props.waiting && props.tappable) emit('tap', event)
   else if (props.running && (!props.feedback || event.detail <= 1)) emit('skip')
 }
 
@@ -61,7 +61,8 @@ const lanes = computed(() => sides.map(who => {
   const sprite = Boolean(props.sprites?.[who])
   const feedback = who === 'player' && (props.live || props.step === 1 || reducedMotion.value) ? props.feedback : null
   if (!props.round) {
-    const position = reducedMotion.value ? 0.22 : 0.1 + 0.64 * liveTime.value / (liveTime.value + LIVE_TRAVEL_MS)
+    const start = props.demo ? 0.1 : 0
+    const position = props.waiting || reducedMotion.value ? (props.demo ? 0.22 : start) : start + 0.64 * liveTime.value / (liveTime.value + LIVE_TRAVEL_MS)
     return { who, art, sprite, position, nitro: false, kind: '', tag: '', feedback }
   }
   const play = props.round[who]
@@ -79,7 +80,7 @@ const lanes = computed(() => sides.map(who => {
 
 <template>
   <div class="sector-run" :class="[`run-${live ?? round?.condition}`, {
-    running: running || (live && !reducedMotion), 'run-live': live, 'run-still': (live || feedback) && (hidden || reducedMotion),
+    running: running || (live && !waiting && !reducedMotion), 'run-live': live, 'run-still': (live || feedback) && (hidden || reducedMotion),
   }]" :aria-hidden="live || (feedback && (step === 1 || reducedMotion)) ? undefined : true" @click="touchScene">
     <div v-if="backdrop" class="run-scenery" :style="demo ? undefined : { backgroundImage: `url(${backdrop})` }" aria-hidden="true">
       <img v-if="demo" :src="backdrop" alt="" draggable="false" />

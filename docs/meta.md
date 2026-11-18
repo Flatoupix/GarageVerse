@@ -331,9 +331,9 @@ en pilotage manuel contre les rivaux, ainsi que dans le Défi du jour et la Nuit
 Le réglage est désactivé par défaut.
 **Démo du passage de vitesses** ouvre le compteur sans lancer de course ni changer le réglage.
 
-Dès que tu engages ta voiture, les deux voitures roulent dans la scène du duel. Touche la scène
-ou **Passer la vitesse**, ou utilise Espace ou Entrée sur le bouton, au moment où l’aiguille atteint
-la cible. À chaque passage, la voiture réagit, le jugement s’affiche près d’elle et le rapport avance.
+Au signal **Partez !**, les deux voitures démarrent dans la scène du duel. Touche la scène
+ou **Passer la vitesse**, ou appuie sur **Espace** ou sur **Entrée** si le bouton a le focus, quand
+l’aiguille atteint la cible. À chaque passage, la voiture réagit, le jugement s’affiche près d’elle et le rapport avance.
 La dernière action déclenche immédiatement le décompte des lignes de score dans la même scène.
 
 | Secteur | Passages | Montée de base | Largeur verte de base |
@@ -358,6 +358,21 @@ Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aig
 et les voitures restent fixes pendant les gestes. Si tu recharges avant la résolution, tu retrouves
 la sélection du secteur. Un secteur validé revient à son bilan.
 
+Au premier secteur manuel d’une course, les voitures attendent sur la ligne pendant **3, 2, 1**.
+Le geste commence à **Partez !**. Chaque temps dure environ 0,6 s. Les secteurs manuels
+suivants affichent seulement **Prêt ?** puis **Partez !** (environ 0,9 s au total).
+Le décompte se suspend quand l’onglet est masqué, comme le chrono du geste.
+
+Au clavier, appuie sur **Espace** pour passer la vitesse et sur **←** ou **→** pour prendre un
+virage. Tu peux utiliser ces touches sans donner le focus aux boutons. Le jeu ignore les appuis
+avant **Partez !** et les répétitions de touche. Les raccourcis laissent la main aux champs de
+saisie et aux fenêtres d’aide ou de réglages.
+
+La première fois que tu engages chaque type de geste, le mécano explique les commandes.
+**C’est parti** valide la bulle dans ta sauvegarde et lance le décompte. Le tutoriel principal
+reprend après le geste. Les démos des réglages se lancent directement et laissent les bulles
+disponibles pour la première course.
+
 ## Direction expérimentale dans les virages (T-027)
 
 Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** puis **Direction dans les
@@ -366,8 +381,8 @@ permet de jouer et de rejouer une séquence qui alterne gauche et droite.
 
 En solo, un secteur de type virage propose trois notes par défaut. Le circuit, l’index du secteur
 et l’identifiant du rival fixent les sens et les instants par un hachage stable. Les notes
-descendent sur les deux pistes superposées au décor du duel. Appuie sur la piste ou le bouton correspondant, ou utilise ← et →,
-quand la flèche atteint la cible **Maintenant**. Les commandes ignorent les répétitions de touche.
+descendent en diagonale sur deux pistes sous la scène du duel. Appuie sur le bouton du bon côté
+quand la flèche atteint la cible accentuée. Les commandes ignorent les répétitions de touche.
 Le mouvement réduit fait avancer les notes par paliers. Le chrono se suspend si tu changes
 d’onglet. Si tu recharges avant la résolution, tu reviens à la sélection du même secteur.
 

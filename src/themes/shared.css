@@ -937,3 +937,15 @@ main.race { animation-name: race-view-in; }
 /* Choix de la langue, en tête des Paramètres. */
 .language-picker { border: 0; padding: 0; margin: 0 0 12px; min-width: 0; }
 .language-picker legend { padding: 0; margin-bottom: 4px; font-weight: 700; }
+
+/* ——— Commandes de pilotage manuel ——— */
+.manual-track {
+  --manual-stripes: repeating-linear-gradient(90deg, var(--line) 0 5px, var(--text) 5px 7px);
+  --manual-target: radial-gradient(var(--panel) 1px, var(--accent) 1.5px) 0 0 / 5px 5px;
+  overflow: hidden; border-radius: 4px;
+}
+.manual-key-hint { display: none; color: var(--muted); font-size: .78rem; text-align: center; }
+@media (min-width: 1024px) and (pointer: fine) {
+  .manual-key-hint { display: block; }
+}
+.manual-lesson .manual-key-hint { text-align: start; }

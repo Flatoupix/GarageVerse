@@ -23,7 +23,8 @@ import BoosterView from './views/BoosterView.vue'
 import SectorRun from './components/SectorRun.vue'
 import TimingGauge from './components/TimingGauge.vue'
 import TurnControl from './components/TurnControl.vue'
-import { turnSequence } from './game/turn'
+import { turnSequence, type TurnJudgment } from './game/turn'
+import { turnFeedback } from './game/turn-text'
 import { shiftsPerSector, timingWindow, type TimingResult } from './game/timing'
 import { timingFeedback } from './game/timing-text'
 import GameLogo from './components/GameLogo.vue'
@@ -90,7 +91,7 @@ function preloadDemoImages() {
   })).then(() => { demoImagesReady.value = true })
 }
 const demoGauge = ref<InstanceType<typeof TimingGauge>>()
-const timingDemo = ref<HTMLElement>()
+const demoScene = ref<HTMLElement>()
 const settingsContent = ref<HTMLElement>()
 const demoFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
 function demoJudgment(result: TimingResult) {
@@ -101,9 +102,9 @@ function demoJudgment(result: TimingResult) {
 async function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
   demoFeedback.value = null
   activeDemo.value = activeDemo.value === demo ? null : demo
-  if (activeDemo.value !== 'timing') return
+  if (!activeDemo.value) return
   await nextTick()
-  const scene = timingDemo.value
+  const scene = demoScene.value
   const content = settingsContent.value
   if (!scene || !content) return
   // Garder la piste en haut de la zone défilante, même si le bouton est plus bas.
@@ -112,6 +113,13 @@ async function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
 }
 const demoTurns = turnSequence('demo', 0, 'demo', { perfect: 100, good: 230, acceptance: 410 })
 const turnAttempt = ref(0)
+function demoTurnJudgment(result: TurnJudgment, count: number) {
+  demoFeedback.value = { tag: turnFeedback(result.outcome), good: result.modifier > 0, count }
+}
+function replayTurns() {
+  demoFeedback.value = null
+  turnAttempt.value++
+}
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
 function transferFeedback(text: string, error = false) {
@@ -499,16 +507,19 @@ watch(() => save.preferences.friendsEnabled, enabled => {
             @click="toggleDemo('timing')">{{ t('Démo du passage de vitesses') }}</button>
           <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'turn'"
             @click="toggleDemo('turn')">{{ t('Démo des virages') }}</button>
-          <div v-if="activeDemo === 'timing'" ref="timingDemo" class="settings-timing-demo">
+          <div v-if="activeDemo === 'timing'" ref="demoScene" class="settings-timing-demo">
             <SectorRun live="sec" demo :step="0" :running="false" :arts="demoSprites"
               :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
               <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
             </SectorRun>
           </div>
-          <template v-else-if="activeDemo === 'turn'">
-            <TurnControl :key="turnAttempt" :sequence="demoTurns" demo />
-            <button type="button" class="button quiet wide turn-replay" @click="turnAttempt++">{{ t('Rejouer la séquence') }}</button>
-          </template>
+          <div v-else-if="activeDemo === 'turn'" ref="demoScene" class="settings-timing-demo">
+            <SectorRun :key="turnAttempt" live="sec" demo :step="0" :running="false" :arts="demoSprites"
+              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback">
+              <TurnControl :sequence="demoTurns" demo @judgment="demoTurnJudgment" />
+            </SectorRun>
+            <button type="button" class="button quiet wide turn-replay" @click="replayTurns">{{ t('Rejouer la séquence') }}</button>
+          </div>
           <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">{{ t('Revoir le tutoriel') }}</button>
           <section class="save-transfer" :aria-label="t('Sauvegarde')">
             <p v-if="offlineReady"><span v-help="'offline'">{{ t('Disponible hors ligne') }}</span></p>

@@ -14,7 +14,7 @@ import {
 import { helpForLine, vHelp } from '../game/help'
 import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
 import { aiChoice, canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Choice, type Round, type Stance } from '../game/rules'
-import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
+import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type ManualDiscovery, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { playTimingRound, playTurnRound, shiftsPerSector, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
 import { playPilotRound, sectorPilot, switchToAutomatic, type PilotMode } from '../game/pilot'
@@ -22,6 +22,7 @@ import { signedTiming, timingFeedback, timingSummary } from '../game/timing-text
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
 import CarCard from '../components/CarCard.vue'
+import ManualCountdown from '../components/ManualCountdown.vue'
 import SectorRun from '../components/SectorRun.vue'
 import TimingGauge from '../components/TimingGauge.vue'
 import TurnControl from '../components/TurnControl.vue'
@@ -178,6 +179,17 @@ const pendingManual = computed(() => {
   const pending = manualRun.value, d = duel.value
   if (pending && pending.duel === d && pending.index === d.rounds.length && !d.winner) return pending
 })
+const manualStarted = ref(false)
+const manualDiscovery = computed<ManualDiscovery | undefined>(() =>
+  pendingManual.value && (pendingManual.value.sequence ? 'virages' : 'manuel'))
+const manualLesson = computed(() => manualDiscovery.value && !save.tutorial.seen.includes(manualDiscovery.value))
+const firstManual = computed(() => !duel.value?.rounds.some(round => roundPilot(round) === 'manuel'))
+function acknowledgeManual() {
+  const key = manualDiscovery.value
+  if (!key || !manualLesson.value) return
+  save.tutorial.seen.push(key)
+  persist()
+}
 const timingWindows = computed(() => {
   const pending = pendingManual.value
   if (!pending || pending.sequence) return []
@@ -335,6 +347,7 @@ function engage() {
     const sequence = rhythmTurns.value && opponent && d.sectors[index.value] === 'virage'
       ? turnSequence(opponent.circuit.name, index.value, opponent.id) : undefined
     // La voiture adverse est choisie une fois et la manche reste transitoire jusqu’au dernier geste.
+    manualStarted.value = false
     manualRun.value = { duel: d, index: index.value, choice, rivalChoice: aiChoice(d, 'rival', Math.random), sequence }
     void scrollToStage(false, true)
     return
@@ -559,18 +572,31 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <h2 v-else>{{ t(sectorLabels[shown.sector]) }} · {{ t(conditionLabels[shown.condition]) }}</h2>
         </template>
         <h2 v-else>{{ t(sectorLabels[duel.sectors[index]]) }} · {{ t(conditionLabels[duel.conditions[index]]) }}</h2>
-        <SectorRun v-if="pendingManual || shown?.timing || shown?.direction" :round="shown" :step="step"
+        <aside v-if="manualLesson" class="mechanic-guide manual-lesson" role="region" aria-live="polite" :aria-label="t('Le mécano')">
+          <strong>{{ t('Le mécano') }}</strong>
+          <template v-if="pendingManual?.sequence">
+            <p>{{ t('Les flèches descendent vers la cible : appuie sur le bon côté quand la flèche y arrive.') }}</p>
+            <small class="manual-key-hint">{{ t('Au clavier, utilise les flèches ← et →.') }}</small>
+          </template>
+          <template v-else>
+            <p>{{ t('Touche Passer la vitesse quand l’aiguille est dans le vert. Parfait au centre, raté dans le rouge. Plusieurs rapports par secteur.') }}</p>
+            <small class="manual-key-hint">{{ t('Au clavier, utilise la barre d’espace.') }}</small>
+          </template>
+          <div class="mechanic-actions"><button type="button" @click="acknowledgeManual">{{ t('C’est parti') }}</button></div>
+        </aside>
+        <SectorRun v-else-if="pendingManual || shown?.timing || shown?.direction" :waiting="Boolean(pendingManual && !manualStarted)" :round="shown" :step="step"
           :live="pendingManual ? duel.conditions[index] : undefined" :running="Boolean(shown && !settled)"
           :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown?.condition ?? duel.conditions[index])"
           :feedback="liveFeedback" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
           <template #overlay>
+            <ManualCountdown v-if="pendingManual" :full="firstManual" @go="manualStarted = true" />
             <span v-if="shown?.shifts && liveFeedback && (step <= 1 || reducedMotion)" class="final-gear">
               {{ t('Rapport {n}/{total}', { n: shown.shifts.length + 1, total: shown.shifts.length + 1 }) }}
             </span>
           </template>
-          <TurnControl v-if="pendingManual?.sequence" :sequence="pendingManual.sequence" @turn="steer"
+          <TurnControl v-if="pendingManual?.sequence" :sequence="pendingManual.sequence" :waiting="!manualStarted" @turn="steer"
             @judgment="result => showJudgment(turnFeedback(result.outcome), result.modifier > 0)" />
-          <TimingGauge v-else-if="timingWindows.length" ref="gauge" :windows="timingWindows" @finish="shift"
+          <TimingGauge v-else-if="timingWindows.length" ref="gauge" :windows="timingWindows" :waiting="!manualStarted" @finish="shift"
             @judgment="result => showJudgment(timingFeedback(result.zone), result.modifier >= 0)" />
         </SectorRun>
         <template v-if="shown">
