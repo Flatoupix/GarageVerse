@@ -1,7 +1,7 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import { t, tp } from '../i18n'
 import { ruleText } from './rules-text'
-import { readTrades, type TradeRecord } from './trade'
+import { readTrades, TRADE_CREDIT_LIMIT, TRADE_INVENTORY_LIMIT, type TradeRecord } from './trade'
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
@@ -33,6 +33,7 @@ import type { VersusAccount } from './versus-wallet'
 
 export interface Save {
   trades?: Record<string, TradeRecord>
+  tradeHistory?: string[]
   versus: VersusAccount | null
   seenCars?: string[]
   nightRecord: number
@@ -114,11 +115,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     return save
   }
 
-  const trades = readTrades(input.trades)
-  if (trades) save.trades = trades
-  // Les fusions et les retours peuvent dépasser les anciennes limites de lecture.
-  const creditLimit = trades ? Number.MAX_SAFE_INTEGER : 1e7
-  const inventoryLimit = trades ? Number.MAX_SAFE_INTEGER : 999
+  readTrades(save, input.trades, input.tradeHistory)
   const account = input.versus
   if (account && typeof account.id === 'string' && typeof account.nickname === 'string' && typeof account.friend_code === 'string') {
     const active = account.active
@@ -131,7 +128,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     streak: int(input.daily.streak, 0, 100000, 0), lastWin: typeof input.daily.lastWin === 'string' ? input.daily.lastWin : '',
   }
   refreshDaily(save)
-  save.credits = int(input.credits, 0, creditLimit, save.credits)
+  save.credits = int(input.credits, 0, TRADE_CREDIT_LIMIT, save.credits)
   save.tickets = Object.fromEntries(Object.entries(input.tickets ?? {}).filter(([id]) => boosterById.has(id)).map(([id, n]) => [id, int(n, 0, 99, 0)]))
   save.cars = {}
   let refunds = 0
@@ -159,13 +156,13 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       const sameFamily = installed.filter(p => partById.get(p)?.family === part.family).length
       if (sameFamily < (part.family === doubled ? 2 : 1)) installed.push(partId)
     }
-    save.cars[id] = { copies: int(car.copies, 1, inventoryLimit, 1), stage, parts: installed, editions,
+    save.cars[id] = { copies: int(car.copies, 1, TRADE_INVENTORY_LIMIT, 1), stage, parts: installed, editions,
       shown: !legacyLegend && editions.includes(car.shown) ? car.shown : editions[0],
       favorite: car.favorite === true, upgrades: levels, ...(extraSlot ? { extraSlot } : {}) }
   }
-  save.credits = Math.min(creditLimit, save.credits + refunds)
+  save.credits = Math.min(TRADE_CREDIT_LIMIT, save.credits + refunds)
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
-  save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, inventoryLimit, 0)]))
+  save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, TRADE_INVENTORY_LIMIT, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
   if (save.sealed && Array.isArray(input.sealedPulls) && input.sealedPulls.length === 5 &&
       input.sealedPulls.every(p => p && (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))) {

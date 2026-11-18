@@ -6,26 +6,49 @@ import type { OwnedCar, Save } from './save'
 
 export interface TradeOffer { cars: readonly string[]; credits: number }
 export interface TradeGoods { cars: Record<string, OwnedCar>; credits: number }
-export type TradeState = 'ouverte' | 'transit' | 'recue' | 'rendue'
+export const TRADE_CREDIT_LIMIT = 1e7
+export const TRADE_INVENTORY_LIMIT = 999
+const terminalLimit = 200
+
+export type TradeState = 'ouverte' | 'transit' | 'recue' | 'rendue' | 'quarantaine'
 export type TradeRecord =
   | { id: string; state: 'ouverte'; offer: TradeOffer }
   | { id: string; state: 'transit'; goods: TradeGoods }
   | { id: string; state: 'recue'; goods?: TradeGoods }
   | { id: string; state: 'rendue' }
+  | { id: string; state: 'quarantaine'; goods?: unknown }
 
 const amount = (value: unknown): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0
 const validId = (id: unknown): id is string => typeof id === 'string' && id.trim().length > 0
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value)
 const entry = (save: Save, id: string) => save.trades && Object.hasOwn(save.trades, id) ? save.trades[id] : undefined
+const used = (save: Save, id: string) => entry(save, id) || save.tradeHistory?.includes(id)
+const terminal = (record: TradeRecord) => record.state === 'rendue' || (record.state === 'recue' && !record.goods)
+
+function trimTerminals(save: Save) {
+  if (!save.trades || !save.tradeHistory) return
+  const recent = new Set(save.tradeHistory.filter(id => {
+    const record = entry(save, id)
+    return record && terminal(record)
+  }).slice(-terminalLimit))
+  for (const record of Object.values(save.trades)) {
+    if (terminal(record) && !recent.has(record.id)) delete save.trades[record.id]
+  }
+}
+
 const write = (save: Save, record: TradeRecord) => {
   const trades: Record<string, TradeRecord> = save.trades ??= Object.create(null)
   if (record.id === '__proto__' && !Object.hasOwn(trades, record.id)) {
     Object.defineProperty(trades, record.id, { value: record, enumerable: true, writable: true, configurable: true })
   } else trades[record.id] = record
+  if (terminal(record)) {
+    (save.tradeHistory ??= []).push(record.id)
+    trimTerminals(save)
+  }
 }
 
 function validOffer(offer: unknown): offer is TradeOffer {
-  return object(offer) && amount(offer.credits) && Array.isArray(offer.cars)
+  return object(offer) && amount(offer.credits) && offer.credits <= TRADE_CREDIT_LIMIT && Array.isArray(offer.cars)
     && [...offer.cars].every(validId) && new Set(offer.cars).size === offer.cars.length
 }
 
@@ -43,10 +66,14 @@ function checkGoods(save: Save, offer: TradeOffer): string | undefined {
 }
 
 export function validateTradeOffer(save: Save, offer: TradeOffer): string | undefined {
+  return checkOffer(save, offer)
+}
+
+function checkOffer(save: Save, offer: TradeOffer, accepting?: string): string | undefined {
   const problem = checkGoods(save, offer)
   if (problem) return problem
 
-  const open = Object.values(save.trades ?? {}).filter(record => record.state === 'ouverte')
+  const open = Object.values(save.trades ?? {}).filter(record => record.state === 'ouverte').filter(record => record.id !== accepting)
   if (open.length >= 10) return t('Tu as déjà dix offres d’échange ouvertes')
   const reserved = new Set(open.flatMap(record => record.offer.cars))
   if (offer.cars.some(id => reserved.has(id))) return t('Cette voiture figure déjà dans une offre d’échange')
@@ -58,7 +85,7 @@ export function validateTradeOffer(save: Save, offer: TradeOffer): string | unde
 }
 
 export function openTrade(save: Save, id: string, offer: TradeOffer): string | undefined {
-  if (!validId(id) || entry(save, id)) return t('Échange indisponible')
+  if (!validId(id) || used(save, id)) return t('Échange indisponible')
   const problem = validateTradeOffer(save, offer)
   if (problem) return problem
   write(save, { id, state: 'ouverte', offer: { cars: [...offer.cars], credits: offer.credits } })
@@ -78,13 +105,18 @@ function copyCar(car: OwnedCar): OwnedCar {
 
 export function transitTrade(save: Save, id: string, offer?: TradeOffer): string | undefined {
   const record = entry(save, id)
-  if (!validId(id) || (record && record.state !== 'ouverte')) return t('Échange indisponible')
+  if (!validId(id) || save.tradeHistory?.includes(id) || (record && record.state !== 'ouverte')) return t('Échange indisponible')
   const outgoing = record?.offer ?? offer
   if (!outgoing) return t('Offre d’échange invalide')
-  const problem = checkGoods(save, outgoing)
+  const problem = checkOffer(save, outgoing, record?.id)
   if (problem) return problem
 
-  const cars = Object.fromEntries(outgoing.cars.map(carId => [carId, copyCar(save.cars[carId])]))
+  const goods = normalizeGoods({
+    cars: Object.fromEntries(outgoing.cars.map(carId => [carId, save.cars[carId]])),
+    credits: outgoing.credits,
+  })
+  if (!goods) return t('Offre d’échange invalide')
+  const { cars } = goods
   const mounted = partCounts(cars)
   if (mounted.some(([partId, count]) => (save.parts[partId] ?? 0) < count)) return t('Stock de pièces incohérent pour cet échange')
   for (const [partId, count] of mounted) save.parts[partId] -= count
@@ -94,7 +126,7 @@ export function transitTrade(save: Save, id: string, offer?: TradeOffer): string
   save.nightLineup = save.nightLineup.filter(keep)
   if (save.dailyLineup) save.dailyLineup = save.dailyLineup.filter(keep)
   save.credits -= outgoing.credits
-  write(save, { id, state: 'transit', goods: { cars, credits: outgoing.credits } })
+  write(save, { id, state: 'transit', goods })
 }
 
 export function mergeTradeCars(current: OwnedCar, incoming: OwnedCar): OwnedCar {
@@ -110,13 +142,13 @@ export function mergeTradeCars(current: OwnedCar, incoming: OwnedCar): OwnedCar 
 }
 
 function fits(save: Save, goods: TradeGoods): boolean {
-  return amount(save.credits + goods.credits)
-    && Object.entries(goods.cars).every(([id, car]) => amount((save.cars[id]?.copies ?? 0) + car.copies))
+  return save.credits + goods.credits <= TRADE_CREDIT_LIMIT
+    && Object.entries(goods.cars).every(([id, car]) => (save.cars[id]?.copies ?? 0) + car.copies <= TRADE_INVENTORY_LIMIT)
 }
 
 function releaseParts(save: Save, goods: TradeGoods): boolean {
   const mounted = partCounts(goods.cars)
-  if (mounted.some(([id, count]) => !amount((save.parts[id] ?? 0) + count))) return false
+  if (mounted.some(([id, count]) => (save.parts[id] ?? 0) + count > TRADE_INVENTORY_LIMIT)) return false
   for (const [id, count] of mounted) save.parts[id] = (save.parts[id] ?? 0) + count
   return true
 }
@@ -130,16 +162,23 @@ export function completeTrade(save: Save, id: string): string | undefined {
   write(save, { id, state: 'recue', goods: { cars, credits: record.goods.credits } })
 }
 
+// Le donneur peut compacter le lot dès que sa réception est confirmée.
+export function acknowledgeTrade(save: Save, id: string): string | undefined {
+  const record = entry(save, id)
+  if (record?.state !== 'recue' || !record.goods) return t('Échange indisponible')
+  write(save, { id, state: 'recue' })
+}
+
 export function receiveTrade(save: Save, record: TradeRecord): string | undefined {
-  if (!validId(record.id) || record.state !== 'recue' || !record.goods || entry(save, record.id)) return t('Échange indisponible')
+  if (!validId(record.id) || record.state !== 'recue' || !record.goods || used(save, record.id)) return t('Échange indisponible')
   const goods = normalizeGoods(record.goods)
-  if (!goods) return t('Offre d’échange invalide')
+  if (!goods || partCounts(goods.cars).length) return t('Offre d’échange invalide')
   if (!fits(save, goods)) return t('Quantité invalide')
 
   const seen = new Set(save.seenCars ?? Object.keys(save.cars))
   for (const [id, car] of Object.entries(goods.cars)) {
     const current = save.cars[id]
-    save.cars[id] = current ? mergeTradeCars(current, car) : { ...car, parts: [], editions: Array.from(new Set(car.editions)) }
+    save.cars[id] = current ? mergeTradeCars(current, car) : { ...car, favorite: false }
     if (!current) seen.delete(id)
   }
   save.seenCars = Array.from(seen)
@@ -149,7 +188,7 @@ export function receiveTrade(save: Save, record: TradeRecord): string | undefine
 
 export function returnTrade(save: Save, id: string): string | undefined {
   const record = entry(save, id)
-  if (!record || record.state === 'rendue' || record.state === 'recue') return t('Échange indisponible')
+  if (record?.state !== 'ouverte' && record?.state !== 'transit') return t('Échange indisponible')
   if (record.state === 'transit') {
     const { goods } = record
     if (!fits(save, goods)) return t('Quantité invalide')
@@ -157,7 +196,7 @@ export function returnTrade(save: Save, id: string): string | undefined {
     for (const [carId, car] of Object.entries(goods.cars)) {
       const current = save.cars[carId]
       // Si un booster l'a redonnée entre-temps, le lot rendu garde ses pièces montées.
-      save.cars[carId] = current ? mergeTradeCars(car, current) : copyCar(car)
+      save.cars[carId] = current ? mergeTradeCars({ ...current, parts: car.parts }, car) : copyCar(car)
     }
     save.credits += goods.credits
   }
@@ -166,11 +205,11 @@ export function returnTrade(save: Save, id: string): string | undefined {
 
 function normalizeCar(id: string, car: unknown): OwnedCar | undefined {
   const vehicle = vehicleById.get(id)
-  if (!vehicle || !object(car) || !amount(car.copies) || !car.copies || !amount(car.stage) || car.stage > 3
+  if (!vehicle || !object(car) || !amount(car.copies) || !car.copies || car.copies > TRADE_INVENTORY_LIMIT || !amount(car.stage) || car.stage > 3
     || !Array.isArray(car.parts) || !Array.isArray(car.editions) || !car.editions.length || !object(car.upgrades)
     || typeof car.favorite !== 'boolean') return
   const styles = stylesOf(id)
-  if (!car.editions.every(style => styles.includes(style)) || !car.editions.includes(car.shown)) return
+  if (![...car.editions].every(style => styles.includes(style)) || !car.editions.includes(car.shown)) return
   const upgrades = { acc: 0, vit: 0, man: 0, end: 0 }
   for (const key of upgradeKeys) {
     const level = car.upgrades[key]
@@ -190,44 +229,51 @@ function normalizeCar(id: string, car: unknown): OwnedCar | undefined {
     families.set(part.family, count)
   }
   return {
-    copies: car.copies, stage: car.stage, parts: Array.from(installed), editions: [...car.editions],
+    copies: car.copies, stage: car.stage, parts: Array.from(installed), editions: Array.from(new Set(car.editions)),
     shown: car.shown as OwnedCar['shown'], favorite: car.favorite, upgrades, ...(slot ? { extraSlot: slot } : {}),
   }
 }
 
 function normalizeGoods(value: unknown): TradeGoods | undefined {
-  if (!object(value) || !amount(value.credits) || !object(value.cars)) return
+  if (!object(value) || !amount(value.credits) || value.credits > TRADE_CREDIT_LIMIT || !object(value.cars)) return
   const cars: Record<string, OwnedCar> = {}
   for (const [id, data] of Object.entries(value.cars)) {
     const car = normalizeCar(id, data)
     if (!car) return
     cars[id] = car
   }
+  if (partCounts(cars).some(([, count]) => count > TRADE_INVENTORY_LIMIT)) return
   return { cars, credits: value.credits }
 }
 
-export function readTrades(value: unknown): Save['trades'] {
-  if (!object(value)) return
+export function readTrades(save: Save, value: unknown, history: unknown) {
   const trades: Record<string, TradeRecord> = Object.create(null)
-  for (const [id, record] of Object.entries(value)) {
-    if (!validId(id) || !object(record) || record.id !== id) continue
-    switch (record.state) {
-      case 'ouverte':
-        if (validOffer(record.offer)) trades[id] = { id, state: 'ouverte', offer: { cars: [...record.offer.cars], credits: record.offer.credits } }
-        break
-      case 'transit': {
-        const goods = normalizeGoods(record.goods)
-        if (goods) trades[id] = { id, state: 'transit', goods }
-        break
-      }
-      case 'recue': {
-        const goods = normalizeGoods(record.goods)
-        trades[id] = { id, state: 'recue', ...(goods ? { goods } : {}) }
-        break
-      }
-      case 'rendue':
-        trades[id] = { id, state: 'rendue' }
+  const ids = new Set(Array.isArray(history) ? history.filter(validId) : [])
+  if (object(value)) for (const [id, record] of Object.entries(value)) {
+    if (!object(record)) continue
+    const quarantine = () => {
+      trades[id] = { id, state: 'quarantaine', ...(Object.hasOwn(record, 'goods') ? { goods: record.goods } : {}) }
+    }
+    if (!validId(id) || record.id !== id || record.state === 'quarantaine') {
+      if (record.state === 'transit' || record.state === 'quarantaine' || Object.hasOwn(record, 'goods')) quarantine()
+      continue
+    }
+    if (record.state === 'transit' || (record.state === 'recue' && Object.hasOwn(record, 'goods'))) {
+      const goods = normalizeGoods(record.goods)
+      if (goods && !ids.has(id) && (record.state === 'transit' || !partCounts(goods.cars).length)) trades[id] = { id, state: record.state, goods }
+      else quarantine()
+    } else if (Object.hasOwn(record, 'goods')) {
+      quarantine()
+    } else if (record.state === 'ouverte' && !ids.has(id) && validOffer(record.offer)) {
+      trades[id] = { id, state: 'ouverte', offer: { cars: [...record.offer.cars], credits: record.offer.credits } }
+    } else if (record.state === 'rendue' || record.state === 'recue') {
+      trades[id] = { id, state: record.state }
     }
   }
-  if (Object.keys(trades).length) return trades
+  if (Object.keys(trades).length) save.trades = trades
+  for (const record of Object.values(trades)) {
+    if (terminal(record)) ids.add(record.id)
+  }
+  if (ids.size) save.tradeHistory = Array.from(ids)
+  trimTerminals(save)
 }

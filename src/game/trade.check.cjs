@@ -8,7 +8,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
 
 const { claimSeries, freeParts, install, newSave, readSave } = require('./save.ts')
 const { series, stylesOf, vehicles } = require('./data.ts')
-const { completeTrade, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer } = require('./trade.ts')
+const { acknowledgeTrade, completeTrade, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer } = require('./trade.ts')
 
 const id = 'f40'
 const offer = { cars: [id], credits: 25 }
@@ -58,12 +58,25 @@ const small = garage()
 delete small.cars[small.lineup.pop()]
 assert.ok(validateTradeOffer(small, offer))
 for (let i = 0; i < 10; i++) assert.equal(openTrade(valid, String(i), { cars: [], credits: 1 }), undefined)
-refused(valid, () => openTrade(valid, '11', { cars: [], credits: 1 }))
+const eleventh = { cars: [], credits: 1 }
+refused(valid, () => openTrade(valid, '11', eleventh))
+refused(valid, () => {
+  const error = transitTrade(valid, '11', eleventh)
+  assert.equal(error, validateTradeOffer(valid, eleventh))
+  return error
+})
+assert.equal(transitTrade(valid, '9'), undefined) // L'offre acceptée ne compte pas deux fois.
+assert.equal(returnTrade(valid, '9'), undefined)
 assert.equal(returnTrade(valid, '0'), undefined)
 assert.equal(openTrade(valid, '11', { cars: [], credits: 1 }), undefined)
 const pending = garage()
 assert.equal(openTrade(pending, 'proposition', offer), undefined)
 assert.ok(validateTradeOffer(pending, offer))
+refused(pending, () => {
+  const error = transitTrade(pending, 'directe', offer)
+  assert.equal(error, validateTradeOffer(pending, offer))
+  return error
+})
 assert.deepEqual(reload(pending).trades, pending.trades)
 pending.credits = 0
 refused(pending, () => transitTrade(pending, 'proposition'))
@@ -99,7 +112,7 @@ refused(donor, () => returnTrade(donor, '__proto__'))
 refused(donor, () => receiveTrade(donor, delivery))
 const receiverCredits = receiver.credits
 assert.equal(receiveTrade(receiver, delivery), undefined)
-assert.deepEqual(receiver.cars[id], { ...original, parts: [] })
+assert.deepEqual(receiver.cars[id], { ...original, parts: [], favorite: false })
 assert.equal(receiver.credits, receiverCredits + offer.credits)
 assert.ok(!receiver.seenCars.includes(id))
 assert.deepEqual(receiver.series, [])
@@ -129,7 +142,7 @@ assert.equal(transitTrade(reacquired, 'booster', offer), undefined)
 reacquired.cars[id] = car(['Synthwave'])
 assert.equal(returnTrade(reacquired, 'booster'), undefined)
 assert.deepEqual(reacquired.cars[id], {
-  ...original, copies: original.copies + 1, editions: [...original.editions, 'Synthwave'],
+  ...original, copies: original.copies + 1, editions: ['Synthwave', ...original.editions], shown: 'Synthwave', favorite: false,
 })
 
 const duplicate = newSave()
@@ -138,14 +151,18 @@ duplicate.cars[id] = { ...car(['Abandonnée', 'Abandonnée']), copies: 999, stag
 duplicate.seenCars.push(id)
 duplicate.parts.nitro = 1
 assert.equal(install(duplicate, id, 'nitro'), undefined)
+refused(duplicate, () => receiveTrade(duplicate, delivery))
+duplicate.credits -= offer.credits
+refused(duplicate, () => receiveTrade(duplicate, delivery))
+duplicate.cars[id].copies--
 assert.equal(receiveTrade(duplicate, delivery), undefined)
 assert.deepEqual(duplicate.cars[id], {
-  ...car(['Abandonnée', 'Solarpunk']), copies: 1000, stage: 3, parts: ['nitro'], extraSlot: 'acc',
+  ...car(['Abandonnée', 'Solarpunk']), copies: 999, stage: 3, parts: ['nitro'], extraSlot: 'acc',
   upgrades: { acc: 2, vit: 2, man: 2, end: 2 },
 })
 assert.ok(duplicate.seenCars.includes(id))
 assert.deepEqual(reload(duplicate).cars, duplicate.cars)
-assert.equal(reload(duplicate).credits, 1e7 + offer.credits)
+assert.equal(reload(duplicate).credits, 1e7)
 const mixed = newSave()
 mixed.cars[id] = { ...car(), stage: 2, upgrades: { acc: 2, vit: 0, man: 1, end: 0 } }
 const mixedDonor = newSave()
@@ -156,10 +173,83 @@ assert.equal(receiveTrade(mixed, mixedDonor.trades.niveaux), undefined)
 assert.equal(mixed.cars[id].stage, 2)
 assert.deepEqual(mixed.cars[id].upgrades, { acc: 2, vit: 2, man: 1, end: 1 })
 
-const old = reload(newSave())
-for (const trades of [null, 4, [], {}, { inutilisable: { id: 'inutilisable', state: 'transit', goods: { cars: { [id]: null }, credits: 2 } } }]) {
-  assert.deepEqual(reload({ ...old, trades }), old)
+for (const old of [reload(newSave()), reload(garage())]) {
+  for (const trades of [null, 4, [], {}]) assert.deepEqual(reload({ ...old, trades }), old)
 }
+
+const capped = garage()
+capped.credits = 1e7 + 10
+capped.cars[id].copies = 1000
+capped.parts.nitro = 1000
+const baseline = reload(capped)
+for (const record of [delivery, { id: delivery.id, state: 'rendue' }, staleTransit]) {
+  const loaded = reload({ ...capped, trades: { [record.id]: record } })
+  for (const key of ['credits', 'cars', 'parts']) assert.deepEqual(loaded[key], baseline[key])
+  assert.equal(loaded.credits, 1e7)
+  assert.equal(loaded.cars[id].copies, 999)
+  assert.equal(loaded.parts.nitro, 999)
+}
+
+const unreadable = [
+  { state: 'transit', goods: { cars: { [id]: null }, credits: 2 } },
+  { state: 'transit', goods: { cars: {}, credits: 1e7 + 1 } },
+  { state: 'transit', goods: { cars: { [id]: { ...original, copies: 1000 } }, credits: 2 } },
+  { state: 'recue', goods: { cars: { [id]: original }, credits: 2 } },
+  { state: 'recue', goods: { cars: [], credits: 2 } },
+]
+for (const [index, record] of unreadable.entries()) {
+  const id = `illisible-${index}`
+  const save = reload({ ...newSave(), trades: { [id]: { id, ...record } } })
+  assert.deepEqual(save.trades[id], { id, state: 'quarantaine', goods: record.goods })
+  assert.deepEqual(reload(save).trades, save.trades)
+  refused(save, () => returnTrade(save, id))
+  refused(save, () => completeTrade(save, id))
+  refused(save, () => acknowledgeTrade(save, id))
+  refused(save, () => receiveTrade(save, save.trades[id]))
+}
+const repeatedStyles = structuredClone(staleTransit)
+repeatedStyles.goods.cars[id].editions.unshift(original.shown)
+assert.deepEqual(reload({ ...newSave(), trades: { [repeatedStyles.id]: repeatedStyles } }).trades[repeatedStyles.id], staleTransit)
+
+for (const fill of [
+  save => { save.credits = 1e7 },
+  save => { save.cars[id] = { ...car(), copies: 999 } },
+  save => { save.parts.nitro = 999 },
+]) {
+  let save = garage()
+  assert.equal(transitTrade(save, 'plafond', offer), undefined)
+  fill(save)
+  save = reload(save)
+  refused(save, () => returnTrade(save, 'plafond'))
+  assert.deepEqual(reload(save), save)
+}
+const fullStock = garage()
+assert.equal(transitTrade(fullStock, 'stock', offer), undefined)
+fullStock.parts.nitro = 999
+refused(fullStock, () => completeTrade(fullStock, 'stock'))
+
+let history = reload({ ...newSave(), trades: { abîmé: { id: 'abîmé', ...unreadable[0] } } })
+assert.equal(receiveTrade(history, delivery), undefined)
+const unconfirmed = { ...delivery, id: 'en-attente' }
+history.trades[unconfirmed.id] = unconfirmed
+assert.equal(acknowledgeTrade(donor, delivery.id), undefined)
+assert.deepEqual(donor.trades[delivery.id], { id: delivery.id, state: 'recue' })
+for (let i = 249; i >= 0; i--) {
+  const id = String(i)
+  assert.equal(openTrade(history, id, { cars: [], credits: 0 }), undefined)
+  assert.equal(returnTrade(history, id), undefined)
+}
+assert.equal(Object.keys(history.trades).length, 202)
+assert.ok(!history.trades['200'])
+assert.deepEqual(history.trades['0'], { id: '0', state: 'rendue' })
+history = reload(history)
+assert.equal(Object.keys(history.trades).length, 202)
+assert.deepEqual(history.trades.abîmé.goods, unreadable[0].goods)
+assert.deepEqual(history.trades[unconfirmed.id], unconfirmed)
+refused(history, () => receiveTrade(history, delivery))
+refused(history, () => openTrade(history, delivery.id, offer))
+refused(history, () => transitTrade(history, '200', { cars: [], credits: 0 }))
+refused(history, () => returnTrade(history, '200'))
 
 // On contrôle le total à chaque étape, y compris entre la décision de livraison et sa réception.
 const garages = Array.from({ length: 4 }, garage)
@@ -168,6 +258,14 @@ for (const [i, save] of garages.entries()) {
   for (const id of pool.slice(i * 2, i * 2 + 6)) save.cars[id] = { ...car([stylesOf(id)[1]]), copies: i + 1 }
 }
 const exchanges = []
+const damagedLots = [
+  { id: 'transit-abîmé', state: 'transit', goods: { cars: { [id]: { ...original, copies: 1000 } }, credits: 2 } },
+  { id: 'livraison-abîmée', state: 'recue', goods: { cars: { [id]: original }, credits: 2 } },
+]
+let damaged = {
+  ...newSave(), credits: 1e7, parts: { nitro: 999 },
+  trades: Object.fromEntries(damagedLots.map(record => [record.id, record])),
+}
 function totals() {
   let credits = 0
   const copies = new Map(), parts = new Map()
@@ -175,23 +273,32 @@ function totals() {
   const addCars = cars => {
     for (const [id, car] of Object.entries(cars)) add(copies, id, car.copies)
   }
-  for (const save of garages) {
+  const addGoods = goods => {
+    credits += goods.credits
+    addCars(goods.cars)
+    for (const car of Object.values(goods.cars)) for (const part of car.parts) add(parts, part, 1)
+  }
+  for (const save of [...garages, damaged]) {
     credits += save.credits
     addCars(save.cars)
     for (const [id, count] of Object.entries(save.parts)) add(parts, id, count)
   }
+  for (const record of Object.values(damaged.trades)) {
+    if (record.goods) addGoods(record.goods)
+  }
   for (const { from, to, id } of exchanges) {
     const record = garages[from].trades?.[id]
-    if (record?.state === 'transit' || (record?.state === 'recue' && !garages[to].trades?.[id])) {
-      credits += record.goods.credits
-      addCars(record.goods.cars)
-      for (const car of Object.values(record.goods.cars)) for (const part of car.parts) add(parts, part, 1)
+    if (record?.state === 'transit' || (record?.state === 'recue' && record.goods && !garages[to].tradeHistory?.includes(id))) {
+      addGoods(record.goods)
     }
   }
   return { credits, copies, parts }
 }
 
 const initial = totals()
+damaged = reload(damaged)
+assert.deepEqual(totals(), initial)
+for (const record of damagedLots) assert.equal(damaged.trades[record.id].state, 'quarantaine')
 let seed = 0xc011ec7
 const random = limit => {
   seed = (Math.imul(1664525, seed) + 1013904223) >>> 0
@@ -214,18 +321,24 @@ for (let i = 0; i < 1200; i++) {
     if (action === 1 && !transitTrade(donor, id)) transits++
     if (action === 2 && !completeTrade(donor, id)) deliveries++
     if (action === 3) {
-      if (!returnTrade(donor, id) && record.state === 'transit') returns++
+      if (!returnTrade(donor, id) && record?.state === 'transit') returns++
     }
-    if (action === 4 || action === 5) receiveTrade(receiver, record)
+    if ((action === 4 || action === 5) && record && !receiveTrade(receiver, record)) {
+      assert.equal(acknowledgeTrade(donor, id), undefined)
+    }
     if (action === 6) garages[from] = reload(donor)
   }
+  if (i % 50 === 0) damaged = reload(damaged)
   assert.deepEqual(totals(), initial, `Conservation à l’opération ${i}`)
 }
 assert.ok(transits > 10 && deliveries > 5 && returns > 5)
 for (const { from, to, id } of exchanges) {
   const donor = garages[from], receiver = garages[to], record = donor.trades[id]
-  if (record.state === 'recue' && !receiver.trades?.[id]) assert.equal(receiveTrade(receiver, record), undefined)
-  if (record.state === 'transit' || record.state === 'ouverte') assert.equal(returnTrade(donor, id), undefined)
+  if (record?.state === 'recue' && record.goods) {
+    assert.equal(receiveTrade(receiver, record), undefined)
+    assert.equal(acknowledgeTrade(donor, id), undefined)
+  }
+  if (record?.state === 'transit' || record?.state === 'ouverte') assert.equal(returnTrade(donor, id), undefined)
 }
 assert.deepEqual(totals(), initial)
 console.log('Échanges : validation, transit, réception, retours et conservation sur 1 200 opérations : OK')
