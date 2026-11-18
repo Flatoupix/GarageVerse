@@ -268,8 +268,11 @@ onMounted(() => {
   if (fx.value) mountFx(fx.value)
 })
 
+// L'écran Échanges s'ouvre depuis l'accueil ou le garage : son bouton de retour y ramène.
+const friendsFrom = ref<'home' | 'garage'>('garage')
 function go(destination: Screen) {
   toast.value = null
+  if (destination === 'friends' && (screen.value === 'home' || screen.value === 'garage')) friendsFrom.value = screen.value
   if (destination === 'shop' || destination === 'booster') tutorialAction(0, 1)
   if (destination === 'race') tutorialAction(2, 3)
   if (screen.value === 'versus' && destination !== 'versus') {
@@ -438,7 +441,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
     <BoosterView v-else-if="screen === 'booster'" @garage="go('garage')" @shop="go('shop')" @inspect="inspect" />
     <GarageView v-else-if="screen === 'garage'" @inspect="inspect" @friends="go('friends')" />
-    <FriendsView v-else-if="screen === 'friends' && save.preferences.friendsEnabled" :online="networkAvailable" @back="go('garage')" />
+    <FriendsView v-else-if="screen === 'friends' && save.preferences.friendsEnabled" :online="networkAvailable" :from="friendsFrom" @back="go(friendsFrom)" />
     <ShowroomView v-else-if="screen === 'showroom'" @close="go('home')" />
     <main v-else-if="screen === 'versus'" class="race">
       <VersusView v-if="networkAvailable" @back="go('home')" />

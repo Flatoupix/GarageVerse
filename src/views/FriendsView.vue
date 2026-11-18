@@ -10,7 +10,7 @@ import { answerTrade, counterTrade, goodsOf, listFriendShowcase, listShowcase, l
 import { vehicleById } from '../game/data'
 import { save } from '../game/store'
 
-const props = defineProps<{ online: boolean }>()
+const props = defineProps<{ online: boolean; from?: 'home' | 'garage' }>()
 const emit = defineEmits<{ back: [] }>()
 const profile = ref<Awaited<ReturnType<typeof loadFriends>>['profile']>(null)
 const list = ref<Friendship[]>([])
@@ -275,7 +275,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
 
 <template>
   <main class="friends-view">
-    <GvButton @click="emit('back')">{{ t('← Garage') }}</GvButton>
+    <GvButton @click="emit('back')">{{ props.from === 'home' ? t('← Accueil') : t('← Garage') }}</GvButton>
     <div class="page-heading"><h1 tabindex="-1">{{ t('Échanges') }}</h1></div>
 
     <div class="tabs friend-tabs" role="tablist" :aria-label="t('Échanges')"

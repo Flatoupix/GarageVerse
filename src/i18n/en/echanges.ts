@@ -20,6 +20,7 @@ export const echanges = {
   'Code ami copié.': 'Friend code copied.',
   'Sélectionne ton code ami pour le copier.': 'Select your friend code to copy it.',
   '← Garage': '← Garage',
+  '← Accueil': '← Home',
   'Échanges': 'Trades',
   'Amis': 'Friends',
   'Synchronisation…': 'Syncing…',
