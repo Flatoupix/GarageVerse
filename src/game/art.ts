@@ -1,5 +1,6 @@
-import { defaultStyle, formerStyle, PIXEL, vehicleById, type Condition, type EditionStyle } from './data'
+import { boosters, conditionLabels, defaultStyle, formerStyle, PIXEL, progression, rivals, specials, type Condition, type EditionStyle } from './data'
 import { theme } from './theme'
+import type { Save } from './save'
 
 const url = (files: Record<string, string>, folder: string) =>
   Object.fromEntries(Object.entries(files).map(([path, href]) => [path.slice(folder.length).replace(/\.webp$/, ''), href]))
@@ -64,4 +65,28 @@ export const art = {
   rival: (id: string) => pick(pixelRival, rivalArt, id.replace(/:\d+$/, '')),
   pack: (id: string) => pick(pixelPack, packArt, id) ?? pick(pixelPack, packArt, packStandIn[id] ?? 'neon'),
   get hero() { return pick(pixelUi, uiArt, 'hero') },
+}
+
+const interfaceArt = [...Object.values(uiArt), ...Object.values(pixelUi)]
+export const imageAssets = [
+  ...interfaceArt,
+  ...[carArt, partArt, rivalArt, packArt, pixelCar, pixelPart, pixelRival, pixelPack, pixelAnim, legacy].flatMap(group => Object.values(group)),
+]
+
+export function essentialImages(save: Save) {
+  const owned = Object.entries(save.cars)
+  // Le garage de départ est offert même sur une sauvegarde neuve.
+  const starter = !save.duel && !Object.keys(save.record).length && owned.length === progression.start.vehicles.length &&
+    owned.every(([id, car]) => progression.start.vehicles.includes(id) && car.copies === 1 && car.shown === defaultStyle(id))
+  return [
+    art.hero,
+    ...interfaceArt,
+    ...boosters.flatMap(({ id }) => [art.pack(id), art.pack(`${id}-legend`)]),
+    ...(Object.keys(conditionLabels) as Condition[]).map(trackBackdrop),
+    ...(starter ? [] : [
+      ...rivals.map(({ id }) => art.rival(id)),
+      ...specials.flatMap(({ tiers }) => tiers.map(({ id }) => art.rival(id))),
+      ...owned.flatMap(([id, car]) => [carSprite(id), edition(id, car.shown).art]),
+    ]),
+  ]
 }

@@ -4,7 +4,7 @@ import { palettes, sparks } from '../game/fx'
 import { buzz } from '../game/store'
 import PackArt from './PackArt.vue'
 
-const props = defineProps<{ booster: string; torn: boolean; reduced: boolean; legend?: boolean }>()
+const props = defineProps<{ booster: string; torn: boolean; reduced: boolean; legend?: boolean; disabled?: boolean }>()
 const emit = defineEmits<{ tear: [] }>()
 
 const progress = ref(0)
@@ -22,7 +22,7 @@ const packStyle = computed(() => ({
 }))
 
 function start(event: PointerEvent) {
-  if (finger || !event.isPrimary || event.button !== 0) return
+  if (props.disabled || finger || !event.isPrimary || event.button !== 0) return
   const target = event.currentTarget as HTMLElement
   const box = target.getBoundingClientRect()
   fromRight.value = event.clientX > box.left + box.width / 2
@@ -66,7 +66,7 @@ function stop(event: PointerEvent) {
     <div class="foil-body"><PackArt :booster="booster" :legend="legend" /></div>
     <div class="foil-strip"><PackArt :booster="booster" :legend="legend" /></div>
     <div
-      v-if="!torn"
+      v-if="!torn && !disabled"
       class="tear-zone"
       aria-hidden="true"
       data-testid="tear-zone"

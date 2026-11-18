@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { t, tp } from '../i18n'
-import { edition } from '../game/art'
+import { art, edition } from '../game/art'
+import { waitForImages } from '../game/asset-loading'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
 import { buyBooster, collect, sealedHasLegend, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
@@ -37,6 +38,8 @@ function showEdition() {
 }
 const recapPulls = computed(() => opening.value?.pulls ?? [])
 const tearing = ref(false)
+const loading = ref(false)
+let disposed = false
 // Après un achat groupé (ou avec des tickets), le récapitulatif propose d'enchaîner sur le sachet suivant.
 const remaining = computed(() => boosterId.value ? save.tickets[boosterId.value] ?? 0 : 0)
 function openNext() {
@@ -44,14 +47,14 @@ function openNext() {
   if (id && act(s => buyBooster(s, id))) { sound('whoosh'); window.scrollTo(0, 0) }
 }
 const legendaryTear = ref(false)
-const legendary = computed(() => sealedHasLegend(save) || (tearing.value && legendaryTear.value))
+const legendary = computed(() => sealedHasLegend(save) || ((loading.value || tearing.value) && legendaryTear.value))
 const stackEntering = ref(false)
 const flipping = ref(false)
 const cinematic = ref(false)
 let tearTimer: ReturnType<typeof setTimeout> | undefined
 let stackTimer: ReturnType<typeof setTimeout> | undefined
 let burstTimer: ReturnType<typeof setTimeout> | undefined
-onUnmounted(() => { clearTimeout(tearTimer); clearTimeout(stackTimer); clearTimeout(burstTimer) })
+onUnmounted(() => { disposed = true; clearTimeout(tearTimer); clearTimeout(stackTimer); clearTimeout(burstTimer) })
 
 const rarityOf = (pull: Pull): Rarity => pull.kind === 'car' ? vehicleById.get(pull.id)!.rarity : partById.get(pull.id)!.rarity
 // La carte encore face cachée trahit sa rareté par un halo, et la scène s'embrase à la révélation.
@@ -85,20 +88,26 @@ function focusRevealAction() {
   void nextTick(() => document.querySelector<HTMLButtonElement>('.stack-actions .primary')?.focus({ preventScroll: true }))
 }
 
-function openPack() {
-  if (!save.sealed) return
+async function openPack() {
+  if (!save.sealed || loading.value) return
+  loading.value = true
   legendaryTear.value = sealedHasLegend(save)
   tear(save, Math.random)
   persist()
+  const current = save.opening!
+  await waitForImages(current.pulls.flatMap(pull => {
+    if (pull.kind === 'part') return [art.part(pull.id)]
+    const look = edition(pull.id, pull.style)
+    return [look.art, look.drift?.backdrop, look.drift?.car]
+  }))
+  if (disposed) return
+  loading.value = false
+  if (save.opening !== current) return
   sound(legendaryTear.value ? 'legend' : 'tear')
   buzz(25)
   const pack = document.querySelector('.tear-pack')?.getBoundingClientRect()
   flash(legendaryTear.value ? tone.gold : tone.rose, 0.35); shake(2, '.tear-pack')
   if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, legendaryTear.value ? palettes.gold : [...palettes.pink, ...palettes.cyan], 44, 1.1)
-  for (const pull of save.opening!.pulls) if (pull.kind === 'car') {
-    const look = edition(pull.id, pull.style)
-    for (const url of [look.art, look.drift?.backdrop, look.drift?.car]) if (url) new Image().src = url
-  }
   if (reduced.value) { focusRevealAction(); return }
   tearing.value = true
   tearTimer = setTimeout(() => {
@@ -182,18 +191,18 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
       <span class="eyebrow">{{ t(booster.tagline) }}</span>
       <h1 tabindex="-1">{{ recap ? t('Tes cinq cartes') : t(booster.name) }}</h1>
     </div>
-    <div v-if="!opening || tearing" class="booster-stage">
+    <div v-if="!opening || loading || tearing" class="booster-stage">
       <div class="booster-art booster-sealed-art">
         <div class="sealed-stage" :class="`stage-${booster.id}`">
           <div class="pack-spotlight"></div>
-          <TearPack :key="booster.id" :booster="booster.id" :legend="legendary" :torn="tearing" :reduced="reduced" @tear="openPack" />
+          <TearPack :key="booster.id" :booster="booster.id" :legend="legendary" :torn="tearing" :disabled="loading" :reduced="reduced" @tear="openPack" />
         </div>
       </div>
       <div class="booster-messages">
-        <p v-if="!tearing">{{ t('Glisse le doigt le long du bord supérieur.') }}</p>
+        <p v-if="!loading && !tearing">{{ t('Glisse le doigt le long du bord supérieur.') }}</p>
       </div>
       <div class="booster-actions">
-        <button v-if="!tearing" type="button" class="button primary" @click="openPack">{{ t('Ouvrir le sachet') }} <span aria-hidden="true">↗</span></button>
+        <button v-if="!tearing" type="button" class="button primary" :disabled="loading" :aria-busy="loading" @click="openPack">{{ loading ? t('Chargement des images…') : t('Ouvrir le sachet') }} <span v-if="!loading" aria-hidden="true">↗</span></button>
       </div>
     </div>
     <div v-else-if="recap" class="recap booster-stage booster-recap">
