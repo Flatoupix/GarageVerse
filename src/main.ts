@@ -3,6 +3,7 @@ import { registerOffline } from './game/offline'
 import { createApp, h, ref } from 'vue'
 import App from './App.vue'
 import GarageLoading from './components/GarageLoading.vue'
+import GameDaveSplash from './components/GameDaveSplash.vue'
 import { audioAssets } from './audio'
 import { essentialImages } from './game/art'
 import { assets, startBackgroundLoading } from './game/asset-loading'
@@ -15,6 +16,8 @@ applyTheme(save.preferences.theme)
 themeFx(save.preferences.theme)
 
 const ready = ref(false)
+// Splash GAMEDAVE à chaque lancement, joué pendant le chargement de l'essentiel ; les navigateurs pilotés par un outil de test le sautent.
+const splash = ref(!navigator.webdriver)
 const showProgress = ref(false)
 const canSkip = ref(false)
 const percent = ref(0)
@@ -50,5 +53,5 @@ void essential.done.then(() => {
 })
 
 createApp({
-  render: () => ready.value ? h(App) : h(GarageLoading, { showProgress: showProgress.value, percent: percent.value, canSkip: canSkip.value, onSkip: openGarage }),
+  render: () => splash.value ? h(GameDaveSplash, { onDone: () => { splash.value = false } }) : ready.value ? h(App) : h(GarageLoading, { showProgress: showProgress.value, percent: percent.value, canSkip: canSkip.value, onSkip: openGarage }),
 }).mount('#app')
