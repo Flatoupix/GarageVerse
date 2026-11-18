@@ -9,6 +9,7 @@ import {
 } from './data'
 import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, extraSlotFamily, lineupCost, partUnlockLevel, potential, prepUsed, racer,
   STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Prep, type Rng } from './rules'
+import type { PilotMode } from './pilot'
 import type { SoloDuel } from './timing'
 
 export const SAVE_KEY = 'garageverse:v2'
@@ -23,7 +24,7 @@ export type ThemeId = (typeof themeIds)[number]
 // Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; pilotMode?: PilotMode }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -198,6 +199,23 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       if (choice && (duel.winner || duel.rounds.length >= duel.sectors.length || !Number.isInteger(choice.car)
         || !duel.player.lineup[choice.car] || typeof choice.nitro !== 'boolean'
         || (choice.stance !== 'normal' && choice.stance !== 'attaque' && choice.stance !== 'gestion'))) delete duel.timingChoice
+      if (rivalById.has(duel.rivalId)) {
+        const pilot = duel.pilot
+        if (pilot?.mode === 'manuel') {
+          const from = pilot.automaticFrom
+          duel.pilot = { mode: 'manuel', turn: pilot.turn === true }
+          if (from !== undefined && Number.isInteger(from) && from >= 0 && from <= duel.rounds.length) {
+            duel.pilot.automaticFrom = from
+            delete duel.timingChoice
+          }
+        } else if (!pilot && duel.timingChoice) {
+          // Une ancienne course peut déjà attendre un passage de vitesse.
+          duel.pilot = { mode: 'manuel', turn: input.preferences?.turnMode === true }
+        } else {
+          duel.pilot = { mode: 'auto' }
+          delete duel.timingChoice
+        }
+      }
       save.duel = duel
     }
   } catch { save.duel = null }
@@ -214,6 +232,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     touchHelp: input.preferences?.touchHelp !== false,
     timingMode: input.preferences?.timingMode === true,
     turnMode: input.preferences?.turnMode === true,
+    pilotMode: input.preferences?.pilotMode === 'manuel' ? 'manuel' : 'auto',
     sound: input.preferences?.sound !== false,
     music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,
@@ -782,6 +801,9 @@ export function startDuel(save: Save, rivalId: string, rng: Rng): string | undef
   const problem = lineupCheck(save, save.lineup, rivalId)
   if (problem) return problem
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
+  save.duel.pilot = save.preferences.timingMode && save.preferences.pilotMode === 'manuel'
+    ? { mode: 'manuel', turn: save.preferences.turnMode === true }
+    : { mode: 'auto' }
 }
 
 export interface Reward { credits: number; ticket?: string; perfect?: true; perfectTicket?: string; car?: string }

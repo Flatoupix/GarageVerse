@@ -1,6 +1,7 @@
 import { partById, sectorStat, type Sector } from './data'
 import { aiChoice, commitRound, playVersusRound, seededRng, STAT_CAP, upgradeForFamily, type Choice, type Duel, type Racer, type Rng, type Round, type ScoreLine } from './rules'
 
+import type { RacePilot } from './pilot'
 import type { TurnResult } from './turn'
 
 export const timingModifiers = { red: -2, orange: -1, green: 0, perfect: 1 }
@@ -12,6 +13,7 @@ type LegacyTurnResult = { outcome: 'bien' | 'tot' | 'mauvais' | 'tard'; modifier
 export interface TimingRound extends Round { timing?: TimingResult; direction?: TurnResult | LegacyTurnResult }
 export interface SoloDuel extends Duel {
   rounds: TimingRound[]
+  pilot?: RacePilot
   timingChoice?: Choice
   timingReview?: boolean
 }

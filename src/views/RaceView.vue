@@ -16,6 +16,7 @@ import { canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luck
 import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { playTimingRound, playTurnRound, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
+import { playPilotRound, sectorPilot, switchToAutomatic, type PilotMode } from '../game/pilot'
 import { signedTiming, timingFeedback } from '../game/timing-text'
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
@@ -56,7 +57,8 @@ onUpdated(measureActions)
 onUnmounted(() => { layoutObserver?.disconnect(); window.removeEventListener('resize', measureActions) })
 async function scrollToStage(result = false, immediate = false) {
   await nextTick()
-  const target = raceRoot.value?.querySelector<HTMLElement>(result ? '.round-result' : '.engage-brief, .night-panel, .race-end')
+  const target = raceRoot.value?.querySelector<HTMLElement>('.pilot-switch')
+    ?? raceRoot.value?.querySelector<HTMLElement>(result ? '.round-result' : '.engage-brief, .night-panel, .race-end')
   if (!target) return
   const header = document.querySelector('.topbar')?.getBoundingClientRect().height ?? 0
   const instant = immediate || reducedMotion.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -152,6 +154,21 @@ function start() {
 
 // ——— Course en cours ———
 const duel = computed(() => save.duel)
+const rivalRace = computed(() => !isDaily.value && !isNight.value)
+const index = computed(() => duel.value?.rounds.length ?? 0)
+const manualSector = computed(() => rivalRace.value
+  ? sectorPilot(duel.value?.pilot, index.value) === 'manuel'
+  : save.preferences.timingMode)
+const rhythmTurns = computed(() => rivalRace.value ? duel.value?.pilot?.turn : save.preferences.turnMode)
+const canSwitchPilot = computed(() => rivalRace.value && duel.value?.pilot?.mode === 'manuel'
+  && manualSector.value && !duel.value.winner)
+const pilotLabel = (mode: PilotMode | 'mixed') => mode === 'mixed' ? t('Manuel puis automatique')
+  : mode === 'manuel' ? t('Manuel') : t('Automatique')
+const roundPilot = (round: TimingRound): PilotMode => round.timing || round.direction ? 'manuel' : 'auto'
+const pilotPreference = computed({
+  get: () => save.preferences.pilotMode ?? 'auto',
+  set: (mode: PilotMode) => { act(s => { s.preferences.pilotMode = mode }) },
+})
 const turnChoice = ref<{ duel: SoloDuel; index: number; choice: Choice; sequence: TurnSequence } | null>(null)
 const pendingTurn = computed(() => {
   const pending = turnChoice.value, d = duel.value
@@ -159,7 +176,7 @@ const pendingTurn = computed(() => {
 })
 const timingWindow = computed(() => {
   const d = duel.value
-  if (d?.timingChoice && !d.winner) return soloTimingWindow(d, d.player.lineup[d.timingChoice.car])
+  if (d?.timingChoice && !d.winner && (manualSector.value || !rivalRace.value)) return soloTimingWindow(d, d.player.lineup[d.timingChoice.car])
 })
 const picked = ref(duel.value?.timingChoice?.car ?? 0)
 const nitro = ref(false)
@@ -180,7 +197,7 @@ const carDetail = computed(() => {
   const side = d[selected.side], car = side.lineup[selected.car]
   const reference = evaluate(d, selected.side, selected.car, false).score
   return {
-    reference, timing: selected.side === 'player' && save.preferences.timingMode,
+    reference, timing: selected.side === 'player' && manualSector.value,
     car, remaining: car.uses - side.used[selected.car],
     stat: sectorStat[d.sectors[d.rounds.length]],
     range: luckRange(reference),
@@ -190,8 +207,11 @@ const restoredRound = duel.value?.timingReview ? duel.value.rounds.at(-1) : unde
 const shown = ref<TimingRound | null>(restoredRound ?? null)
 const reward = ref<Reward | null>(null)
 // Résumé de la course affiché à l'arrivée : la course elle-même est effacée au règlement.
-const recap = ref<{ sector: Sector; condition: Condition; winner: Round['winner']; player: string; rival: string; scores: [number, number] }[]>([])
-const index = computed(() => duel.value?.rounds.length ?? 0)
+const recap = ref<{ sector: Sector; condition: Condition; winner: Round['winner']; player: string; rival: string; scores: [number, number]; pilot: PilotMode }[]>([])
+const recapPilot = computed(() => {
+  if (!recap.value.some(round => round.pilot === 'manuel')) return 'auto'
+  return recap.value.some(round => round.pilot === 'auto') ? 'mixed' : 'manuel'
+})
 
 // Mise en scène d'un secteur : une mini-course joue le détail de score ligne par ligne, puis le verdict tombe.
 // Tant qu'il n'est pas tombé, la piste et le tableau de score n'affichent pas encore ce secteur.
@@ -291,9 +311,9 @@ function engage() {
   const d = duel.value
   if (!d || d.winner || d.timingChoice || pendingTurn.value || shown.value) return
   const choice = { car: picked.value, nitro: nitro.value, stance: stance.value }
-  if (save.preferences.timingMode) {
+  if (manualSector.value) {
     const opponent = rival.value
-    if (save.preferences.turnMode && opponent && d.sectors[index.value] === 'virage') {
+    if (rhythmTurns.value && opponent && d.sectors[index.value] === 'virage') {
       // La séquence reste transitoire pour revenir à la sélection au rechargement.
       turnChoice.value = {
         duel: d, index: index.value, choice,
@@ -306,13 +326,36 @@ function engage() {
     void scrollToStage(false, true)
     return
   }
-  showRound(playRound(d, choice, Math.random))
+  showAutomaticRound(d, choice)
+}
+
+function showAutomaticRound(d: SoloDuel, choice: Choice) {
+  const round = rivalRace.value ? playPilotRound(d, choice, Math.random) : playRound(d, choice, Math.random)
+  if (d.pilot?.automaticFrom !== undefined) d.timingReview = true
+  showRound(round)
+}
+
+function switchPilot() {
+  const d = duel.value
+  if (!canSwitchPilot.value || !d?.pilot) return
+  const choice = d.timingChoice ?? pendingTurn.value?.choice
+  d.pilot = switchToAutomatic(d.pilot, index.value)
+  delete d.timingChoice
+  turnChoice.value = null
+  if (choice && !shown.value) showAutomaticRound(d, choice)
+  else {
+    persist()
+    void scrollToStage(Boolean(shown.value), true)
+  }
 }
 
 function shift(result: TimingResult) {
   const d = duel.value
   if (!d?.timingChoice || d.winner || shown.value) return
-  const round = playTimingRound(d, d.timingChoice, result, Math.random)
+  if (rivalRace.value && !manualSector.value) return
+  const choice = d.timingChoice
+  const resolve = () => playTimingRound(d, choice, result, Math.random)
+  const round = rivalRace.value ? playPilotRound(d, choice, Math.random, resolve) : resolve()
   delete d.timingChoice
   d.timingReview = true
   persist()
@@ -323,7 +366,8 @@ function steer(result: TurnResult) {
   const pending = pendingTurn.value
   if (!pending || shown.value) return
   turnChoice.value = null
-  const round = playTurnRound(pending.duel, pending.choice, result, Math.random)
+  const resolve = () => playTurnRound(pending.duel, pending.choice, result, Math.random)
+  const round = rivalRace.value ? playPilotRound(pending.duel, pending.choice, Math.random, resolve) : resolve()
   pending.duel.timingReview = true
   showRound(round)
 }
@@ -364,7 +408,7 @@ function proceed() {
   if (duel.value?.winner) {
     const won = duel.value.winner === 'player'
     const d = duel.value
-    recap.value = d.rounds.map(r => ({ sector: r.sector, condition: r.condition, winner: r.winner, scores: [r.player.score, r.rival.score],
+    recap.value = d.rounds.map(r => ({ pilot: roundPilot(r), sector: r.sector, condition: r.condition, winner: r.winner, scores: [r.player.score, r.rival.score],
       player: name(d.player.lineup[r.player.car].id), rival: name(d.rival.lineup[r.rival.car].id) }))
     if (isNight.value) {
       nightEnd.value = settleNight(save) ?? null
@@ -419,6 +463,18 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 
 <template>
   <main ref="raceRoot" class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
+    <section v-if="save.preferences.timingMode && rivalRace && !duel && !reward" class="race-pilot">
+      <fieldset>
+        <legend>{{ t('Pilotage') }}</legend>
+        <label><input v-model="pilotPreference" type="radio" name="race-pilot" value="auto" />
+          <span>{{ t('Automatique (avec le hasard, comme avant)') }}</span>
+        </label>
+        <label><input v-model="pilotPreference" type="radio" name="race-pilot" value="manuel" />
+          <span>{{ t('Manuel (ton adresse remplace le hasard)') }}</span>
+        </label>
+      </fieldset>
+      <p>{{ t('En automatique, tu choisis ta voiture et le hasard joue sur son score. En manuel, tu joues le passage de vitesse et les virages si tu les as activés.') }}</p>
+    </section>
     <section v-if="nightEnd" class="race-end night-panel">
       <h1 tabindex="-1">{{ t('Nuit terminée') }}</h1>
       <p><span v-help="'nightRound'">{{ t('Manches gagnées :') }}</span> {{ nightEnd.wins }}</p>
@@ -442,6 +498,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     <section v-else-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
       <span class="eyebrow">{{ t(rival?.circuit.name ?? '') }}</span>
       <h1 tabindex="-1">{{ reward.perfect ? t('Victoire parfaite') : lastWinner === 'player' ? t('Victoire !') : t('Pas cette fois.') }}</h1>
+      <p v-if="rivalRace">{{ t('Pilotage : {mode}', { mode: pilotLabel(recapPilot) }) }}</p>
       <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> {{ t('Tu as gagné tous les secteurs !') }}</p>
       <blockquote v-if="rivalReply" class="rival-reply"><p>« {{ t(rivalReply) }} »</p><cite>{{ character?.name }}</cite></blockquote>
       <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? t('Défi déjà récompensé aujourd’hui.') : t('Retente le défi quand tu veux.') }}</p>
@@ -453,7 +510,9 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <ol v-if="recap.length" class="race-recap" :aria-label="t('Résumé des secteurs')">
         <li v-for="(r, i) in recap" :key="i" :class="r.winner" :style="{ '--i': i }">
           <span class="recap-sector"><span aria-hidden="true">{{ sectorIcons[r.sector] }} {{ conditionIcons[r.condition] }}</span><span class="visually-hidden">{{ t('{sector}, {condition} :', { sector: t(sectorLabels[r.sector]), condition: t(conditionLabels[r.condition]) }) }} </span></span>
-          <span class="recap-car">{{ r.player }}</span><b>{{ r.scores[0] }} – {{ r.scores[1] }}</b><span class="recap-car">{{ r.rival }}</span>
+          <span class="recap-car">{{ r.player }}</span><b>{{ r.scores[0] }} – {{ r.scores[1] }}</b>
+          <small v-if="rivalRace" class="recap-pilot">{{ pilotLabel(r.pilot) }}</small>
+          <span class="recap-car">{{ r.rival }}</span>
         </li>
       </ol>
       <div class="recap-actions race-actions">
@@ -479,7 +538,12 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </li>
       </ol>
 
+      <button v-if="canSwitchPilot" type="button" class="button quiet pilot-switch" @click="switchPilot">
+        {{ t('Passer en automatique pour la suite') }}
+      </button>
+
       <section v-if="shown" class="round-result" :class="settled ? shown.winner : 'pending'">
+        <p v-if="rivalRace && settled">{{ t('Pilotage : {mode}', { mode: pilotLabel(roundPilot(shown)) }) }}</p>
         <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
         <h2 v-else>{{ t(sectorLabels[shown.sector]) }} · {{ t(conditionLabels[shown.condition]) }}</h2>
         <p v-if="shown.timing" role="status">{{ t('Référence {base} · Timing {zone} ({modifier}) = {total}', {
@@ -545,7 +609,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             aria-controls="engage-detail" class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="pick(car, $event)">
             <img v-if="edition(r.id, save.cars[r.id]?.shown).art" :src="edition(r.id, save.cars[r.id]?.shown).art" alt="" />
             <span class="engage-name">{{ r.vehicle.name }}</span>
-            <span v-if="save.preferences.timingMode" class="engage-score">{{ projections[car] }}</span>
+            <span v-if="manualSector" class="engage-score">{{ projections[car] }}</span>
             <span v-else :key="projections[car]" class="engage-score" :aria-label="rangeLabel(projections[car])">{{ rangeText(projections[car]) }}</span>
             <span class="engage-uses">{{ overheated(duel.player, car) ? t('Surchauffe −3') : tp('{n} secteur', '{n} secteurs', r.uses - duel.player.used[car]) }}</span>
           </button>
@@ -563,7 +627,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <p v-if="carDetail.timing">{{ t('Score de référence estimé sans nitro : {n}', { n: carDetail.reference }) }}</p>
           <p v-else><span v-help="'forme'">{{ t('Fourchette de score') }}</span> {{ t('sur ce secteur :') }} <strong>{{ carDetail.range[0] }}–{{ carDetail.range[1] }}</strong> {{ t('points · sans nitro') }}</p>
         </section>
-        <p v-if="save.preferences.timingMode" class="engage-hint">{{ save.preferences.turnMode && duel.sectors[index] === 'virage' ? t('Ton score estimé est affiché avant le virage.') : t('Ton score estimé est affiché avant le passage de vitesse.') }}</p>
+        <p v-if="manualSector" class="engage-hint">{{ rhythmTurns && duel.sectors[index] === 'virage' ? t('Ton score estimé est affiché avant le virage.') : t('Ton score estimé est affiché avant le passage de vitesse.') }}</p>
         <p v-else class="engage-hint">{{ t('Sous chaque voiture :') }} <span v-help="'forme'">{{ t('fourchette de score') }}</span> {{ t('et') }} <span v-help="'secteurs'">{{ t('secteurs restants') }}</span>.</p>
         <!-- Toujours à portée de pouce : la nitro et le bouton restent collés au bas de l'écran. -->
         <div class="engage-actions race-actions">
@@ -726,3 +790,14 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     </template>
   </main>
 </template>
+
+<style scoped>
+.race-pilot { min-width: 0; margin-bottom: 16px; }
+.race-pilot fieldset { min-width: 0; margin: 0; padding: 0 10px; }
+.race-pilot label { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 0; cursor: pointer; }
+.race-pilot label input { flex: none; }
+.race-pilot label span { overflow-wrap: anywhere; }
+.race-pilot p { margin: 8px 0 0; }
+.pilot-switch { min-height: 44px; max-width: 100%; white-space: normal; margin: 8px 0; }
+.race-recap .recap-pilot { grid-column: 1 / -1; grid-row: 2; color: var(--muted); }
+</style>

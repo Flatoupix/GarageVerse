@@ -301,10 +301,26 @@ La préparation affiche une carte compacte avec le portrait existant de `art.riv
 
 Vérification des données hors réseau : `node src/game/personnages.check.cjs`.
 
+## Pilotage des courses contre les rivaux (T-028)
+
+Active **Mode timing (expérimental)** dans **Réglages › Paramètres** pour afficher le choix
+**Pilotage** en haut de l’onglet **Course**. **Automatique**, le mode par défaut, conserve la
+forme du jour, les secteurs parfaits et les incidents. En **Manuel**, ton passage de vitesse
+ou ta direction en rythme, si tu as activé cette option, remplace ces tirages pour ta voiture.
+Le rival conserve ses tirages habituels.
+
+Ton choix est mémorisé pour les prochaines courses. Si tu désactives le mode timing, les nouvelles
+courses se jouent en automatique. En course manuelle, **Passer en automatique pour la suite**
+rétablit le hasard dès le premier secteur encore à résoudre. Tu continues à choisir tes voitures
+et la bascule reste acquise pour cette course, même après rechargement. Le bilan précise le mode
+de chaque secteur et celui de la course. Le Défi du jour, la Nuit sans fin et le Versus gardent
+leur fonctionnement habituel.
+
 ## Passage de vitesses expérimental (T-026)
 
-Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** pour les secteurs solo contre l’IA,
-y compris le Défi du jour et la Nuit sans fin. Le réglage est désactivé par défaut.
+Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** pour jouer le passage de vitesses
+en pilotage manuel contre les rivaux, ainsi que dans le Défi du jour et la Nuit sans fin.
+Le réglage est désactivé par défaut.
 **Démo du passage de vitesses** ouvre le compteur sans lancer de course ni changer le réglage.
 
 Après avoir engagé ta voiture avec la consigne et la nitro choisies, arrête l’aiguille une fois.

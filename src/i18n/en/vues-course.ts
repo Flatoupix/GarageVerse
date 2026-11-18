@@ -2,6 +2,15 @@ import type { Dict } from './index'
 
 export const vuesCourse: Dict = {
   // Écran de course : constitution de l'écurie, secteurs, résultat
+  'Pilotage': 'Driving mode',
+  'Automatique': 'Automatic',
+  'Manuel': 'Manual',
+  'Manuel puis automatique': 'Manual, then automatic',
+  'Pilotage : {mode}': 'Driving mode: {mode}',
+  'Automatique (avec le hasard, comme avant)': 'Automatic (with luck, as before)',
+  'Manuel (ton adresse remplace le hasard)': 'Manual (your skill replaces luck)',
+  'En automatique, tu choisis ta voiture et le hasard joue sur son score. En manuel, tu joues le passage de vitesse et les virages si tu les as activés.': 'In automatic, you pick your car and luck affects its score. In manual, you time the gear shift and steer through corners if you enabled that option.',
+  'Passer en automatique pour la suite': 'Switch to automatic for the rest of the race',
   'de {low} à {high} points': '{low} to {high} points',
   'Ici, c’est l’{stat} qui compte : choisis ta voiture.': 'Here, {stat} is what counts: pick your car.',
   'Ici, c’est la {stat} qui compte : choisis ta voiture.': 'Here, {stat} is what counts: pick your car.',
