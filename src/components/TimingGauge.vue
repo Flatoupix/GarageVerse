@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { classifyTiming, timingBounds, TIMING_RETURN_MS, type TimingResult, type TimingWindow } from '../game/timing'
 import { reducedMotion } from '../game/store'
 import { t } from '../i18n'
@@ -77,22 +77,26 @@ function shift(event?: MouseEvent) {
 function shiftKey(event: KeyboardEvent) {
   if (!event.repeat) shift()
 }
-function retry() {
+function focusShift() {
+  shiftButton.value?.focus({ preventScroll: true })
+}
+async function retry() {
   results.value = []
   active.value = position.value = banked = phaseStart = 0
   since = undefined
   emit('restart')
   syncClock()
-  shiftButton.value?.focus({ preventScroll: true })
+  await nextTick()
+  focusShift()
 }
 function tapScene(event: MouseEvent) {
-  shiftButton.value?.focus({ preventScroll: true })
+  focusShift()
   shift(event)
 }
-defineExpose({ tapScene })
+defineExpose({ focusShift, tapScene })
 onMounted(() => {
   document.addEventListener('visibilitychange', syncClock)
-  shiftButton.value?.focus({ preventScroll: true })
+  if (!props.demo) focusShift()
   syncClock()
 })
 onUnmounted(() => {
@@ -103,7 +107,6 @@ onUnmounted(() => {
 
 <template>
   <div class="timing-gauge">
-    <p v-if="demo">{{ t('Passe la vitesse quand l’aiguille atteint la zone verte.') }}</p>
     <strong>{{ t('Rapport {n}/{total}', { n: results.length + 1, total: windows.length + 1 }) }}</strong>
     <div class="timing-scale" aria-hidden="true">
       <div class="timing-band">
@@ -124,7 +127,6 @@ onUnmounted(() => {
 
 <style scoped>
 .timing-gauge { display: grid; gap: 4px; min-width: 0; padding: 6px 10px; }
-.timing-gauge p { margin: 0; }
 .timing-scale { position: relative; padding-block: 5px; margin-inline: 4px; }
 .timing-band { display: flex; height: 16px; overflow: hidden; border-radius: 4px; }
 .timing-band span + span { border-inline-start: 1px solid var(--panel); }

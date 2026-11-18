@@ -4,7 +4,9 @@ import { VERSUS_OPEN } from './game/features'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
-import { carSprite, edition, trackBackdrop } from './game/art'
+import demoPlayerSprite from './assets/pixel/anim/r4l-car.px.webp'
+import demoRivalSprite from './assets/pixel/anim/deuch-car.px.webp'
+import demoBackdrop from './assets/pixel/anim/track-sec-bg.px.webp'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
@@ -62,28 +64,34 @@ const demoImagesReady = ref(false)
 let demoImageLoad: Promise<void> | undefined
 const demoWindows = Array.from({ length: shiftsPerSector.ligne }, (_, shift) =>
   timingWindow('ligne', 'demo', 0, 6, 1, 0, 0, shift))
-const demoArts = { player: edition('r4l').art, rival: edition('deuch').art }
-const demoSprites = { player: carSprite('r4l'), rival: carSprite('deuch') }
-const demoBackdrop = trackBackdrop('sec')
+const demoSprites = { player: demoPlayerSprite, rival: demoRivalSprite }
 function preloadDemoImages() {
-  const urls = [demoBackdrop, demoSprites.player ?? demoArts.player, demoSprites.rival ?? demoArts.rival]
-  demoImageLoad ??= Promise.allSettled(urls.flatMap(url => {
-    if (!url) return []
+  demoImageLoad ??= Promise.allSettled([demoBackdrop, demoPlayerSprite, demoRivalSprite].map(url => {
     const image = new Image()
     image.src = url
-    return [image.decode()]
+    return image.decode()
   })).then(() => { demoImagesReady.value = true })
 }
 const demoGauge = ref<InstanceType<typeof TimingGauge>>()
+const timingDemo = ref<HTMLElement>()
+const settingsContent = ref<HTMLElement>()
 const demoFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
 function demoJudgment(result: TimingResult) {
   demoFeedback.value = {
     tag: timingFeedback(result.zone), good: result.modifier >= 0, count: (demoFeedback.value?.count ?? 0) + 1,
   }
 }
-function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
+async function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
   demoFeedback.value = null
   activeDemo.value = activeDemo.value === demo ? null : demo
+  if (activeDemo.value !== 'timing') return
+  await nextTick()
+  const scene = timingDemo.value
+  const content = settingsContent.value
+  if (!scene || !content) return
+  // Garder la piste en haut de la zone défilante, même si le bouton est plus bas.
+  content.scrollTop += scene.getBoundingClientRect().top - content.getBoundingClientRect().top
+  demoGauge.value?.focusShift()
 }
 const demoTurns = turnSequence('demo', 0, 'demo', { perfect: 100, good: 230, acceptance: 410 })
 const turnAttempt = ref(0)
@@ -156,7 +164,7 @@ function selectSettingsTab(tab: SettingsTab) {
   if (tab === 'parameters') preloadDemoImages()
   else activeDemo.value = null
   settingsTab.value = tab
-  document.getElementById('settings-content')?.scrollTo(0, 0)
+  settingsContent.value?.scrollTo(0, 0)
 }
 function settingsTabKey(event: KeyboardEvent, index: number) {
   const next = event.key === 'ArrowRight' ? (index + 1) % 3 : event.key === 'ArrowLeft' ? (index + 2) % 3 : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : -1
@@ -446,7 +454,7 @@ function toggleSetting(key: Setting) {
           :aria-selected="settingsTab === tab.id" :aria-controls="'settings-panel-' + tab.id" :tabindex="settingsTab === tab.id ? 0 : -1"
           @click="selectSettingsTab(tab.id)" @keydown="settingsTabKey($event, index)">{{ tab.label }}</button>
       </div>
-      <div id="settings-content" class="settings-content">
+      <div id="settings-content" ref="settingsContent" class="settings-content">
         <div v-show="settingsTab === 'parameters'" id="settings-panel-parameters" role="tabpanel" aria-labelledby="settings-tab-parameters">
           <fieldset class="language-picker">
             <legend>{{ t('Langue') }}</legend>
@@ -460,10 +468,12 @@ function toggleSetting(key: Setting) {
             @click="toggleDemo('timing')">{{ t('Démo du passage de vitesses') }}</button>
           <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'turn'"
             @click="toggleDemo('turn')">{{ t('Démo des virages') }}</button>
-          <SectorRun v-if="activeDemo === 'timing'" live="sec" :step="0" :running="false" :arts="demoArts"
-            :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
-            <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
-          </SectorRun>
+          <div v-if="activeDemo === 'timing'" ref="timingDemo" class="settings-timing-demo">
+            <SectorRun live="sec" :step="0" :running="false" :arts="demoSprites"
+              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
+              <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
+            </SectorRun>
+          </div>
           <template v-else-if="activeDemo === 'turn'">
             <TurnControl :key="turnAttempt" :sequence="demoTurns" demo />
             <button type="button" class="button quiet wide turn-replay" @click="turnAttempt++">{{ t('Rejouer la séquence') }}</button>

@@ -608,6 +608,10 @@
 .settings-content [role="tabpanel"] { min-width: 0; overflow-wrap: anywhere; padding: 2px 2px 12px; }
 .settings-content .button { max-width: 100%; min-width: 0; white-space: normal; }
 .settings-content .setting input { flex: none; }
+.settings-timing-demo .run-scenery { height: 48px; }
+.settings-timing-demo .run-lane { height: 44px; }
+.settings-timing-demo .run-mover { height: 38px; }
+.settings-timing-demo .sector-run.run-live .run-finish { top: 48px; height: 96px; }
 .theme-group-title button { display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 44px; padding: 6px;
   border: 0; border-bottom: 1px solid var(--line); background: var(--night); color: var(--text); font: inherit; text-align: left; }
 .theme-group-title button span { font: 700 1.2rem var(--body); }
