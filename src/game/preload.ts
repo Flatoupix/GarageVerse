@@ -25,12 +25,13 @@ export async function decodeImage(url: string, signal: AbortSignal, lowPriority:
   }
 }
 
-export function createPreloader(load: Loader = decodeImage, concurrency = 6) {
+export function createPreloader(load: Loader = decodeImage, concurrency = 6, backgroundSpacing = 0) {
   const cached = new Set<string>()
   const jobs = new Map<string, Job>()
   const order: Priority[] = ['target', 'essential', 'background']
   let running = 0
   let paused = true
+  let backgroundTimer: ReturnType<typeof setTimeout> | undefined
 
   function priority(job: Job) {
     let rank = order.length
@@ -43,14 +44,12 @@ export function createPreloader(load: Loader = decodeImage, concurrency = 6) {
       const level = priority(job)
       return level === 'target' || level === 'essential'
     })
-    let continuingBackground = 0
     for (const job of jobs.values()) {
-      if (!job.controller || job.controller.signal.aborted) continue
-      const level = priority(job)
-      if (!level || (level === 'background' && (paused || foreground || ++continuingBackground > 2))) job.controller.abort()
+      if (!job.requests.size) job.controller?.abort()
     }
+    // Une image déjà demandée se termine. Seuls les nouveaux départs de fond sont suspendus.
     for (const level of order) {
-      if (level === 'background' && (paused || foreground)) break
+      if (level === 'background' && (paused || foreground || backgroundTimer !== undefined)) break
       for (const [url, job] of jobs) {
         if (running >= concurrency || (level === 'background' && running >= 2)) break
         if (job.controller || priority(job) !== level) continue
@@ -58,6 +57,12 @@ export function createPreloader(load: Loader = decodeImage, concurrency = 6) {
         job.controller = controller
         const background = level === 'background'
         running++
+        if (background && backgroundSpacing > 0) {
+          backgroundTimer = setTimeout(() => {
+            backgroundTimer = undefined
+            pump()
+          }, backgroundSpacing)
+        }
 
         function finish(failed: boolean) {
           running--
@@ -74,6 +79,7 @@ export function createPreloader(load: Loader = decodeImage, concurrency = 6) {
           controller.signal.throwIfAborted()
           return load(url, controller.signal, background)
         }).then(() => finish(false), () => finish(true))
+        if (backgroundTimer !== undefined && background) break
       }
     }
   }

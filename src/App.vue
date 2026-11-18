@@ -9,7 +9,7 @@ import demoPlayerSprite from './assets/pixel/anim/r4l-car.px.webp?inline'
 import demoRivalSprite from './assets/pixel/anim/deuch-car.px.webp?inline'
 import demoBackdrop from './assets/pixel/anim/track-sec-bg.px.webp?inline'
 import { stylesOf, type Rival, type StatKey } from './game/data'
-import { edition } from './game/art'
+import { carSprite, edition, editionImages } from './game/art'
 import { waitForImages } from './game/asset-loading'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
@@ -234,6 +234,7 @@ const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
 const loadingSheet = ref(false)
 let inspection = 0
+let sheetLoading: AbortController | undefined
 const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
   // Tracés 24 × 24 : maison, sachet de cartes, porte de garage, drapeau à damier.
@@ -295,6 +296,8 @@ onMounted(() => {
 const friendsFrom = ref<'home' | 'garage'>('garage')
 function cancelInspection() {
   inspection++
+  sheetLoading?.abort()
+  sheetLoading = undefined
   loadingSheet.value = false
 }
 
@@ -318,13 +321,23 @@ function go(destination: Screen) {
 }
 
 async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+  const previous = sheetLoading
+  sheetLoading = undefined
   const request = ++inspection
   loadingSheet.value = kind === 'car'
   if (kind === 'car') {
-    await waitForImages([edition(id, save.cars[id]?.shown).art, ...stylesOf(id).map(style => edition(id, style).art)])
+    sheetLoading = new AbortController()
+    const images = waitForImages([
+      carSprite(id),
+      ...editionImages(edition(id, save.cars[id]?.shown)),
+      ...stylesOf(id).flatMap(style => editionImages(edition(id, style))),
+    ], sheetLoading.signal)
+    previous?.abort()
+    await images
     if (request !== inspection) return
+    sheetLoading = undefined
     loadingSheet.value = false
-  }
+  } else previous?.abort()
   inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)
@@ -496,7 +509,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 
     <canvas ref="fx" class="fx-canvas" aria-hidden="true"></canvas>
     <div v-if="toast" :key="toast.text" class="toast" :class="toast.tone" role="status">{{ toast.text }}</div>
-    <div v-else-if="loadingSheet" class="toast" role="status">{{ t('Chargement des images…') }}</div>
+    <div v-if="loadingSheet && !inspected" class="toast sheet-loading-toast" role="status">{{ t('Chargement des images…') }}</div>
 
     <Teleport :to="bubbleHost">
     <div ref="bubble" popover="manual" class="help-bubble" :style="bubbleStyle" role="dialog" :aria-label="t('Explication')">
@@ -604,6 +617,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="cancelInspection(); inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
+      <div v-if="loadingSheet" class="toast" role="status">{{ t('Chargement des images…') }}</div>
       <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
         :key="`c-${inspected.id}`" @open="id => inspect('car', id)" @close="sheet?.close()" />
       <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="(id, stat) => inspect('car', id, undefined, stat)" />
@@ -612,5 +626,6 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 </template>
 
 <style scoped>
+.toast + .sheet-loading-toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
 .turn-replay { margin-top: 8px; }
 </style>

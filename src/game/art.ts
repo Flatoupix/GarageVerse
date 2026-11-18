@@ -51,6 +51,10 @@ export function edition(id: string, style: EditionStyle = defaultStyle(id)): Edi
   if (style === former && former !== 'Synthwave') return { style, art: carArt[`${id}-portrait`] }
   return legacyArt[id]?.[style] ?? { style: 'Synthwave', art: carArt[id] }
 }
+export function editionImages({ art, drift }: Edition) {
+  return [art, drift?.backdrop, drift?.car]
+}
+
 // Le thème Synthwave reprend les illustrations d'origine des pièces, rivaux, sachets et de l'accueil ; les autres thèmes montrent le pixel art.
 const pick = (pixel: Record<string, string>, former: Record<string, string>, id: string) =>
   (theme.value === 'neon' ? former[id] ?? pixel[id] : pixel[id] ?? former[id]) as string | undefined
@@ -86,7 +90,7 @@ export function essentialImages(save: Save) {
     ...(starter ? [] : [
       ...rivals.map(({ id }) => art.rival(id)),
       ...specials.flatMap(({ tiers }) => tiers.map(({ id }) => art.rival(id))),
-      ...owned.flatMap(([id, car]) => [carSprite(id), edition(id, car.shown).art]),
+      ...owned.flatMap(([id, car]) => [carSprite(id), ...editionImages(edition(id, car.shown))]),
     ]),
   ]
 }

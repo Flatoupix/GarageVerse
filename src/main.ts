@@ -15,24 +15,26 @@ applyTheme(save.preferences.theme)
 themeFx(save.preferences.theme)
 
 const ready = ref(false)
-const visible = ref(false)
+const showProgress = ref(false)
 const canSkip = ref(false)
 const percent = ref(0)
 const started = performance.now()
 let shownAt: number | undefined
+let readTimer: ReturnType<typeof setTimeout> | undefined
 
 function openGarage() {
   if (ready.value) return
   clearTimeout(showTimer)
   clearTimeout(skipTimer)
   clearTimeout(deadline)
+  clearTimeout(readTimer)
   ready.value = true
   startBackgroundLoading()
   essential.background()
   registerOffline()
 }
 
-const showTimer = setTimeout(() => { shownAt = performance.now(); visible.value = true }, 150)
+const showTimer = setTimeout(() => { shownAt = performance.now(); showProgress.value = true }, 150)
 const skipTimer = setTimeout(() => { canSkip.value = true }, 2000)
 const deadline = setTimeout(openGarage, 8000)
 const essential = assets.preload([...essentialImages(save), ...audioAssets], 'essential', ({ loaded, total }) => {
@@ -43,10 +45,10 @@ void essential.done.then(() => {
   // Si l'écran est apparu, laisse-le au moins le temps d'être lu, dans le délai global.
   const now = performance.now()
   const remaining = shownAt !== undefined ? Math.min(shownAt + 200 - now, started + 8000 - now) : 0
-  if (remaining > 0) setTimeout(openGarage, remaining)
+  if (remaining > 0) readTimer = setTimeout(openGarage, remaining)
   else openGarage()
 })
 
 createApp({
-  render: () => ready.value ? h(App) : visible.value ? h(GarageLoading, { percent: percent.value, canSkip: canSkip.value, onSkip: openGarage }) : null,
+  render: () => ready.value ? h(App) : h(GarageLoading, { showProgress: showProgress.value, percent: percent.value, canSkip: canSkip.value, onSkip: openGarage }),
 }).mount('#app')

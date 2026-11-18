@@ -155,6 +155,8 @@ onUnmounted(() => { disposed = true })
 
 function prepareRace(current: SoloDuel) {
   return waitForImages([
+    art.rival(current.rivalId),
+    character.value && art.rival(character.value.id),
     ...current.conditions.map(trackBackdrop),
     ...current.player.lineup.flatMap(({ id }) => [carSprite(id), edition(id, save.cars[id]?.shown).art]),
     ...current.rival.lineup.flatMap(({ id }) => [carSprite(id), edition(id).art]),
@@ -166,12 +168,12 @@ async function start() {
   if (!act(s => isNight.value ? startNight(s, nightSeed.value) : isDaily.value ? startDaily(s) : startDuel(s, rival.value!.id, Math.random))) return
   const current = save.duel
   if (!current) return
+  if (!isNight.value) tutorialAction(0, 4)
   loadingRace.value = true
   await prepareRace(current)
   if (disposed) return
   loadingRace.value = false
   if (save.duel !== current) return
-  if (!isNight.value) tutorialAction(0, 4)
   picked.value = 0; nitro.value = false; stance.value = 'normal'; detail.value = null
   void scrollToStage()
   sound('rev'); streaks(palettes.cyan, 30); flash(tone.cyan, 0.2); buzz([20, 40, 60])
@@ -785,7 +787,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <div class="rival-steps-tabs">
           <GvButton v-for="stepItem in rivalStepList" :key="stepItem.id" variant="filter"
             :aria-pressed="chosen === stepItem.id"
-            :disabled="!unlockedSteps.includes(stepItem.id)"
+            :disabled="loadingRace || !unlockedSteps.includes(stepItem.id)"
             @click="chosen = stepItem.id">
             <span aria-hidden="true">{{ !unlockedSteps.includes(stepItem.id) ? '🔒' : save.record[stepItem.id]?.wins ? '✓' : '◆' }}</span>
             <span>{{ t(stepItem.stepLabel ?? '') }}</span>

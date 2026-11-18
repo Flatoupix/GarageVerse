@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { t, tp } from '../i18n'
-import { art, edition } from '../game/art'
+import { art, edition, editionImages } from '../game/art'
 import { waitForImages } from '../game/asset-loading'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
@@ -97,8 +97,7 @@ async function openPack() {
   const current = save.opening!
   await waitForImages(current.pulls.flatMap(pull => {
     if (pull.kind === 'part') return [art.part(pull.id)]
-    const look = edition(pull.id, pull.style)
-    return [look.art, look.drift?.backdrop, look.drift?.car]
+    return editionImages(edition(pull.id, pull.style))
   }))
   if (disposed) return
   loading.value = false

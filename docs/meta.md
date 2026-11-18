@@ -420,7 +420,7 @@ quand l’option de direction est inactive.
 
 ## Chargement des illustrations et des sons
 
-L’écran de démarrage attend les URL de l’interface (`ui` et `pixel/ui`, accueil inclus), les sachets du thème actif (ordinaires et légendaires), les cinq décors de course et les sons. Les thèmes dessinent leurs fonds en CSS. Sur une sauvegarde avec une collection déjà développée, la file ajoute les portraits du thème actif, le sprite de profil et l’édition affichée de chaque voiture possédée. Les trois voitures offertes d’une sauvegarde neuve rejoignent la file de fond.
+L’écran de démarrage attend les URL de l’interface (`ui` et `pixel/ui`, accueil inclus), les sachets du thème actif (ordinaires et légendaires), les cinq décors de course et les sons. Les thèmes dessinent leurs fonds en CSS. Sur une sauvegarde avec une collection déjà développée, la file ajoute les portraits du thème actif, le sprite de profil et l’édition affichée de chaque voiture possédée, avec ses calques de drift si elle en a. Les trois voitures offertes d’une sauvegarde neuve rejoignent la file de fond.
 
 Mesure sur les fichiers sources avec le thème Synthwave, dédoublonnés par URL, en Mo décimaux. La sauvegarde type possède la Clio, la Twingo et la Panda de départ, plus la R34, l’Elise, la Venom, l’AE86 et la McLaren F1 dans leurs éditions par défaut.
 
@@ -436,4 +436,6 @@ Mesure sur les fichiers sources avec le thème Synthwave, dédoublonnés par URL
 | Sons et musiques | 19 fichiers · 0,790 Mo | 19 fichiers · 0,790 Mo |
 | **Total** | **36 fichiers · 2,553 Mo** | **58 fichiers · 3,556 Mo** |
 
-L’ensemble des images référencées représente 780 fichiers, soit 69,373 Mo. L’application ouvre le garage dès que l’essentiel est prêt, après 8 secondes au maximum, ou dès que le joueur utilise « Passer ». Les chargements en attente cèdent la priorité au booster tiré, au duel constitué et aux éditions de la fiche demandée. Le chargement de fond suspend ses demandes lorsque l’onglet est masqué et écarte le catalogue si le navigateur signale un mode économie de données. Sur GitHub Pages, le service worker gère séparément son cache hors ligne.
+La sauvegarde type ne contient pas la Skyline de Brian. Si son édition affichée comporte les calques de drift, ceux-ci ajoutent deux fichiers pour 0,150 Mo, en plus de son illustration et de son sprite.
+
+Le logo s’affiche dès le premier rendu. La progression apparaît si l’essentiel est encore en cours après 150 ms. L’ensemble des images référencées représente 780 fichiers, soit 69,373 Mo. L’application ouvre le garage dès que l’essentiel est prêt, après 8 secondes au maximum, ou dès que le joueur utilise « Passer ». Les chargements en attente cèdent la priorité au booster tiré, au duel constitué et aux éditions de la fiche demandée. Aucune nouvelle demande de fond ne démarre lorsque l’onglet est masqué ou qu’une action attend ses images. Les téléchargements déjà lancés se terminent pour éviter de les recommencer. Le catalogue est écarté si le navigateur signale un mode économie de données. Sur GitHub Pages, le service worker gère séparément son cache hors ligne.
