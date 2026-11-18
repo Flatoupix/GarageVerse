@@ -1,5 +1,7 @@
 # Passation GarageVerse (16 novembre 2026)
 
+> **Mise à jour : voir [`passation-2026-11-18.md`](passation-2026-11-18.md)** pour l'état au 18 novembre 2026 (version 0.14.0, i18n, itch.io, orchestrateur à tronc d'intégration, échanges). Le reste de cette note date du 16 novembre.
+
 Note de reprise pour une nouvelle session. À lire avec `docs/meta.md` (règles du jeu, thèmes, aide, économie) et `orchestrator/README.md`.
 
 ## Où en est le projet
