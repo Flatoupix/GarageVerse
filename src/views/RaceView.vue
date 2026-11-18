@@ -560,7 +560,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <SectorRun v-if="pendingManual || shown?.timing || shown?.direction" :round="shown" :step="step"
           :live="pendingManual ? duel.conditions[index] : undefined" :running="Boolean(shown && !settled)"
           :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown?.condition ?? duel.conditions[index])"
-          :feedback="liveFeedback" :tappable="Boolean(timingWindows.length)" @tap="gauge?.shift()" @skip="skipRun">
+          :feedback="liveFeedback" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
           <template #overlay>
             <span v-if="shown?.shifts && liveFeedback && (step <= 1 || reducedMotion)" class="final-gear">
               {{ t('Rapport {n}/{total}', { n: shown.shifts.length + 1, total: shown.shifts.length + 1 }) }}

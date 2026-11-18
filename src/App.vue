@@ -57,12 +57,23 @@ onUnmounted(() => {
 })
 const screen = ref<Screen>(initialScreen())
 const settings = ref<HTMLDialogElement>()
-const timingDemo = ref<HTMLDialogElement>()
-const timingDemoOpen = ref(false)
+const activeDemo = ref<'timing' | 'turn' | null>(null)
+const demoImagesReady = ref(false)
+let demoImageLoad: Promise<void> | undefined
 const demoWindows = Array.from({ length: shiftsPerSector.ligne }, (_, shift) =>
   timingWindow('ligne', 'demo', 0, 6, 1, 0, 0, shift))
 const demoArts = { player: edition('r4l').art, rival: edition('deuch').art }
 const demoSprites = { player: carSprite('r4l'), rival: carSprite('deuch') }
+const demoBackdrop = trackBackdrop('sec')
+function preloadDemoImages() {
+  const urls = [demoBackdrop, demoSprites.player ?? demoArts.player, demoSprites.rival ?? demoArts.rival]
+  demoImageLoad ??= Promise.allSettled(urls.flatMap(url => {
+    if (!url) return []
+    const image = new Image()
+    image.src = url
+    return [image.decode()]
+  })).then(() => { demoImagesReady.value = true })
+}
 const demoGauge = ref<InstanceType<typeof TimingGauge>>()
 const demoFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
 function demoJudgment(result: TimingResult) {
@@ -70,20 +81,12 @@ function demoJudgment(result: TimingResult) {
     tag: timingFeedback(result.zone), good: result.modifier >= 0, count: (demoFeedback.value?.count ?? 0) + 1,
   }
 }
-function showTimingDemo() {
+function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
   demoFeedback.value = null
-  timingDemo.value?.showModal()
-  timingDemoOpen.value = true
+  activeDemo.value = activeDemo.value === demo ? null : demo
 }
-const turnDemo = ref<HTMLDialogElement>()
-const turnDemoOpen = ref(false)
 const demoTurns = turnSequence('demo', 0, 'demo', { perfect: 100, good: 230, acceptance: 410 })
 const turnAttempt = ref(0)
-function showTurnDemo() {
-  turnDemo.value?.showModal()
-  turnAttempt.value++
-  turnDemoOpen.value = true
-}
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
 function transferFeedback(text: string, error = false) {
@@ -150,6 +153,8 @@ function showSettings(tab: SettingsTab = 'parameters') {
   if (!settings.value?.open) settings.value?.showModal()
 }
 function selectSettingsTab(tab: SettingsTab) {
+  if (tab === 'parameters') preloadDemoImages()
+  else activeDemo.value = null
   settingsTab.value = tab
   document.getElementById('settings-content')?.scrollTo(0, 0)
 }
@@ -433,7 +438,7 @@ function toggleSetting(key: Setting) {
     </div>
     </Teleport>
 
-    <dialog ref="settings" class="modal settings-modal" :aria-label="t('Réglages')">
+    <dialog ref="settings" class="modal settings-modal" :aria-label="t('Réglages')" @close="activeDemo = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer les réglages')">×</button></form>
       <h2>{{ t('Réglages') }}</h2>
       <div class="settings-tabs" role="tablist" :aria-label="t('Réglages')">
@@ -451,8 +456,18 @@ function toggleSetting(key: Setting) {
           <label class="setting"><span>{{ t('Mode timing (expérimental)') }}</span><input type="checkbox" :checked="save.preferences.timingMode" @change="toggleSetting('timingMode')" /></label>
           <label class="setting"><span>{{ t('Direction dans les virages (expérimental)') }}</span><input type="checkbox"
             :checked="save.preferences.timingMode && save.preferences.turnMode" :disabled="!save.preferences.timingMode" @change="toggleSetting('turnMode')" /></label>
-          <button type="button" class="button ghost wide" @click="showTurnDemo">{{ t('Démo des virages') }}</button>
-          <button type="button" class="button ghost wide" @click="showTimingDemo">{{ t('Démo du passage de vitesses') }}</button>
+          <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'timing'" :disabled="!demoImagesReady"
+            @click="toggleDemo('timing')">{{ t('Démo du passage de vitesses') }}</button>
+          <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'turn'"
+            @click="toggleDemo('turn')">{{ t('Démo des virages') }}</button>
+          <SectorRun v-if="activeDemo === 'timing'" live="sec" :step="0" :running="false" :arts="demoArts"
+            :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
+            <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
+          </SectorRun>
+          <template v-else-if="activeDemo === 'turn'">
+            <TurnControl :key="turnAttempt" :sequence="demoTurns" demo />
+            <button type="button" class="button quiet wide turn-replay" @click="turnAttempt++">{{ t('Rejouer la séquence') }}</button>
+          </template>
           <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">{{ t('Revoir le tutoriel') }}</button>
           <section class="save-transfer" :aria-label="t('Sauvegarde')">
             <p v-if="offlineReady"><span v-help="'offline'">{{ t('Disponible hors ligne') }}</span></p>
@@ -509,22 +524,6 @@ function toggleSetting(key: Setting) {
       </div>
     </dialog>
 
-    <dialog ref="timingDemo" class="modal timing-modal" :aria-label="t('Démo du passage de vitesses')" @close="timingDemoOpen = false">
-      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
-      <h2>{{ t('Démo du passage de vitesses') }}</h2>
-      <SectorRun v-if="timingDemoOpen" live="sec" :step="0" :running="false" :arts="demoArts"
-        :sprites="demoSprites" :backdrop="trackBackdrop('sec')" :feedback="demoFeedback" tappable @tap="demoGauge?.shift()">
-        <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
-      </SectorRun>
-    </dialog>
-
-    <dialog ref="turnDemo" class="modal timing-modal" :aria-label="t('Démo des virages')" @close="turnDemoOpen = false">
-      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
-      <h2>{{ t('Démo des virages') }}</h2>
-      <TurnControl v-if="turnDemoOpen" :key="turnAttempt" :sequence="demoTurns" demo />
-      <button type="button" class="button quiet wide turn-replay" @click="turnAttempt++">{{ t('Rejouer la séquence') }}</button>
-    </dialog>
-
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
@@ -535,6 +534,5 @@ function toggleSetting(key: Setting) {
 </template>
 
 <style scoped>
-.timing-modal h2 { padding-inline-end: 36px; overflow-wrap: anywhere; }
 .turn-replay { margin-top: 8px; }
 </style>

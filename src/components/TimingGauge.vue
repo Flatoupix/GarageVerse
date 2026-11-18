@@ -85,7 +85,11 @@ function retry() {
   syncClock()
   shiftButton.value?.focus({ preventScroll: true })
 }
-defineExpose({ shift })
+function tapScene(event: MouseEvent) {
+  shiftButton.value?.focus({ preventScroll: true })
+  shift(event)
+}
+defineExpose({ tapScene })
 onMounted(() => {
   document.addEventListener('visibilitychange', syncClock)
   shiftButton.value?.focus({ preventScroll: true })
