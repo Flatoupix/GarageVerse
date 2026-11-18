@@ -881,7 +881,7 @@ main.race { animation-name: race-view-in; }
 .booster-play {
   width: 100%; min-height: 0; flex: 1;
   display: grid; grid-template-rows: auto minmax(0, 1fr);
-  padding-bottom: 12px; animation: none;
+  padding-bottom: 12px; animation-name: race-view-in;
 }
 .booster-stage {
   display: grid; grid-template-rows: minmax(0, 1fr) 4.75rem auto;
@@ -891,10 +891,13 @@ main.race { animation-name: race-view-in; }
 .booster-art {
   min-width: 0; overflow: hidden auto; overscroll-behavior: contain; container-type: size;
 }
-.booster-art :is(.sealed-stage, .stack-stage) {
+.booster-art .stack-stage {
   min-height: 100%; align-content: center; padding: 12px;
 }
-.booster-art .tear-pack { width: clamp(116px, min(55vw, 32svh, 60cqh), 252px); }
+/* Le guide défile sous le sachet. Le sachet s'ajuste à la hauteur utile de son cadre. */
+.booster-sealed-art { display: grid; grid-template-rows: minmax(164px, 1fr) auto; }
+.booster-sealed-art .sealed-stage { container-type: size; align-content: center; padding: 12px; }
+.booster-sealed-art .tear-pack { width: min(55vw, 32svh, 252px, calc((100cqh - 10px) * .69)); }
 .booster-art .card-stack { width: clamp(120px, min(74vw, 40svh, 58cqh), 290px); }
 .booster-recap .booster-art { padding-inline: 4px; }
 .booster-messages {

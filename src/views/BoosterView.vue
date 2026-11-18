@@ -184,7 +184,7 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
       <h1 tabindex="-1">{{ recap ? t('Tes cinq cartes') : t(booster.name) }}</h1>
     </div>
     <div v-if="!opening || tearing" class="booster-stage">
-      <div class="booster-art">
+      <div class="booster-art booster-sealed-art">
         <div class="sealed-stage" :class="`stage-${booster.id}`">
           <div class="pack-spotlight"></div>
           <TearPack :key="booster.id" :booster="booster.id" :legend="legendary" :torn="tearing" :reduced="reduced" @tear="openPack" />

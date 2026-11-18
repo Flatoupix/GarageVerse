@@ -88,7 +88,7 @@ Pendant l’ouverture, deux rangées d’actions sont réservées en bas de la s
 au-dessus des onglets et de la zone sûre. Les messages disposent d’une hauteur
 fixe au-dessus et défilent si besoin. Les choix d’édition prennent la place du
 bouton principal. Le récapitulatif utilise la même zone d’actions et sa grille
-de cartes défile au-dessus.
+de cartes défile au-dessus. Le guide du mécano défile sous le sachet.
 
 ## 7. Direction artistique et thèmes d’interface
 

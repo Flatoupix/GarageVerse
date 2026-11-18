@@ -59,7 +59,8 @@ function refresh() {
       if (!row) break
       anchor = parent
     }
-    if (anchor.matches('.hero')) anchor.after(host.value)
+    // Le sachet reste visible en tête de sa zone défilante sur les écrans courts.
+    if (anchor.matches('.hero, .sealed-stage')) anchor.after(host.value)
     else anchor.before(host.value)
   }
 }
