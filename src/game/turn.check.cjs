@@ -6,39 +6,63 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
 
-const { classifyTurn, expectedTurn, resolveTurn } = require('./turn.ts')
-const { rivals } = require('./data.ts')
+const { advanceTurns, judgeTurn, summarizeTurns, turnModifiers, turnSequence } = require('./turn.ts')
 const { playTimingRound, playTurnRound } = require('./timing.ts')
 const { seededRng } = require('./rules.ts')
 const { newSave, readSave, startNight } = require('./save.ts')
 
-const window = { start: 1250, end: 1750 }
-for (const [side, other] of [['gauche', 'droite'], ['droite', 'gauche']]) {
-  assert.deepEqual([1249, 1250, 1251, 1749, 1750, 1751].map(time => classifyTurn(side, side, time, window)),
-    ['tot', 'bien', 'bien', 'bien', 'bien', 'tard'])
-  assert.equal(classifyTurn(side, other, 1249, window), 'mauvais')
-  assert.equal(classifyTurn(side, other, 1750, window), 'mauvais')
-  assert.equal(classifyTurn(side, null, 1750, window), null)
-  assert.equal(classifyTurn(side, null, 1751, window), 'tard')
-  const first = resolveTurn(null, side, side, 1250, window)
-  assert.deepEqual(first, { outcome: 'bien', modifier: 1 })
-  assert.equal(resolveTurn(first, side, other, 1751, window), first)
-  assert.equal(resolveTurn(null, side, side, 1249, window).modifier, 0)
-  assert.equal(resolveTurn(null, side, other, 1250, window).modifier, -1)
-  assert.equal(resolveTurn(null, side, null, 1751, window).modifier, -1)
-  assert.equal(resolveTurn(null, side, side, 1250, window, { bien: 3, tot: 0, mauvais: -2, tard: -2 }).modifier, 3)
+const sequence = turnSequence('demo', 0, 'demo')
+assert.deepEqual(sequence, turnSequence('demo', 0, 'demo'))
+assert.deepEqual(sequence.notes.map(note => note.direction), ['gauche', 'droite', 'gauche'])
+const { settings } = sequence
+for (const [circuit, index, rival] of [['autre', 0, 'demo'], ['demo', 1, 'demo'], ['demo', 0, 'autre']]) {
+  const changed = turnSequence(circuit, index, rival)
+  assert.notDeepEqual(changed.notes, sequence.notes)
+  assert.notDeepEqual(changed.notes.map(note => note.at), sequence.notes.map(note => note.at))
 }
+const harder = turnSequence('demo', 0, 'autre').settings
+assert.notEqual(harder.lead, settings.lead)
+assert.notEqual(harder.good, settings.good)
 
-const directions = new Set()
-for (const { circuit } of rivals) {
-  circuit.sectors.forEach((sector, index) => {
-    if (sector !== 'virage') return
-    const direction = expectedTurn(circuit.name, index)
-    assert.equal(direction, expectedTurn(circuit.name, index))
-    directions.add(direction)
-  })
+const extended = turnSequence('demo', 0, 'demo', { count: 8, spacing: 10, acceptance: 500 })
+assert.equal(extended.notes.length, 8)
+assert.ok(extended.notes.every((note, index, notes) => index === 0
+  || note.at - notes[index - 1].at > 2 * extended.settings.acceptance))
+assert.ok(sequence.notes[0].at <= settings.lead)
+
+const { perfect, good, acceptance } = settings
+for (const [side, other] of [['gauche', 'droite'], ['droite', 'gauche']]) {
+  const note = { direction: side, at: 2500 }
+  const judge = (offset, input = side) => judgeTurn(note, input, note.at + offset, settings)
+  assert.deepEqual(
+    [-acceptance - 1, -acceptance, -good - 1, -good, -perfect - 1, -perfect, 0,
+      perfect, perfect + 1, good, good + 1, acceptance, acceptance + 1].map(offset => judge(offset)?.outcome),
+    [undefined, 'tot', 'tot', 'bien', 'bien', 'parfait', 'parfait',
+      'parfait', 'bien', 'bien', 'tard', 'tard', 'rate'],
+  )
+  assert.equal(judge(-acceptance, other).outcome, 'mauvais')
+  assert.equal(judge(acceptance, other).outcome, 'mauvais')
+  assert.equal(judge(acceptance, null), null)
+  assert.equal(judge(acceptance + 1, null).outcome, 'rate')
+  const custom = { ...settings, modifiers: { ...turnModifiers, parfait: 5 }, max: 4 }
+  const tuned = judgeTurn(note, side, note.at, custom)
+  assert.equal(tuned.modifier, 5)
+  assert.equal(summarizeTurns([tuned], custom).modifier, 4)
 }
-assert.deepEqual(directions, new Set(['gauche', 'droite']))
+const firstNote = sequence.notes[0]
+const first = advanceTurns(sequence, [], firstNote.direction, firstNote.at)
+assert.deepEqual(summarizeTurns(first, settings), { parfait: 1, bien: 0, rate: 0, modifier: 2 })
+assert.equal(advanceTurns(sequence, first, sequence.notes[1].direction, firstNote.at + 1), first)
+const second = advanceTurns(sequence, first, sequence.notes[1].direction, sequence.notes[1].at)
+assert.equal(second.length, 2)
+assert.equal(first.length, 1)
+const skipped = advanceTurns(sequence, [], sequence.notes[1].direction, sequence.notes[1].at)
+assert.deepEqual(skipped.map(judgment => judgment.outcome), ['rate', 'parfait'])
+
+const allPerfect = extended.notes.map(note => judgeTurn(note, note.direction, note.at, extended.settings))
+const allMissed = extended.notes.map(note => judgeTurn(note, null, note.at + extended.settings.acceptance + 1, extended.settings))
+assert.deepEqual(summarizeTurns(allPerfect, extended.settings), { parfait: 8, bien: 0, rate: 0, modifier: 2 })
+assert.deepEqual(summarizeTurns(allMissed, extended.settings), { parfait: 0, bien: 0, rate: 8, modifier: -2 })
 
 const save = newSave('t027')
 assert.equal(save.preferences.turnMode, false)
@@ -54,12 +78,20 @@ assert.ok(index >= 0)
 const choice = { car: 0, nitro: false, stance: 'normal' }
 for (let i = 0; i < index; i++) playTimingRound(duel, choice, { zone: 'green', modifier: 0 }, seededRng(String(i)))
 const comparison = readSave(JSON.stringify(save)).duel
+assert.equal(comparison.rounds.length, index)
+assert.equal(comparison.timingChoice, undefined)
 const reference = playTimingRound(comparison, choice, { zone: 'green', modifier: 0 }, seededRng('secteur'))
-const round = playTurnRound(duel, choice, { outcome: 'bien', modifier: 1 }, seededRng('secteur'))
+const judgments = sequence.notes.map((note, i) => judgeTurn(note, i === 2 ? null : note.direction,
+  note.at + [0, good, acceptance + 1][i], settings))
+const direction = summarizeTurns(judgments, settings)
+assert.deepEqual(direction, { parfait: 1, bien: 1, rate: 1, modifier: 2 })
+const round = playTurnRound(duel, choice, direction, seededRng('secteur'))
 assert.deepEqual(round.rival, reference.rival)
-assert.equal(round.player.score, reference.player.score + 1)
+assert.equal(round.player.score, reference.player.score + direction.modifier)
 assert.equal(round.player.score, round.player.lines.reduce((sum, line) => sum + line.value, 0))
-assert.deepEqual(round.player.lines.at(-1), { label: 'Direction', value: 1 })
+assert.deepEqual(round.player.lines.at(-1), { label: 'Direction', value: direction.modifier })
 assert.equal(duel.rounds.length, index + 1)
+assert.deepEqual(readSave(JSON.stringify(save)).duel.rounds.at(-1).direction, round.direction)
+round.direction = { outcome: 'bien', modifier: 1 }
 assert.deepEqual(readSave(JSON.stringify(save)).duel.rounds.at(-1).direction, round.direction)
 console.log('Virages : vérifications OK')

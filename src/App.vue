@@ -18,7 +18,7 @@ import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
 import TimingGauge from './components/TimingGauge.vue'
 import TurnControl from './components/TurnControl.vue'
-import type { TurnDirection } from './game/turn'
+import { turnSequence } from './game/turn'
 import { timingWindow } from './game/timing'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
@@ -63,15 +63,11 @@ function showTimingDemo() {
 }
 const turnDemo = ref<HTMLDialogElement>()
 const turnDemoOpen = ref(false)
-const demoDirection = ref<TurnDirection>('gauche')
+const demoTurns = turnSequence('demo', 0, 'demo', { lead: 2500, perfect: 100, good: 230, acceptance: 410 })
 const turnAttempt = ref(0)
-function playDemoTurn(direction: TurnDirection) {
-  demoDirection.value = direction
-  turnAttempt.value++
-}
 function showTurnDemo() {
   turnDemo.value?.showModal()
-  playDemoTurn('gauche')
+  turnAttempt.value++
   turnDemoOpen.value = true
 }
 const saveFile = ref<HTMLInputElement>()
@@ -508,11 +504,8 @@ function toggleSetting(key: Setting) {
     <dialog ref="turnDemo" class="modal timing-modal" :aria-label="t('Démo des virages')" @close="turnDemoOpen = false">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <h2>{{ t('Démo des virages') }}</h2>
-      <TurnControl v-if="turnDemoOpen" :key="turnAttempt" :direction="demoDirection" demo />
-      <div class="turn-demo-actions">
-        <button type="button" class="button quiet" @click="playDemoTurn('gauche')">{{ t('Jouer le virage à gauche') }}</button>
-        <button type="button" class="button quiet" @click="playDemoTurn('droite')">{{ t('Jouer le virage à droite') }}</button>
-      </div>
+      <TurnControl v-if="turnDemoOpen" :key="turnAttempt" :sequence="demoTurns" demo />
+      <button type="button" class="button quiet wide turn-replay" @click="turnAttempt++">{{ t('Rejouer la séquence') }}</button>
     </dialog>
 
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="inspected = null">
@@ -526,6 +519,5 @@ function toggleSetting(key: Setting) {
 
 <style scoped>
 .timing-modal h2 { padding-inline-end: 36px; overflow-wrap: anywhere; }
-.turn-demo-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
-.turn-demo-actions .button { min-width: 0; padding-inline: 6px; white-space: normal; }
+.turn-replay { margin-top: 8px; }
 </style>

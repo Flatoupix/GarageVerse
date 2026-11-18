@@ -345,25 +345,33 @@ si les deux modes doivent coexister.
 
 Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** puis **Direction dans les
 virages (expérimental)**. Ce deuxième réglage est désactivé par défaut. **Démo des virages**
-permet de jouer et de rejouer les deux sens sans lancer de course.
+permet de jouer et de rejouer une séquence qui alterne gauche et droite.
 
-En solo, engage ta voiture avec la consigne et la nitro choisies. Dans chaque secteur de type
-virage, le sens est fixé par l’identifiant du circuit et l’index du secteur. Lis la flèche
-pendant l’annonce, puis suis le repère pendant l’approche. Appuie sur la commande gauche ou
-droite, à l’écran ou au clavier, quand le repère atteint **Maintenant**. Les deux bornes de la
-fenêtre comptent. Le mouvement réduit affiche le repère par étapes et laisse plus de temps.
-Le chrono se suspend si tu changes d’onglet et la consigne revient avant la reprise. Si tu
-recharges avant la résolution, tu reviens à la sélection du secteur.
+En solo, un secteur de type virage propose trois notes par défaut. Le circuit, l’index du secteur
+et l’identifiant du rival fixent les sens et les instants par un hachage stable. Les notes
+descendent sur deux pistes. Appuie sur la piste ou le bouton correspondant, ou utilise ← et →,
+quand la flèche atteint la cible **Maintenant**. Les commandes ignorent les répétitions de touche.
+Le mouvement réduit fait avancer les notes par paliers. Le chrono se suspend si tu changes
+d’onglet. Si tu recharges avant la résolution, tu reviens à la sélection du même secteur.
 
 | Geste | Résultat | Direction |
 | --- | --- | ---: |
-| Bon côté dans la fenêtre | Bien placé | +1 |
-| Bon côté avant la fenêtre | Trop tôt | 0 |
-| Mauvais côté pendant la phase jouable | Mauvais côté | −1 |
-| Fenêtre expirée | Trop tard | −1 |
+| Bon côté, jusqu’au seuil Parfait inclus | Parfait | +2 |
+| Bon côté, entre le seuil Parfait exclu et le seuil Bien inclus | Bien | +1 |
+| Bon côté, avant la fenêtre Bien et dans la fenêtre d’appui | Trop tôt | 0 |
+| Bon côté, après la fenêtre Bien et dans la fenêtre d’appui | Trop tard | −1 |
+| Mauvais côté dans la fenêtre d’appui | Mauvais côté | −1 |
+| Fenêtre d’appui expirée sans appui accepté | Raté | −1 |
 
-Le résultat affiche **score de base + direction = score du secteur**. La ligne **Direction**
-remplace les variations aléatoires du joueur. Le score de base garde les limites habituelles,
-dont le plafond de 12 pour les statistiques préparées. Le rival garde sa résolution habituelle.
+Le profil du rival règle l’avance d’affichage (de 2,2 à 2,8 s) et donc la vitesse de défilement,
+ainsi que les fenêtres symétriques autour de l’instant cible. Par défaut, le seuil Parfait va de
+65 à 100 ms, le seuil Bien de 155 à 230 ms et la limite d’appui de 330 à 410 ms, de chaque côté
+de la cible. Les paramètres du module permettent d’ajuster ces seuils, l’avance, le nombre de
+notes, leur espacement, le barème et les bornes du total. Les fenêtres d’appui sont disjointes.
+La statistique MAN et les pièces agissent sur le score de base selon les règles habituelles.
+
+La ligne **Direction** indique le nombre de Parfaits, de Bien et de Ratés. La somme des
+modificateurs reste comprise entre **−2 et +2** par secteur. Le résultat affiche
+**score de base + direction = score du secteur**. Le rival garde sa résolution habituelle.
 Le départ, la ligne droite et l’endurance gardent le passage de vitesses, comme les virages
 quand l’option de direction est inactive.

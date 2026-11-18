@@ -23,8 +23,8 @@ import CarCard from '../components/CarCard.vue'
 import SectorRun from '../components/SectorRun.vue'
 import TimingGauge from '../components/TimingGauge.vue'
 import TurnControl from '../components/TurnControl.vue'
-import { expectedTurn, type TurnDirection, type TurnResult } from '../game/turn'
-import { turnFeedback } from '../game/turn-text'
+import { turnSequence, type TurnResult, type TurnSequence } from '../game/turn'
+import { turnFeedback, turnSummary } from '../game/turn-text'
 
 // Les mesures suivent aussi les changements de thème, de police et de zone sûre.
 const raceRoot = ref<HTMLElement | null>(null)
@@ -152,7 +152,7 @@ function start() {
 
 // ——— Course en cours ———
 const duel = computed(() => save.duel)
-const turnChoice = ref<{ duel: SoloDuel; index: number; choice: Choice; direction: TurnDirection } | null>(null)
+const turnChoice = ref<{ duel: SoloDuel; index: number; choice: Choice; sequence: TurnSequence } | null>(null)
 const pendingTurn = computed(() => {
   const pending = turnChoice.value, d = duel.value
   if (pending && pending.duel === d && pending.index === d.rounds.length && !d.winner) return pending
@@ -292,10 +292,13 @@ function engage() {
   if (!d || d.winner || d.timingChoice || pendingTurn.value || shown.value) return
   const choice = { car: picked.value, nitro: nitro.value, stance: stance.value }
   if (save.preferences.timingMode) {
-    const circuit = rival.value?.circuit
-    if (save.preferences.turnMode && circuit && d.sectors[index.value] === 'virage') {
-      // Le geste est transitoire : au rechargement, le secteur revient à la sélection.
-      turnChoice.value = { duel: d, index: index.value, choice, direction: expectedTurn(circuit.name, index.value) }
+    const opponent = rival.value
+    if (save.preferences.turnMode && opponent && d.sectors[index.value] === 'virage') {
+      // La séquence reste transitoire pour revenir à la sélection au rechargement.
+      turnChoice.value = {
+        duel: d, index: index.value, choice,
+        sequence: turnSequence(opponent.circuit.name, index.value, opponent.id),
+      }
     } else {
       d.timingChoice = choice
       persist()
@@ -483,8 +486,15 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           base: shown.player.score - shown.timing.modifier, zone: timingFeedback(shown.timing.zone),
           modifier: signedTiming(shown.timing.modifier), total: shown.player.score,
         }) }}</p>
-        <p v-if="shown.direction" role="status">{{ t('Score de base {base} · Direction {outcome} ({modifier}) = {total}', {
-          base: shown.player.score - shown.direction.modifier, outcome: turnFeedback(shown.direction.outcome),
+        <template v-if="shown.direction && 'parfait' in shown.direction">
+          <p>{{ t('Direction · {summary}', { summary: turnSummary(shown.direction) }) }}</p>
+          <p role="status">{{ t('Score de base {base} + Direction ({modifier}) = {total}', {
+            base: shown.player.score - shown.direction.modifier, modifier: signedTiming(shown.direction.modifier),
+            total: shown.player.score,
+          }) }}</p>
+        </template>
+        <p v-else-if="shown.direction" role="status">{{ t('Score de base {base} · Direction {outcome} ({modifier}) = {total}', {
+          base: shown.player.score - shown.direction.modifier, outcome: shown.direction.outcome === 'bien' ? t('Bien placé') : turnFeedback(shown.direction.outcome),
           modifier: signedTiming(shown.direction.modifier), total: shown.player.score,
         }) }}</p>
         <SectorRun :round="shown" :step="step" :running="!settled" :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
@@ -508,7 +518,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 
       <section v-else-if="pendingTurn || timingWindow" class="engage">
         <h2 class="engage-brief">{{ t('Secteur {n}/{total}', { n: index + 1, total: duel.sectors.length }) }} · {{ t(sectorLabels[duel.sectors[index]]) }}</h2>
-        <TurnControl v-if="pendingTurn" :key="`turn-${index}`" :direction="pendingTurn.direction" @turn="steer" />
+        <TurnControl v-if="pendingTurn" :key="`turn-${index}`" :sequence="pendingTurn.sequence" @turn="steer" />
         <TimingGauge v-else-if="timingWindow" :key="index" :window="timingWindow" @shift="shift" />
         <button type="button" class="button quiet wide" @click="abandon">{{ t('Abandonner') }}</button>
       </section>

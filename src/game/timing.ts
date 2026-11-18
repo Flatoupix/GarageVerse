@@ -7,7 +7,9 @@ export const timingModifiers = { red: -2, orange: -1, green: 0, perfect: 1 }
 export type TimingZone = keyof typeof timingModifiers
 export interface TimingResult { zone: TimingZone; modifier: number }
 export interface TimingWindow { center: number; green: number; orange: number; duration: number }
-export interface TimingRound extends Round { timing?: TimingResult; direction?: TurnResult }
+// Les secteurs enregistrés avant la séquence de rythme conservent leur jugement unique.
+type LegacyTurnResult = { outcome: 'bien' | 'tot' | 'mauvais' | 'tard'; modifier: number }
+export interface TimingRound extends Round { timing?: TimingResult; direction?: TurnResult | LegacyTurnResult }
 export interface SoloDuel extends Duel {
   rounds: TimingRound[]
   timingChoice?: Choice
