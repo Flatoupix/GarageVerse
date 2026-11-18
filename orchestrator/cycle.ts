@@ -84,7 +84,8 @@ export function parsePatchPaths(output: string, allowed: string[]) {
     const match = entry.match(/^\d+\t\d+\t([^\n\r\t]+)$/)
     if (!match) throw new Error('Patch binaire, renommage ou chemin inattendu')
     const path = match[1]
-    if (!path.split('/').every(part => /^[a-zA-Z0-9][a-zA-Z0-9_.-]*$/.test(part)) ||
+    // Un dossier peut commencer par « _ » (supabase/functions/_shared), jamais par un point.
+    if (!path.split('/').every(part => /^[a-zA-Z0-9_][a-zA-Z0-9_.-]*$/.test(part)) ||
         !allowed.some(prefix => prefix.endsWith('/') ? path.startsWith(prefix) : path === prefix)) {
       throw new Error('Le patch sort du périmètre de la tâche')
     }

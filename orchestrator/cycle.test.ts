@@ -12,6 +12,7 @@ import { execute, redact } from './process.ts'
 
 test('un patch est limité aux chemins autorisés', () => {
   assert.deepEqual(parsePatchPaths('2\t1\tsrc/App.vue\0', ['src/']), ['src/App.vue'])
+  assert.deepEqual(parsePatchPaths('2\t1\tsupabase/functions/_shared/friends.ts\0', ['supabase/']), ['supabase/functions/_shared/friends.ts'])
   for (const path of ['../src/App.vue', 'src/../package.json', 'src/.secret', 'package.json']) {
     assert.throws(() => parsePatchPaths(`2\t1\t${path}\0`, ['src/']))
   }
