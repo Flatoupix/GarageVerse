@@ -9,6 +9,10 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 const isUuid = (value: unknown): value is string => typeof value === 'string' && uuid.test(value)
 const object = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === 'object' && !Array.isArray(value)
 const fields = (body: unknown) => object(body) ? body : {}
+const maxCars = 1_000
+const maxSnapshotBytes = 16 * 1024
+const maxCarsBytes = 1024 * 1024
+const encoder = new TextEncoder()
 const unavailable = () => fail('TRADE_UNAVAILABLE', 404)
 
 async function transaction<T>(sql: Sql, change: () => Promise<T>) {
@@ -24,10 +28,17 @@ async function transaction<T>(sql: Sql, change: () => Promise<T>) {
   }
 }
 
+function validSnapshots(cars: Record<string, unknown>) {
+  const snapshots = Object.values(cars)
+  return snapshots.length <= maxCars
+    && snapshots.every(snapshot => object(snapshot) && encoder.encode(JSON.stringify(snapshot)).length <= maxSnapshotBytes)
+    && encoder.encode(JSON.stringify(cars)).length <= maxCarsBytes
+}
+
 export async function setShowcase({ sql, player, body }: Context) {
   if (!player) return fail('UNAUTHORIZED', 401)
   const { cars } = fields(body)
-  if (!object(cars) || !validOffer({ cars: Object.keys(cars), credits: 0 }) || !Object.values(cars).every(object)) {
+  if (!object(cars) || !validOffer({ cars: Object.keys(cars), credits: 0 }) || !validSnapshots(cars)) {
     return fail('INVALID_SHOWCASE', 400)
   }
   return withPlayers(sql, player, player, async () => {
@@ -43,7 +54,7 @@ export async function setShowcase({ sql, player, body }: Context) {
 function readOffer(body: unknown) {
   const { give, want } = fields(body)
   if (!object(give) || !object(give.cars) || !validOffer({ cars: Object.keys(give.cars), credits: give.credits })
-    || !Object.values(give.cars).every(object) || !validOffer(want)) return
+    || !validSnapshots(give.cars) || !validOffer(want) || want.cars.length > maxCars) return
   if (!Object.keys(give.cars).length && !give.credits && !want.cars.length && !want.credits) return
   return { cars: give.cars, credits: Number(give.credits), want }
 }
@@ -52,10 +63,9 @@ async function createOffer(ctx: Context, proposer: string, recipient: string, of
   const { sql } = ctx
   if (!await areFriends(sql, proposer, recipient)) return fail('NOT_FRIENDS', 403)
   const now = ctx.now().toISOString()
-  const { rows: limits } = await sql(`select 1 from unnest(array[$1::uuid, $2::uuid]) as p(id)
-    where (select count(*) from gv_trades
-      where state = 'open' and expires_at > $4 and id is distinct from $3::uuid
-        and p.id in (proposer, recipient)) >= 10`, [proposer, recipient, previous, now])
+  const { rows: limits } = await sql(`select 1 from gv_trades
+    where proposer = $1 and state = 'open' and expires_at > $2
+    limit 1 offset 9`, [proposer, now])
   if (limits.length) return fail('OPEN_TRADE_LIMIT', 409)
   const { rows: requested } = await sql(`select car_id, snapshot from gv_showcase
     where player_id = $1 and car_id in (select jsonb_array_elements_text($2::jsonb))`, [recipient, JSON.stringify(offer.want.cars)])

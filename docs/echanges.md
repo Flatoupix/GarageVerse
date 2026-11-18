@@ -43,7 +43,7 @@ Le Versus V1 reste en pause : les échanges n'en dépendent ni pour le client, n
 - une voiture engagée dans une course en cours (ou, plus tard, une mise Versus) ;
 - un échange qui laisserait un garage sous **trois voitures** (règle de la vente) ;
 - des crédits au-delà du solde du joueur au moment de l'acceptation ;
-- plus de **10 offres ouvertes** en même temps par joueur.
+- plus de **10 offres ouvertes envoyées** en même temps par joueur.
 
 **Séries et collection.** Les récompenses de série déjà récupérées restent acquises. Une série complétée grâce à une carte reçue peut être récupérée normalement, une seule fois par joueur.
 
@@ -84,6 +84,8 @@ Fonctions : `request-friend`, `answer-friend`, `set-showcase`, `propose-trade`, 
 | `echange-interface` | Vitrine, composition d'offre, offres reçues, contre-offre, historique | `src/views/`, `src/components/` |
 
 **Étape 1 (Amis) implémentée dans le dépôt.** Le réglage expérimental, désactivé par défaut, ouvre la liste depuis le Garage. Les demandes croisées valent acceptation. Le déploiement sur Supabase hébergé reste à faire après relecture par le propriétaire et fusion dans `master`.
+
+**Étape 2 (Règles locales) implémentée dans le dépôt.** Les règles de validation, de transit, de livraison unique et de restitution sont décrites au § 7 et vérifiées par `src/game/trade.check.cjs`.
 
 **Étape 3 (Serveur) implémentée dans le dépôt.** Le serveur enregistre les offres, les contre-offres et les réclamations, puis prend une décision commune de livraison ou de retour. Les fonctions et la migration attendent le déploiement depuis `master` après relecture. Le client de l'étape 4 appliquera cette décision à la sauvegarde. Le serveur conserve les instantanés déclarés et le jeu contrôle les contraintes du garage local.
 

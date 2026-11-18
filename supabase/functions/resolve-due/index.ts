@@ -1,4 +1,5 @@
-// Appelée par un joueur de la salle, ou par la tâche planifiée.
+// Appelée par un joueur de la salle ou par la tâche planifiée (voir docs/supabase.md § 7).
+// Les appels planifiés utilisent le jeton dédié ou la clé service_role.
 import { handle } from '../_shared/http.ts'
 import { resolveTrades } from '../_shared/trades.ts'
 import { resolveDue } from '../_shared/versus.ts'

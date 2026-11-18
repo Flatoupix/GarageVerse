@@ -33,6 +33,13 @@ export async function run(db, { assert, user }) {
   await rejected(propose(a, b), 'CAR_NOT_IN_SHOWCASE')
   await rejected(propose(a, b, { ...offer, want: { cars: ['car', 'car'], credits: 0 } }), 'INVALID_OFFER')
   await success(setShowcase(context(b, { cars: { car: card } })))
+  const oversized = { label: 'é'.repeat(8_192) }
+  await rejected(setShowcase(context(b, { cars: { car: oversized } })), 'INVALID_SHOWCASE')
+  const tooMany = Object.fromEntries(Array.from({ length: 1_001 }, (_, i) => [`car-${i}`, {}]))
+  await rejected(setShowcase(context(b, { cars: tooMany })), 'INVALID_SHOWCASE')
+  const oversizedShowcase = Object.fromEntries(Array.from({ length: 70 }, (_, i) => [`car-${i}`, { label: 'x'.repeat(16_000) }]))
+  await rejected(setShowcase(context(b, { cars: oversizedShowcase })), 'INVALID_SHOWCASE')
+  await rejected(propose(a, b, { ...offer, give: { cars: { car: oversized }, credits: 0 } }), 'INVALID_OFFER')
   const first = await success(propose(a, b))
   assert.equal(+((await state(first.id)).expires_at), time + day)
   await rejected(answer(c, first.id, 'accept'), 'TRADE_UNAVAILABLE')
@@ -54,6 +61,8 @@ export async function run(db, { assert, user }) {
   const open = []
   for (let i = 0; i < 10; i++) open.push(await success(propose(a, b)))
   await rejected(propose(a, b), 'OPEN_TRADE_LIMIT')
+  const outgoing = await success(propose(b, a, { ...offer, want: { cars: [], credits: 5 } }))
+  await success(answer(b, outgoing.id, 'cancel'))
   const [completed, returned, expired] = open
   // PGlite partage une session. Les appels se chevauchent avant le verrou, puis les transactions s'exécutent en série.
   let tail = Promise.resolve()
