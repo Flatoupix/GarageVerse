@@ -5,7 +5,7 @@ Note de reprise pour une nouvelle session. À lire avec `docs/meta.md` (règles 
 ## Où en est le projet
 
 - Dépôt public `Flatoupix/GarageVerse`, site https://flatoupix.github.io/GarageVerse/. **Deux branches depuis le 17 novembre 2026** :
-  - `master` : la seule branche publiée. Chaque push sur `master` déploie le site (GitHub Actions, environnement `github-pages` limité à `master`). `deploy.yml` cite encore `prototype/mobile-tcg`, branche supprimée : sans effet, à retirer lors d'une prochaine modification du fichier (le jeton de l'agent n'a pas le droit `workflow`).
+  - `master` : la seule branche publiée. Chaque push sur `master` déploie le site (GitHub Actions, environnement `github-pages` limité à `master`).
   - `dev` : le travail en cours, sauvegardé sur GitHub mais jamais déployé. Publier une version = fusionner `dev` dans `master` (avec sa note de version, voir `CHANGELOG.md`).
   - Les anciennes branches (`prototype/mobile-tcg`, `prototype/booster`, `ccr-f24d04f7-jr6tpb`, `docs/tickets-futures-20261117`) sont supprimées ; leur dernier état est gardé par les étiquettes `archive/*`. Sur un clone existant : `git fetch --prune` puis `git switch dev` (ou `master`).
 - Version 0.5.0 en ligne (commit `133501c` d’Antigravity, sans tag ni release GitHub ; la dernière release est v0.4.0). Projet personnel : pas de rappel sur les droits, pas de diffusion prévue.
