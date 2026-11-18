@@ -30,11 +30,25 @@ Le jeu actuel propose les secteurs `depart`, `virage`, `ligne` et `endurance`, l
 
 - **Départ / drag :** montée rapide de l'aiguille, sensation de départ arrêté ; calibrer la fenêtre autour du bon régime.
 - **Ligne droite / vitesse :** montée soutenue, passage précis à haut régime.
-- **Virage / maniabilité :** timing différent (par exemple fenêtre déplacée, accélération plus irrégulière), sans ajouter une nouvelle commande complexe.
+- **Virage / maniabilité :** conserver le timing de passage de vitesse, mais ajouter un **pilotage gauche/droite** pour négocier le sens du virage. La direction et le moment du braquage deviennent des gestes du joueur, distincts du régime moteur ; garder le dispositif simple et lisible sur téléphone.
 - **Endurance :** davantage de constance et de maîtrise ; tester une vitesse moins agressive mais une fenêtre moins généreuse, ou des passages successifs.
 - **Rivaux / boss :** difficulté progressivement plus exigeante (aiguille plus vive, fenêtre verte plus étroite ou déplacée), avec paramètres explicites et équilibrables. Les premiers adversaires servent d'apprentissage ; le dernier doit être exigeant mais lisible.
 
 Les comportements ci-dessus sont des **pistes de réglage à tester**, pas des chiffres figés. La météo/terrain et les consignes déjà présents doivent conserver un sens dans la course.
+
+## 3 bis. Pilotage gauche / droite dans les secteurs de virage
+
+Dans une épreuve de type `virage`, le joueur doit aussi **gérer la direction** et pas uniquement passer un rapport : les virages peuvent être **à gauche ou à droite**.
+
+- Montrer **le sens du prochain virage** suffisamment tôt (flèche, tracé ou courbe visible) et proposer deux grandes commandes tactiles **« Gauche »** et **« Droite »**, placées dans des zones adaptées au smartphone. Ne pas faire dépendre le résultat uniquement de la couleur de l'indicateur.
+- Le joueur choisit la **bonne direction au bon moment** pour prendre sa courbe. Un braquage correct et bien synchronisé récompense la maîtrise ; une mauvaise direction ou un braquage trop tôt/tard entraîne une perte de performance lisible. Le sens du virage ne doit pas être deviné.
+- Tester une V0 **séquentielle et accessible** : anticiper le sens du virage, valider le braquage, puis passer la vitesse au compte-tours ; comparer avec une variante plus dynamique si le prototype séquentiel manque de tension. Ne pas imposer deux gestes simultanés qui rendent le jeu injouable à une main.
+- Définir pour la direction une **fenêtre de braquage** (ou un indicateur de trajectoire) dont la précision dépend de la difficulté, de l'adversaire et de la statistique **MAN**. Une meilleure maniabilité et les pièces adaptées peuvent faciliter cette fenêtre, sans rendre le bon sens de direction automatique.
+- Combiner le résultat du braquage et celui du passage de rapport dans un **modificateur plafonné**, documenté et déterministe : éviter de doubler systématiquement les pénalités de timing. Afficher les deux contributions dans le bilan du secteur (« trajectoire » + « passage de vitesse »).
+- Pour les suites de virages, explorer plusieurs directions dans le même secteur seulement après validation de la V0 : **gauche → droite** ou **droite → gauche** peut créer de la variété, sans transformer cinq secteurs en une séquence trop longue.
+- Prévoir un affichage et un contrôle équivalents au clavier pour ordinateur, une marge tactile suffisante, une signalisation non limitée aux couleurs et un comportement adapté au mouvement réduit.
+
+**But du test :** vérifier que l'on ressent la conduite et la spécificité de la maniabilité, sans perdre l'accessibilité mobile-first ni les bénéfices de la collection et des améliorations automobiles.
 
 ## 4. Calcul du score : de l'aléatoire vers l'adresse
 
@@ -85,7 +99,7 @@ Ne pas attribuer arbitrairement cet effet à toutes les pièces. Proposer un mod
 Comparer sur les **mêmes voitures et mêmes adversaires** une version actuelle (hasard) et le prototype (timing).
 
 1. Vérifier le ressenti sur Android à **320 et 390 px**, puis sur ordinateur.
-2. Tester les secteurs départ/drag, virage, ligne droite et endurance avec les mêmes configurations.
+2. Tester les secteurs départ/drag, virage, ligne droite et endurance avec les mêmes configurations ; pour les virages, comparer **gauche/droite**, bonne/mauvaise direction, timing du braquage et enchaînement avec le changement de vitesse.
 3. Tester plusieurs difficultés et au moins un boss.
 4. Mesurer les taux de **rouge / orange / vert / parfait**, la courbe d'apprentissage, les ratés involontaires, la durée d'une course et la frustration éventuelle.
 5. Comparer voiture de base, voiture haut de gamme et voiture améliorée avec pièces : progression perceptible, mais pas de victoire automatique.
@@ -97,6 +111,9 @@ Comparer sur les **mêmes voitures et mêmes adversaires** une version actuelle 
 - [ ] Un écran/contrôle de changement de rapport à aiguille fonctionne au doigt sur mobile.
 - [ ] La fenêtre **rouge–orange–vert–orange–rouge** est lisible, et sa position peut varier d'une épreuve à l'autre.
 - [ ] Les vitesses et largeurs de zones diffèrent selon secteur, difficulté et boss.
+- [ ] Dans les épreuves **Virage**, les commandes **Gauche** et **Droite** permettent de choisir le bon sens et de gérer le braquage au bon moment ; leur résultat a un effet mesurable et compréhensible sur le score.
+- [ ] Les virages gauche et droite, avec des difficultés variables, restent jouables sur **320 et 390 px** ; le joueur peut enchaîner braquage et changement de rapport sans geste simultané imposé.
+- [ ] La statistique MAN et les pièces adaptées améliorent de façon bornée la tolérance du braquage ; une direction incorrecte reste pénalisée.
 - [ ] Un appui produit un résultat immédiat déterministe : rouge −2, orange −1, vert score de base, centre vert bonus configurable (barème initial).
 - [ ] Les statistiques de secteur, la météo, les pièces, les capacités, la consigne et la nitro continuent de déterminer le score de référence.
 - [ ] Les meilleures voitures et les améliorations rendent la fenêtre de réussite plus accessible, dans des limites documentées.
@@ -108,6 +125,7 @@ Comparer sur les **mêmes voitures et mêmes adversaires** une version actuelle 
 ## Décisions à prendre après playtest (non bloquantes pour la V0)
 
 - Un seul passage par secteur ou plusieurs changements de vitesses ?
+- Virage : braquage ponctuel avec deux boutons, appui maintenu, ou autre interaction tactile ? Faut-il des virages gauche/droite successifs dans un même secteur après validation de la V0 ?
 - Bonus du centre vert : +1, +2 ou proportionnel au score ?
 - Quelle part de la variation aléatoire conserver éventuellement (conditions météo, accidents), si l'on veut garder des imprévus sans pénaliser le bon timing ?
 - Quelles pièces et caractéristiques étendent la fenêtre de réussite, et jusqu'à quel plafond ?
