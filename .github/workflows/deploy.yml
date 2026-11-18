@@ -3,7 +3,7 @@ name: Déploiement mobile
 
 on:
   push:
-    branches: [master, prototype/mobile-tcg]
+    branches: [master]
   workflow_dispatch:
 
 permissions:
