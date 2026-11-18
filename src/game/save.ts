@@ -26,7 +26,9 @@ export type ThemeId = (typeof themeIds)[number]
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
 export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; friendsEnabled?: boolean; pilotMode?: PilotMode }
-export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
+const discoveries = ['nitro', 'heat', 'daily', 'perfect', 'series', 'stance', 'manuel', 'virages'] as const
+export type Discovery = typeof discoveries[number]
+export type ManualDiscovery = Extract<Discovery, 'manuel' | 'virages'>
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
 import type { VersusAccount } from './versus-wallet'
@@ -227,7 +229,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   if (tutorial) save.tutorial = {
     step: int(tutorial.step, 0, tutorialSteps - 1, 0),
     status: tutorial.status === 'done' || tutorial.status === 'skipped' ? tutorial.status : 'active',
-    seen: (['nitro', 'heat', 'daily', 'perfect', 'series', 'stance'] as const).filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
+    seen: discoveries.filter(key => Array.isArray(tutorial.seen) && tutorial.seen.includes(key)),
   }
   else if (Object.keys(save.record).length || save.duel?.rounds.length || save.daily.won || save.daily.lastWin) save.tutorial.status = 'done'
   save.preferences = {

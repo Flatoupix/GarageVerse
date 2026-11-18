@@ -1,4 +1,12 @@
 export const timing = {
+  '3': '3',
+  '2': '2',
+  '1': '1',
+  'Prêt ?': 'Ready?',
+  'Partez !': 'Go!',
+  'Espace': 'Space',
+  'Au clavier, utilise la barre d’espace.': 'On a keyboard, press Space.',
+  'Touche Passer la vitesse quand l’aiguille est dans le vert. Parfait au centre, raté dans le rouge. Plusieurs rapports par secteur.': 'Tap Shift gear when the needle is in the green. The centre is perfect and red is a miss. Shift several times per sector.',
   'Rapport {n}/{total}': 'Gear {n}/{total}',
   '{n} {judgment}': '{n} {judgment}',
   '{label} · {summary}': '{label} · {summary}',

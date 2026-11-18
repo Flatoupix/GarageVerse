@@ -1,11 +1,11 @@
 import { ref, watch } from 'vue'
 import { completedSeries, persist, save } from './store'
 import { t } from '../i18n'
-import { tutorialSteps, type Discovery } from './save'
+import { tutorialSteps, type Discovery, type ManualDiscovery } from './save'
 
 export const helpSettingTip = t('Tu peux activer « Aide en touchant les mots soulignés » dans les Réglages. Le lexique reste accessible dans les Réglages, onglet Aide.')
 
-export const discovery = ref<Discovery | null>(null)
+export const discovery = ref<Exclude<Discovery, ManualDiscovery> | null>(null)
 export function tutorialAction(from: number, to: number) {
   // La Nuit sans fin ne fait pas avancer le tutoriel de la première partie.
   if (save.night || save.tutorial.status !== 'active' || save.tutorial.step < from || save.tutorial.step >= to) return
@@ -17,7 +17,7 @@ export function nextTutorial() {
   else save.tutorial.step++
   persist()
 }
-export function discover(key: Discovery) {
+export function discover(key: NonNullable<typeof discovery.value>) {
   if (save.tutorial.status === 'active' || save.tutorial.seen.includes(key) || discovery.value) return
   discovery.value = key
 }

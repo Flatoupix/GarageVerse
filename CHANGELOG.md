@@ -4,6 +4,19 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.16.0] — 2026-11-18
+
+### Ajouté
+
+- **Décompte au départ.** En pilotage manuel, la course démarre sur « 3, 2, 1, Partez ! » : tu as le temps de te préparer avant que l’aiguille ne monte. Aux secteurs suivants, un « Prêt ? » plus court t’annonce le départ.
+- **Jouer au clavier.** Sur ordinateur, en pilotage manuel, la **barre d’espace** passe la vitesse et les **flèches gauche et droite** prennent les virages, sans avoir à cliquer.
+- **Premier geste guidé.** La première fois que tu passes les vitesses, puis la première fois que tu prends des virages en manuel, le mécano t’explique le geste avant de lancer le départ.
+- **Échanges depuis l’accueil.** Si tu as activé « Échanges entre amis (expérimental) », un bouton **Échanges** t’attend aussi sur l’accueil.
+
+### Modifié
+
+- **Virages repensés.** Les flèches des virages ont maintenant le même style que le compte-tours, avec deux grands boutons gauche et droite plus faciles à toucher.
+
 ## [0.15.0] — 2026-11-18
 
 ### Ajouté

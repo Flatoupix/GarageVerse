@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { classifyTiming, timingBounds, TIMING_RETURN_MS, type TimingResult, type TimingWindow } from '../game/timing'
 import { reducedMotion } from '../game/store'
+import { useManualKeys } from '../game/manual-keys'
 import { t } from '../i18n'
 import { timingFeedback } from '../game/timing-text'
 
-const props = defineProps<{ windows: TimingWindow[]; demo?: boolean }>()
+const props = defineProps<{ windows: TimingWindow[]; demo?: boolean; waiting?: boolean }>()
 const emit = defineEmits<{ judgment: [result: TimingResult]; finish: [results: TimingResult[]]; restart: [] }>()
 const REDUCED_STEP_MS = 65
 const shiftButton = ref<HTMLButtonElement>()
@@ -46,7 +47,7 @@ function judge(time: number, at: number) {
   if (complete.value) emit('finish', [...results.value])
 }
 function tick() {
-  if (document.hidden || complete.value) return
+  if (props.waiting || document.hidden || complete.value) return
   const time = readClock(performance.now())
   if (returning.value) {
     const progress = Math.min(1, (time - phaseStart) / TIMING_RETURN_MS)
@@ -64,19 +65,20 @@ function syncClock() {
   const now = performance.now()
   banked = readClock(now)
   since = undefined
-  if (document.hidden || complete.value) return
+  if (props.waiting || document.hidden || complete.value) return
   since = now
   tick()
 }
 function shift(event?: MouseEvent) {
   if (event && event.detail > 1) return
-  if (complete.value || returning.value || document.hidden) return
+  if (props.waiting || complete.value || returning.value || document.hidden) return
   const time = readClock(performance.now())
   judge(time, time - phaseStart >= activeWindow.value.duration ? 1 : rise(time))
 }
-function shiftKey(event: KeyboardEvent) {
-  if (!event.repeat) shift()
-}
+useManualKeys(() => !props.demo && !complete.value, key => {
+  if (key === ' ') shift()
+})
+watch(() => props.waiting, syncClock)
 function focusShift() {
   shiftButton.value?.focus({ preventScroll: true })
 }
@@ -90,13 +92,13 @@ async function retry() {
   focusShift()
 }
 function tapScene(event: MouseEvent) {
+  if (props.waiting) return
   focusShift()
   shift(event)
 }
 defineExpose({ focusShift, tapScene })
 onMounted(() => {
   document.addEventListener('visibilitychange', syncClock)
-  if (!props.demo) focusShift()
   syncClock()
 })
 onUnmounted(() => {
@@ -109,7 +111,7 @@ onUnmounted(() => {
   <div class="timing-gauge">
     <strong>{{ t('Rapport {n}/{total}', { n: results.length + 1, total: windows.length + 1 }) }}</strong>
     <div class="timing-scale" aria-hidden="true">
-      <div class="timing-band">
+      <div class="timing-band manual-track">
         <span v-for="(segment, index) in segments" :key="index" :class="segment.zone" :style="{ width: segment.width + '%' }"></span>
       </div>
       <span class="timing-needle" :style="{ left: position * 100 + '%' }"></span>
@@ -120,20 +122,21 @@ onUnmounted(() => {
       </li>
     </ul>
     <button v-if="demo && complete" type="button" class="button quiet wide" @click="retry">{{ t('Rejouer la séquence') }}</button>
-    <button v-else ref="shiftButton" type="button" class="button primary wide" :aria-disabled="returning"
-      @click="shift" @keydown.space.prevent="shiftKey" @keydown.enter.prevent="shiftKey">{{ t('Passer la vitesse') }}</button>
+    <button v-else ref="shiftButton" type="button" class="button primary wide" :disabled="waiting" :aria-disabled="returning || waiting"
+      @click="shift" @keydown.enter="$event.repeat && $event.preventDefault()">{{ t('Passer la vitesse') }}</button>
+    <small v-if="!demo" class="manual-key-hint">{{ t('Espace') }}</small>
   </div>
 </template>
 
 <style scoped>
 .timing-gauge { display: grid; gap: 4px; min-width: 0; padding: 6px 10px; }
 .timing-scale { position: relative; padding-block: 5px; margin-inline: 4px; }
-.timing-band { display: flex; height: 16px; overflow: hidden; border-radius: 4px; }
+.timing-band { display: flex; height: 16px; }
 .timing-band span + span { border-inline-start: 1px solid var(--panel); }
 .red { background: repeating-linear-gradient(135deg, var(--panel) 0 4px, var(--muted) 4px 7px); }
-.orange { background: repeating-linear-gradient(90deg, var(--line) 0 5px, var(--text) 5px 7px); }
+.orange { background: var(--manual-stripes); }
 .green { background: var(--accent); }
-.perfect { background: radial-gradient(var(--panel) 1px, var(--accent) 1.5px) 0 0 / 5px 5px; }
+.perfect { background: var(--manual-target); }
 .timing-needle { position: absolute; inset-block: 0; width: 4px; transform: translateX(-50%); border-radius: 3px; background: var(--text); box-shadow: 0 0 0 1px var(--panel); }
 .timing-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; list-style: none; margin: 0; padding: 0; }
 .timing-legend li { display: flex; gap: 5px; align-items: center; font-size: .78rem; }
