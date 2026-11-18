@@ -39,6 +39,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-014](014-catalogue-futures-voitures.md) | 50 candidats de la bible à réconcilier avec le roster | P2 |
 | [T-015](015-equilibrage-overdrive.md) | Playtest réel Overdrive | P2 |
 | [T-016](016-economie-booster-bricole-mecanique.md) | Ressenti Bricole/Mécanique (déjà rééquilibrés en v0.6) | P2 |
+| [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-019](019-nouveaux-rivaux-overdrive.md) | Personnages et rivaux Overdrive | P3 |
 | [T-020](020-series-speciales-extension.md) | Variantes futures de spéciales | P3 |
 | [T-021](021-demontage-voiture.md) | Démontage de véhicule, distinct du retrait des pièces | P3 |
