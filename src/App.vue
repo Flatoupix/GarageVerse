@@ -4,9 +4,9 @@ import { VERSUS_OPEN } from './game/features'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
-import demoPlayerSprite from './assets/pixel/anim/r4l-car.px.webp'
-import demoRivalSprite from './assets/pixel/anim/deuch-car.px.webp'
-import demoBackdrop from './assets/pixel/anim/track-sec-bg.px.webp'
+import demoPlayerSprite from './assets/pixel/anim/r4l-car.px.webp?inline'
+import demoRivalSprite from './assets/pixel/anim/deuch-car.px.webp?inline'
+import demoBackdrop from './assets/pixel/anim/track-sec-bg.px.webp?inline'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
@@ -469,7 +469,7 @@ function toggleSetting(key: Setting) {
           <button type="button" class="button ghost wide" :aria-expanded="activeDemo === 'turn'"
             @click="toggleDemo('turn')">{{ t('Démo des virages') }}</button>
           <div v-if="activeDemo === 'timing'" ref="timingDemo" class="settings-timing-demo">
-            <SectorRun live="sec" :step="0" :running="false" :arts="demoSprites"
+            <SectorRun live="sec" demo :step="0" :running="false" :arts="demoSprites"
               :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
               <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
             </SectorRun>

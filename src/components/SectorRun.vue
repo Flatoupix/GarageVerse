@@ -7,7 +7,7 @@ import { t } from '../i18n'
 
 // Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
-const props = defineProps<{ round?: Round | null; live?: Condition; feedback?: { tag: string; good: boolean; count: number } | null; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
+const props = defineProps<{ round?: Round | null; live?: Condition; demo?: boolean; feedback?: { tag: string; good: boolean; count: number } | null; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
 const emit = defineEmits<{ skip: []; tap: [event: MouseEvent] }>()
 const sides = ['player', 'rival'] as const
 
@@ -81,15 +81,18 @@ const lanes = computed(() => sides.map(who => {
   <div class="sector-run" :class="[`run-${live ?? round?.condition}`, {
     running: running || (live && !reducedMotion), 'run-live': live, 'run-still': (live || feedback) && (hidden || reducedMotion),
   }]" :aria-hidden="live || (feedback && (step === 1 || reducedMotion)) ? undefined : true" @click="touchScene">
-    <div v-if="backdrop" class="run-scenery" :style="{ backgroundImage: `url(${backdrop})` }"></div>
-    <div v-for="lane in lanes" :aria-hidden="live ? !lane.feedback : undefined" :key="lane.who" class="run-lane" :class="lane.who">
+    <div v-if="backdrop" class="run-scenery" :style="demo ? undefined : { backgroundImage: `url(${backdrop})` }" aria-hidden="true">
+      <img v-if="demo" :src="backdrop" alt="" draggable="false" />
+    </div>
+    <div v-for="lane in lanes" :key="lane.who" class="run-lane" :class="lane.who">
       <div class="run-mover" :class="{ far: lane.position > .5 }" :style="{ '--p': lane.position }">
-        <div :key="live && lane.feedback ? `live-${lane.feedback.count}` : `${step}${lane.kind}`" class="run-car" :class="[lane.kind, { sprite: lane.sprite, 'live-boost': live && lane.feedback?.good, 'live-brake': live && lane.feedback && !lane.feedback.good }]">
+        <div :key="live && lane.feedback ? `live-${lane.feedback.count}` : `${step}${lane.kind}`" class="run-car" aria-hidden="true"
+          :class="[lane.kind, { sprite: lane.sprite, 'live-boost': live && lane.feedback?.good, 'live-brake': live && lane.feedback && !lane.feedback.good }]">
           <i v-if="lane.nitro" class="run-flame"></i>
           <img v-if="lane.art" :src="lane.art" alt="" draggable="false"
             :class="{ 'live-boost': !live && lane.feedback?.good, 'live-brake': !live && lane.feedback && !lane.feedback.good }" />
         </div>
-        <span v-if="lane.tag" class="run-tag" :key="step" :class="[lane.kind, { 'run-score-tag': lane.feedback }]">{{ lane.tag }}</span>
+        <span v-if="lane.tag" class="run-tag" :key="step" aria-hidden="true" :class="[lane.kind, { 'run-score-tag': lane.feedback }]">{{ lane.tag }}</span>
         <span v-if="lane.feedback" class="run-tag" :key="`feedback-${lane.feedback.count}`" role="status"
           :class="{ 'run-feedback-tag': lane.tag }">{{ lane.feedback.tag }}</span>
       </div>
@@ -104,6 +107,7 @@ const lanes = computed(() => sides.map(who => {
 <style scoped>
 .run-live .run-finish { bottom: auto; height: 108px; }
 .run-live .run-mover { transition: none; }
+.run-scenery > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .run-controls { z-index: 1; min-width: 0; background: var(--panel); border-top: 1px solid var(--line); }
 .run-live:has(.turn-control) .run-scenery,
 .run-live:has(.turn-control) .run-controls { grid-area: 1 / 1; }
