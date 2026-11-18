@@ -876,10 +876,48 @@ main.race { animation-name: race-view-in; }
 .showroom-bar .showroom-count { margin: 0; }
 .showroom-cols button { min-width: 40px; }
 
-/* Récapitulatif d'un achat groupé : « Ouvrir le suivant » occupe sa propre ligne, au-dessus des deux autres boutons. */
-.recap-actions:has(.next-booster) { flex-wrap: wrap; }
-.recap-actions .next-booster.button { flex: 1 1 100%; white-space: normal; }
-.recap-actions:has(.next-booster) .button:not(.next-booster) { flex: 1 1 0; min-width: 0; }
+/* Ouverture : les messages et les cartes défilent dans leurs propres zones. */
+.app-shell:has(> .booster-play) { height: 100svh; display: flex; flex-direction: column; }
+.booster-play {
+  width: 100%; min-height: 0; flex: 1;
+  display: grid; grid-template-rows: auto minmax(0, 1fr);
+  padding-bottom: 12px; animation: none;
+}
+.booster-stage {
+  display: grid; grid-template-rows: minmax(0, 1fr) 4.75rem auto;
+  gap: 8px; min-width: 0; text-align: center;
+}
+.booster-recap { grid-template-rows: minmax(0, 1fr) auto; }
+.booster-art {
+  min-width: 0; overflow: hidden auto; overscroll-behavior: contain; container-type: size;
+}
+.booster-art :is(.sealed-stage, .stack-stage) {
+  min-height: 100%; align-content: center; padding: 12px;
+}
+.booster-art .tear-pack { width: clamp(116px, min(55vw, 32svh, 60cqh), 252px); }
+.booster-art .card-stack { width: clamp(120px, min(74vw, 40svh, 58cqh), 290px); }
+.booster-recap .booster-art { padding-inline: 4px; }
+.booster-messages {
+  min-width: 0; overflow: hidden auto; overscroll-behavior: contain;
+  color: var(--muted); font-size: .875rem; overflow-wrap: anywhere;
+}
+.booster-messages > p { margin: 4px auto; }
+.booster-messages .stack-indicators { margin: 4px 0; }
+
+/* Deux rangées réservées dès le sachet, au-dessus de la navigation. */
+.booster-stage .booster-actions {
+  display: grid; grid-template: repeat(2, 52px) / repeat(2, minmax(0, 1fr));
+  gap: 8px; width: 100%; max-width: 420px; margin: 0 auto;
+}
+.booster-actions > .button {
+  grid-column: 1 / -1; min-width: 0; margin: 0; padding: 4px 8px;
+  white-space: normal; overflow-wrap: anywhere; line-height: 1.15;
+}
+.booster-actions-split.stack-actions > .button:not(.quiet),
+.booster-actions-split.recap-actions > .button:not(.next-booster) { grid-column: auto; font-size: .875rem; }
+@media (min-width: 1024px) {
+  .booster-play { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+}
 
 /* Choix de la langue, en tête des Paramètres. */
 .language-picker { border: 0; padding: 0; margin: 0 0 12px; min-width: 0; }

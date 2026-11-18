@@ -263,10 +263,10 @@ export function flash(color = tone.light, strength = 0.5) {
   flashAlpha = Math.max(flashAlpha, strength)
 }
 
-// Secousse de la vue courante (ou de la fiche ouverte), niveau 1 à 3.
-export function shake(level: 1 | 2 | 3 = 1) {
+// Secousse de la scène ciblée ou de la vue courante, niveau 1 à 3.
+export function shake(level: 1 | 2 | 3 = 1, target?: string) {
   if (reducedMotion.value) return
-  const el = document.querySelector('dialog[open] .sheet') ?? document.querySelector('main')
+  const el = target ? document.querySelector(target) : document.querySelector('dialog[open] .sheet') ?? document.querySelector('main')
   const d = [0, 4, 8, 14][level]
   if (!(el instanceof HTMLElement)) return
   // La secousse déplace l'élément par left/top et non par translate : un déplacement transformé ferait de l'élément
