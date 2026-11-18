@@ -4,6 +4,19 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.16.0] — 2026-11-18
+
+### Added
+
+- **Starting countdown.** In manual driving, the race starts on "3, 2, 1, Go!": you have time to get ready before the needle climbs. In the following sectors, a shorter "Ready?" announces the start.
+- **Keyboard controls.** On a computer, in manual driving, the **space bar** shifts gears and the **left and right arrows** take the corners, with no need to click.
+- **Guided first move.** The first time you shift gears, then the first time you take corners in manual mode, the mechanic explains the move before the start.
+- **Trades from the home screen.** If you turned on "Trading with friends (experimental)", a **Trades** button now waits for you on the home screen too.
+
+### Changed
+
+- **Corners redesigned.** The corner arrows now match the rev counter's style, with two big left and right buttons that are easier to tap.
+
 ## [0.15.0] — 2026-11-18
 
 ### Added
