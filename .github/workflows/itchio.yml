@@ -26,7 +26,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publier sur itch.io (uniquement depuis master)
+        description: Publier sur itch.io (depuis master vers html5, depuis dev vers html5-dev)
         required: true
         default: false
         type: boolean
@@ -93,11 +93,11 @@ jobs:
       - name: Publier sur le canal html5
         run: /tmp/butler/butler push --if-changed dist-itch "$ITCHIO_TARGET:html5"
 
-  # Aperçu de dev : chaque push sur dev met à jour le canal html5-dev de la page itch.io (en brouillon, donc invisible du public).
+  # Aperçu de dev : lancé à la demande (Run workflow sur dev, publish coché), il met à jour le canal html5-dev de la page itch.io.
   # Sans les secrets de l'environnement itchio-dev, la tâche se termine sans rien envoyer et sans échec.
   publish-dev:
     needs: package
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/dev' && inputs.publish == true
     runs-on: ubuntu-latest
     environment: itchio-dev
     env:

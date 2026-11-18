@@ -5,6 +5,11 @@
 - **Ticket lié** [T-026 · Passage de vitesses au bon régime](026-prototype-passage-vitesses-timing.md).
 - **Contexte technique** [RaceView.vue](../src/views/RaceView.vue), [SectorRun.vue](../src/components/SectorRun.vue), [règles de course](../src/game/rules.ts) et [méta du jeu](../docs/meta.md).
 
+
+## Playtest du 18 novembre 2026 (téléphone)
+
+Les deux gestes fonctionnent mais sont trop lents, se jouent dans un bloc à part au lieu de la scène du duel et jurent avec le design. Le joueur veut le geste en temps réel pendant la course, plusieurs passages de rapport par secteur (un raté ne coûte que des points) et un habillage aux couleurs des thèmes. Tâche : `orchestrator/backlog/pilotage-temps-reel.json`.
+
 ## Évolution : jeu de rythme (retour du joueur, 18 novembre 2026)
 
 La première version de ce ticket (un seul virage annoncé, puis une fenêtre « Maintenant ») ne correspondait pas à l'idée du joueur : il imagine **un jeu de rythme**. La variante présente dans `dev` l'applique ainsi :

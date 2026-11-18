@@ -82,7 +82,7 @@ Le dépôt contient des noms de modèles et des références visuelles/culturell
 
 ## Aperçu de `dev` (canal `html5-dev`)
 
-Chaque push sur `dev` qui touche le jeu envoie le même package sur le canal `html5-dev` de la page itch.io, sans passer par `master` ni par GitHub Pages. La page restant en brouillon, seul son propriétaire (ou les personnes à qui il donne accès) la voit. La publication sur le canal `html5` reste réservée à `master` et à l'environnement `itchio-release`.
+À la demande seulement (jamais automatiquement), le même package part sur le canal `html5-dev` de la page itch.io, sans passer par `master` ni par GitHub Pages : **Actions → Package HTML5 itch.io → Run workflow**, choisir `dev` et cocher `publish`. La page restant en brouillon, seul son propriétaire (ou les personnes à qui il donne accès) la voit. La publication sur le canal `html5` reste réservée à `master` et à l'environnement `itchio-release`.
 
 Mise en place, une fois (Settings › Environments du dépôt) :
 
