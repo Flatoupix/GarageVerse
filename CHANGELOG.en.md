@@ -4,6 +4,16 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.14.0] — 2026-11-18
+
+### Added
+
+- **GarageVerse now speaks English.** In Settings, on the Parameters tab, pick **Français** or **English**: the menus, cards, car stories, help, tutorial, and these release notes switch language. Your game is kept. By default the game follows your browser's language; if you already have a game, it stays in French until you change it.
+
+### Fixed
+
+- **Rarity color.** The same car now shows the same rarity color in the garage and on its enlarged sheet, whatever the theme.
+
 ## [0.13.1] — 2026-11-18
 
 ### Changed
