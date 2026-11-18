@@ -152,6 +152,7 @@ onUnmounted(() => {
 .turn-phase { display: grid; place-items: center; min-height: 2.8em; font-weight: 700; }
 .turn-buttons .button { margin: 0; min-width: 0; min-height: 52px; padding-inline: 6px; white-space: normal; touch-action: manipulation; }
 .compact { padding: 4px 10px; }
-.compact .turn-track { height: 60px; }
-.turn-lane-arrow { position: absolute; inset: 3px 6px auto auto; font-size: .9rem; }
+.compact .turn-track { height: 104px; }
+.compact .turn-note { font-size: 1.15rem; }
+.turn-lane-arrow { position: absolute; inset: 4px 8px auto auto; font-size: 1.1rem; font-weight: 900; }
 </style>

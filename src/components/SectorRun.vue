@@ -109,12 +109,6 @@ const lanes = computed(() => sides.map(who => {
 .run-live .run-mover { transition: none; }
 .run-scenery > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .run-controls { z-index: 1; min-width: 0; background: var(--panel); border-top: 1px solid var(--line); }
-.run-live:has(.turn-control) .run-scenery,
-.run-live:has(.turn-control) .run-controls { grid-area: 1 / 1; }
-.run-live:has(.turn-control) .run-controls {
-  align-self: stretch; border-top: 0; background: color-mix(in srgb, var(--panel) 82%, transparent);
-}
-.run-live:has(.turn-control) .run-finish { top: auto; bottom: 6px; }
 .live-boost { animation: live-boost 240ms ease-out; }
 .live-brake { animation: run-brake 240ms ease-out; }
 @keyframes live-boost { 40% { transform: translateX(10px); } }
