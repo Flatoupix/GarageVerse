@@ -1,4 +1,7 @@
 export const timing = {
+  'Rapport {n}/{total}': 'Gear {n}/{total}',
+  '{n} {judgment}': '{n} {judgment}',
+  '{label} · {summary}': '{label} · {summary}',
   'Mode timing (expérimental)': 'Timing mode (experimental)',
   'Démo du passage de vitesses': 'Gear shift demo',
   'Passe la vitesse quand l’aiguille atteint la zone verte.': 'Shift when the needle reaches the green zone.',

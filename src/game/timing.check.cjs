@@ -6,9 +6,11 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
 
-const { classifyTiming, playTimingRound, soloTimingWindow, timingBounds, timingWindow } = require('./timing.ts')
+const { classifyTiming, playTimingRound, shiftsPerSector, soloTimingWindow, summarizeShifts, timingBounds, timingModifiers, timingWindow,
+  TIMING_MIN_GREEN_START, TIMING_MIN_RISE_MS, TIMING_RETURN_MS } = require('./timing.ts')
 const { aiChoice, evaluate, playVersusRound, seededRng, STAT_CAP } = require('./rules.ts')
-const { newSave, readSave, startNight } = require('./save.ts')
+const { rivals } = require('./data.ts')
+const { newSave, readSave, startDuel, startNight } = require('./save.ts')
 
 const window = timingWindow('ligne', 'course', 0, 5, 1, 0, 0)
 const bounds = timingBounds(window)
@@ -46,6 +48,47 @@ for (const sector of profiles) {
   }
 }
 
+assert.deepEqual(shiftsPerSector, { depart: 2, ligne: 3, endurance: 2, virage: 2 })
+assert.ok(TIMING_RETURN_MS > 0 && TIMING_RETURN_MS < 300)
+const windowFor = (sector, shift, difficulty = 0) => timingWindow(sector, 'course', 0, 5, 1, 0, difficulty, shift)
+for (const sector of profiles) {
+  const windows = Array.from({ length: shiftsPerSector[sector] }, (_, shift) => windowFor(sector, shift))
+  assert.equal(new Set(windows.map(({ center }) => center)).size, windows.length)
+  windows.forEach((window, shift) => {
+    assert.deepEqual(windowFor(sector, shift), window)
+    assert.ok(window.duration >= 900 && window.duration <= 1200)
+    assert.ok(windowFor(sector, shift, 1).duration >= TIMING_MIN_RISE_MS)
+    assert.ok(timingBounds(window)[1] >= TIMING_MIN_GREEN_START)
+  })
+}
+assert.ok(windowFor('ligne', 2).green < windowFor('ligne', 1).green)
+assert.ok(windowFor('ligne', 2).green < windowFor('ligne', 0).green)
+for (const shift of [0, 1]) {
+  assert.ok(windowFor('endurance', shift).green > windowFor('depart', shift).green)
+  assert.ok(windowFor('endurance', shift).green > windowFor('ligne', shift).green)
+}
+const raceRng = seededRng('course')
+const referenceRng = seededRng('course')
+assert.equal(raceRng(), referenceRng())
+const nextWindow = windowFor('ligne', 1)
+assert.equal(classifyTiming(1, windowFor('ligne', 0)).zone, 'red')
+assert.deepEqual(windowFor('ligne', 1), nextWindow)
+assert.equal(raceRng(), referenceRng())
+
+const result = zone => ({ zone, modifier: timingModifiers[zone] })
+const aggregate = (...zones) => summarizeShifts(zones.map(result)).modifier
+assert.equal(aggregate('red', 'orange'), -1)
+assert.equal(aggregate('green', 'orange'), 0)
+assert.equal(aggregate('perfect', 'green'), 0)
+assert.equal(aggregate('perfect', 'perfect', 'green'), 1)
+assert.equal(aggregate('red', 'red', 'orange'), -2)
+const zones = Object.keys(timingModifiers)
+for (const first of zones) for (const second of zones) for (const third of zones) {
+  const modifier = aggregate(first, second, third)
+  assert.ok(Number.isInteger(modifier) && modifier >= -2 && modifier <= 1)
+  assert.ok(!Object.is(modifier, -0))
+}
+
 let save = newSave()
 delete save.preferences.timingMode
 assert.equal(readSave(JSON.stringify(save)).preferences.timingMode, false)
@@ -55,7 +98,7 @@ const choice = { car: 0, nitro: true, stance: 'normal' }
 save.duel.timingChoice = choice
 const before = soloTimingWindow(save.duel, save.duel.player.lineup[0])
 save = readSave(JSON.stringify(save))
-assert.deepEqual(save.duel.timingChoice, choice)
+assert.equal(save.duel.timingChoice, undefined)
 assert.deepEqual(soloTimingWindow(save.duel, save.duel.player.lineup[0]), before)
 assert.equal(save.preferences.timingMode, true)
 
@@ -81,3 +124,18 @@ assert.equal(save.duel.rounds.length, 1)
 assert.deepEqual(save.duel.rounds[0].timing, outcome)
 assert.equal(save.duel.timingReview, true)
 assert.equal(save.duel.timingChoice, undefined)
+
+assert.equal(save.duel.rounds[0].shifts, undefined)
+const shifts = [result('perfect'), result('red')]
+const sequenceRound = playTimingRound(save.duel, choice, shifts, seededRng('rival'))
+assert.equal(sequenceRound.player.lines.at(-1).value, 0)
+assert.deepEqual(readSave(JSON.stringify(save)).duel.rounds.at(-1).shifts, shifts)
+
+const legacy = newSave()
+assert.equal(startDuel(legacy, `${rivals[0].id}:1`, seededRng('reprise')), undefined)
+delete legacy.duel.pilot
+legacy.duel.timingChoice = choice
+const resumed = readSave(JSON.stringify(legacy)).duel
+assert.equal(resumed.timingChoice, undefined)
+assert.deepEqual(resumed.pilot, { mode: 'manuel', turn: false })
+assert.equal(resumed.rounds.length, 0)

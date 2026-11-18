@@ -10,7 +10,7 @@ export interface TimingResult { zone: TimingZone; modifier: number }
 export interface TimingWindow { center: number; green: number; orange: number; duration: number }
 // Les secteurs enregistrés avant la séquence de rythme conservent leur jugement unique.
 type LegacyTurnResult = { outcome: 'bien' | 'tot' | 'mauvais' | 'tard'; modifier: number }
-export interface TimingRound extends Round { timing?: TimingResult; direction?: TurnResult | LegacyTurnResult }
+export interface TimingRound extends Round { timing?: TimingResult; shifts?: TimingResult[]; direction?: TurnResult | LegacyTurnResult }
 export interface SoloDuel extends Duel {
   rounds: TimingRound[]
   pilot?: RacePilot
@@ -18,25 +18,37 @@ export interface SoloDuel extends Duel {
   timingReview?: boolean
 }
 
-const profiles: Record<Sector, { duration: number; green: number; anchor: number }> = {
-  depart: { duration: 1750, green: 0.14, anchor: 0.52 },
-  virage: { duration: 2050, green: 0.13, anchor: 0.57 },
-  ligne: { duration: 1900, green: 0.12, anchor: 0.69 },
-  endurance: { duration: 2400, green: 0.105, anchor: 0.58 },
+export const shiftsPerSector: Record<Sector, number> = { depart: 2, ligne: 3, endurance: 2, virage: 2 }
+export const TIMING_RISE_MS: Record<Sector, number> = { depart: 900, ligne: 1000, virage: 1050, endurance: 1200 }
+export const TIMING_RETURN_MS = 220
+export const TIMING_MIN_RISE_MS = 800
+export const TIMING_DIFFICULTY_FACTOR = 0.12
+export const TIMING_MIN_GREEN_START = 0.28
+
+const profiles: Record<Sector, { green: number; anchor: number }> = {
+  depart: { green: 0.15, anchor: 0.54 },
+  virage: { green: 0.14, anchor: 0.57 },
+  ligne: { green: 0.13, anchor: 0.65 },
+  endurance: { green: 0.19, anchor: 0.58 },
 }
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 
-export function timingWindow(sector: Sector, seed: string, sectorIndex: number, stat: number, stage: number, parts: number, difficulty: number): TimingWindow {
+export function timingWindow(sector: Sector, seed: string, sectorIndex: number, stat: number, stage: number, parts: number, difficulty: number, shiftIndex = 0): TimingWindow {
   const profile = profiles[sector]
   const level = clamp(difficulty, 0, 1)
   const assist = Math.min(1.35, 1 + 0.15 * clamp(stat, 0, STAT_CAP) / STAT_CAP
     + 0.04 * clamp(stage, 0, 3) + 0.04 * clamp(parts, 0, 3))
+  const finalStraight = sector === 'ligne' && shiftIndex === shiftsPerSector.ligne - 1
+  const green = profile.green * (finalStraight ? 0.72 : 1) * (1 - 0.2 * level) * assist
+  // Les décalages séparent les fenêtres voisines, même si leurs tirages se ressemblent.
+  const offset = (shiftIndex - (shiftsPerSector[sector] - 1) / 2) * 0.09
+  const jitter = (seededRng(JSON.stringify([seed, sectorIndex, shiftIndex]))() - 0.5) * 0.08
   return {
-    center: profile.anchor + (seededRng(JSON.stringify([seed, sectorIndex]))() - 0.5) * 0.16,
-    green: profile.green * (1 - 0.2 * level) * assist,
+    center: Math.max(TIMING_MIN_GREEN_START + green / 2, profile.anchor + offset + jitter),
+    green,
     orange: 0.055 * assist,
-    duration: profile.duration * (1 - 0.2 * level),
+    duration: Math.max(TIMING_MIN_RISE_MS, TIMING_RISE_MS[sector] * (1 - TIMING_DIFFICULTY_FACTOR * level)),
   }
 }
 
@@ -54,26 +66,33 @@ export function classifyTiming(position: number, window: TimingWindow, modifiers
   return { zone, modifier: modifiers[zone] }
 }
 
-export function soloTimingWindow(duel: Duel, car: Racer): TimingWindow {
+export function soloTimingWindow(duel: Duel, car: Racer, shiftIndex = 0): TimingWindow {
   const index = duel.rounds.length
   const sector = duel.sectors[index], stat = sectorStat[sector]
   const parts = car.prep.parts.filter(id => upgradeForFamily(partById.get(id)?.family ?? '') === stat).length
   const rivalStat = duel.rival.lineup.reduce((sum, racer) => sum + racer.stats[stat], 0) / duel.rival.lineup.length
   const seed = JSON.stringify([duel.rivalId, duel.sectors, duel.player.lineup.map(racer => racer.id)])
-  return timingWindow(sector, seed, index, car.stats[stat], car.prep.stage, parts, rivalStat / STAT_CAP)
+  return timingWindow(sector, seed, index, car.stats[stat], car.prep.stage, parts, rivalStat / STAT_CAP, shiftIndex)
 }
 
-export function playTimingRound(duel: SoloDuel, choice: Choice, timing: TimingResult, rng: Rng): TimingRound {
-  return playSoloModifiedRound(duel, choice, { label: 'Timing du passage', value: timing.modifier }, { timing }, rng)
+export function summarizeShifts(shifts: readonly TimingResult[]): TimingResult {
+  const mean = shifts.reduce((sum, { zone }) => sum + timingModifiers[zone], 0) / Math.max(1, shifts.length)
+  const modifier = Math.sign(mean) * Math.ceil(Math.abs(mean) - 0.5) || 0
+  const zone = modifier === 1 ? 'perfect' : modifier === 0 ? 'green' : modifier === -1 ? 'orange' : 'red'
+  return { zone, modifier }
 }
 
-export function playTurnRound(duel: SoloDuel, choice: Choice, direction: TurnResult, rng: Rng): TimingRound {
-  return playSoloModifiedRound(duel, choice, { label: 'Direction', value: direction.modifier }, { direction }, rng)
+export function playTimingRound(duel: SoloDuel, choice: Choice, result: TimingResult | TimingResult[], rng: Rng, rivalChoice?: Choice): TimingRound {
+  const feedback = Array.isArray(result) ? { timing: summarizeShifts(result), shifts: [...result] } : { timing: result }
+  return playSoloModifiedRound(duel, choice, { label: 'Timing du passage', value: feedback.timing.modifier }, feedback, rng, rivalChoice)
+}
+
+export function playTurnRound(duel: SoloDuel, choice: Choice, direction: TurnResult, rng: Rng, rivalChoice?: Choice): TimingRound {
+  return playSoloModifiedRound(duel, choice, { label: 'Direction', value: direction.modifier }, { direction }, rng, rivalChoice)
 }
 
 function playSoloModifiedRound(duel: SoloDuel, choice: Choice, line: ScoreLine,
-  feedback: Pick<TimingRound, 'timing' | 'direction'>, rng: Rng): TimingRound {
-  const rivalChoice = aiChoice(duel, 'rival', rng)
+  feedback: Pick<TimingRound, 'timing' | 'shifts' | 'direction'>, rng: Rng, rivalChoice: Choice = aiChoice(duel, 'rival', rng)): TimingRound {
   // Le moteur tire d'abord la chance du joueur. Deux milieux d'intervalle donnent une forme du jour nulle.
   // On conserve ensuite les vrais tirages du rival et on applique le secteur corrigé à la course réelle.
   const preview = {

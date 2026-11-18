@@ -6,7 +6,7 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
 
-const { advanceTurns, judgeTurn, summarizeTurns, turnModifiers, turnSequence } = require('./turn.ts')
+const { advanceTurns, judgeTurn, summarizeTurns, turnModifiers, turnSequence, TURN_LEAD_MS } = require('./turn.ts')
 const { playTimingRound, playTurnRound } = require('./timing.ts')
 const { seededRng } = require('./rules.ts')
 const { newSave, readSave, startNight } = require('./save.ts')
@@ -21,7 +21,8 @@ for (const [circuit, index, rival] of [['autre', 0, 'demo'], ['demo', 1, 'demo']
   assert.notDeepEqual(changed.notes.map(note => note.at), sequence.notes.map(note => note.at))
 }
 const harder = turnSequence('demo', 0, 'autre').settings
-assert.notEqual(harder.lead, settings.lead)
+assert.equal(settings.lead, 1600)
+assert.equal(harder.lead, TURN_LEAD_MS)
 assert.notEqual(harder.good, settings.good)
 
 const extended = turnSequence('demo', 0, 'demo', { count: 8, spacing: 10, acceptance: 500 })

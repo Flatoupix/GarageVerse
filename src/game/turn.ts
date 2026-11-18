@@ -1,3 +1,5 @@
+export const TURN_LEAD_MS = 1600
+
 export type TurnDirection = 'gauche' | 'droite'
 export const turnModifiers = { parfait: 2, bien: 1, tot: 0, tard: -1, mauvais: -1, rate: -1 }
 export type TurnOutcome = keyof typeof turnModifiers
@@ -27,7 +29,7 @@ export function turnSequence(circuitId: string, sectorIndex: number, rivalId: st
   const difficulty = hashTurn(rivalId) / 0xffffffff
   const settings: TurnSettings = {
     count: 3,
-    lead: Math.round(2800 - 600 * difficulty),
+    lead: TURN_LEAD_MS,
     perfect: Math.round(100 - 35 * difficulty),
     good: Math.round(230 - 75 * difficulty),
     acceptance: Math.round(410 - 80 * difficulty),

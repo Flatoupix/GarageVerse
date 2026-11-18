@@ -4,6 +4,7 @@ import { VERSUS_OPEN } from './game/features'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
+import { carSprite, edition, trackBackdrop } from './game/art'
 import type { Rival, StatKey } from './game/data'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
@@ -16,10 +17,12 @@ import ReleaseNotes from './components/ReleaseNotes.vue'
 import GameDaveSplash from './components/GameDaveSplash.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
+import SectorRun from './components/SectorRun.vue'
 import TimingGauge from './components/TimingGauge.vue'
 import TurnControl from './components/TurnControl.vue'
 import { turnSequence } from './game/turn'
-import { timingWindow } from './game/timing'
+import { shiftsPerSector, timingWindow, type TimingResult } from './game/timing'
+import { timingFeedback } from './game/timing-text'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
@@ -56,14 +59,25 @@ const screen = ref<Screen>(initialScreen())
 const settings = ref<HTMLDialogElement>()
 const timingDemo = ref<HTMLDialogElement>()
 const timingDemoOpen = ref(false)
-const demoWindow = timingWindow('ligne', 'demo', 0, 6, 1, 0, 0)
+const demoWindows = Array.from({ length: shiftsPerSector.ligne }, (_, shift) =>
+  timingWindow('ligne', 'demo', 0, 6, 1, 0, 0, shift))
+const demoArts = { player: edition('r4l').art, rival: edition('deuch').art }
+const demoSprites = { player: carSprite('r4l'), rival: carSprite('deuch') }
+const demoGauge = ref<InstanceType<typeof TimingGauge>>()
+const demoFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
+function demoJudgment(result: TimingResult) {
+  demoFeedback.value = {
+    tag: timingFeedback(result.zone), good: result.modifier >= 0, count: (demoFeedback.value?.count ?? 0) + 1,
+  }
+}
 function showTimingDemo() {
+  demoFeedback.value = null
   timingDemo.value?.showModal()
   timingDemoOpen.value = true
 }
 const turnDemo = ref<HTMLDialogElement>()
 const turnDemoOpen = ref(false)
-const demoTurns = turnSequence('demo', 0, 'demo', { lead: 2500, perfect: 100, good: 230, acceptance: 410 })
+const demoTurns = turnSequence('demo', 0, 'demo', { perfect: 100, good: 230, acceptance: 410 })
 const turnAttempt = ref(0)
 function showTurnDemo() {
   turnDemo.value?.showModal()
@@ -498,7 +512,10 @@ function toggleSetting(key: Setting) {
     <dialog ref="timingDemo" class="modal timing-modal" :aria-label="t('Démo du passage de vitesses')" @close="timingDemoOpen = false">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <h2>{{ t('Démo du passage de vitesses') }}</h2>
-      <TimingGauge v-if="timingDemoOpen" :window="demoWindow" demo />
+      <SectorRun v-if="timingDemoOpen" live="sec" :step="0" :running="false" :arts="demoArts"
+        :sprites="demoSprites" :backdrop="trackBackdrop('sec')" :feedback="demoFeedback" tappable @tap="demoGauge?.shift()">
+        <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
+      </SectorRun>
     </dialog>
 
     <dialog ref="turnDemo" class="modal timing-modal" :aria-label="t('Démo des virages')" @close="turnDemoOpen = false">

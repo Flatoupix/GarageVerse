@@ -329,39 +329,32 @@ en pilotage manuel contre les rivaux, ainsi que dans le Défi du jour et la Nuit
 Le réglage est désactivé par défaut.
 **Démo du passage de vitesses** ouvre le compteur sans lancer de course ni changer le réglage.
 
-Après avoir engagé ta voiture avec la consigne et la nitro choisies, arrête l’aiguille une fois.
-Le score de référence conserve la préparation, le terrain, la météo, les capacités, la consigne,
-la nitro et la surchauffe. Pour le joueur, le barème remplace la forme du jour, le secteur parfait
-aléatoire et l’incident : rouge −2, orange −1, vert 0, tiers central du vert +1.
-Le rival garde ses tirages habituels. Le bilan donne la référence, le résultat du passage, son
-modificateur et le total. Les règles de départage et de récompenses restent communes.
+Dès que tu engages ta voiture, les deux voitures roulent dans la scène du duel. Touche la scène
+ou **Passer la vitesse**, ou utilise Espace ou Entrée sur le bouton, au moment où l’aiguille atteint
+la cible. À chaque passage, la voiture réagit, le jugement s’affiche près d’elle et le rapport avance.
+La dernière action déclenche immédiatement le décompte des lignes de score dans la même scène.
 
-| Secteur | Stat | Durée de base | Largeur verte de base | Ancre du centre |
-| --- | --- | ---: | ---: | ---: |
-| Départ | ACC | 1 750 ms | 14 % | 52 % |
-| Virage | MAN | 2 050 ms | 13 % | 57 % |
-| Ligne droite | VIT | 1 900 ms | 12 % | 69 % |
-| Endurance | END | 2 400 ms | 10,5 % | 58 % |
+| Secteur | Passages | Montée de base | Largeur verte de base |
+| --- | ---: | ---: | ---: |
+| Départ | 2 | 900 ms | 15 % |
+| Ligne droite | 3 | 1 000 ms | 13 %, puis 9,36 % au dernier passage |
+| Endurance | 2 | 1 200 ms | 19 % |
+| Virage | 2 si le rythme est désactivé | 1 050 ms | 14 % |
 
-- La moyenne de la stat de secteur de l’écurie adverse, divisée par 12, donne un niveau borné
-  entre 0 et 1. Il réduit la durée et le vert jusqu’à 20 %. Une durée plus courte accélère l’aiguille.
-- Le facteur de tolérance multiplie la largeur verte et les deux bandes orange (5,5 % chacune
-  à la base). Il vaut 1 + 0,15 × stat préparée / 12 + 0,04 × Stage + 0,04 × nombre de pièces
-  adaptées, plafonné à 1,35. La stat est plafonnée à 12, le Stage et le nombre de pièces à 3.
-  Les familles adaptées suivent l’atelier : transmission et spéciale pour ACC, pneus et
-  suspension pour MAN, moteur et suralimentation pour VIT, freins et châssis pour END.
-- La graine combine l’identifiant du rival, l’ordre des secteurs du circuit
-  et les identifiants de la sélection de voitures sauvegardée. L’index du secteur fixe un décalage
-  déterministe de ±8 points de pourcentage autour de l’ancre. Toute la fenêtre est visible avant l’appui.
-- La pause et le changement d’onglet suspendent le compteur. Le mouvement réduit allonge
-  le balayage de 80 %. En course, l’aiguille s’arrête en bout de course et attend l’appui.
-  La démo reboucle jusqu’à l’appui. Après rechargement, une tentative sans appui reprend au
-  début avec les mêmes paramètres, et un secteur validé revient à son bilan.
+La difficulté du rival raccourcit la montée jusqu’à 12 %, avec un plancher de 800 ms, et réduit
+la largeur verte jusqu’à 20 %. La préparation de la voiture peut élargir les zones de réussite.
+La graine de la course et les index du secteur et du passage déterminent la fenêtre sans tirer dans
+le générateur du duel. La cible est visible dès le départ de l’aiguille, qui redescend en 220 ms.
+Un passage sans appui est raté. Un raté laisse la fenêtre et la vitesse du passage suivant intactes.
 
-Après playtest, décider du nombre de passages, des vitesses et des tolérances, du bonus parfait,
-de l’intérêt d’un braquage dédié en virage et d’une éventuelle part d’imprévu. Comparer la lisibilité,
-les taux de réussite, la durée d’une course et l’intérêt des choix de préparation avant de décider
-si les deux modes doivent coexister.
+Chaque passage rapporte −2 (Raté), −1 (Moyen), 0 (Bon) ou +1 (Parfait). La ligne **Timing du passage**
+affiche la moyenne arrondie à l’entier le plus proche, avec les demis vers zéro, et le nombre de
+jugements de chaque type. Ce modificateur remplace les tirages de forme du jour, de secteur parfait
+et d’incident du joueur. Le rival conserve ses tirages habituels.
+
+Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aiguille avance par paliers
+et les voitures restent fixes pendant les gestes. Si tu recharges avant la résolution, tu retrouves
+la sélection du secteur. Un secteur validé revient à son bilan.
 
 ## Direction expérimentale dans les virages (T-027)
 
@@ -371,7 +364,7 @@ permet de jouer et de rejouer une séquence qui alterne gauche et droite.
 
 En solo, un secteur de type virage propose trois notes par défaut. Le circuit, l’index du secteur
 et l’identifiant du rival fixent les sens et les instants par un hachage stable. Les notes
-descendent sur deux pistes. Appuie sur la piste ou le bouton correspondant, ou utilise ← et →,
+descendent sur les deux pistes superposées au décor du duel. Appuie sur la piste ou le bouton correspondant, ou utilise ← et →,
 quand la flèche atteint la cible **Maintenant**. Les commandes ignorent les répétitions de touche.
 Le mouvement réduit fait avancer les notes par paliers. Le chrono se suspend si tu changes
 d’onglet. Si tu recharges avant la résolution, tu reviens à la sélection du même secteur.
@@ -385,8 +378,8 @@ d’onglet. Si tu recharges avant la résolution, tu reviens à la sélection du
 | Mauvais côté dans la fenêtre d’appui | Mauvais côté | −1 |
 | Fenêtre d’appui expirée sans appui accepté | Raté | −1 |
 
-Le profil du rival règle l’avance d’affichage (de 2,2 à 2,8 s) et donc la vitesse de défilement,
-ainsi que les fenêtres symétriques autour de l’instant cible. Par défaut, le seuil Parfait va de
+Les notes apparaissent jusqu’à 1,6 s à l’avance. Le profil du rival règle les fenêtres
+symétriques autour de l’instant cible. Par défaut, le seuil Parfait va de
 65 à 100 ms, le seuil Bien de 155 à 230 ms et la limite d’appui de 330 à 410 ms, de chaque côté
 de la cible. Les paramètres du module permettent d’ajuster ces seuils, l’avance, le nombre de
 notes, leur espacement, le barème et les bornes du total. Les fenêtres d’appui sont disjointes.

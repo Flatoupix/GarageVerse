@@ -209,16 +209,16 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
           duel.pilot = { mode: 'manuel', turn: pilot.turn === true }
           if (from !== undefined && Number.isInteger(from) && from >= 0 && from <= duel.rounds.length) {
             duel.pilot.automaticFrom = from
-            delete duel.timingChoice
           }
         } else if (!pilot && duel.timingChoice) {
           // Une ancienne course peut déjà attendre un passage de vitesse.
           duel.pilot = { mode: 'manuel', turn: input.preferences?.turnMode === true }
         } else {
           duel.pilot = { mode: 'auto' }
-          delete duel.timingChoice
         }
       }
+      // Les anciennes manches en attente reprennent aussi à la sélection.
+      delete duel.timingChoice
       save.duel = duel
     }
   } catch { save.duel = null }
