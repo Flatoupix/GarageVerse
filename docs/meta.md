@@ -334,7 +334,17 @@ Le réglage est désactivé par défaut.
 Au signal **Partez !**, les deux voitures démarrent dans la scène du duel. Touche la scène
 ou **Passer la vitesse**, ou appuie sur **Espace** ou sur **Entrée** si le bouton a le focus, quand
 l’aiguille atteint la cible. À chaque passage, la voiture réagit, le jugement s’affiche près d’elle et le rapport avance.
-La dernière action déclenche immédiatement le décompte des lignes de score dans la même scène.
+Le décompte joue un bip sur chaque chiffre, puis un bruit de moteur au départ. La traînée de
+l’aiguille et l’éclat de la zone verte annoncent le bon moment. Le passage parfait déclenche
+des étincelles dorées, un claquement de rapport et une courte vibration. Le bond et la flamme
+de la voiture marquent l’accélération. Un raté donne un léger à-coup et un bruit d’échappement.
+
+En virage, la piste réagit sur la cible et la note ratée s’efface dans une teinte rose du thème.
+Après deux gestes parfaits de suite, **Série ×n** compte les Parfait consécutifs, vitesses et
+virages confondus. Tout autre jugement remet la série à zéro. Un secteur entièrement parfait
+affiche brièvement **Sans faute !** avant les lignes de score de la même scène.
+Les deux démos reprennent ces retours de jugement. Les réglages **Son** et **Vibration**
+s’appliquent. Le mouvement réduit conserve les textes et les sons et coupe les effets animés.
 
 | Secteur | Passages | Montée de base | Largeur verte de base |
 | --- | ---: | ---: | ---: |

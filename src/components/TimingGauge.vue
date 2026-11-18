@@ -4,22 +4,29 @@ import { classifyTiming, timingBounds, TIMING_RETURN_MS, type TimingResult, type
 import { reducedMotion } from '../game/store'
 import { useManualKeys } from '../game/manual-keys'
 import { t } from '../i18n'
+import { flash, pop, shake, tone } from '../game/fx'
+import { manualImpact, shiftGrade } from '../game/manual-feedback'
 import { timingFeedback } from '../game/timing-text'
 
 const props = defineProps<{ windows: TimingWindow[]; demo?: boolean; waiting?: boolean }>()
 const emit = defineEmits<{ judgment: [result: TimingResult]; finish: [results: TimingResult[]]; restart: [] }>()
 const REDUCED_STEP_MS = 65
 const shiftButton = ref<HTMLButtonElement>()
+const scale = ref<HTMLElement>()
+const gear = ref<HTMLElement>()
+const perfectLabel = ref<HTMLElement>()
 const position = ref(0)
 const results = ref<TimingResult[]>([])
 const complete = computed(() => results.value.length === props.windows.length)
 const active = ref(0)
 const activeWindow = computed(() => props.windows[active.value])
 const returning = computed(() => results.value.length > active.value)
+const bounds = computed(() => [0, ...timingBounds(activeWindow.value), 1])
+const inGreen = computed(() => !reducedMotion.value && !props.waiting && !returning.value && !complete.value
+  && position.value >= bounds.value[2] && position.value <= bounds.value[5])
 const segments = computed(() => {
-  const bounds = [0, ...timingBounds(activeWindow.value), 1]
   return ['red', 'orange', 'green', 'perfect', 'green', 'orange', 'red'].map((zone, index) => ({
-    zone, width: (bounds[index + 1] - bounds[index]) * 100,
+    zone, width: (bounds.value[index + 1] - bounds.value[index]) * 100,
   }))
 })
 
@@ -43,6 +50,16 @@ function judge(time: number, at: number) {
   position.value = returnFrom = at
   results.value.push(result)
   phaseStart = time
+  const grade = shiftGrade[result.zone]
+  const box = scale.value?.getBoundingClientRect()
+  if (box) manualImpact(grade, { x: box.left + at * box.width, y: box.top + box.height / 2 }, perfectLabel.value, true)
+  if (grade === 'perfect') flash(tone.gold, 0.075)
+  if (grade === 'miss') {
+    flash(tone.rose, 0.05)
+    const scene = scale.value?.closest<HTMLElement>('.sector-run')
+    if (scene) shake(1, scene)
+  }
+  pop(gear.value, 1.13, 220)
   emit('judgment', result)
   if (complete.value) emit('finish', [...results.value])
 }
@@ -109,12 +126,18 @@ onUnmounted(() => {
 
 <template>
   <div class="timing-gauge">
-    <strong>{{ t('Rapport {n}/{total}', { n: results.length + 1, total: windows.length + 1 }) }}</strong>
-    <div class="timing-scale" aria-hidden="true">
+    <div class="timing-heading">
+      <strong ref="gear">{{ t('Rapport {n}/{total}', { n: results.length + 1, total: windows.length + 1 }) }}</strong>
+      <span ref="perfectLabel" class="timing-perfect" :style="{ color: tone.gold }" role="status">
+        {{ reducedMotion && results.at(-1)?.zone === 'perfect' ? t('Parfait !') : '' }}
+      </span>
+    </div>
+    <div ref="scale" class="timing-scale" :class="{ 'in-green': inGreen }" aria-hidden="true">
       <div class="timing-band manual-track">
         <span v-for="(segment, index) in segments" :key="index" :class="segment.zone" :style="{ width: segment.width + '%' }"></span>
       </div>
-      <span class="timing-needle" :style="{ left: position * 100 + '%' }"></span>
+      <span class="timing-needle" :class="{ trailing: !reducedMotion && !waiting && !returning && !complete }"
+        :style="{ left: position * 100 + '%', '--glow': tone.cyan }"></span>
     </div>
     <ul v-if="demo" class="timing-legend">
       <li v-for="zone in (['red', 'orange', 'green', 'perfect'] as const)" :key="zone">
@@ -130,6 +153,9 @@ onUnmounted(() => {
 
 <style scoped>
 .timing-gauge { display: grid; gap: 4px; min-width: 0; padding: 6px 10px; }
+.timing-heading { display: flex; justify-content: space-between; padding-inline: 4px; }
+.timing-heading strong { transform-origin: left center; }
+.timing-perfect { flex: 0 0 88px; text-align: center; font-weight: 700; }
 .timing-scale { position: relative; padding-block: 5px; margin-inline: 4px; }
 .timing-band { display: flex; height: 16px; }
 .timing-band span + span { border-inline-start: 1px solid var(--panel); }
@@ -138,6 +164,12 @@ onUnmounted(() => {
 .green { background: var(--accent); }
 .perfect { background: var(--manual-target); }
 .timing-needle { position: absolute; inset-block: 0; width: 4px; transform: translateX(-50%); border-radius: 3px; background: var(--text); box-shadow: 0 0 0 1px var(--panel); }
+.in-green :is(.green, .perfect) { filter: brightness(1.32); }
+.trailing::before {
+  content: ''; position: absolute; inset: 3px 100% 3px auto; width: 16px;
+  background: linear-gradient(90deg, transparent, var(--glow)); opacity: .65; pointer-events: none;
+}
+.timing-scale { overflow: clip; overflow-clip-margin: 2px; }
 .timing-legend { display: flex; flex-wrap: wrap; gap: 4px 10px; list-style: none; margin: 0; padding: 0; }
 .timing-legend li { display: flex; gap: 5px; align-items: center; font-size: .78rem; }
 .timing-legend i { width: 12px; height: 12px; border-radius: 2px; }

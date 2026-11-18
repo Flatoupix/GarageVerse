@@ -4,6 +4,16 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.17.0] — 2026-11-18
+
+### Ajouté
+
+- **Pilotage plus vivant.** En pilotage manuel, chaque geste se sent : bips du décompte, étincelles et flamme d’échappement sur un passage **Parfait**, à-coup et raté d’échappement quand tu rates, notes qui éclatent sur la cible dans les virages. Enchaîne les **Parfait** pour faire grimper ta **série**, et réussis tout un secteur sans faute pour une petite célébration. Avec le mouvement réduit, les effets restent sobres.
+
+### Modifié
+
+- **Virages.** Les flèches descendent de nouveau vers la cible, comme dans un jeu de rythme, avec les deux grands boutons gauche et droite juste en dessous.
+
 ## [0.16.0] — 2026-11-18
 
 ### Ajouté

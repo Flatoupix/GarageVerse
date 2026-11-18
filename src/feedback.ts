@@ -1,7 +1,7 @@
 import { audioContext, duckMusic, effectsOutput, playSample } from './audio'
 
 export type Cue = 'tear' | 'flip' | 'drift' | 'collect' | 'legend' | 'revealLegend' | 'win' | 'lose' | 'nitro' | 'upgrade'
-  | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh' | 'debugCredits'
+  | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh' | 'debugCredits' | 'gearShift' | 'misfire'
 
 function tone(ctx: AudioContext, at: number, freq: number, duration: number, type: OscillatorType = 'sine', gain = 0.075, slideTo?: number) {
   const oscillator = ctx.createOscillator()
@@ -44,6 +44,8 @@ const cues: Record<Exclude<Cue, 'revealLegend'>, (c: AudioContext, t: number) =>
   debugCredits: (c, t) => { tone(c, t, 988, 0.08, 'square', 0.03); tone(c, t + 0.07, 1319, 0.22, 'square', 0.03) },
   coin: (c, t) => { tone(c, t, 988, 0.08, 'square', 0.03); tone(c, t + 0.07, 1319, 0.22, 'square', 0.03) },
   error: (c, t) => { tone(c, t, 170, 0.09, 'square', 0.04); tone(c, t + 0.1, 120, 0.14, 'square', 0.04) },
+  gearShift: (c, t) => { noise(c, t, 0.07, 'bandpass', 1800, 600, 0.19); tone(c, t + 0.025, 130, 0.13, 'triangle', 0.11, 230) },
+  misfire: (c, t) => { noise(c, t, 0.08, 'lowpass', 900, 250, 0.19); noise(c, t + 0.09, 0.10, 'lowpass', 650, 180, 0.13) },
   slam: (c, t) => { tone(c, t, 150, 0.28, 'sine', 0.32, 38); noise(c, t, 0.14, 'lowpass', 900, 120, 0.22) },
   flip: (c, t) => { noise(c, t, 0.12, 'bandpass', 900, 2600, 0.07); [440, 660].forEach((n, i) => tone(c, t + i * 0.035, n, 0.15)) },
   collect: (c, t) => [330, 440, 660].forEach((n, i) => tone(c, t + i * 0.09, n, 0.3)),
