@@ -5,7 +5,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 ## Utilisation
 
 - Lire le statut et la priorité dans chaque ticket ; **« à arbitrer / mis de côté » n'autorise pas de développement sans validation**.
-- L'implémentation doit s'appuyer sur **`prototype/mobile-tcg`**, non sur `master` (qui ne contient qu'un README de conception).
+- L'implémentation doit s'appuyer sur **`dev`** pour le développement ; la branche **`master`** publie le jeu. Vérifier l'état des branches avant de commencer.
 - Avant de coder, confronter chaque ticket au code et au `CHANGELOG.md` les plus récents. Les notes `docs/passation.md` sont partiellement datées ; la v0.12.0 est plus récente.
 - Ne pas écraser `docs/`, `README.md` ni `orchestrator/backlog/`. Un ticket ne remplace pas sa source.
 - Les références relatives partent du dossier `tickets/`.
@@ -27,6 +27,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Priorité |
 |---|---|---|
+| [T-026](026-prototype-passage-vitesses-timing.md) | Prototype de course au timing : passage des vitesses, zones de réussite et préparation auto | P2 |
 | [T-009](009-modes-duel-alternatifs.md) | Modèles de duel alternatifs | P3 |
 | [T-010](010-deck-et-evolution-en-duel.md) | Deck et évolution tactique | P3 |
 | [T-011](011-fusion-de-cartes-doublons.md) | Fusion des doublons | P3 |
