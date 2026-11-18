@@ -27,6 +27,7 @@ import { shiftsPerSector, timingWindow, type TimingResult } from './game/timing'
 import { timingFeedback } from './game/timing-text'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
+import FriendsView from './views/FriendsView.vue'
 import GarageView from './views/GarageView.vue'
 import HomeView from './views/HomeView.vue'
 import PartSheet from './views/PartSheet.vue'
@@ -47,7 +48,6 @@ function initialScreen(): Screen {
   return 'home'
 }
 const VersusView = defineAsyncComponent(() => import('./views/VersusView.vue'))
-const FriendsView = defineAsyncComponent(() => import('./views/FriendsView.vue'))
 const networkAvailable = ref(navigator.onLine)
 function updateNetwork() { networkAvailable.value = navigator.onLine }
 onMounted(() => {
@@ -262,8 +262,11 @@ function go(destination: Screen) {
     history.replaceState(history.state, '', url)
   }
   screen.value = destination
-  window.scrollTo(0, 0)
-  void nextTick(() => document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true }))
+  if (destination !== 'friends') window.scrollTo(0, 0)
+  void nextTick(() => {
+    if (destination === 'friends' && screen.value === destination) window.scrollTo(0, 0)
+    document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true })
+  })
 }
 
 function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {

@@ -2,9 +2,8 @@
 // La logique métier reste dans versus.ts et friends.ts, testés hors ligne avec Node.
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import postgres from 'npm:postgres@3'
-import type { Context } from './versus.ts'
-
-type Reply = { ok: true; data: unknown } | { ok: false; error: string; message?: string }
+import type { Context, Result } from './versus.ts'
+import type { FriendResult } from './friends.ts'
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -23,7 +22,15 @@ async function playerOf(token: string): Promise<string | undefined> {
 }
 
 // `scheduled` : la tâche planifiée appelle avec la clé service_role, sans joueur (resolve-due seulement).
-export function handle(fn: (ctx: Context) => Promise<Reply>, options: { scheduled?: boolean } = {}) {
+export function handle(fn: (ctx: Context) => Promise<Result>, options: { scheduled?: boolean } = {}) {
+  return handleRequest(fn, options)
+}
+
+export function handleFriend(fn: (ctx: Context) => Promise<FriendResult>) {
+  return handleRequest(fn, {})
+}
+
+function handleRequest(fn: (ctx: Context) => Promise<Result | FriendResult>, options: { scheduled?: boolean }) {
   return async (req: Request): Promise<Response> => {
     if (req.method === 'OPTIONS') return new Response('ok', { headers: cors })
     if (req.method !== 'POST') return reply({ ok: false, error: 'METHOD_NOT_ALLOWED' }, 405)

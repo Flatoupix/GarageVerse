@@ -6,12 +6,12 @@ type Failure =
 
 const fail = (error: Failure) => ({ ok: false as const, error })
 const ok = () => ({ ok: true as const, data: null })
-type Result = ReturnType<typeof fail> | ReturnType<typeof ok>
+export type FriendResult = ReturnType<typeof fail> | ReturnType<typeof ok>
 
 const fields = (body: unknown) => body && typeof body === 'object' ? body as Record<string, unknown> : {}
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-async function withPlayers(sql: Sql, a: string, b: string, change: () => Promise<Result>) {
+async function withPlayers(sql: Sql, a: string, b: string, change: () => Promise<FriendResult>) {
   await sql('begin isolation level read committed')
   try {
     await sql('set local role service_role')

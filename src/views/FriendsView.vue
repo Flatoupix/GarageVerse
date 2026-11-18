@@ -94,7 +94,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
           <button class="button primary" :disabled="!online || busy">{{ t('Obtenir ton code ami') }}</button>
         </form>
         <form @submit.prevent="send">
-          <label>{{ t('Code ami') }} <input v-model.trim="code" required minlength="6" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" :disabled="!canChange"></label>
+          <label>{{ t('Code ami') }} <input v-model.trim="code" class="friend-code-entry" required minlength="6" maxlength="6" autocapitalize="characters" autocomplete="off" spellcheck="false" :disabled="!canChange"></label>
           <button class="button primary" :disabled="!canChange">{{ t('Envoyer la demande') }}</button>
         </form>
       </section>
@@ -144,7 +144,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
 </template>
 
 <style scoped>
-.friends-view { max-width: 720px; margin-inline: auto; }
+.friends-view { max-width: 720px; margin-inline: auto; animation: none; }
 .friend-tabs { grid-template-columns: minmax(0, 1fr); }
 .friend-panel { display: grid; gap: 10px; margin-block: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; }
 .friend-panel h2, .friend-panel p { margin: 0; }
@@ -152,6 +152,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
 .friend-panel form, .friend-row, .friend-actions { display: flex; flex-wrap: wrap; align-items: end; gap: 8px; }
 .friend-panel label { display: grid; gap: 4px; min-width: 0; flex: 1 1 160px; }
 .friend-panel input { min-width: 0; width: 100%; }
+.friend-code-entry { text-transform: uppercase; }
 .friend-panel .friend-code { width: 8ch; text-align: center; }
 .friend-row { align-items: center; justify-content: space-between; overflow-wrap: anywhere; }
 .friend-row .friend-code { margin-inline-end: auto; }
