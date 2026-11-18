@@ -267,8 +267,8 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--cyan), va
 .car-card.finish-legendary {
   --accent: #ff587b;
   --rail: #dd91d8;
-  --frame: repeating-linear-gradient(132deg, #ffffff38 0 .32cqw, #5139741f .32cqw .64cqw),
-    conic-gradient(from var(--holo, 0deg), #ffeea5, #9af7ff, #d9a8ff, #ffafdd, #f7efa5, #a4fff6, #ffeea5);
+  background-image: repeating-linear-gradient(132deg, #ffffff38 0 .32cqw, #5139741f .32cqw .64cqw),
+    conic-gradient(from var(--holo, 0deg), #ffeea54d, #9af7ff4d, #d9a8ff4d, #ffafdd4d, #f7efa54d, #a4fff64d, #ffeea54d);
 }
 .car-card.finish-legendary::after { opacity: .55; }
 .car-masthead { min-width: 0; padding: 1.5cqw 3cqw 2.25cqw; background: linear-gradient(128deg, #13103a, #100822); clip-path: var(--cut); }
