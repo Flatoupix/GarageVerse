@@ -1,0 +1,16 @@
+{
+  "id": "t030-bouton-booster-fixe",
+  "title": "Ouverture de booster : le bouton d'action garde toujours la même place",
+  "brief": "Ticket T-030 (tickets/030-bouton-ouverture-booster-position-fixe.md, à lire en entier). Retour du joueur : pendant l'ouverture d'un booster, le bouton principal (« Retourner la carte », « Carte suivante », « Voir le récapitulatif ») monte, descend ou saute selon les messages autour de la carte (« Doublon : +1 exemplaire », proposition de nouvelle édition avec « Garder l'apparence actuelle » / « Afficher cette édition », libellés de rareté ou de pièce). Il veut que le bouton ait toujours la même place, peu importe les messages. Examiner src/views/BoosterView.vue, src/components/RevealStack.vue, PullCard.vue, TearPack.vue et les styles. Solution attendue : zone d'actions ancrée en bas de la scène avec une hauteur réservée, et zone de messages de hauteur fixe (ou défilante) au-dessus, plutôt qu'un empilement dont la hauteur varie ; quand un choix (nouvelle édition) remplace le bouton principal, ses boutons occupent la même zone ; même principe pour le récapitulatif (« Voir le garage », « Ouvrir le suivant », « Autre booster »). Un message long, en français comme en anglais, ne doit pas déplacer le bouton. CONTRAINTES COMMUNES : `src/game/rules.ts` et `src/game/data.ts` sont recopiés tels quels côté serveur (supabase/sync-rules.mjs, vérifié par src/game/supabase.check.cjs) : ne pas les modifier, ne rien changer sous supabase/. Le projet est bilingue : tout texte visible passe par `t('…')` / `tp(…)` (import de '../i18n'), avec sa traduction anglaise dans `src/i18n/en/` (règles dans docs/i18n.md) ; `node src/i18n/i18n.check.cjs` doit passer, ainsi que toutes les vérifications existantes de src/game/ et le typage. Textes français, tutoiement. Les sauvegardes existantes restent valides. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Les huit thèmes (src/game/theme.ts) restent cohérents : règles communes dans src/themes/shared.css, règles propres à un thème dans base.css et neon.css (gardées synchronisées).",
+  "requirements": [
+    "Le bouton principal de l'ouverture occupe la même position verticale à l'écran sur toutes les cartes d'un même booster, quels que soient le message affiché (nouvelle carte, doublon, nouvelle édition, pièce) et la longueur du texte, à 320, 390 et 1280 px.",
+    "Les choix de nouvelle édition et les actions du récapitulatif tiennent dans la même zone d'actions réservée, sans pousser le contenu ni créer de débordement horizontal.",
+    "Aucune régression du geste de déchirure, du retournement des cartes, de la reprise après rechargement ni du mouvement réduit ; textes français et anglais (i18n.check.cjs passe).",
+    "Le principe de mise en page est décrit en quelques lignes dans docs/meta.md ; aucune erreur dans la console ; le parcours complet (boutique, ouverture, récapitulatif, garage) reste fonctionnel aux trois largeurs."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon"
+}

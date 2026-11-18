@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { PROFILES, chainFor, describeLink, invoke, orderChain, profileFor, validateChains } from './agents.ts'
 import type { Chains, Phase, Profile, Report } from './agents.ts'
+import { integratePatch, land, startPoint } from './integration.ts'
 import { execute, failure, redact, sessionEnv } from './process.ts'
 import type { Result, RunOptions } from './process.ts'
 
@@ -240,17 +241,21 @@ async function cycle(directory: string, resume: boolean) {
             const interrupted = checkout + '-interrompu-' + state.sequence
             await rename(checkout, interrupted)
           }
-          let source = state.config.repository
-          for (const candidate of [join(store, 'source'), resolve(here, '..')]) {
-            const origin = await git(['config', '--get', 'remote.origin.url'], candidate)
-            if (origin.code !== 0 || origin.stdout.trim() !== state.config.repository) continue
-            const localBase = await git(['show-ref', '--verify', '--quiet', 'refs/heads/' + state.config.base], candidate)
-            if (localBase.code !== 0) continue
-            source = candidate
-            break
+          // La base est lue dans le dépôt qui contient l'orchestrateur ; s'il prolonge sa branche par des cycles déjà intégrés (tronc), le cycle part du tronc.
+          let source = state.config.repository, start: string | undefined
+          const repo = resolve(here, '..')
+          const origin = await git(['config', '--get', 'remote.origin.url'], repo)
+          if (origin.code === 0 && origin.stdout.trim() === state.config.repository &&
+              (await git(['show-ref', '--verify', '--quiet', 'refs/heads/' + state.config.base], repo)).code === 0) {
+            source = repo
+            start = await startPoint(repo, state.config.base)
           }
           must(await git(['clone', '--no-local', '--single-branch', '--no-tags', '--branch', state.config.base,
             source, checkout], directory), 'Clone Git')
+          if (start && start !== 'refs/heads/' + state.config.base) {
+            must(await git(['fetch', '--no-tags', source, start], checkout), 'Récupérer le tronc d’intégration')
+            must(await git(['reset', '--hard', 'FETCH_HEAD'], checkout), 'Partir du tronc d’intégration')
+          }
         }
         const current = (await gitText(['branch', '--show-current'], 'Branche active')).trim()
         state.base = (await gitText(['rev-parse', 'HEAD'], 'Commit de base')).trim()
@@ -454,27 +459,18 @@ async function cycle(directory: string, resume: boolean) {
   }
 }
 
-// Reprend les commits d'un cycle terminé sur la branche de base du clone local. Le push reste manuel.
+// Empile les commits d'un cycle terminé sur le tronc d'intégration du dépôt (voir integration.ts). `land` les reprend ensuite dans la branche de base.
 async function integrate(directory: string, state: State, config: Config) {
   if (state.status !== 'complete') throw new Error('Ce cycle n’est pas terminé')
   const patch = join(directory, 'changes.patch')
   if (!await readFile(patch).then(() => true, () => false)) { console.log('Aucun changement à intégrer'); return }
-  const source = join(store, 'source')
-  const run = (args: string[]) => execute('git', [...gitArgs, ...args], { cwd: source, env: sessionEnv(), timeout: 60_000 })
-  if (must(await run(['config', '--get', 'remote.origin.url']), 'Clone local').trim() !== config.repository ||
-      must(await run(['branch', '--show-current']), 'Branche du clone').trim() !== config.base) throw new Error('Le clone local n’est pas sur la branche de base')
-  if (must(await run(['status', '--porcelain']), 'État du clone').trim()) throw new Error('Le clone local a des modifications non commitées')
-  const applied = await run(['am', '--3way', patch])
-  if (applied.code !== 0 || applied.problem) {
-    await run(['am', '--abort'])
-    throw new Error('Intégration · le patch ne s’applique plus sur la branche de base')
-  }
-  console.log('Commits intégrés sur ' + config.base + ' · ' + must(await run(['log', '--oneline', `${state.base}..HEAD`]), 'Journal').trim())
+  const head = await integratePatch(resolve(here, '..'), config.base, patch, store)
+  console.log('Commits intégrés au tronc de ' + config.base + ' · ' + head.slice(0, 7) + ' (les reprendre avec « land »)')
 }
 
 async function main() {
   const [command, arg, ...flags] = process.argv.slice(2)
-  const help = 'node orchestrator/cycle.ts doctor | run [booster] [--dry-run] | queue <tâches...> [--integrate] [--dry-run] | resume <cycle> | status <cycle> | integrate <cycle>'
+  const help = 'node orchestrator/cycle.ts doctor | run [booster] [--dry-run] | queue <tâches...> [--integrate] [--dry-run] | resume <cycle> | status <cycle> | integrate <cycle> | land'
   if (!command || command === '--help') { console.log(help); return }
   const config = await json<Config>(join(here, 'config.json'))
   const sessions = () => Promise.all([
@@ -514,6 +510,11 @@ async function main() {
         }
       }
     }
+    return
+  }
+  if (command === 'land') {
+    const commits = await land(resolve(here, '..'), config.base)
+    console.log(commits.length ? `Repris dans ${config.base} :\n${commits.join('\n')}` : `Rien à reprendre : ${config.base} contient déjà le tronc`)
     return
   }
   if (command === 'status' || command === 'resume' || command === 'integrate') {

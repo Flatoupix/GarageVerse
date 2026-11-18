@@ -5,6 +5,9 @@ import { mkdtemp, writeFile, chmod, readFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { DEFAULT_CHAINS, invoke, orderChain, profileFor, reportFrom, validateChains } from './agents.ts'
+import { execFileSync } from 'node:child_process'
+import { existsSync, writeFileSync } from 'node:fs'
+import { integratePatch, land, startPoint, trunkRef } from './integration.ts'
 import { execute, redact } from './process.ts'
 
 test('un patch est limité aux chemins autorisés', () => {
@@ -91,4 +94,45 @@ test('le profil de la tâche réordonne les modèles sans changer l’ordre des 
   assert.equal(orderChain(DEFAULT_CHAINS.ux, 'light')[0].engine, 'agy')
   assert.equal(orderChain(DEFAULT_CHAINS.ux, 'light')[0].model, 'gemini-3.8-flash-high')
   assert.equal(orderChain(DEFAULT_CHAINS.ux, 'heavy').at(-1)?.model, 'claude-sonnet-5-5')
+})
+
+test('l’intégration empile les cycles sur un tronc caché sans toucher au dépôt de travail', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'trunk-'))
+  const repo = join(root, 'repo')
+  const sh = (cwd: string, ...args: string[]) => execFileSync('git', ['-c', 'user.name=Test', '-c', 'user.email=test@example.com', ...args], { cwd, encoding: 'utf8' }).trim()
+  execFileSync('git', ['init', '-q', '-b', 'dev', repo])
+  writeFileSync(join(repo, 'a.txt'), 'a\n'); sh(repo, 'add', '.'); sh(repo, 'commit', '-q', '-m', 'base')
+  // Deux patchs successifs, fabriqués sur une branche jetable puis remise à zéro.
+  const patchFor = (name: string, file: string, content: string) => {
+    sh(repo, 'switch', '-q', '-c', 'jetable'); writeFileSync(join(repo, file), content); sh(repo, 'add', '.'); sh(repo, 'commit', '-q', '-m', name)
+    const out = join(root, name + '.patch'); writeFileSync(out, sh(repo, 'format-patch', '-1', '--stdout') + '\n')
+    sh(repo, 'switch', '-q', 'dev'); sh(repo, 'branch', '-q', '-D', 'jetable'); return out
+  }
+  const first = patchFor('un', 'b.txt', 'b\n'), second = patchFor('deux', 'c.txt', 'c\n')
+  const devBefore = sh(repo, 'rev-parse', 'dev')
+  assert.equal(await startPoint(repo, 'dev'), 'refs/heads/dev')
+  await integratePatch(repo, 'dev', first, root)
+  assert.equal(await startPoint(repo, 'dev'), trunkRef('dev'))
+  await integratePatch(repo, 'dev', second, root)
+  assert.equal(sh(repo, 'log', '--format=%s', `dev..${trunkRef('dev')}`), 'deux\nun')
+  // Rien n'a bougé dans le dépôt de travail : branche, fichiers, copies de travail supplémentaires.
+  assert.equal(sh(repo, 'rev-parse', 'dev'), devBefore)
+  assert.ok(!existsSync(join(repo, 'b.txt')) && !existsSync(join(repo, 'c.txt')))
+  assert.equal(sh(repo, 'status', '--porcelain'), '')
+  assert.equal(sh(repo, 'worktree', 'list').split('\n').length, 1)
+  // La branche avance de son côté : la reprise se fait commit par commit, puis le tronc disparaît.
+  writeFileSync(join(repo, 'd.txt'), 'd\n'); sh(repo, 'add', '.'); sh(repo, 'commit', '-q', '-m', 'ailleurs')
+  assert.deepEqual((await land(repo, 'dev')).map(line => line.slice(8)), ['un', 'deux'])
+  assert.equal(sh(repo, 'log', '--format=%s', '-3'), 'deux\nun\nailleurs')
+  assert.equal(await startPoint(repo, 'dev'), 'refs/heads/dev')
+  await assert.rejects(land(repo, 'dev'), /Aucun cycle/)
+  // Avance rapide quand la branche n'a pas bougé ; un patch qui ne s'applique plus est refusé sans laisser de trace.
+  const third = patchFor('trois', 'e.txt', 'e\n')
+  await integratePatch(repo, 'dev', third, root)
+  assert.deepEqual((await land(repo, 'dev')).map(line => line.slice(8)), ['trois'])
+  writeFileSync(join(repo, 'e.txt'), 'autre\n'); sh(repo, 'add', '.'); sh(repo, 'commit', '-q', '-m', 'conflit')
+  await assert.rejects(integratePatch(repo, 'dev', third, root), /ne s’applique plus/)
+  assert.equal(sh(repo, 'worktree', 'list').split('\n').length, 1)
+  // Le patch refusé n'a pas créé de tronc.
+  assert.throws(() => execFileSync('git', ['show-ref', '--verify', '--quiet', trunkRef('dev')], { cwd: repo }))
 })

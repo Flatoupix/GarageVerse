@@ -24,15 +24,16 @@ node orchestrator/cycle.ts queue booster autre-tache --dry-run
 node orchestrator/cycle.ts status <identifiant>
 node orchestrator/cycle.ts resume <identifiant>
 node orchestrator/cycle.ts integrate <identifiant>
+node orchestrator/cycle.ts land
 ```
 
-`integrate` reprend les commits d’un cycle terminé sur la branche de base du clone local `.orchestrator/source`. Le push reste manuel. Si Codex atteint son quota ou perd sa session pendant l’implémentation, Claude prend le relais dans la même copie de travail.
+`integrate` empile les commits d’un cycle terminé sur un **tronc d’intégration** : une référence cachée du dépôt (`refs/orchestrator/<base>`) qui ne touche ni votre branche de base, ni votre dossier de travail, et ne demande aucun clone supplémentaire. `land` reprend ensuite ces commits dans la branche de base (il faut être sur cette branche, avec un arbre propre ; avance rapide, ou reprise commit par commit si la branche a avancé) puis supprime le tronc. Le push reste manuel. Si Codex atteint son quota ou perd sa session pendant l’implémentation, Claude prend le relais dans la même copie de travail.
 
 `run` sélectionne `orchestrator/backlog/booster.json` par défaut. Pour ajouter une tâche, copier `backlog/defi-du-jour.json` sous un nouvel identifiant, adapter le brief et renseigner les fichiers ou répertoires modifiables dans `paths`. Les tâches peuvent cibler `src/`, `docs/`, `public/`, `supabase/`, `README.md` et `index.html`. Les scripts d’installation et de test restent sous contrôle humain.
 
 Le champ `browser` choisit le scénario Chrome : `neon` rejoue le parcours complet de la version Neon Drive (boutique, ouverture, garage, fiche, course jusqu’à l’arrivée, rechargements), `booster` est le scénario de l’ancien prototype. Avec `neon`, le champ facultatif `flow` ajoute des étapes propres à la tâche, jouées après le parcours commun : `{ "reset": true }` (sauvegarde neuve), `{ "tab": "Accueil" }`, `{ "tap": "nom accessible du bouton" }`, `{ "expect": "texte visible" }` et `{ "capture": "nom" }`. Les exigences de la tâche doivent donc fixer les libellés que ces étapes utilisent. Les captures ainsi produites sont celles que relit Antigravity. Le mode `--dry-run` valide les entrées et affiche le parcours et ses limites sans appeler les agents, Git ou le navigateur.
 
-`queue` enchaîne les identifiants indiqués, chacun dans sa propre branche à partir de la base configurée. La file s’arrête au premier blocage. Avec `--integrate`, les commits de chaque cycle validé rejoignent la branche de base du clone local avant le cycle suivant, pour que les tâches s’appuient les unes sur les autres. Reprendre le cycle concerné, puis relancer les tâches qui restent si nécessaire.
+`queue` enchaîne les identifiants indiqués, chacun dans sa propre branche à partir de la base configurée. La file s’arrête au premier blocage. Avec `--integrate`, les commits de chaque cycle validé rejoignent le tronc d’intégration avant le cycle suivant, pour que les tâches s’appuient les unes sur les autres. Reprendre le cycle concerné, puis relancer les tâches qui restent si nécessaire.
 
 Utiliser **Ctrl+C** pour arrêter proprement. La reprise conserve le nombre d’appels déjà réservés, le temps actif, les rapports, la branche et l’itération. Une étape interrompue peut être rejouée. Si le patch a déjà atteint l’index ou le commit, la reprise vérifie l’arbre Git attendu avant de poursuivre. Une durée ou un budget épuisé arrête le cycle. Pour essayer avec un nouveau budget, ajuster la configuration et démarrer un nouveau cycle.
 
@@ -58,7 +59,7 @@ Moteurs permis par phase : `plan` et `review` → `claude` ; `implement` → `co
 
 Chaque cycle a sa propre copie Git et une branche `orchestrator/<identifiant>`. La base par défaut est `dev`, la branche du travail en cours (jamais publiée telle quelle). Le dépôt distant est retiré de la copie après le clonage. Codex écrit dans une copie jetable du dépôt, confinée à ce dossier, sans réseau ni destination distante, où il peut vérifier le typage. Le script relève le diff limité aux chemins de la tâche, vérifie les chemins et le type de patch, l’applique dans la copie isolée puis crée un commit local. La copie jetable est ensuite supprimée. Les outils de Claude sont désactivés pour ces appels. Antigravity reçoit une configuration MCP temporaire propre au dossier de revue. La capacité du modèle à ouvrir les images est vérifiée par les appels effectifs à l’outil, avec une capture inspectée à chaque largeur. Si l’accès est refusé, le cycle indique un blocage.
 
-Le cycle cherche d’abord la branche de base dans la copie locale `.orchestrator/source` ou dans le clone courant, si celui-ci a le bon dépôt d’origine. Il consulte GitHub lorsque la branche locale est absente.
+Le cycle lit la branche de base dans le dépôt qui contient l’orchestrateur, s’il a le bon dépôt d’origine ; si des cycles déjà intégrés prolongent cette branche (tronc d’intégration), il part du tronc, donc chaque tâche voit le travail des précédentes. Il consulte GitHub lorsque la branche locale est absente.
 
 Les tests Chrome utilisent un profil éphémère et un serveur sur la boucle locale. Ils émulent les événements tactiles et les dimensions de l’écran. Le toucher, le son et les vibrations sur téléphone physique nécessitent un essai joueur.
 
