@@ -20,8 +20,8 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-004](004-versus-mises-et-reglement.md) | Mises et règlement unique | P1 |
 | [T-005](005-versus-client-temps-reel.md) | Client Versus et reprise | P1 |
 | [T-006](006-versus-interface-mobile.md) | Interface de duel mobile | P1 |
-| [T-007](007-versus-amis-palmares-v2.md) | Amis et palmarès V2 | P2 |
-| [T-008](008-versus-echange-cartes-v3.md) | Échanges de cartes V3 | P2 |
+| [T-007](007-versus-amis-palmares-v2.md) | Palmarès V2 (la liste d'amis passe dans [T-008](008-echanges-de-cartes.md)) | P2 |
+| [T-008](008-echanges-de-cartes.md) | Échanges de cartes entre amis, dissociés du Versus et livrés avant lui | P2 |
 
 ## Gameplay, collection et économie
 

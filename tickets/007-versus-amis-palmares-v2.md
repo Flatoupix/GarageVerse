@@ -1,5 +1,7 @@
 # T-007 · Versus V2 : amis par code et palmarès
 
+> **Mise à jour du 18 novembre 2026.** Les échanges de cartes sont dissociés du Versus et livrés avant lui ([T-008](008-echanges-de-cartes.md), [docs/echanges.md](../docs/echanges.md)). La **liste d'amis par code** passe dans ce chantier ; ce ticket garde l'historique des duels et le palmarès, qui réutiliseront cette liste.
+
 - **Priorité :** P2
 - **Statut :** Planifié pour V2
 - **Sources :** [docs/versus.md](../docs/versus.md) §2
