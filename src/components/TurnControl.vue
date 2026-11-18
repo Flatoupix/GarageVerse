@@ -5,6 +5,8 @@ import { signedTiming } from '../game/timing-text'
 import { advanceTurns, summarizeTurns, type TurnJudgment, type TurnDirection, type TurnResult, type TurnSequence } from '../game/turn'
 import { turnFeedback } from '../game/turn-text'
 import { useManualKeys } from '../game/manual-keys'
+import { pop, shake, tone } from '../game/fx'
+import { manualImpact, turnGrade } from '../game/manual-feedback'
 import { t } from '../i18n'
 
 const props = defineProps<{ sequence: TurnSequence; demo?: boolean; waiting?: boolean }>()
@@ -14,6 +16,9 @@ const lanes = [
   { direction: 'droite', arrow: '→', action: t('Tourner à droite') },
 ] as const
 
+const control = ref<HTMLElement>()
+const perfectLabel = ref<HTMLElement>()
+const miss = shallowRef<{ direction: TurnDirection; position: number; key: number }>()
 const elapsed = ref(0)
 const judgments = shallowRef<TurnJudgment[]>([])
 const hidden = ref(document.hidden)
@@ -41,11 +46,34 @@ function update(input: TurnDirection | null, time: number) {
   if (complete.value) return
   const next = advanceTurns(props.sequence, judgments.value, input, time)
   if (next === judgments.value) return
+  const previous = judgments.value.length
   judgments.value = next
-  emit('judgment', next[next.length - 1], next.length)
+  for (let i = previous; i < next.length; i++) emit('judgment', next[i], i + 1)
+  const index = next.length - 1
+  impact(next[index], index, time)
   if (complete.value && !props.demo) {
     emit('turn', summarizeTurns(next, settings))
   }
+}
+
+function impact(result: TurnJudgment, index: number, time: number) {
+  const note = notes[index]
+  const track = control.value?.querySelector<HTMLElement>(`[data-lane="${note.direction}"]`)
+  const center = track?.querySelector<HTMLElement>('.turn-target')
+  if (!track || !center) return
+  const grade = turnGrade[result.outcome]
+  manualImpact(grade, center, perfectLabel.value, false)
+  if (reducedMotion.value) return
+  if (grade === 'miss') {
+    const position = Math.max(12, Math.min(86, target + travel * (time - note.at) / settings.lead))
+    miss.value = { direction: note.direction, position, key: index }
+    shake(1, track)
+    return
+  }
+  const color = grade === 'perfect' ? tone.gold : grade === 'good' ? tone.cyan : tone.light
+  const duration = grade === 'perfect' ? 250 : grade === 'good' ? 190 : 140
+  track.animate({ boxShadow: [`inset 0 0 16px ${color}`, 'inset 0 0 0 transparent'] }, { duration, easing: 'ease-out' })
+  pop(control.value?.querySelector(`[data-steer="${note.direction}"]`), 1.08, duration)
 }
 
 function tick() {
@@ -92,12 +120,17 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="turn-control">
+  <div ref="control" class="turn-control">
     <p v-if="demo">{{ t('Appuie quand la flèche atteint la cible.') }}</p>
+    <div ref="perfectLabel" class="turn-perfect" :style="{ color: tone.gold }" role="status">
+      {{ reducedMotion && last?.outcome === 'parfait' ? t('Parfait !') : '' }}
+    </div>
     <div class="turn-lanes" aria-hidden="true">
-      <div v-for="lane in lanes" :key="lane.direction" class="turn-track manual-track">
+      <div v-for="lane in lanes" :key="lane.direction" class="turn-track manual-track" :data-lane="lane.direction">
         <span class="turn-lane-arrow">{{ lane.arrow }}</span>
         <span class="turn-target" :style="{ top: target - targetRadius + '%', height: 2 * targetRadius + '%' }"></span>
+        <span v-if="!reducedMotion && miss?.direction === lane.direction" :key="miss.key" class="turn-note turn-miss"
+          :style="{ top: miss.position + '%', color: tone.rose }" @animationend="miss = undefined">{{ lane.arrow }}</span>
         <template v-for="note in visibleNotes" :key="note.at">
           <span v-if="note.direction === lane.direction" class="turn-note" :style="{ top: note.position + '%' }">{{ lane.arrow }}</span>
         </template>
@@ -105,7 +138,7 @@ onUnmounted(() => {
     </div>
     <div class="turn-buttons">
       <button v-for="lane in lanes" :key="lane.direction" type="button" class="button primary wide"
-        :disabled="waiting || complete || hidden" :aria-label="lane.action" @click="steer(lane.direction, $event)"
+        :data-steer="lane.direction" :disabled="waiting || complete || hidden" :aria-label="lane.action" @click="steer(lane.direction, $event)"
         @keydown.enter="$event.repeat && $event.preventDefault()">{{ lane.arrow }}</button>
     </div>
     <small v-if="!demo" class="manual-key-hint">{{ t('← →') }}</small>
@@ -119,6 +152,9 @@ onUnmounted(() => {
 
 <style scoped>
 .turn-control { display: grid; min-width: 0; gap: 4px; padding: 6px 10px; text-align: center; }
+.turn-perfect { min-height: 1.15em; font-size: .82rem; font-weight: 700; }
+.turn-note.turn-miss { pointer-events: none; animation: turn-miss 220ms ease-out both; }
+@keyframes turn-miss { to { opacity: 0; scale: .65; } }
 .turn-control p { margin: 0; }
 .turn-lanes, .turn-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .turn-track {

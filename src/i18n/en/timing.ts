@@ -1,4 +1,6 @@
 export const timing = {
+  'Série ×{n}': 'Streak ×{n}',
+  'Sans faute !': 'Flawless!',
   '3': '3',
   '2': '2',
   '1': '1',

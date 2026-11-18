@@ -210,51 +210,52 @@ export function point(target: Target) {
   return { x: box.left + box.width / 2, y: box.top + box.height / 2 }
 }
 
-export function sparks(target: Target, colors = palettes.cyan, count = 26, power = 1) {
+export function sparks(target: Target, colors = palettes.cyan, count = 26, power = 1, duration?: number) {
   if (!start()) return
   const { x, y } = point(target)
   for (let i = 0; i < count; i++) {
-    const angle = rand(0, Math.PI * 2), speed = rand(140, 620) * power, life = rand(0.35, 0.85)
+    const angle = rand(0, Math.PI * 2), speed = rand(140, 620) * power, life = duration ? rand(duration * 0.55, duration) : rand(0.35, 0.85)
     particles.push({ kind: 'spark', x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 80, life, max: life, size: rand(1.5, 3.4), color: pick(colors), rot: 0, spin: 0 })
   }
 }
 
-export function ring(target: Target, color = tone.cyan, speed = 520) {
+export function ring(target: Target, color = tone.cyan, speed = 520, life = 0.5) {
   if (!start()) return
   const { x, y } = point(target)
-  particles.push({ kind: 'ring', x, y, vx: 0, vy: 0, life: 0.5, max: 0.5, size: 12, color, rot: 0, spin: speed })
+  particles.push({ kind: 'ring', x, y, vx: 0, vy: 0, life, max: life, size: 12, color, rot: 0, spin: speed })
 }
 
-// Pluie de confettis depuis le haut, plus deux canons latéraux.
-export function confetti(colors = palettes.gold, count = 90) {
+// Pluie de confettis et canons latéraux, ou salve courte depuis une cible.
+export function confetti(colors = palettes.gold, count = 90, burst?: { target: Target; duration: number }) {
   if (!start()) return
+  const origin = burst ? point(burst.target) : undefined
   for (let i = 0; i < count; i++) {
     const side = i % 3
-    const life = rand(1.6, 2.8)
+    const life = burst ? rand(burst.duration * 0.7, burst.duration) : rand(1.6, 2.8)
     particles.push({
-      kind: 'confetti', life, max: life, size: rand(6, 12), color: pick(colors), rot: rand(0, 6), spin: rand(-9, 9),
-      x: side === 0 ? rand(0, width) : side === 1 ? -10 : width + 10,
-      y: side === 0 ? rand(-60, -10) : height * rand(0.45, 0.75),
-      vx: side === 0 ? rand(-60, 60) : (side === 1 ? 1 : -1) * rand(180, 520),
-      vy: side === 0 ? rand(40, 260) : rand(-760, -380),
+      kind: 'confetti', life, max: life, size: burst ? rand(3, 6) : rand(6, 12), color: pick(colors), rot: rand(0, 6), spin: rand(-9, 9),
+      x: origin ? origin.x : side === 0 ? rand(0, width) : side === 1 ? -10 : width + 10,
+      y: origin ? origin.y : side === 0 ? rand(-60, -10) : height * rand(0.45, 0.75),
+      vx: origin ? rand(-260, 260) : side === 0 ? rand(-60, 60) : (side === 1 ? 1 : -1) * rand(180, 520),
+      vy: origin ? rand(-200, -75) : side === 0 ? rand(40, 260) : rand(-760, -380),
     })
   }
 }
 
 // Lignes de vitesse horizontales (nitro, départ de course).
-export function streaks(colors = palettes.fire, count = 34, direction = 1) {
+export function streaks(colors = palettes.fire, count = 34, direction = 1, duration?: number) {
   if (!start()) return
   for (let i = 0; i < count; i++) {
-    const life = rand(0.3, 0.7)
+    const life = duration ? rand(duration * 0.65, duration) : rand(0.3, 0.7)
     particles.push({ kind: 'streak', x: direction > 0 ? rand(-width * 0.6, width * 0.3) : rand(width * 0.7, width * 1.6), y: rand(0, height),
       vx: direction * rand(1400, 2800), vy: 0, life, max: life, size: rand(1, 3.5), color: pick(colors), rot: 0, spin: 0 })
   }
 }
 
-export function floatText(target: Target, text: string, color = tone.gold, size = 22) {
+export function floatText(target: Target, text: string, color = tone.gold, size = 22, life = 1.1) {
   if (!start()) return
   const { x, y } = point(target)
-  particles.push({ kind: 'text', x, y, vx: 0, vy: -46, life: 1.1, max: 1.1, size, color, rot: 0, spin: 0, text })
+  particles.push({ kind: 'text', x, y, vx: 0, vy: -46, life, max: life, size, color, rot: 0, spin: 0, text })
 }
 
 export function flash(color = tone.light, strength = 0.5) {
@@ -264,9 +265,9 @@ export function flash(color = tone.light, strength = 0.5) {
 }
 
 // Secousse de la scène ciblée ou de la vue courante, niveau 1 à 3.
-export function shake(level: 1 | 2 | 3 = 1, target?: string) {
+export function shake(level: 1 | 2 | 3 = 1, target?: string | HTMLElement) {
   if (reducedMotion.value) return
-  const el = target ? document.querySelector(target) : document.querySelector('dialog[open] .sheet') ?? document.querySelector('main')
+  const el = typeof target === 'string' ? document.querySelector(target) : target ?? document.querySelector('dialog[open] .sheet') ?? document.querySelector('main')
   const d = [0, 4, 8, 14][level]
   if (!(el instanceof HTMLElement)) return
   // La secousse déplace l'élément par left/top et non par translate : un déplacement transformé ferait de l'élément

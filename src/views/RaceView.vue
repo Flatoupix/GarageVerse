@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inTransit } from '../game/trade'
-import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef, watch } from 'vue'
 import { locale, t, tp } from '../i18n'
 import { ruleText } from '../game/rules-text'
 import { NIGHT_CAP, nightRival } from '../game/endless'
@@ -27,6 +27,7 @@ import SectorRun from '../components/SectorRun.vue'
 import TimingGauge from '../components/TimingGauge.vue'
 import TurnControl from '../components/TurnControl.vue'
 import { turnSequence, type TurnResult, type TurnSequence } from '../game/turn'
+import { raceStreaks, shiftGrade, turnGrade, type ManualFeedback, type ManualGrade } from '../game/manual-feedback'
 import { turnFeedback, turnSummary } from '../game/turn-text'
 
 // Les mesures suivent aussi les changements de thème, de police et de zone sûre.
@@ -198,9 +199,16 @@ const timingWindows = computed(() => {
     soloTimingWindow(d, d.player.lineup[choice.car], shift))
 })
 const gauge = ref<InstanceType<typeof TimingGauge>>()
-const liveFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
-function showJudgment(tag: string, good: boolean) {
-  liveFeedback.value = { tag, good, count: (liveFeedback.value?.count ?? 0) + 1 }
+const liveFeedback = ref<ManualFeedback | null>(null)
+const manualStreak = ref(0)
+const flawless = ref(false)
+const finishedTurns = shallowRef<TurnSequence>()
+const finalGear = ref<HTMLElement>()
+watch(duel, current => { manualStreak.value = current ? (raceStreaks.get(current) ?? 0) : 0 }, { immediate: true })
+watch(finalGear, gear => { if (gear) pop(gear, 1.13, 220) }, { flush: 'post' })
+function showJudgment(tag: string, grade: ManualGrade) {
+  manualStreak.value = grade === 'perfect' ? manualStreak.value + 1 : 0
+  liveFeedback.value = { tag: grade === 'perfect' ? t('Parfait !') : tag, grade, count: (liveFeedback.value?.count ?? 0) + 1 }
 }
 const picked = ref(0)
 const nitro = ref(false)
@@ -298,6 +306,8 @@ function advance(round: Round, to: number) {
 function skipRun() { if (shown.value && !settled.value) { clear(); settle(shown.value) } }
 
 function settle(round: Round, immediateBoost = false) {
+  if (!reducedMotion.value) flawless.value = false
+  finishedTurns.value = undefined
   settled.value = true
   step.value = Math.max(round.player.lines.length, round.rival.lines.length) + 1
   counts.player = round.player.score
@@ -342,6 +352,7 @@ function engage() {
   if (!d || d.winner || pendingManual.value || shown.value) return
   const choice = { car: picked.value, nitro: nitro.value, stance: stance.value }
   liveFeedback.value = null
+  flawless.value = false
   if (manualSector.value) {
     const opponent = rival.value
     const sequence = rhythmTurns.value && opponent && d.sectors[index.value] === 'virage'
@@ -390,7 +401,14 @@ function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>
   const round = rivalRace.value
     ? playPilotRound(pending.duel, pending.choice, Math.random, () => resolve(pending)) : resolve(pending)
   pending.duel.timingReview = true
+  raceStreaks.set(pending.duel, manualStreak.value)
+  flawless.value = Boolean(liveFeedback.value && manualStreak.value >= liveFeedback.value.count)
   showRound(round, true)
+  // La dernière note termine son effet pendant la transition vers le score.
+  if (pending.sequence && !reducedMotion.value) {
+    finishedTurns.value = pending.sequence
+    timers.push(setTimeout(() => { finishedTurns.value = undefined }, 260))
+  }
 }
 
 function showRound(round: TimingRound, fromLive = false) {
@@ -403,17 +421,28 @@ function showRound(round: TimingRound, fromLive = false) {
   stance.value = 'normal'
   persist()
   clear()
-  if (reducedMotion.value) settle(round, round.player.nitro || round.rival.nitro)
+  const celebrationDelay = flawless.value ? 290 : 0
+  if (reducedMotion.value && !celebrationDelay) settle(round, round.player.nitro || round.rival.nitro)
   else {
     settled.value = false
     counts.player = counts.rival = 0
-    sound('whoosh')
     step.value = 0
-    const startDelay = fromLive ? 0 : AUTOMATIC_START_MS
-    if (fromLive) advance(round, 1)
-    const steps = Math.max(round.player.lines.length, round.rival.lines.length)
-    for (let k = fromLive ? 2 : 1; k <= steps; k++) timers.push(setTimeout(() => advance(round, k), startDelay + (k - 1) * STEP_MS))
-    timers.push(setTimeout(() => settle(round), startDelay + steps * STEP_MS + 240))
+    if (reducedMotion.value) {
+      timers.push(setTimeout(() => settle(round, round.player.nitro || round.rival.nitro), celebrationDelay))
+    } else {
+      sound('whoosh')
+      const startDelay = fromLive ? celebrationDelay : AUTOMATIC_START_MS
+      const firstNow = fromLive && !celebrationDelay
+      if (firstNow) advance(round, 1)
+      const steps = Math.max(round.player.lines.length, round.rival.lines.length)
+      for (let k = firstNow ? 2 : 1; k <= steps; k++) {
+        timers.push(setTimeout(() => {
+          flawless.value = false
+          advance(round, k)
+        }, startDelay + (k - 1) * STEP_MS))
+      }
+      timers.push(setTimeout(() => settle(round), startDelay + steps * STEP_MS + 240))
+    }
   }
   void scrollToStage(true)
   const free = d.player.lineup.findIndex((_, car) => !overheated(d.player, car))
@@ -587,17 +616,17 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <SectorRun v-else-if="pendingManual || shown?.timing || shown?.direction" :waiting="Boolean(pendingManual && !manualStarted)" :round="shown" :step="step"
           :live="pendingManual ? duel.conditions[index] : undefined" :running="Boolean(shown && !settled)"
           :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown?.condition ?? duel.conditions[index])"
-          :feedback="liveFeedback" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
+          :feedback="liveFeedback" :streak="manualStreak" :flawless="flawless" :keep-controls="Boolean(finishedTurns)" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
           <template #overlay>
             <ManualCountdown v-if="pendingManual" :full="firstManual" @go="manualStarted = true" />
-            <span v-if="shown?.shifts && liveFeedback && (step <= 1 || reducedMotion)" class="final-gear">
+            <span ref="finalGear" v-if="shown?.shifts && liveFeedback && (step <= 1 || reducedMotion)" class="final-gear">
               {{ t('Rapport {n}/{total}', { n: shown.shifts.length + 1, total: shown.shifts.length + 1 }) }}
             </span>
           </template>
-          <TurnControl v-if="pendingManual?.sequence" :sequence="pendingManual.sequence" :waiting="!manualStarted" @turn="steer"
-            @judgment="result => showJudgment(turnFeedback(result.outcome), result.modifier > 0)" />
+          <TurnControl v-if="pendingManual?.sequence || finishedTurns" :sequence="(pendingManual?.sequence ?? finishedTurns)!" :waiting="!manualStarted" @turn="steer"
+            @judgment="result => showJudgment(turnFeedback(result.outcome), turnGrade[result.outcome])" />
           <TimingGauge v-else-if="timingWindows.length" ref="gauge" :windows="timingWindows" :waiting="!manualStarted" @finish="shift"
-            @judgment="result => showJudgment(timingFeedback(result.zone), result.modifier >= 0)" />
+            @judgment="result => showJudgment(timingFeedback(result.zone), shiftGrade[result.zone])" />
         </SectorRun>
         <template v-if="shown">
           <p v-if="shown.timing && !shown.shifts?.length" role="status">{{ t('Référence {base} · Timing {zone} ({modifier}) = {total}', {

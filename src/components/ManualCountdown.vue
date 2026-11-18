@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import { COUNTDOWN_STEP_MS, READY_STEP_MS } from '../game/countdown'
+import { palettes, pop, streaks } from '../game/fx'
+import { sound } from '../game/store'
 import { t } from '../i18n'
 
 const props = defineProps<{ full: boolean }>()
@@ -8,6 +10,15 @@ const emit = defineEmits<{ go: [] }>()
 const steps = props.full ? [t('3'), t('2'), t('1'), t('Partez !')] : [t('Prêt ?'), t('Partez !')]
 const duration = props.full ? COUNTDOWN_STEP_MS : READY_STEP_MS
 const label = ref('')
+const digit = ref<HTMLElement>()
+watch(label, value => {
+  if (!value) return
+  pop(digit.value, 1.18, 230)
+  if (value === steps.at(-1)) {
+    sound('rev')
+    streaks(palettes.fire, 8, 1, 0.28)
+  } else if (props.full) sound('tick')
+}, { flush: 'post' })
 let frame = 0
 let since: number | undefined
 let banked = 0
@@ -46,7 +57,7 @@ onUnmounted(() => {
 
 <template>
   <div class="manual-countdown" role="status" aria-live="polite" aria-atomic="true">
-    <strong v-if="label">{{ label }}</strong>
+    <strong v-if="label" ref="digit" :key="label">{{ label }}</strong>
   </div>
 </template>
 

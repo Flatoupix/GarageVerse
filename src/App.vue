@@ -26,6 +26,7 @@ import TurnControl from './components/TurnControl.vue'
 import { turnSequence, type TurnJudgment } from './game/turn'
 import { turnFeedback } from './game/turn-text'
 import { shiftsPerSector, timingWindow, type TimingResult } from './game/timing'
+import { shiftGrade, turnGrade, type ManualFeedback, type ManualGrade } from './game/manual-feedback'
 import { timingFeedback } from './game/timing-text'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
@@ -93,14 +94,25 @@ function preloadDemoImages() {
 const demoGauge = ref<InstanceType<typeof TimingGauge>>()
 const demoScene = ref<HTMLElement>()
 const settingsContent = ref<HTMLElement>()
-const demoFeedback = ref<{ tag: string; good: boolean; count: number } | null>(null)
+const demoFeedback = ref<ManualFeedback | null>(null)
+const demoStreak = ref(0)
+const demoFlawless = computed(() => {
+  const total = activeDemo.value === 'timing' ? demoWindows.length : demoTurns.notes.length
+  return demoStreak.value === total
+})
+function showDemoJudgment(tag: string, grade: ManualGrade) {
+  demoStreak.value = grade === 'perfect' ? demoStreak.value + 1 : 0
+  demoFeedback.value = { tag: grade === 'perfect' ? t('Parfait !') : tag, grade, count: (demoFeedback.value?.count ?? 0) + 1 }
+}
 function demoJudgment(result: TimingResult) {
-  demoFeedback.value = {
-    tag: timingFeedback(result.zone), good: result.modifier >= 0, count: (demoFeedback.value?.count ?? 0) + 1,
-  }
+  showDemoJudgment(timingFeedback(result.zone), shiftGrade[result.zone])
+}
+function resetDemoFeedback() {
+  demoFeedback.value = null
+  demoStreak.value = 0
 }
 async function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
-  demoFeedback.value = null
+  resetDemoFeedback()
   activeDemo.value = activeDemo.value === demo ? null : demo
   if (!activeDemo.value) return
   await nextTick()
@@ -113,11 +125,11 @@ async function toggleDemo(demo: NonNullable<typeof activeDemo.value>) {
 }
 const demoTurns = turnSequence('demo', 0, 'demo', { perfect: 100, good: 230, acceptance: 410 })
 const turnAttempt = ref(0)
-function demoTurnJudgment(result: TurnJudgment, count: number) {
-  demoFeedback.value = { tag: turnFeedback(result.outcome), good: result.modifier > 0, count }
+function demoTurnJudgment(result: TurnJudgment) {
+  showDemoJudgment(turnFeedback(result.outcome), turnGrade[result.outcome])
 }
 function replayTurns() {
-  demoFeedback.value = null
+  resetDemoFeedback()
   turnAttempt.value++
 }
 const saveFile = ref<HTMLInputElement>()
@@ -509,13 +521,13 @@ watch(() => save.preferences.friendsEnabled, enabled => {
             @click="toggleDemo('turn')">{{ t('Démo des virages') }}</button>
           <div v-if="activeDemo === 'timing'" ref="demoScene" class="settings-timing-demo">
             <SectorRun live="sec" demo :step="0" :running="false" :arts="demoSprites"
-              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" tappable @tap="demoGauge?.tapScene($event)">
-              <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="demoFeedback = null" />
+              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" :streak="demoStreak" :flawless="demoFlawless" tappable @tap="demoGauge?.tapScene($event)">
+              <TimingGauge ref="demoGauge" :windows="demoWindows" demo @judgment="demoJudgment" @restart="resetDemoFeedback" />
             </SectorRun>
           </div>
           <div v-else-if="activeDemo === 'turn'" ref="demoScene" class="settings-timing-demo">
             <SectorRun :key="turnAttempt" live="sec" demo :step="0" :running="false" :arts="demoSprites"
-              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback">
+              :sprites="demoSprites" :backdrop="demoBackdrop" :feedback="demoFeedback" :streak="demoStreak" :flawless="demoFlawless">
               <TurnControl :sequence="demoTurns" demo @judgment="demoTurnJudgment" />
             </SectorRun>
             <button type="button" class="button quiet wide turn-replay" @click="replayTurns">{{ t('Rejouer la séquence') }}</button>
