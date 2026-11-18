@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { t } from '../i18n'
 import { art } from '../game/art'
 import { boosterById } from '../game/data'
 import GameLogo from './GameLogo.vue'
@@ -14,9 +15,9 @@ const picture = computed(() => art.pack(`${props.booster}${props.legend ? '-lege
     <img v-if="picture" class="pack-picture" :src="picture" alt="" draggable="false" />
     <div class="pack-print">
       <GameLogo size="pack" :flicker="false" />
-      <span v-if="legend" class="pack-ribbon">Édition légendaire</span>
-      <div class="pack-wordmark">{{ pack.name }}</div>
-      <div class="pack-footer">Collection 001 · 5 cartes</div>
+      <span v-if="legend" class="pack-ribbon">{{ t('Édition légendaire') }}</span>
+      <div class="pack-wordmark">{{ t(pack.name) }}</div>
+      <div class="pack-footer">{{ t('Collection 001 · 5 cartes') }}</div>
     </div>
     <span v-if="legend" class="pack-sparkles">✦ · ✧ · ✦</span>
     <div class="pack-crimp pack-crimp-top"></div>

@@ -1,4 +1,6 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
+import { t, tp } from '../i18n'
+import { ruleText } from './rules-text'
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
@@ -223,11 +225,11 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
 
 export function buyBooster(save: Save, id: string, rng: Rng = Math.random): string | undefined {
   const booster = boosterById.get(id)
-  if (!booster) return 'Booster inconnu'
-  if (save.sealed || (save.opening && !save.opening.collected)) return 'Termine d’abord le booster en cours'
+  if (!booster) return t('Booster inconnu')
+  if (save.sealed || (save.opening && !save.opening.collected)) return t('Termine d’abord le booster en cours')
   if ((save.tickets[id] ?? 0) > 0) save.tickets[id]--
   else if (save.credits >= booster.price) save.credits -= booster.price
-  else return `Il manque ${booster.price - save.credits} crédits`
+  else return t('Il manque {n} crédits', { n: booster.price - save.credits })
   save.sealed = id
   save.sealedPulls = drawPulls(save, booster, rng)
   save.opening = null
@@ -236,11 +238,11 @@ export function buyBooster(save: Save, id: string, rng: Rng = Math.random): stri
 // Achat groupé : `count` boosters payés d'un coup deviennent des tickets, puis le premier est scellé pour l'ouverture.
 export function buyBoosters(save: Save, id: string, count: number, rng: Rng = Math.random): string | undefined {
   const booster = boosterById.get(id)
-  if (!booster) return 'Booster inconnu'
-  if (!Number.isInteger(count) || count < 2 || count > 10) return 'Quantité invalide'
-  if (save.sealed || (save.opening && !save.opening.collected)) return 'Termine d’abord le booster en cours'
+  if (!booster) return t('Booster inconnu')
+  if (!Number.isInteger(count) || count < 2 || count > 10) return t('Quantité invalide')
+  if (save.sealed || (save.opening && !save.opening.collected)) return t('Termine d’abord le booster en cours')
   const price = booster.price * count
-  if (save.credits < price) return `Il manque ${price - save.credits} crédits`
+  if (save.credits < price) return t('Il manque {n} crédits', { n: price - save.credits })
   save.credits -= price
   save.tickets[id] = (save.tickets[id] ?? 0) + count
   return buyBooster(save, id, rng)
@@ -372,7 +374,7 @@ export function uninstallAll(save: Save): string | undefined {
     count += car.parts.length
     car.parts = []
   }
-  if (!count) return 'Aucune pièce démontable pour le moment'
+  if (!count) return t('Aucune pièce démontable pour le moment')
 }
 
 export function uninstallPartEverywhere(save: Save, partId: string): string | undefined {
@@ -382,7 +384,7 @@ export function uninstallPartEverywhere(save: Save, partId: string): string | un
     car.parts = car.parts.filter(p => p !== partId)
     count++
   }
-  if (!count) return 'Cette pièce n’est montée sur aucune voiture disponible'
+  if (!count) return t('Cette pièce n’est montée sur aucune voiture disponible')
 }
 
 export const isCarMaxedForExtraSlot = (car?: OwnedCar) =>
@@ -390,13 +392,13 @@ export const isCarMaxedForExtraSlot = (car?: OwnedCar) =>
 
 export function extraSlotCheck(save: Save, carId: string, key: StatKey): string | undefined {
   const car = save.cars[carId]
-  if (!car) return 'Voiture absente du garage'
-  if (!extraSlotFamily[key]) return 'Pas de 3ᵉ pièce sur cet atelier'
-  if (!isCarMaxedForExtraSlot(car)) return 'Requiert Stage 3 et les 4 ateliers au niveau 2'
-  if (car.extraSlot === key) return '3ᵉ emplacement déjà débloqué sur cet atelier'
+  if (!car) return t('Voiture absente du garage')
+  if (!extraSlotFamily[key]) return t('Pas de 3ᵉ pièce sur cet atelier')
+  if (!isCarMaxedForExtraSlot(car)) return t('Requiert Stage 3 et les 4 ateliers au niveau 2')
+  if (car.extraSlot === key) return t('3ᵉ emplacement déjà débloqué sur cet atelier')
   const previous = car.extraSlot && extraSlotFamily[car.extraSlot]
-  if (previous && car.parts.filter(p => partById.get(p)?.family === previous).length > 1) return `Retire d’abord la 3ᵉ pièce de ${upgrades[car.extraSlot!].label}`
-  if (save.credits < EXTRA_SLOT_PRICE) return `Il te manque ${EXTRA_SLOT_PRICE - save.credits} crédits`
+  if (previous && car.parts.filter(p => partById.get(p)?.family === previous).length > 1) return t('Retire d’abord la 3ᵉ pièce de {workshop}', { workshop: t(upgrades[car.extraSlot!].label) })
+  if (save.credits < EXTRA_SLOT_PRICE) return t('Il te manque {n} crédits', { n: EXTRA_SLOT_PRICE - save.credits })
 }
 
 export function unlockExtraSlot(save: Save, carId: string, key: StatKey): string | undefined {
@@ -408,11 +410,11 @@ export function unlockExtraSlot(save: Save, carId: string, key: StatKey): string
 
 export function upgradeCheck(save: Save, id: string, key: StatKey): string | undefined {
   const car = save.cars[id]
-  if (!car) return 'Voiture absente du garage'
+  if (!car) return t('Voiture absente du garage')
   const level = car.upgrades[key]
   const price = upgradePrices[level]
-  if (price === undefined) return 'Niveau maximal atteint'
-  if (save.credits < price) return `Il te manque ${price - save.credits} crédits`
+  if (price === undefined) return t('Niveau maximal atteint')
+  if (save.credits < price) return t('Il te manque {n} crédits', { n: price - save.credits })
 }
 
 export function upgradeStat(save: Save, id: string, key: StatKey): string | undefined {
@@ -431,9 +433,9 @@ export function stageCost(save: Save, id: string) {
 
 export function upgrade(save: Save, id: string): string | undefined {
   const car = save.cars[id], next = stageCost(save, id)
-  if (!car || !next) return 'Préparation maximale atteinte'
-  if (save.credits < next.credits) return `Il manque ${next.credits - save.credits} crédits`
-  if (car.copies - 1 < next.duplicates) return `Il faut ${next.duplicates} doublon${next.duplicates > 1 ? 's' : ''}`
+  if (!car || !next) return t('Préparation maximale atteinte')
+  if (save.credits < next.credits) return t('Il manque {n} crédits', { n: next.credits - save.credits })
+  if (car.copies - 1 < next.duplicates) return tp('Il faut {n} doublon', 'Il faut {n} doublons', next.duplicates)
   save.credits -= next.credits
   car.copies -= next.duplicates
   car.stage = next.stage
@@ -449,18 +451,18 @@ export function partReplacedOnInstall(car: OwnedCar, part: Part): Part | undefin
 
 export function installCheck(save: Save, carId: string, partId: string): string | undefined {
   const v = vehicleById.get(carId), part = partById.get(partId), car = save.cars[carId]
-  if (!v || !part || !car) return 'Pièce ou voiture absente'
+  if (!v || !part || !car) return t('Pièce ou voiture absente')
   const reason = compatibility(part, v)
-  if (reason) return reason
-  if (car.parts.includes(partId)) return 'Déjà installée'
+  if (reason) return ruleText(reason)
+  if (car.parts.includes(partId)) return t('Déjà installée')
   const key = upgradeForFamily(part.family)
   if (key && car.upgrades[key] < partUnlockLevel && !car.parts.some(id => partById.get(id)?.family === part.family)) {
-    return `${upgrades[key].label} · niveau ${partUnlockLevel} requis`
+    return t('{workshop} · niveau {level} requis', { workshop: t(upgrades[key].label), level: partUnlockLevel })
   }
-  if (freeParts(save, partId) <= 0) return 'Aucun exemplaire libre'
+  if (freeParts(save, partId) <= 0) return t('Aucun exemplaire libre')
   const toReplace = partReplacedOnInstall(car, part)
   const remaining = toReplace ? car.parts.filter(p => p !== toReplace.id) : car.parts
-  if (prepUsed({ stage: car.stage, parts: remaining }) + part.cost > potential(v, car.stage, car.extraSlot)) return 'Potentiel de préparation insuffisant'
+  if (prepUsed({ stage: car.stage, parts: remaining }) + part.cost > potential(v, car.stage, car.extraSlot)) return t('Potentiel de préparation insuffisant')
 }
 
 export function install(save: Save, carId: string, partId: string): string | undefined {
@@ -479,12 +481,12 @@ export function uninstall(save: Save, carId: string, partId: string) {
 
 export function craftCheck(save: Save, id: string): string | undefined {
   const v = vehicleById.get(id)
-  if (!v?.craft || !v.evolvesFrom) return 'Cette voiture ne se débloque pas au garage'
-  if (save.cars[id]) return 'Déjà débloquée'
+  if (!v?.craft || !v.evolvesFrom) return t('Cette voiture ne se débloque pas au garage')
+  if (save.cars[id]) return t('Déjà débloquée')
   const base = save.cars[v.evolvesFrom]
-  if (!base) return `Il faut posséder ${vehicleById.get(v.evolvesFrom)!.name} ${vehicleById.get(v.evolvesFrom)!.version}`
-  if (base.stage < v.craft.stage) return `Préparer la version de base au Stage ${v.craft.stage}`
-  if (save.credits < v.craft.credits) return `Il te manque ${v.craft.credits - save.credits} crédits`
+  if (!base) return t('Il faut posséder {car}', { car: `${vehicleById.get(v.evolvesFrom)!.name} ${vehicleById.get(v.evolvesFrom)!.version}` })
+  if (base.stage < v.craft.stage) return t('Préparer la version de base au Stage {stage}', { stage: v.craft.stage })
+  if (save.credits < v.craft.credits) return t('Il te manque {n} crédits', { n: v.craft.credits - save.credits })
 }
 
 export function craft(save: Save, id: string): string | undefined {
@@ -496,7 +498,7 @@ export function craft(save: Save, id: string): string | undefined {
 
 export function scrapCar(save: Save, id: string): string | undefined {
   const car = save.cars[id], v = vehicleById.get(id)
-  if (!car || !v || car.copies < 2) return 'Aucun doublon'
+  if (!car || !v || car.copies < 2) return t('Aucun doublon')
   car.copies--
   save.credits += progression.scrap[v.rarity]
 }
@@ -511,13 +513,13 @@ export function sellPrice(save: Save, id: string): number {
 }
 
 export function sellCheck(save: Save, id: string): string | undefined {
-  if (!save.cars[id]) return 'Voiture absente du garage'
-  if (save.night?.lineup.includes(id)) return 'Cette voiture est engagée dans ta Nuit sans fin en cours'
-  if (save.nightLineup.includes(id)) return 'Retire cette voiture de l’écurie Nuit sans fin avant de la vendre'
-  if (save.lineup.includes(id)) return 'Retire cette voiture de ton écurie avant de la vendre'
-  if (save.dailyLineup?.includes(id)) return 'Retire cette voiture de l’écurie du défi du jour avant de la vendre'
-  if (save.duel?.player.lineup.some(car => car.id === id)) return 'Cette voiture est engagée dans une course en cours'
-  if (Object.keys(save.cars).length <= 3) return 'Tu dois garder au moins trois voitures dans ton garage'
+  if (!save.cars[id]) return t('Voiture absente du garage')
+  if (save.night?.lineup.includes(id)) return t('Cette voiture est engagée dans ta Nuit sans fin en cours')
+  if (save.nightLineup.includes(id)) return t('Retire cette voiture de l’écurie Nuit sans fin avant de la vendre')
+  if (save.lineup.includes(id)) return t('Retire cette voiture de ton écurie avant de la vendre')
+  if (save.dailyLineup?.includes(id)) return t('Retire cette voiture de l’écurie du défi du jour avant de la vendre')
+  if (save.duel?.player.lineup.some(car => car.id === id)) return t('Cette voiture est engagée dans une course en cours')
+  if (Object.keys(save.cars).length <= 3) return t('Tu dois garder au moins trois voitures dans ton garage')
 }
 
 export function sellCar(save: Save, id: string): string | undefined {
@@ -530,7 +532,7 @@ export function sellCar(save: Save, id: string): string | undefined {
 
 export function scrapPart(save: Save, id: string): string | undefined {
   const part = partById.get(id)
-  if (!part || freeParts(save, id) <= 0) return 'Aucun exemplaire libre'
+  if (!part || freeParts(save, id) <= 0) return t('Aucun exemplaire libre')
   save.parts[id]--
   save.credits += Math.round(progression.scrap[part.rarity] / 2)
 }
@@ -547,21 +549,21 @@ export const editionPrice = (id: string) => {
 
 export function selectEdition(save: Save, id: string, style: EditionStyle): string | undefined {
   const car = save.cars[id]
-  if (!car) return 'Voiture absente du garage'
-  if (!car.editions.includes(style)) return 'Style non débloqué'
+  if (!car) return t('Voiture absente du garage')
+  if (!car.editions.includes(style)) return t('Style non débloqué')
   car.shown = style
 }
 
 export function unlockEditionCheck(save: Save, id: string, style: EditionStyle): string | undefined {
   const car = save.cars[id], v = vehicleById.get(id)
-  if (!car || !v) return 'Voiture absente du garage'
-  if (!stylesOf(id).includes(style)) return 'Style indisponible pour cette voiture'
-  if (car.editions.includes(style)) return 'Style déjà débloqué'
+  if (!car || !v) return t('Voiture absente du garage')
+  if (!stylesOf(id).includes(style)) return t('Style indisponible pour cette voiture')
+  if (car.editions.includes(style)) return t('Style déjà débloqué')
   const missing: string[] = []
   const credits = editionPrice(id) - save.credits
   const duplicates = editionDuplicates - (car.copies - 1)
-  if (credits > 0) missing.push(`Il te manque ${credits} crédits`)
-  if (duplicates > 0) missing.push(`Il te manque ${duplicates} doublon${duplicates > 1 ? 's' : ''}`)
+  if (credits > 0) missing.push(t('Il te manque {n} crédits', { n: credits }))
+  if (duplicates > 0) missing.push(tp('Il te manque {n} doublon', 'Il te manque {n} doublons', duplicates))
   if (missing.length) return missing.join(' · ')
 }
 
@@ -649,7 +651,7 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
           if (current && (candidate.id === current.id || partScore(candidate, priority) <= partScore(current, priority))) break
           if (!install(sim, id, candidate.id)) {
             installedNames.push(candidate.name)
-            steps.push(`Monter ${candidate.name} (${candidate.text})`)
+            steps.push(t('Monter {name} ({text})', { name: t(candidate.name), text: t(candidate.text) }))
             break
           }
         }
@@ -675,7 +677,7 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
       if (upgradeStat(sim, id, key)) break
     }
     if (simCar.upgrades[key] > startLevel) {
-      steps.push(`${upgrades[key].label} → niv. ${simCar.upgrades[key]}`)
+      steps.push(t('{workshop} → niv. {level}', { workshop: t(upgrades[key].label), level: simCar.upgrades[key] }))
       fitBestParts()
     }
   }
@@ -685,11 +687,11 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
     const key = upgradeForFamily(p.family)
     return !compatibility(p, v) && freeParts(sim, p.id) > 0 && !simCar.parts.includes(p.id)
       && key && simCar.upgrades[key] >= partUnlockLevel
-      && installCheck(sim, id, p.id) === 'Potentiel de préparation insuffisant'
+      && installCheck(sim, id, p.id) === t('Potentiel de préparation insuffisant')
   })
   const allWorkshopMaxed = upgradeKeys.every(k => simCar.upgrades[k] >= partUnlockLevel || statsOf(v, prepOf(sim, id))[k] >= STAT_CAP)
   if ((needsPotentialForStock || allWorkshopMaxed || !steps.length) && !upgrade(sim, id)) {
-    steps.push(`Passer au Stage ${simCar.stage}`)
+    steps.push(t('Passer au Stage {stage}', { stage: simCar.stage }))
     fitBestParts()
   }
 
@@ -699,7 +701,7 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
   const potentialAfter = potential(v, simCar.stage, simCar.extraSlot)
   const statChanges = upgradeKeys
     .filter(k => afterStats[k] !== beforeStats[k])
-    .map(k => ({ key: k, label: statLabels[k], before: beforeStats[k], after: afterStats[k] }))
+    .map(k => ({ key: k, label: t(statLabels[k]), before: beforeStats[k], after: afterStats[k] }))
 
   const credits = save.credits - sim.credits
   const duplicates = car.copies - simCar.copies
@@ -710,20 +712,20 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
     const nextWorkshop = orderedKeys.find(k => car.upgrades[k] < partUnlockLevel && beforeStats[k] < STAT_CAP)
     if (nextWorkshop) {
       const price = upgradePrices[car.upgrades[nextWorkshop]]
-      blockedReason = `Prochaine étape : ${upgrades[nextWorkshop].label} niv. ${car.upgrades[nextWorkshop] + 1} (+1 ${statLabels[nextWorkshop]}) · il manque ${price - save.credits} crédits`
+      blockedReason = t('Prochaine étape : {workshop} niv. {level} (+1 {stat}) · il manque {n} crédits', { workshop: t(upgrades[nextWorkshop].label), level: car.upgrades[nextWorkshop] + 1, stat: t(statLabels[nextWorkshop]), n: price - save.credits })
     } else {
       const nextStage = stageCost(save, id)
       if (nextStage) {
         const problem = upgrade(sim, id)
-        blockedReason = `Prochaine étape : Stage ${nextStage.stage} (${nextStage.text}) · ${problem}`
+        blockedReason = t('Prochaine étape : Stage {stage} ({text}) · {problem}', { stage: nextStage.stage, text: t(nextStage.text), problem: String(problem) })
       } else {
-        blockedReason = 'Voiture déjà préparée au maximum avec les pièces de ton stock.'
+        blockedReason = t('Voiture déjà préparée au maximum avec les pièces de ton stock.')
       }
     }
   }
 
   const summaryParts = [...steps]
-  if (staminaAfter > staminaBefore) summaryParts.push(`+${staminaAfter - staminaBefore} secteur avant surchauffe`)
+  if (staminaAfter > staminaBefore) summaryParts.push(tp('+{n} secteur avant surchauffe', '+{n} secteurs avant surchauffe', staminaAfter - staminaBefore))
   return {
     credits,
     duplicates,
@@ -744,8 +746,8 @@ export function autoUpgradePlan(save: Save, id: string, circuit?: Rival['circuit
 
 export function applyAutoUpgrade(save: Save, id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey): string | undefined {
   const plan = autoUpgradePlan(save, id, circuit, suggestedStat)
-  if (!plan) return 'Voiture absente du garage'
-  if (!plan.steps.length) return plan.blockedReason ?? 'Aucune amélioration disponible'
+  if (!plan) return t('Voiture absente du garage')
+  if (!plan.steps.length) return plan.blockedReason ?? t('Aucune amélioration disponible')
   const car = save.cars[id]
   save.credits -= plan.credits
   car.copies -= plan.duplicates
@@ -758,18 +760,18 @@ export function applyAutoUpgrade(save: Save, id: string, circuit?: Rival['circui
 
 export function lineupCheck(save: Save, ids: string[], rivalId: string): string | undefined {
   const rival = rivalById.get(rivalId), league = rival && leagueById.get(rival.league)
-  if (!rival || (!league && !specialByRivalId.has(rivalId))) return 'Rival inconnu'
-  if (specialByRivalId.has(rivalId) && !unlockedSpecials(save).includes(rivalId)) return 'Palier verrouillé'
-  if (rival.baseRivalId && !unlockedRivalSteps(save, rival.baseRivalId).includes(rivalId)) return 'Étape verrouillée'
+  if (!rival || (!league && !specialByRivalId.has(rivalId))) return t('Rival inconnu')
+  if (specialByRivalId.has(rivalId) && !unlockedSpecials(save).includes(rivalId)) return t('Palier verrouillé')
+  if (rival.baseRivalId && !unlockedRivalSteps(save, rival.baseRivalId).includes(rivalId)) return t('Étape verrouillée')
   const cap = rival.cap ?? league!.cap
-  if (ids.length !== 3 || new Set(ids).size !== 3) return 'Choisis trois voitures différentes'
-  if (ids.some(id => !save.cars[id])) return 'Voiture absente du garage'
+  if (ids.length !== 3 || new Set(ids).size !== 3) return t('Choisis trois voitures différentes')
+  if (ids.some(id => !save.cars[id])) return t('Voiture absente du garage')
   const cost = lineupCost(ids)
-  if (cost > cap) return `Écurie trop chère : ${cost} / ${cap}`
+  if (cost > cap) return t('Écurie trop chère : {cost} / {cap}', { cost, cap })
 }
 
 export function startDuel(save: Save, rivalId: string, rng: Rng): string | undefined {
-  if (save.night || save.duel) return 'Termine d’abord la course en cours'
+  if (save.night || save.duel) return t('Termine d’abord la course en cours')
   const problem = lineupCheck(save, save.lineup, rivalId)
   if (problem) return problem
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
@@ -880,12 +882,12 @@ export function refreshDaily(save: Save, date = localDate()) {
 }
 export function claimDailyBooster(save: Save) {
   refreshDaily(save)
-  if (save.daily.booster) return 'Reviens demain'
+  if (save.daily.booster) return t('Reviens demain')
   save.daily.booster = true
   save.tickets.neon = (save.tickets.neon ?? 0) + 1
 }
 export function dailyLineupCheck(save: Save) {
-  if ((save.dailyLineup ?? []).some(id => !save.cars[id])) return 'Voiture absente du garage'
+  if ((save.dailyLineup ?? []).some(id => !save.cars[id])) return t('Voiture absente du garage')
   return constraintCheck(save.dailyLineup ?? [], todayChallenge(save).constraint)
 }
 export function prepareDaily(save: Save) {
@@ -893,7 +895,7 @@ export function prepareDaily(save: Save) {
   save.dailyLineup = validDailyLineup(Object.keys(save.cars), todayChallenge(save).constraint) ?? []
 }
 export function startDaily(save: Save) {
-  if (save.night || save.duel) return 'Termine d’abord la course en cours'
+  if (save.night || save.duel) return t('Termine d’abord la course en cours')
   refreshDaily(save)
   const problem = dailyLineupCheck(save)
   if (problem) return problem
@@ -906,9 +908,9 @@ export const seriesProgress = (save: Save, entry: (typeof series)[number]) => en
 export const seriesComplete = (save: Save, entry: (typeof series)[number]) => seriesProgress(save, entry) === entry.vehicles.length
 export function claimSeries(save: Save, id: string): string | undefined {
   const entry = series.find(s => s.id === id)
-  if (!entry) return 'Série inconnue'
-  if (save.series.includes(id)) return 'Récompense déjà récupérée'
-  if (!seriesComplete(save, entry)) return 'Réunis toutes les voitures de cette série'
+  if (!entry) return t('Série inconnue')
+  if (save.series.includes(id)) return t('Récompense déjà récupérée')
+  if (!seriesComplete(save, entry)) return t('Réunis toutes les voitures de cette série')
   save.series.push(id)
   save.credits += entry.reward.credits
   if (entry.reward.ticket) save.tickets[entry.reward.ticket] = (save.tickets[entry.reward.ticket] ?? 0) + 1
@@ -916,7 +918,7 @@ export function claimSeries(save: Save, id: string): string | undefined {
 
 // ——— Nuit sans fin ———
 export function nightLineupCheck(save: Save) {
-  if (save.nightLineup.some(id => !save.cars[id])) return 'Voiture absente du garage'
+  if (save.nightLineup.some(id => !save.cars[id])) return t('Voiture absente du garage')
   return constraintCheck(save.nightLineup, { type: 'cost', cap: NIGHT_CAP })
 }
 export function createNightRound(save: Save) {
@@ -927,7 +929,7 @@ export function createNightRound(save: Save) {
   night.resting = false
 }
 export function startNight(save: Save, seed = String(Date.now())) {
-  if (save.duel || save.night) return 'Termine d’abord la course en cours'
+  if (save.duel || save.night) return t('Termine d’abord la course en cours')
   const problem = nightLineupCheck(save)
   if (problem) return problem
   save.night = { seed, round: 1, wins: 0, gains: 0, lineup: [...save.nightLineup], resting: false, newRecord: false }

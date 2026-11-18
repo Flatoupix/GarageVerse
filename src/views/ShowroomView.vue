@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
+import { t, tp } from '../i18n'
 import CarCard from '../components/CarCard.vue'
 import CarThumb from '../components/CarThumb.vue'
 import { narrow, save } from '../game/store'
@@ -49,50 +50,50 @@ function onScroll() {
 <template>
   <main class="showroom">
     <div class="page-heading">
-      <span class="eyebrow"><span></span> Accès caché</span>
+      <span class="eyebrow"><span></span> {{ t('Accès caché') }}</span>
       <h1 tabindex="-1">Showroom</h1>
-      <p>{{ vehicles.length }} voitures · {{ editionCount }} éditions. Touche une carte pour voir toutes ses éditions.</p>
-      <button type="button" class="button ghost showroom-close" @click="emit('close')">Quitter le Showroom</button>
+      <p>{{ t('{cars} voitures · {editions} éditions. Touche une carte pour voir toutes ses éditions.', { cars: vehicles.length, editions: editionCount }) }}</p>
+      <button type="button" class="button ghost showroom-close" @click="emit('close')">{{ t('Quitter le Showroom') }}</button>
     </div>
 
-    <input v-model="query" class="showroom-search" type="search" placeholder="Rechercher (nom, numéro, année, catégorie…)" aria-label="Rechercher une voiture" />
-    <div class="showroom-filters" role="group" aria-label="Rareté">
-      <button type="button" :aria-pressed="rarity === null" @click="rarity = null">Toutes</button>
+    <input v-model="query" class="showroom-search" type="search" :placeholder="t('Rechercher (nom, numéro, année, catégorie…)')" :aria-label="t('Rechercher une voiture')" />
+    <div class="showroom-filters" role="group" :aria-label="t('Rareté')">
+      <button type="button" :aria-pressed="rarity === null" @click="rarity = null">{{ t('Toutes') }}</button>
       <button v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarity === r" @click="rarity = rarity === r ? null : r">
-        <span aria-hidden="true">{{ rarityMark[r] }}</span> {{ r }}
+        <span aria-hidden="true">{{ rarityMark[r] }}</span> {{ t(r) }}
       </button>
     </div>
     <div class="showroom-bar">
-      <p class="showroom-count" role="status">{{ list.length }} voiture{{ list.length > 1 ? 's' : '' }}</p>
-      <div class="showroom-filters showroom-cols" role="group" aria-label="Nombre de voitures par ligne">
+      <p class="showroom-count" role="status">{{ tp('{n} voiture', '{n} voitures', list.length) }}</p>
+      <div class="showroom-filters showroom-cols" role="group" :aria-label="t('Nombre de voitures par ligne')">
         <button v-for="n in colOptions" :key="n" type="button" :aria-pressed="cols === n"
-          :aria-label="n === 0 ? 'Nombre de colonnes automatique' : `${n} voiture${n > 1 ? 's' : ''} par ligne`" @click="cols = n">{{ n === 0 ? 'Auto' : n }}</button>
+          :aria-label="n === 0 ? t('Nombre de colonnes automatique') : tp('{n} voiture par ligne', '{n} voitures par ligne', n)" @click="cols = n">{{ n === 0 ? t('Auto') : n }}</button>
       </div>
     </div>
 
     <div class="garage-grid" :class="{ 'grid-custom': cols > 0, 'grid-single': cols === 1, 'grid-dense': cols >= 4, 'grid-sheet': sheet }"
       :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined">
       <div v-for="v in list" :key="v.id" class="garage-tile">
-        <button type="button" class="card-tile" :aria-label="`Éditions de ${v.name} ${v.version}`" @click="open(v.id)">
+        <button type="button" class="card-tile" :aria-label="t('Éditions de {name} {version}', { name: v.name, version: v.version })" @click="open(v.id)">
           <CarThumb v-if="sheet" :id="v.id" />
           <CarCard v-else :id="v.id" :compact="cols !== 1" />
-          <span v-if="!sheet" class="tile-tag showroom-tag">{{ stylesOf(v.id).length }} éditions</span>
+          <span v-if="!sheet" class="tile-tag showroom-tag">{{ tp('{n} édition', '{n} éditions', stylesOf(v.id).length) }}</span>
         </button>
       </div>
     </div>
 
-    <dialog ref="dialog" class="modal showroom-modal" :aria-label="shown ? `Éditions de ${shown.name} ${shown.version}` : 'Éditions'" @close="shownId = null">
-      <form method="dialog"><button class="close-modal" aria-label="Fermer">×</button></form>
+    <dialog ref="dialog" class="modal showroom-modal" :aria-label="shown ? t('Éditions de {name} {version}', { name: shown.name, version: shown.version }) : t('Éditions')" @close="shownId = null">
+      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <template v-if="shown">
         <h2>{{ shown.name }} <small>{{ shown.version }}</small></h2>
-        <p class="showroom-edition" aria-live="polite">{{ styleLabel(shown, styles[index]) }} · {{ index + 1 }} / {{ styles.length }}</p>
+        <p class="showroom-edition" aria-live="polite">{{ t(styleLabel(shown, styles[index])) }} · {{ index + 1 }} / {{ styles.length }}</p>
         <div ref="strip" class="showroom-strip" @scroll.passive="onScroll">
           <div v-for="style in styles" :key="style" class="showroom-slide"><CarCard :id="shown.id" :style-name="style" /></div>
         </div>
         <div class="showroom-nav">
-          <button type="button" class="button ghost" :disabled="index === 0" aria-label="Édition précédente" @click="go(-1)">←</button>
+          <button type="button" class="button ghost" :disabled="index === 0" :aria-label="t('Édition précédente')" @click="go(-1)">←</button>
           <span class="showroom-dots" aria-hidden="true"><i v-for="(style, i) in styles" :key="style" :class="{ on: i === index }"></i></span>
-          <button type="button" class="button ghost" :disabled="index === styles.length - 1" aria-label="Édition suivante" @click="go(1)">→</button>
+          <button type="button" class="button ghost" :disabled="index === styles.length - 1" :aria-label="t('Édition suivante')" @click="go(1)">→</button>
         </div>
       </template>
     </dialog>

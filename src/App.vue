@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { locale, locales, setLocale, t, tp, type Locale } from './i18n'
 import { VERSUS_OPEN } from './game/features'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
@@ -55,7 +56,7 @@ function transferFeedback(text: string, error = false) {
   transferMessage.value = text
   sound(error ? 'error' : 'collect')
   const box = settings.value?.getBoundingClientRect()
-  if (box) floatText({ x: box.left + box.width / 2, y: box.top + 70 }, error ? 'Échec' : 'Sauvegarde', error ? tone.rose : tone.cyan, 16)
+  if (box) floatText({ x: box.left + box.width / 2, y: box.top + 70 }, error ? t('Échec') : t('Sauvegarde'), error ? tone.rose : tone.cyan, 16)
 }
 function exportSave() {
   let url: string | undefined
@@ -67,8 +68,8 @@ function exportSave() {
     document.body.append(link)
     link.click()
     link.remove()
-    transferFeedback('Ta sauvegarde a été exportée.')
-  } catch { transferFeedback('Impossible d’exporter ta sauvegarde. Réessaie.', true) }
+    transferFeedback(t('Ta sauvegarde a été exportée.'))
+  } catch { transferFeedback(t('Impossible d’exporter ta sauvegarde. Réessaie.'), true) }
   finally { if (url) setTimeout(() => URL.revokeObjectURL(url!), 1000) }
 }
 async function importSave(event: Event) {
@@ -84,7 +85,7 @@ async function importSave(event: Event) {
         !object(data.tickets) || !object(data.preferences) || !Array.isArray(data.lineup) ||
         !Number.isFinite(data.credits)) throw new Error('format')
     const restored = readSave(raw)
-    if (!window.confirm('Importer cette sauvegarde ? Tu vas remplacer ta partie actuelle.')) return
+    if (!window.confirm(t('Importer cette sauvegarde ? Tu vas remplacer ta partie actuelle.'))) return
     // Écrire avant de remplacer la partie : un stockage indisponible laisse le garage intact.
     localStorage.setItem(SAVE_KEY, JSON.stringify(restored))
     Object.assign(save, restored)
@@ -92,22 +93,22 @@ async function importSave(event: Event) {
     themeFx(save.preferences.theme)
     inspected.value = null
     screen.value = initialScreen()
-    transferFeedback('Ta sauvegarde a été importée.')
-  } catch { transferFeedback('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.', true) }
+    transferFeedback(t('Ta sauvegarde a été importée.'))
+  } catch { transferFeedback(t('Import impossible : choisis une sauvegarde GarageVerse valide et vérifie que le stockage est disponible.'), true) }
 }
 // Remise à zéro complète : nouvelle partie, réglages compris. Le rechargement repart d'un état propre.
 function resetGame() {
-  if (!window.confirm('Tout remettre à zéro ? Voitures, pièces, crédits, progression et réglages seront effacés. Exporte ta sauvegarde avant si tu veux la garder.')) return
+  if (!window.confirm(t('Tout remettre à zéro ? Voitures, pièces, crédits, progression et réglages seront effacés. Exporte ta sauvegarde avant si tu veux la garder.'))) return
   try {
     localStorage.setItem(SAVE_KEY, JSON.stringify(newSave()))
     localStorage.removeItem(LEGACY_KEY)
     location.reload()
-  } catch { transferFeedback('Remise à zéro impossible : le stockage du navigateur est indisponible.', true) }
+  } catch { transferFeedback(t('Remise à zéro impossible : le stockage du navigateur est indisponible.'), true) }
 }
 type SettingsTab = 'parameters' | 'themes' | 'help'
 const settingsTab = ref<SettingsTab>('parameters')
 const settingsTabs: { id: SettingsTab; label: string }[] = [
-  { id: 'parameters', label: 'Paramètres' }, { id: 'themes', label: 'Thèmes' }, { id: 'help', label: 'Aide' },
+  { id: 'parameters', label: t('Paramètres') }, { id: 'themes', label: t('Thèmes') }, { id: 'help', label: t('Aide') },
 ]
 function showSettings(tab: SettingsTab = 'parameters') {
   openHelp.value = null
@@ -149,10 +150,10 @@ const sheet = ref<HTMLDialogElement>()
 const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
   // Tracés 24 × 24 : maison, sachet de cartes, porte de garage, drapeau à damier.
-  { id: 'home', label: 'Accueil', icon: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5' },
-  { id: 'shop', label: 'Boosters', icon: 'M6 3.5h12v17H6zM6 7h12M6 17h12M12 9.8l.9 1.8 2 .3-1.5 1.4.4 2-1.8-.9-1.8.9.4-2-1.5-1.4 2-.3z' },
-  { id: 'garage', label: 'Garage', icon: 'M3 20V9.5L12 4l9 5.5V20M6.5 20v-8h11v8M6.5 14.7h11M6.5 17.4h11' },
-  { id: 'race', label: 'Course', icon: 'M5 21V3.5M5 4.5h14v9H5M9.7 4.5v9M14.3 4.5v9M5 9h14' },
+  { id: 'home', label: t('Accueil'), icon: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5' },
+  { id: 'shop', label: t('Boosters'), icon: 'M6 3.5h12v17H6zM6 7h12M6 17h12M12 9.8l.9 1.8 2 .3-1.5 1.4.4 2-1.8-.9-1.8.9.4-2-1.5-1.4 2-.3z' },
+  { id: 'garage', label: t('Garage'), icon: 'M3 20V9.5L12 4l9 5.5V20M6.5 20v-8h11v8M6.5 14.7h11M6.5 17.4h11' },
+  { id: 'race', label: t('Course'), icon: 'M5 21V3.5M5 4.5h14v9H5M9.7 4.5v9M14.3 4.5v9M5 9h14' },
 ]
 
 watch(() => save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
@@ -250,16 +251,16 @@ function showReleaseNotes() {
   releaseNotes.value?.openAll()
 }
 // Liste des Réglages rangée par groupes ; chaque thème n'apparaît qu'une fois.
-const themeLists = themeGroups.map(group => ({ title: group.title, items: themes.filter(t => group.ids.includes(t.id)) }))
-const expandedGroups = ref<string[]>([themeLists.find(group => group.items.some(t => t.id === theme.value))!.title])
+const themeLists = themeGroups.map(group => ({ title: group.title, items: themes.filter(th => group.ids.includes(th.id)) }))
+const expandedGroups = ref<string[]>([themeLists.find(group => group.items.some(th => th.id === theme.value))!.title])
 function toggleThemeGroup(title: string) {
-  expandedGroups.value = expandedGroups.value.includes(title) ? expandedGroups.value.filter(t => t !== title) : [...expandedGroups.value, title]
+  expandedGroups.value = expandedGroups.value.includes(title) ? expandedGroups.value.filter(open => open !== title) : [...expandedGroups.value, title]
 }
 // Un thème débloqué en cours de partie est annoncé une fois.
-const openThemes = computed(() => themes.filter(t => unlocked(save, t.id)).map(t => t.id))
+const openThemes = computed(() => themes.filter(th => unlocked(save, th.id)).map(th => th.id))
 watch(openThemes, (now, before) => {
-  const fresh = themes.find(t => now.includes(t.id) && !before.includes(t.id))
-  if (fresh) setTimeout(() => { notify(`Thème « ${fresh.name} » débloqué dans les Réglages`); sound('legend') }, 2700)
+  const fresh = themes.find(th => now.includes(th.id) && !before.includes(th.id))
+  if (fresh) setTimeout(() => { notify(t('Thème « {name} » débloqué dans les Réglages', { name: t(fresh.name) })); sound('legend') }, 2700)
 })
 
 // Aide rapide : la bulle passe au premier plan (au-dessus des fiches ouvertes) et se ferme au toucher suivant.
@@ -338,24 +339,24 @@ function toggleSetting(key: Setting) {
   <div class="app-shell" :class="{ 'motion-reduced': reducedMotion }">
     <div class="sky" aria-hidden="true"><div class="sky-grid"></div></div>
     <header class="topbar">
-      <button class="brand" type="button" aria-label="GarageVerse, accueil" @click="brandClick">
+      <button class="brand" type="button" :aria-label="t('GarageVerse, accueil')" @click="brandClick">
         <span class="brand-mark" aria-hidden="true">GV</span><GameLogo v-if="theme === 'neon'" size="bar" :flicker="false" /><span v-else>GARAGE<span class="brand-accent">VERSE</span></span>
       </button>
       <div class="wallet">
-        <span ref="wallet" class="credits" :class="creditMove" :aria-label="`${save.credits} crédits`"><span aria-hidden="true">₡ {{ shownCredits }}</span></span>
-        <button v-if="!installed" type="button" class="settings-button fullscreen-button" :aria-label="fullscreen ? 'Quitter le plein écran' : 'Plein écran'"
+        <span ref="wallet" class="credits" :class="creditMove" :aria-label="tp('{n} crédit', '{n} crédits', save.credits)"><span aria-hidden="true">₡ {{ shownCredits }}</span></span>
+        <button v-if="!installed" type="button" class="settings-button fullscreen-button" :aria-label="fullscreen ? t('Quitter le plein écran') : t('Plein écran')"
           :aria-pressed="fullscreen" @click="toggleFullscreen">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
             <path v-if="fullscreen" d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/><path v-else d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
           </svg>
         </button>
-        <button type="button" class="settings-button" aria-label="Réglages" @click="showSettings()">
+        <button type="button" class="settings-button" :aria-label="t('Réglages')" @click="showSettings()">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><path d="M8 3v6m8 0v6m-6 0v6"/></svg>
         </button>
       </div>
     </header>
 
-    <p v-if="storageWarning" class="storage-warning" role="alert">La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.</p>
+    <p v-if="storageWarning" class="storage-warning" role="alert">{{ t('La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.') }}</p>
 
     <MechanicGuide />
     <ReleaseNotes ref="releaseNotes" :ready="!splash" />
@@ -369,18 +370,18 @@ function toggleSetting(key: Setting) {
     <main v-else-if="screen === 'versus'" class="race">
       <VersusView v-if="networkAvailable" @back="go('home')" />
       <section v-else>
-        <button class="button quiet" @click="go('home')">← Accueil</button>
-        <h1>Versus</h1><p role="status">Connexion nécessaire</p>
+        <button class="button quiet" @click="go('home')">{{ t('← Accueil') }}</button>
+        <h1>Versus</h1><p role="status">{{ t('Connexion nécessaire') }}</p>
       </section>
     </main>
     <RaceView v-else @inspect="inspect" @go="go" />
 
-    <nav class="tabbar" aria-label="Navigation principale">
+    <nav class="tabbar" :aria-label="t('Navigation principale')">
       <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'home' && screen === 'versus') || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
         @click="go(tab.id)">
         <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="tab.icon" /></svg></span>{{ tab.label }}
-        <span v-if="tab.id === 'garage' && pendingSeries.length" class="tab-dot" aria-label="Récompense de série à récupérer"></span>
-        <span v-if="tab.id === 'race' && save.duel" class="tab-dot" aria-label="course en cours"></span>
+        <span v-if="tab.id === 'garage' && pendingSeries.length" class="tab-dot" :aria-label="t('Récompense de série à récupérer')"></span>
+        <span v-if="tab.id === 'race' && save.duel" class="tab-dot" :aria-label="t('course en cours')"></span>
       </button>
     </nav>
 
@@ -388,84 +389,89 @@ function toggleSetting(key: Setting) {
     <div v-if="toast" :key="toast.text" class="toast" :class="toast.tone" role="status">{{ toast.text }}</div>
 
     <Teleport :to="bubbleHost">
-    <div ref="bubble" popover="manual" class="help-bubble" :style="bubbleStyle" role="dialog" aria-label="Explication">
+    <div ref="bubble" popover="manual" class="help-bubble" :style="bubbleStyle" role="dialog" :aria-label="t('Explication')">
       <template v-if="helpEntry">
-        <button type="button" class="help-close" aria-label="Fermer l’explication" @click="dismissHelp(true)">×</button>
-        <b>{{ helpEntry.term }}</b>
-        <p>{{ helpEntry.text }}</p>
-        <button type="button" class="link" @click="showLexicon">Tout le lexique</button>
+        <button type="button" class="help-close" :aria-label="t('Fermer l’explication')" @click="dismissHelp(true)">×</button>
+        <b>{{ t(helpEntry.term) }}</b>
+        <p>{{ t(helpEntry.text) }}</p>
+        <button type="button" class="link" @click="showLexicon">{{ t('Tout le lexique') }}</button>
       </template>
     </div>
     </Teleport>
 
-    <dialog ref="settings" class="modal settings-modal" aria-label="Réglages">
-      <form method="dialog"><button class="close-modal" aria-label="Fermer les réglages">×</button></form>
-      <h2>Réglages</h2>
-      <div class="settings-tabs" role="tablist" aria-label="Réglages">
+    <dialog ref="settings" class="modal settings-modal" :aria-label="t('Réglages')">
+      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer les réglages')">×</button></form>
+      <h2>{{ t('Réglages') }}</h2>
+      <div class="settings-tabs" role="tablist" :aria-label="t('Réglages')">
         <button v-for="(tab, index) in settingsTabs" :id="'settings-tab-' + tab.id" :key="tab.id" type="button" role="tab"
           :aria-selected="settingsTab === tab.id" :aria-controls="'settings-panel-' + tab.id" :tabindex="settingsTab === tab.id ? 0 : -1"
           @click="selectSettingsTab(tab.id)" @keydown="settingsTabKey($event, index)">{{ tab.label }}</button>
       </div>
       <div id="settings-content" class="settings-content">
         <div v-show="settingsTab === 'parameters'" id="settings-panel-parameters" role="tabpanel" aria-labelledby="settings-tab-parameters">
-          <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">Revoir le tutoriel</button>
-          <section class="save-transfer" aria-label="Sauvegarde">
-            <p v-if="offlineReady"><span v-help="'offline'">Disponible hors ligne</span></p>
-            <p><span v-help="'exportSave'">Export de sauvegarde</span> · <span v-help="'importSave'">Import de sauvegarde</span></p>
-            <button type="button" class="button ghost" @click="exportSave">Exporter la sauvegarde</button>
-            <button type="button" class="button ghost" @click="saveFile?.click()">Importer une sauvegarde</button>
+          <fieldset class="language-picker">
+            <legend>{{ t('Langue') }}</legend>
+            <label v-for="l in locales" :key="l.id" class="setting"><span :lang="l.id">{{ l.name }}</span>
+              <input type="radio" name="language" :value="l.id" :checked="locale === l.id" @change="setLocale(l.id as Locale)" /></label>
+          </fieldset>
+          <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">{{ t('Revoir le tutoriel') }}</button>
+          <section class="save-transfer" :aria-label="t('Sauvegarde')">
+            <p v-if="offlineReady"><span v-help="'offline'">{{ t('Disponible hors ligne') }}</span></p>
+            <p><span v-help="'exportSave'">{{ t('Export de sauvegarde') }}</span> · <span v-help="'importSave'">{{ t('Import de sauvegarde') }}</span></p>
+            <button type="button" class="button ghost" @click="exportSave">{{ t('Exporter la sauvegarde') }}</button>
+            <button type="button" class="button ghost" @click="saveFile?.click()">{{ t('Importer une sauvegarde') }}</button>
             <input ref="saveFile" type="file" accept=".json,application/json" hidden @change="importSave" />
-            <button type="button" class="button quiet" @click="resetGame">Réinitialiser la partie</button>
+            <button type="button" class="button quiet" @click="resetGame">{{ t('Réinitialiser la partie') }}</button>
             <p v-if="transferMessage" role="status">{{ transferMessage }}</p>
           </section>
-          <label v-if="hasMusic" class="setting"><span>Musique</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
-          <label class="setting"><span>Bruitages</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
-          <label class="setting"><span>Mouvement réduit</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
-          <p v-if="systemReduced" class="setting-note">Activé dans les réglages du système.</p>
-          <label class="setting"><span>Aide en touchant les mots soulignés</span><input type="checkbox" :checked="save.preferences.touchHelp !== false" @change="toggleSetting('touchHelp')" /></label>
-          <label class="setting"><span>Vibrations</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
-          <label v-if="canFullscreen && !installed" class="setting"><span>Plein écran</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
-          <p v-else-if="!installed" class="setting-note">Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.</p>
-          <p class="setting-note app-version"><span @click="versionTap">GarageVerse v{{ appVersion }}</span> · <button type="button" class="link" @click="showReleaseNotes">Notes de version</button></p>
+          <label v-if="hasMusic" class="setting"><span>{{ t('Musique') }}</span><input type="checkbox" :checked="save.preferences.music" @change="toggleSetting('music')" /></label>
+          <label class="setting"><span>{{ t('Bruitages') }}</span><input type="checkbox" :checked="save.preferences.sound" @change="toggleSetting('sound')" /></label>
+          <label class="setting"><span>{{ t('Mouvement réduit') }}</span><input type="checkbox" :checked="reducedMotion" :disabled="systemReduced" @change="toggleSetting('reducedMotion')" /></label>
+          <p v-if="systemReduced" class="setting-note">{{ t('Activé dans les réglages du système.') }}</p>
+          <label class="setting"><span>{{ t('Aide en touchant les mots soulignés') }}</span><input type="checkbox" :checked="save.preferences.touchHelp !== false" @change="toggleSetting('touchHelp')" /></label>
+          <label class="setting"><span>{{ t('Vibrations') }}</span><input type="checkbox" :checked="save.preferences.vibration" @change="toggleSetting('vibration')" /></label>
+          <label v-if="canFullscreen && !installed" class="setting"><span>{{ t('Plein écran') }}</span><input type="checkbox" :checked="fullscreen" @change="toggleFullscreen" /></label>
+          <p v-else-if="!installed" class="setting-note">{{ t('Plein écran sur iPhone : dans Safari, touche Partager puis « Sur l’écran d’accueil », et lance GarageVerse depuis son icône.') }}</p>
+          <p class="setting-note app-version"><span @click="versionTap">GarageVerse v{{ appVersion }}</span> · <button type="button" class="link" @click="showReleaseNotes">{{ t('Notes de version') }}</button></p>
         </div>
         <div v-show="settingsTab === 'themes'" id="settings-panel-themes" role="tabpanel" aria-labelledby="settings-tab-themes">
           <fieldset class="theme-picker">
-            <legend>Thème</legend>
-            <div v-for="(group, groupIndex) in themeLists" :key="group.title" class="theme-group" role="group" :aria-label="group.title">
-              <h3 class="theme-group-title"><button type="button" :aria-expanded="expandedGroups.includes(group.title)" :aria-controls="'theme-group-' + groupIndex" @click="toggleThemeGroup(group.title)">{{ group.title }} <span aria-hidden="true">{{ expandedGroups.includes(group.title) ? '⌄' : '›' }}</span></button></h3>
+            <legend>{{ t('Thème') }}</legend>
+            <div v-for="(group, groupIndex) in themeLists" :key="group.title" class="theme-group" role="group" :aria-label="t(group.title)">
+              <h3 class="theme-group-title"><button type="button" :aria-expanded="expandedGroups.includes(group.title)" :aria-controls="'theme-group-' + groupIndex" @click="toggleThemeGroup(group.title)">{{ t(group.title) }} <span aria-hidden="true">{{ expandedGroups.includes(group.title) ? '⌄' : '›' }}</span></button></h3>
               <div v-show="expandedGroups.includes(group.title)" :id="'theme-group-' + groupIndex" class="theme-group-items">
-              <label v-for="t in group.items" :key="t.id" class="theme-option" :class="{ chosen: theme === t.id, locked: !unlocked(save, t.id) }">
-                <input type="radio" name="theme" :value="t.id" :checked="theme === t.id" :disabled="!unlocked(save, t.id)" @change="chooseTheme(t.id)" />
-                <span class="theme-swatch" aria-hidden="true"><i v-for="c in t.swatch" :key="c" :style="{ background: c }"></i></span>
-                <span class="theme-text"><b>{{ t.name }}</b>
-                  <small v-if="!unlocked(save, t.id) && t.unlock" class="theme-goal">🔒 {{ t.unlock.goal }} · {{ t.unlock.progress(save).join(' / ') }}</small>
+              <label v-for="th in group.items" :key="th.id" class="theme-option" :class="{ chosen: theme === th.id, locked: !unlocked(save, th.id) }">
+                <input type="radio" name="theme" :value="th.id" :checked="theme === th.id" :disabled="!unlocked(save, th.id)" @change="chooseTheme(th.id)" />
+                <span class="theme-swatch" aria-hidden="true"><i v-for="c in th.swatch" :key="c" :style="{ background: c }"></i></span>
+                <span class="theme-text"><b>{{ t(th.name) }}</b>
+                  <small v-if="!unlocked(save, th.id) && th.unlock" class="theme-goal">🔒 {{ t(th.unlock.goal) }} · {{ th.unlock.progress(save).join(' / ') }}</small>
                 </span>
               </label>
               </div>
             </div>
           </fieldset>
           <fieldset class="back-picker">
-            <legend>Dos des cartes</legend>
+            <legend>{{ t('Dos des cartes') }}</legend>
             <label v-for="b in cardBacks" :key="b.id" class="back-option" :class="{ chosen: currentBack === b.id }">
               <input type="radio" name="cardback" :value="b.id" :checked="currentBack === b.id" @change="chooseCardBack(b.id)" />
               <span class="back-thumb" :style="{ backgroundImage: `url(${b.art})` }" aria-hidden="true"></span>
-              <span>{{ b.name }}</span>
+              <span>{{ t(b.name) }}</span>
             </label>
           </fieldset>
         </div>
         <div v-show="settingsTab === 'help'" id="settings-panel-help" role="tabpanel" aria-labelledby="settings-tab-help">
-          <h2>Lexique</h2>
-          <p class="lexicon-intro">Touche un mot souligné en pointillé, partout dans le jeu, pour voir son explication.</p>
+          <h2>{{ t('Lexique') }}</h2>
+          <p class="lexicon-intro">{{ t('Touche un mot souligné en pointillé, partout dans le jeu, pour voir son explication.') }}</p>
           <section v-for="section in glossarySections" :key="section.title" class="lexicon-section">
-            <h3>{{ section.title }}</h3>
-            <dl><template v-for="key in section.keys" :key="key"><dt>{{ glossary[key].term }}</dt><dd>{{ glossary[key].text }}</dd></template></dl>
+            <h3>{{ t(section.title) }}</h3>
+            <dl><template v-for="key in section.keys" :key="key"><dt>{{ t(glossary[key].term) }}</dt><dd>{{ t(glossary[key].text) }}</dd></template></dl>
           </section>
         </div>
       </div>
     </dialog>
 
-    <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? 'Fiche voiture' : 'Fiche pièce'" @close="inspected = null">
-      <form method="dialog"><button class="close-modal" aria-label="Fermer">×</button></form>
+    <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="inspected = null">
+      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
         :key="`c-${inspected.id}`" @open="id => inspect('car', id)" @close="sheet?.close()" />
       <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="(id, stat) => inspect('car', id, undefined, stat)" />

@@ -880,3 +880,7 @@ main.race { animation-name: race-view-in; }
 .recap-actions:has(.next-booster) { flex-wrap: wrap; }
 .recap-actions .next-booster.button { flex: 1 1 100%; white-space: normal; }
 .recap-actions:has(.next-booster) .button:not(.next-booster) { flex: 1 1 0; min-width: 0; }
+
+/* Choix de la langue, en tête des Paramètres. */
+.language-picker { border: 0; padding: 0; margin: 0 0 12px; min-width: 0; }
+.language-picker legend { padding: 0; margin-bottom: 4px; font-weight: 700; }

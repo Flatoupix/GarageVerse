@@ -1,3 +1,4 @@
+import './i18n/localize-data'
 import { registerOffline } from './game/offline'
 import { createApp } from 'vue'
 import App from './App.vue'

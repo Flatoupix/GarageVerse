@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { Play, Round } from '../game/rules'
+import { t } from '../i18n'
 
 // Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
@@ -27,7 +28,7 @@ const lanes = computed(() => sides.map(who => {
   return {
     who, position, art: props.sprites?.[who] ?? props.arts[who], sprite: Boolean(props.sprites?.[who]),
     kind: line ? kindOf(play, index) : '',
-    tag: line ? `${line.label} ${index && line.value > 0 ? '+' : ''}${line.value}` : '',
+    tag: line ? `${t(line.label)} ${index && line.value > 0 ? '+' : ''}${line.value}` : '',
     nitro: play.nitro && play.lines.findIndex(l => l.label === 'Nitro') < props.step,
   }
 }))
@@ -46,6 +47,6 @@ const lanes = computed(() => sides.map(who => {
       </div>
     </div>
     <span class="run-finish"></span>
-    <span v-if="running" class="run-skip">Touche pour passer</span>
+    <span v-if="running" class="run-skip">{{ t('Touche pour passer') }}</span>
   </div>
 </template>

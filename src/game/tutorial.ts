@@ -1,8 +1,9 @@
 import { ref, watch } from 'vue'
 import { completedSeries, persist, save } from './store'
+import { t } from '../i18n'
 import { tutorialSteps, type Discovery } from './save'
 
-export const helpSettingTip = 'Tu peux activer « Aide en touchant les mots soulignés » dans les Réglages. Le lexique reste accessible dans les Réglages, onglet Aide.'
+export const helpSettingTip = t('Tu peux activer « Aide en touchant les mots soulignés » dans les Réglages. Le lexique reste accessible dans les Réglages, onglet Aide.')
 
 export const discovery = ref<Discovery | null>(null)
 export function tutorialAction(from: number, to: number) {

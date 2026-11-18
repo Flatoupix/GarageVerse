@@ -1,4 +1,5 @@
 // Tirage reproductible : la nuit garde la même grille après un rechargement.
+import { t } from '../i18n'
 import { parts, rivals, sectorStat, vehicles, type Condition, type Rival } from './data'
 import { dailyRng } from './daily'
 import { compatibility, partUnlockLevel, potential, prepUsed, upgradeKeys } from './rules'
@@ -64,6 +65,6 @@ export function nightRival(seed: string, round: number): Rival {
     const upgrades = Object.fromEntries(upgradeKeys.map(key => [key, level]))
     return { id: v.id, ...prep, upgrades }
   })
-  return { id: `night:${seed}:${round}`, name: `Manche ${round}`, title: 'Nuit sans fin', league: 'neon', lineup,
+  return { id: `night:${seed}:${round}`, name: t('Manche {round}', { round }), title: t('Nuit sans fin'), league: 'neon', lineup,
     circuit: { ...circuit, sectors: [...circuit.sectors], conditions: { [weather]: 1 } } }
 }
