@@ -340,3 +340,30 @@ Après playtest, décider du nombre de passages, des vitesses et des tolérances
 de l’intérêt d’un braquage dédié en virage et d’une éventuelle part d’imprévu. Comparer la lisibilité,
 les taux de réussite, la durée d’une course et l’intérêt des choix de préparation avant de décider
 si les deux modes doivent coexister.
+
+## Direction expérimentale dans les virages (T-027)
+
+Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** puis **Direction dans les
+virages (expérimental)**. Ce deuxième réglage est désactivé par défaut. **Démo des virages**
+permet de jouer et de rejouer les deux sens sans lancer de course.
+
+En solo, engage ta voiture avec la consigne et la nitro choisies. Dans chaque secteur de type
+virage, le sens est fixé par l’identifiant du circuit et l’index du secteur. Lis la flèche
+pendant l’annonce, puis suis le repère pendant l’approche. Appuie sur la commande gauche ou
+droite, à l’écran ou au clavier, quand le repère atteint **Maintenant**. Les deux bornes de la
+fenêtre comptent. Le mouvement réduit affiche le repère par étapes et laisse plus de temps.
+Le chrono se suspend si tu changes d’onglet et la consigne revient avant la reprise. Si tu
+recharges avant la résolution, tu reviens à la sélection du secteur.
+
+| Geste | Résultat | Direction |
+| --- | --- | ---: |
+| Bon côté dans la fenêtre | Bien placé | +1 |
+| Bon côté avant la fenêtre | Trop tôt | 0 |
+| Mauvais côté pendant la phase jouable | Mauvais côté | −1 |
+| Fenêtre expirée | Trop tard | −1 |
+
+Le résultat affiche **score de base + direction = score du secteur**. La ligne **Direction**
+remplace les variations aléatoires du joueur. Le score de base garde les limites habituelles,
+dont le plafond de 12 pour les statistiques préparées. Le rival garde sa résolution habituelle.
+Le départ, la ligne droite et l’endurance gardent le passage de vitesses, comme les virages
+quand l’option de direction est inactive.

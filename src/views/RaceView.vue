@@ -12,16 +12,19 @@ import {
 } from '../game/data'
 import { helpForLine, vHelp } from '../game/help'
 import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
-import { canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Round, type Stance } from '../game/rules'
+import { canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Choice, type Round, type Stance } from '../game/rules'
 import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
-import { playTimingRound, soloTimingWindow, type TimingResult, type TimingRound } from '../game/timing'
+import { playTimingRound, playTurnRound, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
 import { signedTiming, timingFeedback } from '../game/timing-text'
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
 import CarCard from '../components/CarCard.vue'
 import SectorRun from '../components/SectorRun.vue'
 import TimingGauge from '../components/TimingGauge.vue'
+import TurnControl from '../components/TurnControl.vue'
+import { expectedTurn, type TurnDirection, type TurnResult } from '../game/turn'
+import { turnFeedback } from '../game/turn-text'
 
 // Les mesures suivent aussi les changements de thème, de police et de zone sûre.
 const raceRoot = ref<HTMLElement | null>(null)
@@ -149,6 +152,11 @@ function start() {
 
 // ——— Course en cours ———
 const duel = computed(() => save.duel)
+const turnChoice = ref<{ duel: SoloDuel; index: number; choice: Choice; direction: TurnDirection } | null>(null)
+const pendingTurn = computed(() => {
+  const pending = turnChoice.value, d = duel.value
+  if (pending && pending.duel === d && pending.index === d.rounds.length && !d.winner) return pending
+})
 const timingWindow = computed(() => {
   const d = duel.value
   if (d?.timingChoice && !d.winner) return soloTimingWindow(d, d.player.lineup[d.timingChoice.car])
@@ -281,11 +289,17 @@ const projections = computed(() => duel.value && index.value < duel.value.sector
 
 function engage() {
   const d = duel.value
-  if (!d || d.winner || d.timingChoice || shown.value) return
+  if (!d || d.winner || d.timingChoice || pendingTurn.value || shown.value) return
   const choice = { car: picked.value, nitro: nitro.value, stance: stance.value }
   if (save.preferences.timingMode) {
-    d.timingChoice = choice
-    persist()
+    const circuit = rival.value?.circuit
+    if (save.preferences.turnMode && circuit && d.sectors[index.value] === 'virage') {
+      // Le geste est transitoire : au rechargement, le secteur revient à la sélection.
+      turnChoice.value = { duel: d, index: index.value, choice, direction: expectedTurn(circuit.name, index.value) }
+    } else {
+      d.timingChoice = choice
+      persist()
+    }
     void scrollToStage(false, true)
     return
   }
@@ -299,6 +313,15 @@ function shift(result: TimingResult) {
   delete d.timingChoice
   d.timingReview = true
   persist()
+  showRound(round)
+}
+
+function steer(result: TurnResult) {
+  const pending = pendingTurn.value
+  if (!pending || shown.value) return
+  turnChoice.value = null
+  const round = playTurnRound(pending.duel, pending.choice, result, Math.random)
+  pending.duel.timingReview = true
   showRound(round)
 }
 
@@ -381,6 +404,7 @@ function cashNight(returnGarage = false) {
   if (returnGarage) { nightEnd.value = null; chosen.value = null; emit('go', 'garage') }
 }
 function abandon() {
+  turnChoice.value = null
   if (isNight.value) { clear(); shown.value = null; cashNight(); sound('lose'); return }
 
   act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0, perfect: false }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, t('Course abandonnée'))
@@ -459,6 +483,10 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           base: shown.player.score - shown.timing.modifier, zone: timingFeedback(shown.timing.zone),
           modifier: signedTiming(shown.timing.modifier), total: shown.player.score,
         }) }}</p>
+        <p v-if="shown.direction" role="status">{{ t('Score de base {base} · Direction {outcome} ({modifier}) = {total}', {
+          base: shown.player.score - shown.direction.modifier, outcome: turnFeedback(shown.direction.outcome),
+          modifier: signedTiming(shown.direction.modifier), total: shown.player.score,
+        }) }}</p>
         <SectorRun :round="shown" :step="step" :running="!settled" :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
         <p v-if="settled && tieBreak" class="tie-note">{{ tieBreak }}</p>
         <div class="duel-columns">
@@ -467,7 +495,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             <span class="duel-who">{{ who === 'player' ? t('Toi') : rival.name }} <span v-if="shown[who].nitro" class="clash-nitro">{{ t('Nitro') }}</span></span>
             <strong>{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
             <span class="duel-score" :aria-label="tp('{n} point', '{n} points', shown[who].score)">{{ counts[who] }}</span>
-            <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ ruleText(l.label) }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
+            <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ l.label === 'Direction' ? t('Direction') : ruleText(l.label) }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
           </div>
         </div>
         <div v-if="settled" class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? t('Voir le résultat') : t('Secteur suivant') }} <span aria-hidden="true">⟶</span></button></div>
@@ -478,9 +506,10 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <div class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ t('Voir le résultat') }} <span aria-hidden="true">⟶</span></button></div>
       </section>
 
-      <section v-else-if="timingWindow" class="engage">
+      <section v-else-if="pendingTurn || timingWindow" class="engage">
         <h2 class="engage-brief">{{ t('Secteur {n}/{total}', { n: index + 1, total: duel.sectors.length }) }} · {{ t(sectorLabels[duel.sectors[index]]) }}</h2>
-        <TimingGauge :key="index" :window="timingWindow" @shift="shift" />
+        <TurnControl v-if="pendingTurn" :key="`turn-${index}`" :direction="pendingTurn.direction" @turn="steer" />
+        <TimingGauge v-else-if="timingWindow" :key="index" :window="timingWindow" @shift="shift" />
         <button type="button" class="button quiet wide" @click="abandon">{{ t('Abandonner') }}</button>
       </section>
 
@@ -524,7 +553,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <p v-if="carDetail.timing">{{ t('Score de référence estimé sans nitro : {n}', { n: carDetail.reference }) }}</p>
           <p v-else><span v-help="'forme'">{{ t('Fourchette de score') }}</span> {{ t('sur ce secteur :') }} <strong>{{ carDetail.range[0] }}–{{ carDetail.range[1] }}</strong> {{ t('points · sans nitro') }}</p>
         </section>
-        <p v-if="save.preferences.timingMode" class="engage-hint">{{ t('Ton score estimé est affiché avant le passage de vitesse.') }}</p>
+        <p v-if="save.preferences.timingMode" class="engage-hint">{{ save.preferences.turnMode && duel.sectors[index] === 'virage' ? t('Ton score estimé est affiché avant le virage.') : t('Ton score estimé est affiché avant le passage de vitesse.') }}</p>
         <p v-else class="engage-hint">{{ t('Sous chaque voiture :') }} <span v-help="'forme'">{{ t('fourchette de score') }}</span> {{ t('et') }} <span v-help="'secteurs'">{{ t('secteurs restants') }}</span>.</p>
         <!-- Toujours à portée de pouce : la nitro et le bouton restent collés au bas de l'écran. -->
         <div class="engage-actions race-actions">

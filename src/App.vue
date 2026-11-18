@@ -17,6 +17,8 @@ import GameDaveSplash from './components/GameDaveSplash.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
 import TimingGauge from './components/TimingGauge.vue'
+import TurnControl from './components/TurnControl.vue'
+import type { TurnDirection } from './game/turn'
 import { timingWindow } from './game/timing'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
@@ -31,7 +33,7 @@ import { offlineReady } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus'
-type Setting = 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
+type Setting = 'turnMode' | 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 function initialScreen(): Screen {
   if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
@@ -58,6 +60,19 @@ const demoWindow = timingWindow('ligne', 'demo', 0, 6, 1, 0, 0)
 function showTimingDemo() {
   timingDemo.value?.showModal()
   timingDemoOpen.value = true
+}
+const turnDemo = ref<HTMLDialogElement>()
+const turnDemoOpen = ref(false)
+const demoDirection = ref<TurnDirection>('gauche')
+const turnAttempt = ref(0)
+function playDemoTurn(direction: TurnDirection) {
+  demoDirection.value = direction
+  turnAttempt.value++
+}
+function showTurnDemo() {
+  turnDemo.value?.showModal()
+  playDemoTurn('gauche')
+  turnDemoOpen.value = true
 }
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
@@ -424,6 +439,9 @@ function toggleSetting(key: Setting) {
               <input type="radio" name="language" :value="l.id" :checked="locale === l.id" @change="setLocale(l.id as Locale)" /></label>
           </fieldset>
           <label class="setting"><span>{{ t('Mode timing (expérimental)') }}</span><input type="checkbox" :checked="save.preferences.timingMode" @change="toggleSetting('timingMode')" /></label>
+          <label class="setting"><span>{{ t('Direction dans les virages (expérimental)') }}</span><input type="checkbox"
+            :checked="save.preferences.timingMode && save.preferences.turnMode" :disabled="!save.preferences.timingMode" @change="toggleSetting('turnMode')" /></label>
+          <button type="button" class="button ghost wide" @click="showTurnDemo">{{ t('Démo des virages') }}</button>
           <button type="button" class="button ghost wide" @click="showTimingDemo">{{ t('Démo du passage de vitesses') }}</button>
           <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">{{ t('Revoir le tutoriel') }}</button>
           <section class="save-transfer" :aria-label="t('Sauvegarde')">
@@ -487,6 +505,16 @@ function toggleSetting(key: Setting) {
       <TimingGauge v-if="timingDemoOpen" :window="demoWindow" demo />
     </dialog>
 
+    <dialog ref="turnDemo" class="modal timing-modal" :aria-label="t('Démo des virages')" @close="turnDemoOpen = false">
+      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
+      <h2>{{ t('Démo des virages') }}</h2>
+      <TurnControl v-if="turnDemoOpen" :key="turnAttempt" :direction="demoDirection" demo />
+      <div class="turn-demo-actions">
+        <button type="button" class="button quiet" @click="playDemoTurn('gauche')">{{ t('Jouer le virage à gauche') }}</button>
+        <button type="button" class="button quiet" @click="playDemoTurn('droite')">{{ t('Jouer le virage à droite') }}</button>
+      </div>
+    </dialog>
+
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
@@ -498,4 +526,6 @@ function toggleSetting(key: Setting) {
 
 <style scoped>
 .timing-modal h2 { padding-inline-end: 36px; overflow-wrap: anywhere; }
+.turn-demo-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+.turn-demo-actions .button { min-width: 0; padding-inline: 6px; white-space: normal; }
 </style>

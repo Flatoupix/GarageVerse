@@ -23,7 +23,7 @@ export type ThemeId = (typeof themeIds)[number]
 // Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -60,7 +60,7 @@ export function newSave(): Save {
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false },
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false, turnMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
@@ -213,6 +213,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     // Les anciennes parties conservent l’aide tactile ; les nouvelles la désactivent.
     touchHelp: input.preferences?.touchHelp !== false,
     timingMode: input.preferences?.timingMode === true,
+    turnMode: input.preferences?.turnMode === true,
     sound: input.preferences?.sound !== false,
     music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,

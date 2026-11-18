@@ -1,11 +1,13 @@
 import { partById, sectorStat, type Sector } from './data'
-import { aiChoice, commitRound, playVersusRound, seededRng, STAT_CAP, upgradeForFamily, type Choice, type Duel, type Racer, type Rng, type Round } from './rules'
+import { aiChoice, commitRound, playVersusRound, seededRng, STAT_CAP, upgradeForFamily, type Choice, type Duel, type Racer, type Rng, type Round, type ScoreLine } from './rules'
+
+import type { TurnResult } from './turn'
 
 export const timingModifiers = { red: -2, orange: -1, green: 0, perfect: 1 }
 export type TimingZone = keyof typeof timingModifiers
 export interface TimingResult { zone: TimingZone; modifier: number }
 export interface TimingWindow { center: number; green: number; orange: number; duration: number }
-export interface TimingRound extends Round { timing?: TimingResult }
+export interface TimingRound extends Round { timing?: TimingResult; direction?: TurnResult }
 export interface SoloDuel extends Duel {
   rounds: TimingRound[]
   timingChoice?: Choice
@@ -58,6 +60,15 @@ export function soloTimingWindow(duel: Duel, car: Racer): TimingWindow {
 }
 
 export function playTimingRound(duel: SoloDuel, choice: Choice, timing: TimingResult, rng: Rng): TimingRound {
+  return playSoloModifiedRound(duel, choice, { label: 'Timing du passage', value: timing.modifier }, { timing }, rng)
+}
+
+export function playTurnRound(duel: SoloDuel, choice: Choice, direction: TurnResult, rng: Rng): TimingRound {
+  return playSoloModifiedRound(duel, choice, { label: 'Direction', value: direction.modifier }, { direction }, rng)
+}
+
+function playSoloModifiedRound(duel: SoloDuel, choice: Choice, line: ScoreLine,
+  feedback: Pick<TimingRound, 'timing' | 'direction'>, rng: Rng): TimingRound {
   const rivalChoice = aiChoice(duel, 'rival', rng)
   // Le moteur tire d'abord la chance du joueur. Deux milieux d'intervalle donnent une forme du jour nulle.
   // On conserve ensuite les vrais tirages du rival et on applique le secteur corrigé à la course réelle.
@@ -67,10 +78,9 @@ export function playTimingRound(duel: SoloDuel, choice: Choice, timing: TimingRe
     rival: { ...duel.rival, used: [...duel.rival.used] },
   }
   let draws = 0
-  const round: TimingRound = playVersusRound(preview, choice, rivalChoice, () => draws++ < 2 ? 0.5 : rng())
-  round.timing = timing
-  round.player.score += timing.modifier
-  round.player.lines.push({ label: 'Timing du passage', value: timing.modifier })
+  const round = Object.assign(playVersusRound(preview, choice, rivalChoice, () => draws++ < 2 ? 0.5 : rng()), feedback)
+  round.player.score += line.value
+  round.player.lines.push(line)
   const difference = round.player.score - round.rival.score
     || duel.player.lineup[choice.car].stats.end - duel.rival.lineup[rivalChoice.car].stats.end
   round.winner = difference > 0 ? 'player' : difference < 0 ? 'rival' : 'tie'
