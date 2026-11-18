@@ -464,16 +464,15 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 <template>
   <main ref="raceRoot" class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
     <section v-if="save.preferences.timingMode && rivalRace && !duel && !reward" class="race-pilot">
-      <fieldset>
-        <legend>{{ t('Pilotage') }}</legend>
-        <label><input v-model="pilotPreference" type="radio" name="race-pilot" value="auto" />
-          <span>{{ t('Automatique (avec le hasard, comme avant)') }}</span>
-        </label>
-        <label><input v-model="pilotPreference" type="radio" name="race-pilot" value="manuel" />
-          <span>{{ t('Manuel (ton adresse remplace le hasard)') }}</span>
-        </label>
-      </fieldset>
-      <p>{{ t('En automatique, tu choisis ta voiture et le hasard joue sur son score. En manuel, tu joues le passage de vitesse et les virages si tu les as activés.') }}</p>
+      <h2 id="race-pilot-title">{{ t('Pilotage') }}</h2>
+      <div class="race-pilot-options" role="group" aria-labelledby="race-pilot-title" aria-describedby="race-pilot-help">
+        <GvButton v-for="mode in (['auto', 'manuel'] as const)" :key="mode" variant="filter"
+          :aria-pressed="pilotPreference === mode" @click="pilotPreference = mode">
+          <span v-if="pilotPreference === mode" aria-hidden="true">✓</span>
+          {{ pilotLabel(mode) }}
+        </GvButton>
+      </div>
+      <small id="race-pilot-help">{{ t('En auto, le hasard joue sur ton score. En manuel, tu passes les vitesses et tu négocies les virages si tu les as activés.') }}</small>
     </section>
     <section v-if="nightEnd" class="race-end night-panel">
       <h1 tabindex="-1">{{ t('Nuit terminée') }}</h1>
@@ -538,9 +537,9 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </li>
       </ol>
 
-      <button v-if="canSwitchPilot" type="button" class="button quiet pilot-switch" @click="switchPilot">
+      <GvButton v-if="canSwitchPilot" variant="filter" class="pilot-switch" @click="switchPilot">
         {{ t('Passer en automatique pour la suite') }}
-      </button>
+      </GvButton>
 
       <section v-if="shown" class="round-result" :class="settled ? shown.winner : 'pending'">
         <p v-if="rivalRace && settled">{{ t('Pilotage : {mode}', { mode: pilotLabel(roundPilot(shown)) }) }}</p>
@@ -792,12 +791,5 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 </template>
 
 <style scoped>
-.race-pilot { min-width: 0; margin-bottom: 16px; }
-.race-pilot fieldset { min-width: 0; margin: 0; padding: 0 10px; }
-.race-pilot label { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 4px 0; cursor: pointer; }
-.race-pilot label input { flex: none; }
-.race-pilot label span { overflow-wrap: anywhere; }
-.race-pilot p { margin: 8px 0 0; }
-.pilot-switch { min-height: 44px; max-width: 100%; white-space: normal; margin: 8px 0; }
 .race-recap .recap-pilot { grid-column: 1 / -1; grid-row: 2; color: var(--muted); }
 </style>
