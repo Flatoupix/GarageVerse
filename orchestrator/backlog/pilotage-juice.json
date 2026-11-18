@@ -1,0 +1,36 @@
+{
+  "id": "pilotage-juice",
+  "title": "Pilotage manuel : du juice pour le passage de vitesses et les virages (effets, sons, vibration, série)",
+  "profile": "heavy",
+  "brief": "Retour du joueur (18 novembre 2026) : les deux mini-jeux du pilotage manuel (passage de vitesses : src/components/TimingGauge.vue ; virages en rythme : src/components/TurnControl.vue ; scène src/components/SectorRun.vue ; décompte src/components/ManualCountdown.vue ; orchestration src/views/RaceView.vue) manquent de « juice » : chaque geste doit se SENTIR. Le jeu a déjà toute la boîte à outils : src/game/fx.ts (sparks, ring, floatText, flash, shake, pop, streaks, confetti, palettes et tone suivant le thème), sons synthétisés de src/feedback.ts (`sound(cue)` dans src/game/store.ts, cues existants : tick, tap, rev, whoosh, nitro, coin, slam, error, legend…) et vibration `buzz(pattern)`. Les réutiliser, ne pas créer de nouveau système d'effets. On peut ajouter un ou deux cues synthétisés dans src/feedback.ts (par exemple un passage de rapport et un raté d'échappement) sur le modèle des existants, sans fichier audio. \n\nCE QU'IL FAUT AJOUTER. Décompte : un bip (tick) sur 3, 2, 1, un son plus fort (rev) et un petit coup de streaks sur « Partez ! » ; le chiffre fait un pop à chaque temps. Passage de vitesses : (a) pendant la montée, l'aiguille laisse une courte traînée lumineuse et la zone verte s'illumine quand l'aiguille y entre (anticipation) ; (b) à l'appui, retour proportionné au jugement — Parfait : étincelles dorées et anneau à la position de l'aiguille, texte flottant « Parfait ! », petit flash doré, son de passage net, vibration brève, la voiture du joueur fait un bond avec une flamme d'échappement ; Bon : étincelles cyan plus discrètes et bond plus court ; Moyen : petite bouffée, pas de flash ; Raté : légère secousse de la scène (shake 1), flash rose très faible, son de raté, vibration double, la voiture a un à-coup ; (c) l'indicateur « Rapport n/N » fait un pop à chaque changement de rapport ; (d) SÉRIE : deux Parfait d'affilée ou plus dans une course affichent un compteur « Série ×n » qui grossit à chaque Parfait et se brise sur un Raté. Virages : (a) à l'appui réussi, la note éclate en étincelles sur la cible de sa piste, la piste s'illumine brièvement et le bouton fait un pop ; Parfait reçoit en plus le texte flottant et l'anneau dorés ; (b) mauvais côté ou raté : la note se brise / s'efface en rose, la piste tremble légèrement, son de raté ; (c) la même série ×n que les vitesses (compteur partagé pour la course). Fin de secteur manuel : si tous les gestes du secteur sont Parfait, petite célébration « Sans faute ! » (texte doré et confettis légers) avant l'animation des lignes de score. \n\nMESURE ET RÈGLES. Les effets doivent rester BREFS (≤ 300 ms en général) et ne jamais masquer la jauge, la cible ou la prochaine note ; aucune action qui gêne la lecture du geste suivant. Les intensités suivent le jugement : Parfait > Bon > Moyen ; Raté reste sobre. Couleurs via palettes et tone de fx.ts (donc le thème), aucune couleur en dur. Mouvement réduit : pas de secousse, de flash, de traînée ni de particules ; garder les textes (« Parfait ! », « Série ×3 ») et les sons. Les sons respectent le réglage Son, la vibration le réglage Vibration (déjà gérés par sound/buzz). Rien ne s'exécute dans la boucle d'animation au-delà de ce qui est déjà calculé (pas de création d'objets à chaque image). Les démos des Réglages bénéficient des mêmes effets. Le mode automatique, le barème, les durées et la logique de jugement ne changent pas. \n\nCONTRAINTES COMMUNES : prototype solo réversible, mode expérimental désactivé par défaut ; rien ne change pour le Versus ni les échanges. `src/game/rules.ts` et `src/game/data.ts` sont recopiés côté serveur : ne pas les modifier, ne rien changer sous supabase/. Bilingue : tout texte visible passe par t('…') / tp(…) avec sa traduction anglaise dans src/i18n/en/ ; node src/i18n/i18n.check.cjs, toutes les vérifications de src/game/ et le typage passent. Textes français, tutoiement. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. docs/meta.md décrit brièvement les retours visuels et sonores du pilotage manuel.",
+  "requirements": [
+    "Décompte sonore et visuel (bip sur 3-2-1, son et streaks sur « Partez ! », pop du chiffre).",
+    "Passage de vitesses : traînée de l'aiguille et zone verte qui s'illumine à l'approche ; retour proportionné au jugement (Parfait, Bon, Moyen, Raté) avec étincelles, anneau, texte flottant, flash, secousse, son, vibration et réaction de la voiture ; pop de l'indicateur de rapport.",
+    "Virages : éclat de la note sur la cible, piste qui s'illumine, pop du bouton ; mauvais côté ou raté en rose avec légère secousse et son.",
+    "Série ×n partagée par la course (deux Parfait d'affilée ou plus), qui grossit à chaque Parfait et se brise sur un Raté ; célébration « Sans faute ! » quand tous les gestes d'un secteur sont Parfait.",
+    "Effets brefs qui ne masquent jamais la jauge, la cible ni la prochaine note ; couleurs des thèmes via fx.ts ; mouvement réduit sans secousse, flash ni particules ; réglages Son et Vibration respectés ; démos des Réglages incluses.",
+    "Barème, durées, jugement et mode automatique inchangés ; aucune modification de rules.ts, data.ts ni supabase/ ; i18n, typage, vérifications de src/game/ et build verts ; aucune erreur dans la console ni débordement à 320, 390 et 1280 px."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon",
+  "flow": [
+    {
+      "reset": true
+    },
+    {
+      "tap": "Réglages"
+    },
+    {
+      "expect": "Démo du passage de vitesses"
+    },
+    {
+      "tap": "Démo du passage de vitesses"
+    },
+    {
+      "capture": "juice-vitesses"
+    }
+  ]
+}
