@@ -2,11 +2,14 @@
 import { t } from '../i18n'
 import { parts, rivals, sectorStat, vehicles, type Condition, type Rival } from './data'
 import { dailyRng } from './daily'
+import type { PilotMode, PilotSummary } from './pilot'
 import { compatibility, partUnlockLevel, potential, prepUsed, upgradeKeys } from './rules'
 
 export const NIGHT_CAP = 9
 export const nightReward = (round: number) => 60 + 20 * round
-export interface Night { seed: string; round: number; wins: number; gains: number; lineup: string[]; resting: boolean; newRecord: boolean }
+// `pilotMode` est le choix de la série pour la prochaine manche ; le duel engagé fige le sien dans `duel.pilot`.
+export interface Night { seed: string; round: number; wins: number; gains: number; lineup: string[]; resting: boolean; newRecord: boolean
+  pilotMode: PilotMode; lastPilot?: PilotSummary }
 export function nightRival(seed: string, round: number): Rival {
   const rng = dailyRng(`${seed}:${round}`)
   const offset = Math.floor(dailyRng(seed)() * rivals.length)

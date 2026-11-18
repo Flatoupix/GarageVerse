@@ -4,7 +4,7 @@ import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, s
 import { locale, t, tp } from '../i18n'
 import { ruleText } from '../game/rules-text'
 import { NIGHT_CAP, nightRival } from '../game/endless'
-import { createNightRound, finishNight, nightLineupCheck, settleNight, startNight } from '../game/save'
+import { createNightRound, finishNight, nightLineupCheck, setNightPilot, settleNight, startNight } from '../game/save'
 import { constraintCap, constraintText } from '../game/daily'
 import { art, carSprite, edition, trackBackdrop } from '../game/art'
 import {
@@ -17,10 +17,11 @@ import { aiChoice, canAttack, circuitPriorities, circuitScores, evaluate, lineup
 import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type ManualDiscovery, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { playTimingRound, playTurnRound, shiftsPerSector, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
-import { playPilotRound, sectorPilot, switchToAutomatic, type PilotMode } from '../game/pilot'
+import { pilotSummary, playPilotRound, roundPilot, sectorPilot, switchToAutomatic, type PilotMode, type PilotSummary } from '../game/pilot'
 import { signedTiming, timingFeedback, timingSummary } from '../game/timing-text'
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
+import PilotPicker from '../components/PilotPicker.vue'
 import CarCard from '../components/CarCard.vue'
 import ManualCountdown from '../components/ManualCountdown.vue'
 import SectorRun from '../components/SectorRun.vue'
@@ -75,7 +76,7 @@ const challenge = computed(() => todayChallenge(save, chosen.value?.startsWith('
 const isNight = computed(() => chosen.value?.startsWith('night'))
 const nightSeed = ref(String(Date.now()))
 const nightOpponent = computed(() => nightRival(save.night?.seed ?? nightSeed.value, save.night?.round ?? 1))
-const nightEnd = ref<{ wins: number; credits: number; newRecord: boolean } | null>(null)
+const nightEnd = ref<{ wins: number; credits: number; newRecord: boolean; pilot?: PilotSummary } | null>(null)
 const isDaily = computed(() => chosen.value?.startsWith('daily:'))
 const rival = computed(() => isNight.value ? nightOpponent.value : isDaily.value ? challenge.value.rival : chosen.value ? rivalById.get(chosen.value) : undefined)
 const special = computed(() => chosen.value ? specialByRivalId.get(chosen.value) : undefined)
@@ -159,20 +160,32 @@ function start() {
 // ——— Course en cours ———
 const duel = computed(() => save.duel)
 const rivalRace = computed(() => !isDaily.value && !isNight.value)
+// Rivaux et Nuit sans fin figent leur pilotage dans `duel.pilot` ; le Défi du jour garde le réglage global.
+const pilotedRace = computed(() => rivalRace.value || isNight.value)
 const index = computed(() => duel.value?.rounds.length ?? 0)
-const manualSector = computed(() => rivalRace.value
+const manualSector = computed(() => pilotedRace.value
   ? sectorPilot(duel.value?.pilot, index.value) === 'manuel'
   : save.preferences.timingMode)
-const rhythmTurns = computed(() => rivalRace.value ? duel.value?.pilot?.turn : save.preferences.turnMode)
-const canSwitchPilot = computed(() => rivalRace.value && duel.value?.pilot?.mode === 'manuel'
+const rhythmTurns = computed(() => pilotedRace.value ? duel.value?.pilot?.turn : save.preferences.turnMode)
+const canSwitchPilot = computed(() => pilotedRace.value && duel.value?.pilot?.mode === 'manuel'
   && manualSector.value && !duel.value.winner)
-const pilotLabel = (mode: PilotMode | 'mixed') => mode === 'mixed' ? t('Manuel puis automatique')
+const pilotLabel = (mode: PilotSummary) => mode === 'mixed' ? t('Manuel puis automatique')
   : mode === 'manuel' ? t('Manuel') : t('Automatique')
-const roundPilot = (round: TimingRound): PilotMode => round.timing || round.direction ? 'manuel' : 'auto'
-const pilotPreference = computed({
-  get: () => save.preferences.pilotMode ?? 'auto',
-  set: (mode: PilotMode) => { act(s => { s.preferences.pilotMode = mode }) },
+// Mode de la manche de nuit engagée, d'après le secteur à jouer.
+const nightPilotNow = computed<PilotSummary>(() => {
+  const d = duel.value
+  if (!d) return 'auto'
+  const modes = new Set([...d.rounds.map(roundPilot), ...(d.winner ? [] : [sectorPilot(d.pilot, index.value)])])
+  return modes.has('manuel') ? (modes.has('auto') ? 'mixed' : 'manuel') : 'auto'
 })
+const nightPilotHelp = t('Auto : le hasard décide de la variation. Manuel : c’est ton adresse.')
+const pilotPreference = computed({
+  get: () => isNight.value ? save.night?.pilotMode ?? save.preferences.nightPilotMode ?? 'auto' : save.preferences.pilotMode ?? 'auto',
+  set: (mode: PilotMode) => { act(s => { if (isNight.value) setNightPilot(s, mode); else s.preferences.pilotMode = mode }) },
+})
+// Le manuel n'est proposé que si le mode timing expérimental est activé.
+const pilotPicker = computed(() => save.preferences.timingMode && !duel.value && !reward.value && !nightEnd.value
+  && (rivalRace.value || (isNight.value && (!save.night || save.night.resting))))
 const manualRun = shallowRef<{
   duel: SoloDuel; index: number; choice: Choice; rivalChoice: Choice; sequence?: TurnSequence
 } | null>(null)
@@ -367,7 +380,7 @@ function engage() {
 }
 
 function showAutomaticRound(d: SoloDuel, choice: Choice) {
-  const round = rivalRace.value ? playPilotRound(d, choice, Math.random) : playRound(d, choice, Math.random)
+  const round = pilotedRace.value ? playPilotRound(d, choice, Math.random) : playRound(d, choice, Math.random)
   if (d.pilot?.automaticFrom !== undefined) d.timingReview = true
   showRound(round)
 }
@@ -398,7 +411,7 @@ function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>
   const pending = pendingManual.value
   if (!pending || shown.value) return
   manualRun.value = null
-  const round = rivalRace.value
+  const round = pilotedRace.value
     ? playPilotRound(pending.duel, pending.choice, Math.random, () => resolve(pending)) : resolve(pending)
   pending.duel.timingReview = true
   raceStreaks.set(pending.duel, manualStreak.value)
@@ -516,22 +529,14 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 
 <template>
   <main ref="raceRoot" class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
-    <section v-if="save.preferences.timingMode && rivalRace && !duel && !reward" class="race-pilot">
-      <h2 id="race-pilot-title">{{ t('Pilotage') }}</h2>
-      <div class="race-pilot-options" role="group" aria-labelledby="race-pilot-title" aria-describedby="race-pilot-help">
-        <GvButton v-for="mode in (['auto', 'manuel'] as const)" :key="mode" variant="filter"
-          :aria-pressed="pilotPreference === mode" @click="pilotPreference = mode">
-          <span v-if="pilotPreference === mode" aria-hidden="true">✓</span>
-          {{ pilotLabel(mode) }}
-        </GvButton>
-      </div>
-      <small id="race-pilot-help">{{ t('En auto, le hasard joue sur ton score. En manuel, tu passes les vitesses et tu négocies les virages si tu les as activés.') }}</small>
-    </section>
+    <PilotPicker v-if="pilotPicker && !save.night" :id="isNight ? 'night-pilot' : 'race-pilot'" v-model="pilotPreference"
+      :help="isNight ? nightPilotHelp : t('En auto, le hasard joue sur ton score. En manuel, tu passes les vitesses et tu négocies les virages si tu les as activés.')" />
     <section v-if="nightEnd" class="race-end night-panel">
       <h1 tabindex="-1">{{ t('Nuit terminée') }}</h1>
       <p><span v-help="'nightRound'">{{ t('Manches gagnées :') }}</span> {{ nightEnd.wins }}</p>
       <p>{{ tp('{n} crédit versé', '{n} crédits versés', nightEnd.credits) }}</p>
       <p v-if="nightEnd.newRecord" v-help="'nightRecord'" role="status">{{ t('Nouveau record !') }}</p>
+      <p v-if="nightEnd.pilot">{{ t('Pilotage de la dernière manche : {mode}', { mode: pilotLabel(nightEnd.pilot) }) }}</p>
       <div class="race-actions"><button type="button" class="button primary wide" @click="nightEnd = null; chosen = null; emit('go', 'garage')">{{ t('Rentrer au garage') }}</button></div>
     </section>
     <section v-else-if="isNight && save.night?.resting" class="race-end night-panel">
@@ -541,6 +546,8 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <p><span v-help="'nightGains'">{{ t('Gains accumulés :') }}</span> {{ tp('{n} crédit', '{n} crédits', save.night.gains) }}</p>
       <p v-if="save.night.newRecord" v-help="'nightRecord'" role="status">{{ t('Nouveau record !') }}</p>
       <p v-help="'nightRecord'">{{ tp('Record : {n} manche', 'Record : {n} manches', save.nightRecord) }}</p>
+      <p v-if="save.night.lastPilot">{{ t('Pilotage de la dernière manche : {mode}', { mode: pilotLabel(save.night.lastPilot) }) }}</p>
+      <PilotPicker v-if="pilotPicker" id="night-next-pilot" v-model="pilotPreference" :help="nightPilotHelp" />
       <div class="recap-actions race-actions">
         <button type="button" class="button primary" @click="nextNightRound">{{ t('Manche suivante') }}</button>
         <button type="button" class="button quiet" @click="cashNight(true)">{{ t('Rentrer au garage') }}</button>
@@ -590,13 +597,14 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </li>
       </ol>
 
+      <p v-if="isNight && duel.pilot?.mode === 'manuel'" class="pilot-now" role="status">{{ t('Pilotage : {mode}', { mode: pilotLabel(nightPilotNow) }) }}</p>
       <GvButton v-if="canSwitchPilot" variant="filter" class="pilot-switch" @click="switchPilot">
         {{ t('Passer en automatique pour la suite') }}
       </GvButton>
 
       <section v-if="shown || pendingManual" class="round-result" :class="[shown && settled ? shown.winner : 'pending', { 'manual-stage': pendingManual }]">
         <template v-if="shown">
-          <p v-if="rivalRace && settled">{{ t('Pilotage : {mode}', { mode: pilotLabel(roundPilot(shown)) }) }}</p>
+          <p v-if="pilotedRace && settled">{{ t('Pilotage : {mode}', { mode: pilotLabel(roundPilot(shown)) }) }}</p>
           <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
           <h2 v-else>{{ t(sectorLabels[shown.sector]) }} · {{ t(conditionLabels[shown.condition]) }}</h2>
         </template>

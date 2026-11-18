@@ -8,6 +8,21 @@ export interface RacePilot {
   automaticFrom?: number
 }
 
+export type PilotSummary = PilotMode | 'mixed'
+
+// Mode figé au lancement d'une course : le manuel exige le mode timing expérimental.
+export function racePilot(mode: PilotMode | undefined, timingMode?: boolean, turnMode?: boolean): RacePilot {
+  return timingMode && mode === 'manuel' ? { mode: 'manuel', turn: turnMode === true } : { mode: 'auto' }
+}
+
+// Mode réellement joué, d'après les secteurs résolus : un geste de timing ou de virage signe un secteur manuel.
+export const roundPilot = (round: Round & { timing?: unknown; direction?: unknown }): PilotMode =>
+  round.timing || round.direction ? 'manuel' : 'auto'
+export function pilotSummary(rounds: Round[]): PilotSummary {
+  const modes = new Set(rounds.map(roundPilot))
+  return modes.has('manuel') ? (modes.has('auto') ? 'mixed' : 'manuel') : 'auto'
+}
+
 export function sectorPilot(pilot: RacePilot | undefined, index: number): PilotMode {
   return pilot?.mode === 'manuel' && index < (pilot.automaticFrom ?? Infinity) ? 'manuel' : 'auto'
 }
