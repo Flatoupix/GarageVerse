@@ -33,6 +33,10 @@ test('une revue passe seulement avec les trois validations', () => {
 test('les rapports et journaux filtrent les jetons courants', () => {
   const token = 'ghp_aaaaaaaaaaaaaaaaaaaaaaaaaaa'
   assert.ok(!redact('Authorization: Bearer ' + token).includes(token))
+  assert.ok(!redact('const API_KEY = "s3cr3t-valeur-longue"').includes('s3cr3t'))
+  assert.ok(!redact('password=Zx81kq9fT2mLp0aWq').includes('Zx81kq9fT2mLp0aWq'))
+  for (const code of ['autoRefreshToken: VERSUS_OPEN || !!save.versus?.active', 'async function playerOf(token: string)', 'token: session.access_token'])
+    assert.equal(redact(code), code)
   const report = { status: 'pass', summary: token, criteria: ['critère'], findings: [], evidence: [], patch: '' }
   assert.equal(reportFrom(report, 'plan').summary, '[masqué]')
   assert.throws(() => reportFrom({ ...report, criteria: [] }, 'plan'))

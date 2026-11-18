@@ -81,7 +81,9 @@ export function redact(text: string) {
   return text
     .replace(/\b(?:sk-[\w-]{12,}|gh[pousr]_[\w-]{12,}|github_pat_[\w-]{12,}|AIza[\w-]{20,}|ya29\.[\w.-]{12,}|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{6,})\b/g, '[masqué]')
     .replace(/\bBearer\s+[\w.+\/=-]+/gi, 'Bearer [masqué]')
-    .replace(/((?:["']?(?:[\w-]*(?:token|secret|password|api[_-]?key)|authorization|cookie)["']?)\s*[:=]\s*)(["']?)[^\s"',;{}]+\2/gi, '$1[masqué]')
+    // Seule une valeur qui ressemble à un secret est masquée : chaîne littérale d'au moins 8 caractères, ou longue suite
+    // avec au moins un chiffre. Un nom de variable ou un type (`autoRefreshToken: VERSUS_OPEN`, `token: string`) passe.
+    .replace(/((?:["']?(?:[\w-]*(?:token|secret|password|api[_-]?key)|authorization|cookie)["']?)\s*[:=]\s*)(?:(["'])[^\s"']{8,}\2|(?=[\w.+/=-]*\d)[\w.+/=-]{16,})/gi, '$1[masqué]')
     .replace(/https?:\/\/[^/\s@]+@/gi, '[URL masquée]@')
 }
 
