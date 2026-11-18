@@ -16,6 +16,8 @@ import ReleaseNotes from './components/ReleaseNotes.vue'
 import GameDaveSplash from './components/GameDaveSplash.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
+import TimingGauge from './components/TimingGauge.vue'
+import { timingWindow } from './game/timing'
 import GameLogo from './components/GameLogo.vue'
 import CarSheet from './views/CarSheet.vue'
 import GarageView from './views/GarageView.vue'
@@ -29,7 +31,7 @@ import { offlineReady } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus'
-type Setting = 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
+type Setting = 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
 
 function initialScreen(): Screen {
   if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
@@ -50,6 +52,13 @@ onUnmounted(() => {
 })
 const screen = ref<Screen>(initialScreen())
 const settings = ref<HTMLDialogElement>()
+const timingDemo = ref<HTMLDialogElement>()
+const timingDemoOpen = ref(false)
+const demoWindow = timingWindow('ligne', 'demo', 0, 6, 1, 0, 0)
+function showTimingDemo() {
+  timingDemo.value?.showModal()
+  timingDemoOpen.value = true
+}
 const saveFile = ref<HTMLInputElement>()
 const transferMessage = ref('')
 function transferFeedback(text: string, error = false) {
@@ -414,6 +423,8 @@ function toggleSetting(key: Setting) {
             <label v-for="l in locales" :key="l.id" class="setting"><span :lang="l.id">{{ l.name }}</span>
               <input type="radio" name="language" :value="l.id" :checked="locale === l.id" @change="setLocale(l.id as Locale)" /></label>
           </fieldset>
+          <label class="setting"><span>{{ t('Mode timing (expérimental)') }}</span><input type="checkbox" :checked="save.preferences.timingMode" @change="toggleSetting('timingMode')" /></label>
+          <button type="button" class="button ghost wide" @click="showTimingDemo">{{ t('Démo du passage de vitesses') }}</button>
           <button type="button" class="button ghost" @click="replayTutorial(); settings?.close(); sheet?.close(); go('home')">{{ t('Revoir le tutoriel') }}</button>
           <section class="save-transfer" :aria-label="t('Sauvegarde')">
             <p v-if="offlineReady"><span v-help="'offline'">{{ t('Disponible hors ligne') }}</span></p>
@@ -470,6 +481,12 @@ function toggleSetting(key: Setting) {
       </div>
     </dialog>
 
+    <dialog ref="timingDemo" class="modal timing-modal" :aria-label="t('Démo du passage de vitesses')" @close="timingDemoOpen = false">
+      <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
+      <h2>{{ t('Démo du passage de vitesses') }}</h2>
+      <TimingGauge v-if="timingDemoOpen" :window="demoWindow" demo />
+    </dialog>
+
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
@@ -478,3 +495,7 @@ function toggleSetting(key: Setting) {
     </dialog>
   </div>
 </template>
+
+<style scoped>
+.timing-modal h2 { padding-inline-end: 36px; overflow-wrap: anywhere; }
+</style>

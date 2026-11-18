@@ -8,7 +8,8 @@ import {
   type Booster, type EditionStyle, type Part, type Rarity, type Rival, type StatKey,
 } from './data'
 import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, extraSlotFamily, lineupCost, partUnlockLevel, potential, prepUsed, racer,
-  STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Duel, type Prep, type Rng } from './rules'
+  STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Prep, type Rng } from './rules'
+import type { SoloDuel } from './timing'
 
 export const SAVE_KEY = 'garageverse:v2'
 export const LEGACY_KEY = 'garageverse:v1'
@@ -22,7 +23,7 @@ export type ThemeId = (typeof themeIds)[number]
 // Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -48,7 +49,7 @@ export interface Save {
   dailyLineup?: string[]
   lineup: string[]
   record: Record<string, { wins: number; losses: number; perfect: boolean }>
-  duel: Duel | null
+  duel: SoloDuel | null
   preferences: Preferences
 }
 
@@ -59,7 +60,7 @@ export function newSave(): Save {
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
     version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
-    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false },
+    lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
   for (const id of start.parts) save.parts[id] = (save.parts[id] ?? 0) + 1
@@ -193,6 +194,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     const duel = input.duel
     if (duel && (rivalById.has(duel.rivalId) || (save.night && duel.rivalId === `night:${save.night.seed}:${save.night.round}`) || /^daily:\d{4}-\d{2}-\d{2}$/.test(duel.rivalId)) && Array.isArray(duel.rounds) && duel.rounds.length <= duel.sectors.length) {
       for (const who of ['player', 'rival'] as const) duel[who].lineup = duel[who].lineup.map(r => racer(r.id, r.prep))
+      const choice = duel.timingChoice
+      if (choice && (duel.winner || duel.rounds.length >= duel.sectors.length || !Number.isInteger(choice.car)
+        || !duel.player.lineup[choice.car] || typeof choice.nitro !== 'boolean'
+        || (choice.stance !== 'normal' && choice.stance !== 'attaque' && choice.stance !== 'gestion'))) delete duel.timingChoice
       save.duel = duel
     }
   } catch { save.duel = null }
@@ -207,6 +212,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   save.preferences = {
     // Les anciennes parties conservent l’aide tactile ; les nouvelles la désactivent.
     touchHelp: input.preferences?.touchHelp !== false,
+    timingMode: input.preferences?.timingMode === true,
     sound: input.preferences?.sound !== false,
     music: input.preferences?.music ?? (input.preferences?.sound !== false),
     reducedMotion: input.preferences?.reducedMotion === true,

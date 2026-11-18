@@ -7,9 +7,10 @@ import { donnees } from './donnees'
 import { jeu } from './jeu'
 import { notes } from './notes'
 import { serveur } from './serveur'
+import { timing } from './timing'
 import { vuesAccueil } from './vues-accueil'
 import { vuesCourse } from './vues-course'
 import { vuesGarage } from './vues-garage'
 
 export type Dict = Record<string, string>
-export const en: Dict = { ...aide, ...commun, ...composants, ...donnees, ...jeu, ...notes, ...serveur, ...vuesAccueil, ...vuesCourse, ...vuesGarage }
+export const en: Dict = { ...aide, ...commun, ...composants, ...donnees, ...jeu, ...notes, ...serveur, ...timing, ...vuesAccueil, ...vuesCourse, ...vuesGarage }

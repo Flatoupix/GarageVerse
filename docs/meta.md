@@ -300,3 +300,43 @@ Les six rivaux de ligue portent sept champs optionnels de type texte dans `garag
 La préparation affiche une carte compacte avec le portrait existant de `art.rival`, le titre, le style, « Aime … », la biographie et l’introduction entre guillemets. Le résultat affiche une seule réplique au-dessus des gains. La liste des rivaux ajoute le style au titre. Ces informations n’ajoutent aucun contrôle et ne modifient ni les écuries ni les récompenses. Chaque texte absent est masqué ; sans personnalité, l’affichage reste celui d’origine. Les spéciales, la Nuit sans fin et le défi du jour n’affichent aucune carte ni réplique de personnage.
 
 Vérification des données hors réseau : `node src/game/personnages.check.cjs`.
+
+## Passage de vitesses expérimental (T-026)
+
+Dans **Réglages › Paramètres**, active **Mode timing (expérimental)** pour les secteurs solo contre l’IA,
+y compris le Défi du jour et la Nuit sans fin. Le réglage est désactivé par défaut.
+**Démo du passage de vitesses** ouvre le compteur sans lancer de course ni changer le réglage.
+
+Après avoir engagé ta voiture avec la consigne et la nitro choisies, arrête l’aiguille une fois.
+Le score de référence conserve la préparation, le terrain, la météo, les capacités, la consigne,
+la nitro et la surchauffe. Pour le joueur, le barème remplace la forme du jour, le secteur parfait
+aléatoire et l’incident : rouge −2, orange −1, vert 0, tiers central du vert +1.
+Le rival garde ses tirages habituels. Le bilan donne la référence, le résultat du passage, son
+modificateur et le total. Les règles de départage et de récompenses restent communes.
+
+| Secteur | Stat | Durée de base | Largeur verte de base | Ancre du centre |
+| --- | --- | ---: | ---: | ---: |
+| Départ | ACC | 1 750 ms | 14 % | 52 % |
+| Virage | MAN | 2 050 ms | 13 % | 57 % |
+| Ligne droite | VIT | 1 900 ms | 12 % | 69 % |
+| Endurance | END | 2 400 ms | 10,5 % | 58 % |
+
+- La moyenne de la stat de secteur de l’écurie adverse, divisée par 12, donne un niveau borné
+  entre 0 et 1. Il réduit la durée et le vert jusqu’à 20 %. Une durée plus courte accélère l’aiguille.
+- Le facteur de tolérance multiplie la largeur verte et les deux bandes orange (5,5 % chacune
+  à la base). Il vaut 1 + 0,15 × stat préparée / 12 + 0,04 × Stage + 0,04 × nombre de pièces
+  adaptées, plafonné à 1,35. La stat est plafonnée à 12, le Stage et le nombre de pièces à 3.
+  Les familles adaptées suivent l’atelier : transmission et spéciale pour ACC, pneus et
+  suspension pour MAN, moteur et suralimentation pour VIT, freins et châssis pour END.
+- La graine combine l’identifiant du rival, l’ordre des secteurs du circuit
+  et les identifiants de la sélection de voitures sauvegardée. L’index du secteur fixe un décalage
+  déterministe de ±8 points de pourcentage autour de l’ancre. Toute la fenêtre est visible avant l’appui.
+- La pause et le changement d’onglet suspendent le compteur. Le mouvement réduit allonge
+  le balayage de 80 %. En course, l’aiguille s’arrête en bout de course et attend l’appui.
+  La démo reboucle jusqu’à l’appui. Après rechargement, une tentative sans appui reprend au
+  début avec les mêmes paramètres, et un secteur validé revient à son bilan.
+
+Après playtest, décider du nombre de passages, des vitesses et des tolérances, du bonus parfait,
+de l’intérêt d’un braquage dédié en virage et d’une éventuelle part d’imprévu. Comparer la lisibilité,
+les taux de réussite, la durée d’une course et l’intérêt des choix de préparation avant de décider
+si les deux modes doivent coexister.
