@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { t } from '../i18n'
+import { t, tp } from '../i18n'
 import { statLabels } from '../game/data'
 import { upgradeKeys } from '../game/rules'
 import { normalizeTradeCar } from '../game/trade'
@@ -14,7 +14,7 @@ const car = computed(() => normalizeTradeCar(props.id, props.snapshot))
   <div class="trade-card">
     <template v-if="car">
       <CarCard :id="id" :style-name="car.shown" :prep="car" :compact="compact" />
-      <p>{{ t('Stage {n} sur 3', { n: car.stage }) }} · {{ t('{n} exemplaires', { n: car.copies }) }}</p>
+      <p>{{ t('Stage {n} sur 3', { n: car.stage }) }} · {{ tp('{n} exemplaire', '{n} exemplaires', car.copies) }}</p>
       <dl>
         <div v-for="key in upgradeKeys" :key="key"><dt>{{ t(statLabels[key]) }}</dt><dd>{{ car.upgrades[key] }}</dd></div>
       </dl>
@@ -24,7 +24,7 @@ const car = computed(() => normalizeTradeCar(props.id, props.snapshot))
 </template>
 
 <style scoped>
-.trade-card { min-width: 0; overflow-wrap: anywhere; }
+.trade-card { container-type: inline-size; min-width: 0; overflow-wrap: anywhere; }
 .trade-card p, .trade-card dl { margin-block: 4px; }
 .trade-card dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 8px; font-size: .8rem; }
 .trade-card dl div { display: flex; flex-wrap: wrap; gap: 2px 6px; }

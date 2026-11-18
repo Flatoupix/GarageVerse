@@ -6,6 +6,7 @@ import type { OwnedCar, Save } from './save'
 
 export interface TradeOffer { cars: readonly string[]; credits: number }
 export interface TradeGoods { cars: Record<string, OwnedCar>; credits: number }
+export const TRADE_OPEN_LIMIT = 10
 export const TRADE_CREDIT_LIMIT = 1e7
 export const TRADE_INVENTORY_LIMIT = 999
 const terminalLimit = 200
@@ -86,7 +87,7 @@ function checkOffer(save: Save, offer: TradeOffer, accepting?: string): string |
   if (problem) return problem
 
   const open = Object.values(save.trades ?? {}).filter(record => record.state === 'ouverte').filter(record => record.id !== accepting)
-  if (open.length >= 10) return t('Tu as déjà dix offres d’échange ouvertes')
+  if (open.length >= TRADE_OPEN_LIMIT) return t('Tu as déjà dix offres d’échange ouvertes')
   const reserved = new Set(open.flatMap(record => record.offer.cars))
   if (offer.cars.some(id => reserved.has(id))) return t('Cette voiture figure déjà dans une offre d’échange')
   const credits = open.reduce((total, record) => total + record.offer.credits, 0)

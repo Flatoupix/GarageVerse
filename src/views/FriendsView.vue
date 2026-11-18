@@ -5,8 +5,8 @@ import { answerFriend, loadFriends, registerFriends, requestFriend, type FriendA
 
 import GvButton from '../components/GvButton.vue'
 import TradeCard from '../components/TradeCard.vue'
-import { TRADE_CREDIT_LIMIT, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods } from '../game/trade'
-import { answerTrade, counterTrade, goodsOf, listFriendShowcase, listShowcase, proposeTrade, publishShowcase, syncTrades, type Side, type Trade } from '../game/trade-client'
+import { TRADE_CREDIT_LIMIT, TRADE_OPEN_LIMIT, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods } from '../game/trade'
+import { answerTrade, counterTrade, goodsOf, listFriendShowcase, listShowcase, listTrades, proposeTrade, publishShowcase, syncTrades, type Side, type Trade } from '../game/trade-client'
 import { vehicleById } from '../game/data'
 import { save } from '../game/store'
 
@@ -23,6 +23,7 @@ const removing = ref<string>()
 const received = computed(() => list.value.filter(friend => friend.state === 'pending' && !friend.outgoing))
 const sent = computed(() => list.value.filter(friend => friend.state === 'pending' && friend.outgoing))
 const friends = computed(() => list.value.filter(friend => friend.state === 'accepted'))
+const friendProblem = computed(() => error.value || (!busy.value && !profile.value ? t('Connexion nécessaire') : ''))
 const canChange = computed(() => props.online && !!profile.value && !busy.value)
 
 async function refresh() {
@@ -131,12 +132,13 @@ interface Draft {
   friend?: Friendship
   previous?: Trade
   owner?: string
+  sent?: Trade[]
   cars: TradeGoods['cars']
   give: { cars: string[]; credits: number }
   want: { cars: string[]; credits: number }
 }
 const draft = ref<Draft>()
-const draftReady = computed(() => !!draft.value?.owner)
+const draftReady = computed(() => !!draft.value?.owner && !!draft.value.sent)
 const requestedCars = computed(() => {
   const current = draft.value
   if (!current) return {}
@@ -154,6 +156,9 @@ const draftProblems = computed(() => {
   if (!Number.isSafeInteger(want.credits) || want.credits < 0 || want.credits > TRADE_CREDIT_LIMIT) problems.push(t('Offre d’échange invalide'))
   if (!give.cars.length && !want.cars.length && !give.credits && !want.credits) problems.push(t('Ajoute une voiture ou des crédits à l’offre.'))
   if (draftReady.value && want.cars.some(id => !Object.hasOwn(current.cars, id))) problems.push(t('Cette voiture ne figure plus dans la vitrine de ton ami.'))
+  if (current.sent && current.sent.filter(trade => trade.state === 'open' && remaining(trade) > 0).length >= TRADE_OPEN_LIMIT) {
+    problems.push(t('Tu as déjà dix offres d’échange ouvertes'))
+  }
   if (previous && !remaining(previous)) problems.push(t('Expiré'))
   return [...new Set(problems.filter(Boolean))]
 })
@@ -221,7 +226,7 @@ function refreshDraft() {
   const current = draft.value
   if (!current) return
   void runTrade(async () => {
-    current.owner = undefined
+    current.sent = undefined
     if (current.previous) {
       current.cars = await listShowcase(current.previous.proposer)
       current.owner = current.previous.proposer
@@ -230,6 +235,7 @@ function refreshDraft() {
       current.cars = result.cars
       current.owner = result.owner
     }
+    current.sent = (await listTrades()).sent
   })
 }
 function closeDraft() {
@@ -239,7 +245,7 @@ function closeDraft() {
 }
 function sendTrade() {
   const current = draft.value
-  if (!current?.owner || draftProblems.value.length) return
+  if (!current?.owner || !draftReady.value || draftProblems.value.length) return
   const { owner, previous, give, want } = current
   void runTrade(async () => {
     offers.value = previous ? await counterTrade(previous.id, give, want) : await proposeTrade(owner, give, want)
@@ -281,14 +287,13 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
     <div id="exchange-panel" role="tabpanel" :aria-labelledby="`exchange-tab-${tab}`" :aria-busy="tradeBusy || (tab === 'friends' && busy)">
       <template v-if="!online">
         <p role="status">{{ t('Connexion nécessaire') }}</p>
-        <GvButton disabled>{{ t('Réessayer') }}</GvButton>
       </template>
       <template v-else-if="tradeError && (tab !== 'friends' || draft)">
         <p role="alert">{{ tradeError }}</p>
         <GvButton @click="draft ? refreshDraft() : refreshTab()">{{ t('Réessayer') }}</GvButton>
       </template>
-      <template v-else-if="error && tab === 'friends' && !draft">
-        <p role="alert">{{ error }}</p>
+      <template v-else-if="friendProblem && tab === 'friends' && !draft">
+        <p :role="error ? 'alert' : 'status'">{{ friendProblem }}</p>
         <GvButton @click="run()">{{ t('Réessayer') }}</GvButton>
       </template>
       <p v-if="tradeBusy" role="status">{{ t('Synchronisation…') }}</p>
@@ -329,7 +334,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
           </section>
         </div>
         <p v-if="hasParts(draft.give.cars)">{{ t('Les pièces montées sur tes voitures offertes retournent à ton stock si l’échange aboutit.') }}</p>
-        <p v-if="draft.want.cars.some(id => draft?.cars[id]?.parts.length)">{{ t('Les pièces montées sur les voitures demandées retournent au stock de ton ami si l’échange aboutit.') }}</p>
+        <p v-if="draft.want.cars.some(id => requestedCars[id]?.parts.length)">{{ t('Les pièces montées sur les voitures demandées retournent au stock de ton ami si l’échange aboutit.') }}</p>
         <p v-for="problem in draftProblems" :key="problem">{{ problem }}</p>
         <div class="friend-actions">
           <GvButton variant="primary" :disabled="!online || tradeBusy || !draftReady || !!draftProblems.length" @click="sendTrade">{{ t('Envoyer l’offre') }}</GvButton>
@@ -372,6 +377,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
             <template v-if="trade.state === 'open' && tab === 'offers'">
               <template v-if="offers.received.includes(trade)">
                 <p v-if="hasParts(Object.keys(goodsOf(trade, 'recipient').cars))">{{ t('Les pièces montées sur tes voitures offertes retournent à ton stock si l’échange aboutit.') }}</p>
+                <p v-if="Object.values(goodsOf(trade, 'proposer').cars).some(car => car.parts.length)">{{ t('Les pièces montées sur les voitures demandées retournent au stock de ton ami si l’échange aboutit.') }}</p>
                 <p v-if="acceptanceProblems[trade.id]">{{ acceptanceProblems[trade.id] }}</p>
                 <div class="friend-actions">
                   <GvButton variant="primary" :disabled="!canAnswer(trade) || !!acceptanceProblems[trade.id]" @click="answerOffer(trade, 'accept')">{{ t('Accepter') }}</GvButton>
@@ -383,12 +389,11 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
             </template>
           </article>
         </section>
-        <GvButton :disabled="!online || tradeBusy" @click="refreshTab()">{{ t('Actualiser') }}</GvButton>
+        <GvButton v-if="online && !tradeError" :disabled="tradeBusy" @click="refreshTab()">{{ t('Actualiser') }}</GvButton>
       </template>
 
       <template v-else>
         <p v-if="busy" role="status">{{ t('Synchronisation…') }}</p>
-        <p v-else-if="online && !profile && !error" role="status">{{ t('Connexion nécessaire') }}</p>
         <p v-if="status" role="status">{{ status }}</p>
 
         <section class="friend-panel">
@@ -449,7 +454,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
             </li>
           </ul>
         </section>
-        <button type="button" class="button ghost" :disabled="!online || busy" @click="run()">{{ t('Actualiser') }}</button>
+        <button v-if="online && !friendProblem" type="button" class="button ghost" :disabled="busy" @click="run()">{{ t('Actualiser') }}</button>
       </template>
     </div>
   </main>
@@ -460,10 +465,11 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
 .friend-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .friend-tabs .gv-button { min-width: 0; padding-inline: 4px; white-space: normal; overflow-wrap: anywhere; }
 .friend-tabs [aria-selected="true"] :deep(.gv-button-content) { text-decoration: underline; text-underline-offset: .2em; }
-.trade-sides, .trade-cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+.trade-sides, .trade-cards { display: grid; gap: 12px; }
+.trade-sides { grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
 .trade-sides section, .trade-choice { min-width: 0; overflow-wrap: anywhere; }
 .trade-sides h3 { margin-block: 6px; }
-.trade-cards { margin-block: 8px; }
+.trade-cards { grid-template-columns: repeat(auto-fill, min(100%, 220px)); margin-block: 8px; }
 .trade-offer { display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
 .friend-panel input[type="checkbox"] { width: auto; }
 .trade-choice { display: grid; align-content: start; gap: 4px; }

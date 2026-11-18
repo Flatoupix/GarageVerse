@@ -63,7 +63,8 @@ const screen = ref<Screen>(initialScreen())
 function resumeTrades() {
   if (document.visibilityState !== 'visible' || save.preferences.friendsEnabled !== true) return
   void syncTrades().catch(cause => {
-    if (save.preferences.friendsEnabled === true) notify(cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.'), 'error')
+    const message = cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.')
+    if (save.preferences.friendsEnabled === true && screen.value !== 'friends' && message !== t('Connexion nécessaire')) notify(message, 'error')
   })
 }
 onMounted(() => {
