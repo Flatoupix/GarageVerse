@@ -270,7 +270,6 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
 .car-card.finish-legendary {
   --accent: var(--night);
   --rail: var(--night);
-  --frame: var(--slate);
 }
 .car-card.finish-legendary::after { opacity: .55; }
 .car-masthead { min-width: 0; padding: 1.5cqw 3cqw 2.25cqw; background: var(--night-2); clip-path: var(--cut); }
@@ -801,7 +800,8 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 .gv-card { --frame: var(--slate); --glow: var(--text); --ink: var(--night); padding: 3px; border: 3px solid var(--frame); background: var(--frame); aspect-ratio: auto; overflow: hidden; }
 .finish-rare { --frame: var(--blue); }
 .finish-epic { --frame: var(--rose); }
-.finish-legendary, .car-card.finish-legendary { --frame: var(--yellow); --accent: var(--yellow); --rail: var(--yellow); }
+.finish-legendary { --frame: var(--yellow); }
+.finish-legendary, .car-card.finish-legendary { --accent: var(--yellow); --rail: var(--yellow); }
 .gv-card::after { display: none; }
 .gv-card.finish-legendary::after { display: block; content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 0 45%, var(--text) 45% 55%, transparent 55%); opacity: .18; animation: pixel-sheen 3s var(--ease) infinite; mix-blend-mode: normal; }
 @keyframes pixel-sheen { from { translate: -100% 0; } to { translate: 100% 0; } }
