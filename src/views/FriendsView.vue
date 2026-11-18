@@ -80,7 +80,6 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
     <div id="friends-panel" role="tabpanel" aria-labelledby="friends-tab" :aria-busy="busy">
       <p v-if="!online" role="status">{{ t('Connexion nécessaire') }}</p>
       <p v-else-if="error" role="alert">{{ error }}</p>
-      <p v-else-if="!profile && !busy" role="status">{{ t('Connexion nécessaire') }}</p>
       <p v-if="busy" role="status">{{ t('Synchronisation…') }}</p>
       <p v-if="status" role="status">{{ status }}</p>
 
@@ -91,7 +90,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
           <button type="button" class="button ghost" @click="copy">{{ t('Copier') }}</button>
         </div>
         <form v-else @submit.prevent="run(async () => { await registerFriends(nickname); await refresh() })">
-          <label>{{ t('Ton pseudo') }} <input v-model="nickname" required minlength="2" maxlength="40" autocomplete="nickname"></label>
+          <label>{{ t('Ton pseudo') }} <input v-model="nickname" required minlength="2" maxlength="20" autocomplete="nickname"></label>
           <button class="button primary" :disabled="!online || busy">{{ t('Obtenir ton code ami') }}</button>
         </form>
         <form @submit.prevent="send">

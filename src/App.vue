@@ -158,8 +158,8 @@ const settingsTabs: { id: SettingsTab; label: string }[] = [
 ]
 function showSettings(tab: SettingsTab = 'parameters') {
   openHelp.value = null
-  selectSettingsTab(tab)
   if (!settings.value?.open) settings.value?.showModal()
+  selectSettingsTab(tab)
 }
 function selectSettingsTab(tab: SettingsTab) {
   if (tab === 'parameters') preloadDemoImages()
@@ -380,6 +380,7 @@ function toggleSetting(key: Setting) {
   save.preferences[key] = !save.preferences[key]
   if (save.preferences[key] && (key === 'music' || key === 'sound')) onAudioGesture()
   persist()
+  if (key === 'friendsEnabled' && save.preferences.friendsEnabled) settings.value?.close()
 }
 
 watch(() => save.preferences.friendsEnabled, enabled => {
@@ -462,13 +463,13 @@ watch(() => save.preferences.friendsEnabled, enabled => {
       </div>
       <div id="settings-content" ref="settingsContent" class="settings-content">
         <div v-show="settingsTab === 'parameters'" id="settings-panel-parameters" role="tabpanel" aria-labelledby="settings-tab-parameters">
+          <label class="setting"><span>{{ t('Échanges entre amis (expérimental)') }}</span><input type="checkbox"
+            :checked="save.preferences.friendsEnabled === true" @change="toggleSetting('friendsEnabled')" /></label>
           <fieldset class="language-picker">
             <legend>{{ t('Langue') }}</legend>
             <label v-for="l in locales" :key="l.id" class="setting"><span :lang="l.id">{{ l.name }}</span>
               <input type="radio" name="language" :value="l.id" :checked="locale === l.id" @change="setLocale(l.id as Locale)" /></label>
           </fieldset>
-          <label class="setting"><span>{{ t('Échanges entre amis (expérimental)') }}</span><input type="checkbox"
-            :checked="save.preferences.friendsEnabled === true" @change="toggleSetting('friendsEnabled')" /></label>
           <label class="setting"><span>{{ t('Mode timing (expérimental)') }}</span><input type="checkbox" :checked="save.preferences.timingMode" @change="toggleSetting('timingMode')" /></label>
           <label class="setting"><span>{{ t('Direction dans les virages (expérimental)') }}</span><input type="checkbox"
             :checked="save.preferences.timingMode && save.preferences.turnMode" :disabled="!save.preferences.timingMode" @change="toggleSetting('turnMode')" /></label>
