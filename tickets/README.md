@@ -30,6 +30,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-026](026-prototype-passage-vitesses-timing.md) | Prototype de course au timing : passage des vitesses, zones de réussite et préparation auto | P2 |
 | [T-027](027-prototype-direction-virages.md) | Prototype de course : virages en jeu de rythme (deux pistes gauche/droite) | P2 |
 | [T-028](028-pilotage-automatique-ou-manuel.md) | Prototype de course : choisir entre course automatique (hasard) et pilotage manuel | P2 |
+| [T-035](035-nuit-sans-fin-pilotage-auto-manuel.md) | Nuit sans fin : sélectionner Auto / Manuel, basculer sans perdre sa série | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
 | [T-032](032-etoile-victoire-parfaite-par-etape.md) | Étoile de victoire parfaite sur chaque étape d'un rival (Essais, Qualifs, Finale) | P3 |
 | [T-009](009-modes-duel-alternatifs.md) | Modèles de duel alternatifs | P3 |
