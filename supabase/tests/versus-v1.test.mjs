@@ -11,7 +11,7 @@ const TABLES = ['gv_players', 'gv_rooms', 'gv_lineups', 'gv_moves', 'gv_rounds',
 // Une ligne valide par table, et une modification simple, pour tester les écritures refusées.
 const WRITES = {
   gv_players: [`insert into gv_players (id, nickname, friend_code) values ('${THIRD}', 'Intrus', 'ZZZ999')`, `update gv_players set nickname = 'Pirate'`],
-  gv_rooms: [`insert into gv_rooms (code, host, cap, stake, seed) values ('INTRUS99', '${HOST}', 9, 0, 's')`, `update gv_rooms set stake = 500`],
+  gv_rooms: [`insert into gv_rooms (code, host, cap, stake) values ('INTRUS99', '${HOST}', 9, 0)`, `update gv_rooms set stake = 500`],
   gv_lineups: [`insert into gv_lineups (room, player, cars) values ('${ROOM}', '${HOST}', '[]')`, `update gv_lineups set cars = '[]'`],
   gv_moves: [`insert into gv_moves (room, sector, player, car, stance, nitro) values ('${ROOM}', 4, '${HOST}', 0, 'normal', false)`, `update gv_moves set nitro = true`],
   gv_rounds: [`insert into gv_rounds (room, sector, result) values ('${ROOM}', 4, '{}')`, `update gv_rounds set result = '{}'`],
@@ -35,20 +35,20 @@ export async function run(db, { assert, as, user }) {
   // Données de test, écrites par service_role.
   for (const id of [HOST, GUEST, THIRD, FOURTH]) await user(id)
   await service(`insert into gv_players (id, nickname, friend_code) values ('${HOST}', 'Hote', 'HOST01'), ('${GUEST}', 'Invite', 'GUES02'), ('${THIRD}', 'Tiers', 'THIR03')`)
-  await service(`insert into gv_rooms (id, code, host, guest, cap, stake, seed, state) values ('${ROOM}', 'ABCDEFGH', '${HOST}', '${GUEST}', 15, 100, 'graine', 'racing')`)
+  await service(`insert into gv_rooms (id, code, host, guest, cap, stake, state) values ('${ROOM}', 'ABCDEFGH', '${HOST}', '${GUEST}', 15, 100, 'racing')`)
   await service(`insert into gv_lineups (room, player, cars) values ('${ROOM}', '${HOST}', '[1, 2, 3]'), ('${ROOM}', '${GUEST}', '[4, 5, 6]')`)
   await service(`insert into gv_moves (room, sector, player, car, stance, nitro) values
     ('${ROOM}', 0, '${HOST}', 0, 'attaque', true), ('${ROOM}', 0, '${GUEST}', 1, 'gestion', false), ('${ROOM}', 1, '${GUEST}', 2, 'normal', false)`)
   await service(`insert into gv_settlements (room, player, delta, reason) values ('${ROOM}', '${HOST}', 180, 'win'), ('${ROOM}', '${GUEST}', 0, 'loss')`)
 
   // Contraintes de valeur.
-  for (const stake of [0, 50, 100, 250, 500]) await service(`insert into gv_rooms (code, host, cap, stake, seed) values ('STAKE${stake}', '${HOST}', 9, ${stake}, 's')`)
-  for (const stake of [75, -50, 1000]) await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake, seed) values ('BAD${stake}', '${HOST}', 9, ${stake}, 's')`, /check constraint/)
-  for (const cap of [9, 15, 22]) await service(`insert into gv_rooms (code, host, cap, stake, seed) values ('CAP${cap}', '${HOST}', ${cap}, 0, 's')`)
-  for (const cap of [0, 10, 23]) await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake, seed) values ('BADCAP${cap}', '${HOST}', ${cap}, 0, 's')`, /check constraint/)
-  await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake, seed) values ('ABCDEFGH', '${HOST}', 9, 0, 's')`, /unique constraint/)
-  await service(`insert into gv_rooms (code, host, cap, stake, seed, rematch_of) values ('REMATCH1', '${HOST}', 15, 100, 's', '${ROOM}')`)
-  await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake, seed, rematch_of) values ('REMATCH2', '${HOST}', 15, 100, 's', gen_random_uuid())`, /foreign key/)
+  for (const stake of [0, 50, 100, 250, 500]) await service(`insert into gv_rooms (code, host, cap, stake) values ('STAKE${stake}', '${HOST}', 9, ${stake})`)
+  for (const stake of [75, -50, 1000]) await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake) values ('BAD${stake}', '${HOST}', 9, ${stake})`, /check constraint/)
+  for (const cap of [9, 15, 22]) await service(`insert into gv_rooms (code, host, cap, stake) values ('CAP${cap}', '${HOST}', ${cap}, 0)`)
+  for (const cap of [0, 10, 23]) await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake) values ('BADCAP${cap}', '${HOST}', ${cap}, 0)`, /check constraint/)
+  await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake) values ('ABCDEFGH', '${HOST}', 9, 0)`, /unique constraint/)
+  await service(`insert into gv_rooms (code, host, cap, stake, rematch_of) values ('REMATCH1', '${HOST}', 15, 100, '${ROOM}')`)
+  await rejects('service_role', null, `insert into gv_rooms (code, host, cap, stake, rematch_of) values ('REMATCH2', '${HOST}', 15, 100, gen_random_uuid())`, /foreign key/)
   const move = (sector, car, stance) => `insert into gv_moves (room, sector, player, car, stance, nitro) values ('${ROOM}', ${sector}, '${THIRD}', ${car}, '${stance}', false)`
   for (const [sector, car, stance] of [[5, 0, 'normal'], [-1, 0, 'normal'], [2, 3, 'normal'], [2, -1, 'normal'], [2, 0, 'prudence']]) await rejects('service_role', null, move(sector, car, stance), /check constraint/)
   for (const sector of [5, -1]) await rejects('service_role', null, `insert into gv_rounds (room, sector, result) values ('${ROOM}', ${sector}, '{}')`, /check constraint/)
