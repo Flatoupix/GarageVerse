@@ -26,7 +26,7 @@ Le Versus V1 reste en pause : les échanges n'en dépendent ni pour le client, n
 ## 4. Amis
 
 - Un joueur se présente par son **pseudo et son code ami** (6 caractères, déjà générés à l'inscription).
-- **Demande d'ami par code, acceptée par l'autre** (à valider : l'alternative la plus simple est un échange direct par code, sans liste ; la liste est retenue ici parce que la vitrine n'est visible que des amis).
+- **Demande d'ami par code, acceptée par l'autre** : **retenu le 18 novembre 2026** (une vraie liste d'amis, plutôt qu'un échange direct par code), parce que la vitrine n'est visible que des amis.
 - Liste d'amis : pseudo, état de la demande, retrait d'un ami.
 - Limites : nombre d'amis plafonné (par exemple 50) et de demandes en attente (par exemple 10), pour éviter le courrier indésirable.
 
