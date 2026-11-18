@@ -1,0 +1,17 @@
+{
+  "id": "t025-rarete-coherente",
+  "title": "Corriger la couleur de rareté incohérente entre le garage et la fiche agrandie",
+  "brief": "Retour joueur du 17 novembre 2026 (ticket T-025) : la couleur qui représente la rareté d'une même voiture est différente entre sa vignette dans le garage et sa fiche agrandie / plein écran. Le code couleur de la collection devient illisible alors que la rareté de la carte ne change pas. Commencer par reproduire et diagnostiquer : comparer les classes et variables de rareté de src/components/CarCard.vue avec les styles appliqués dans src/views/CarSheet.vue et leurs conteneurs, vérifier les styles `finish-*` et `rarity-*`, les variables CSS et les surcharges propres à un thème, à une taille ou à la vue agrandie (src/themes/). Si les deux vues affichent la même carte, chercher une différence de contexte CSS plutôt qu'une divergence des données `rarity`. Ne pas présumer que tous les thèmes ou toutes les raretés sont touchés, et nommer dans le rapport l'élément exact qui divergeait (cadre, liseré, badge ou autre). Corriger à la source, avec le moins de styles possible, sans toucher aux données des voitures, à l'équilibrage ni aux sauvegardes. Les effets distinctifs (holographie, animations, éditions artistiques, aura culturelle) peuvent varier mais ne doivent pas changer la lecture de la rareté. Tout le texte visible est en français, tutoiement.",
+  "requirements": [
+    "Pour une même voiture, la couleur associée à sa rareté est la même dans la vignette du garage et dans la fiche agrandie, pour Courante, Rare, Épique et Légendaire.",
+    "La cause exacte est identifiée dans le rapport : élément divergent, raretés et thèmes concernés, fichier et règle fautifs.",
+    "La correction vaut dans les huit thèmes (src/game/theme.ts) ; les règles communes vont dans src/themes/shared.css et celles propres à un thème dans src/themes/base.css et src/themes/neon.css, gardées synchronisées.",
+    "Les effets propres aux éditions artistiques, à l'holographie ou aux animations restent intacts et ne modifient pas la lecture de la rareté.",
+    "Aucune erreur dans la console ; le garage, ses filtres et la fiche restent lisibles et sans débordement horizontal à 320, 390 et 1280 px ; docs/meta.md reste exact."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon"
+}
