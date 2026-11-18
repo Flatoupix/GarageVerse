@@ -39,10 +39,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Pas de `cache: yarn` ici : setup-node l'évaluerait avec le Yarn 1 du runner, avant que Corepack n'active le Yarn 4
+      # du projet (packageManager), et l'étape échouerait.
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: yarn
       - run: corepack enable
       - run: yarn install --immutable
       - name: Vérifier les tests de jeu existants
