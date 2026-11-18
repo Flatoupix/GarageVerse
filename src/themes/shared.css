@@ -512,18 +512,18 @@
 .car-sheet .button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .car-sale-actions { flex-wrap: wrap; }
 
-/* Couleurs de collection stables dans les huit interfaces. */
-.garage .finish-common, .garage .rarity-common { --rarity-color: #aabbd0; }
-.garage .finish-rare, .garage .rarity-rare { --rarity-color: #4aa8ff; }
-.garage .finish-epic, .garage .rarity-epic { --rarity-color: #ff5fd2; }
-.garage .finish-legendary, .garage .rarity-legendary { --rarity-color: #ffc64a; }
-.garage .car-card {
+/* Même palette pour les cartes de voiture, les vignettes et les filtres. */
+.car-card.finish-common, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-common { --rarity-color: #aabbd0; }
+.car-card.finish-rare, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-rare { --rarity-color: #4aa8ff; }
+.car-card.finish-epic, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-epic { --rarity-color: #ff5fd2; }
+.car-card.finish-legendary, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-legendary { --rarity-color: #ffc64a; }
+.gv-card.car-card {
   --glow: var(--rarity-color);
   --frame: var(--rarity-color);
   border-color: var(--rarity-color);
   box-shadow: 0 0 12px color-mix(in srgb, var(--rarity-color) 35%, transparent);
 }
-.garage .car-rarity, .garage .missing-card > span:first-child {
+.car-rarity, .garage .missing-card > span:first-child {
   color: var(--rarity-color); background: #141827; padding: 2px 4px; border-radius: 3px;
 }
 .garage .missing-card { border-color: var(--rarity-color); box-shadow: inset 3px 0 var(--rarity-color); }
@@ -865,10 +865,6 @@ main.race { animation-name: race-view-in; }
 /* Vignette de planche : illustration, numéro et cadre de rareté. */
 .car-thumb { position: relative; display: block; aspect-ratio: 2 / 3; overflow: hidden; border: 2px solid var(--rarity-color, var(--line));
   border-radius: calc(var(--radius, 8px) * .6); background: var(--night); }
-.car-thumb.rarity-common { --rarity-color: #8fa3b8; }
-.car-thumb.rarity-rare { --rarity-color: #3fa9ff; }
-.car-thumb.rarity-epic { --rarity-color: #ff5fd2; }
-.car-thumb.rarity-legendary { --rarity-color: #ffc94a; }
 .car-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .car-thumb-blank { display: grid; place-items: center; height: 100%; color: var(--muted); font: 700 1.2rem var(--display, sans-serif); opacity: .5; }
 .car-thumb.missing { border-style: dashed; opacity: .7; }
@@ -884,3 +880,7 @@ main.race { animation-name: race-view-in; }
 .recap-actions:has(.next-booster) { flex-wrap: wrap; }
 .recap-actions .next-booster.button { flex: 1 1 100%; white-space: normal; }
 .recap-actions:has(.next-booster) .button:not(.next-booster) { flex: 1 1 0; min-width: 0; }
+
+/* Choix de la langue, en tête des Paramètres. */
+.language-picker { border: 0; padding: 0; margin: 0 0 12px; min-width: 0; }
+.language-picker legend { padding: 0; margin-bottom: 4px; font-weight: 700; }

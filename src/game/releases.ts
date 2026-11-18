@@ -1,3 +1,5 @@
+import { dateLocale } from '../i18n'
+
 // Notes de version affichées dans le jeu. Une seule source : CHANGELOG.md, lu au build.
 // Le format attendu : « ## [x.y.z] — AAAA-MM-JJ », puis des « ### Rubrique » et des puces « - ».
 
@@ -72,5 +74,5 @@ export function markVersionSeen(version: string) {
 export const formatDate = (date: string) => {
   const [year, month, day] = date.split('-').map(Number)
   if (!year || !month || !day) return date
-  return new Date(year, month - 1, day).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  return new Date(year, month - 1, day).toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
 }

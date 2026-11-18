@@ -10,6 +10,11 @@ import SectorRun from '../components/SectorRun.vue'
 import { canAttack, checkVersusLineup, rebuildVersus, stakeCheck, VERSUS_CAPS, VERSUS_STAKES, type Stance } from '../game/rules'
 import { dismiss, engage, identify, move, preview, resolve, snapshot, subscribe, type Snapshot } from '../game/versus'
 import type { Invitation } from '../game/versus-wallet'
+import { t } from '../i18n'
+import { ruleText } from '../game/rules-text'
+
+// Message déjà traduit : l'erreur des échanges avec le serveur, elle, est traduite à l'affichage.
+class Notice extends Error {}
 
 const emit = defineEmits<{ back: [] }>()
 const nickname = ref(''), code = ref(new URLSearchParams(location.search).get('versus') ?? '')
@@ -90,7 +95,7 @@ async function run(action: () => Promise<void>) {
       await action()
     })
   }
-  catch (e) { error.value = e instanceof Error ? e.message : 'Serveur indisponible.'; nextSync = Date.now() + 5000 }
+  catch (e) { error.value = e instanceof Notice ? e.message : t(e instanceof Error ? e.message : 'Serveur indisponible.'); nextSync = Date.now() + 5000 }
   finally { busy.value = false }
 }
 async function connect() { await identify(nickname.value.trim()); await sync() }
@@ -102,9 +107,9 @@ async function start(rematch?: string) {
   const terms = rematch ? room.value! : invite
   if (rematch && state.value && save.versus) ids.value = state.value.lineups[save.versus.id].map(entry => entry.id)
   const limit = terms?.cap ?? cap.value, wager = terms?.stake ?? stake.value
-  if (ids.value.some(id => !save.cars[id])) throw new Error('Une voiture de cette écurie a été vendue. Crée un nouveau défi.')
+  if (ids.value.some(id => !save.cars[id])) throw new Notice(t('Une voiture de cette écurie a été vendue. Crée un nouveau défi.'))
   const invalid = checkVersusLineup(lineup.value, limit) || stakeCheck(wager, save.credits)
-  if (invalid) throw new Error(invalid)
+  if (invalid) throw new Notice(ruleText(invalid))
   if (rematch) dismiss()
   engage({ id: invite?.id ?? crypto.randomUUID(), cap: limit, stake: wager, credits: save.credits,
     lineup: lineup.value, ...(invite ? { code: code.value.trim().toUpperCase() } : {}), ...(rematch ? { rematch_of: rematch } : {}) })
@@ -137,74 +142,74 @@ onUnmounted(() => {
 
 <template>
   <section class="versus">
-    <button class="button quiet" @click="emit('back')">← Accueil</button>
+    <button class="button quiet" @click="emit('back')">← {{ t('Accueil') }}</button>
     <h1>Versus</h1>
-    <p role="status" v-if="!online">Connexion nécessaire</p>
+    <p role="status" v-if="!online">{{ t('Connexion nécessaire') }}</p>
     <p role="alert" v-if="error">{{ error }}</p>
     <template v-if="!VERSUS_OPEN && !active">
-      <p>Le mode Versus revient bientôt. Tes crédits et ton garage ne sont pas touchés.</p>
+      <p>{{ t('Le mode Versus revient bientôt. Tes crédits et ton garage ne sont pas touchés.') }}</p>
     </template>
     <template v-else-if="!save.versus">
       <form @submit.prevent="run(connect)">
-        <label>Ton pseudo <input v-model="nickname" required minlength="2" maxlength="20" autocomplete="nickname"></label>
-        <button class="button primary" :disabled="busy || !online">Entrer dans Versus</button>
+        <label>{{ t('Ton pseudo') }} <input v-model="nickname" required minlength="2" maxlength="20" autocomplete="nickname"></label>
+        <button class="button primary" :disabled="busy || !online">{{ t('Entrer dans Versus') }}</button>
       </form>
     </template>
     <template v-else-if="!active">
-      <p>{{ save.versus.nickname }} · Code ami <strong>{{ save.versus.friend_code }}</strong></p>
+      <p>{{ save.versus.nickname }} · {{ t('Code ami') }} <strong>{{ save.versus.friend_code }}</strong></p>
       <form @submit.prevent="run(inspectCode)">
-        <label>Code d’invitation <input v-model="code" required maxlength="8" autocapitalize="characters" @input="invitation = null"></label>
-        <button class="button" :disabled="busy || !online">Voir le défi</button>
+        <label>{{ t('Code d’invitation') }} <input v-model="code" required maxlength="8" autocapitalize="characters" @input="invitation = null"></label>
+        <button class="button" :disabled="busy || !online">{{ t('Voir le défi') }}</button>
       </form>
-      <h2>{{ invitation ? 'Rejoindre le défi' : 'Créer un défi' }}</h2>
-      <p v-if="invitation">Plafond {{ invitation.cap }} · Mise {{ invitation.stake }} ₡ <button class="button quiet" @click="invitation = null">Annuler</button></p>
+      <h2>{{ invitation ? t('Rejoindre le défi') : t('Créer un défi') }}</h2>
+      <p v-if="invitation">{{ t('Plafond {cap} · Mise {stake} ₡', { cap: invitation.cap, stake: invitation.stake }) }} <button class="button quiet" @click="invitation = null">{{ t('Annuler') }}</button></p>
       <div v-else class="controls">
-        <label>Plafond <select v-model.number="cap"><option v-for="n in VERSUS_CAPS" :key="n">{{ n }}</option></select></label>
-        <label>Mise <select v-model.number="stake"><option v-for="n in VERSUS_STAKES" :value="n" :key="n">{{ n }} ₡</option></select></label>
+        <label>{{ t('Plafond') }} <select v-model.number="cap"><option v-for="n in VERSUS_CAPS" :key="n">{{ n }}</option></select></label>
+        <label>{{ t('Mise') }} <select v-model.number="stake"><option v-for="n in VERSUS_STAKES" :value="n" :key="n">{{ n }} ₡</option></select></label>
       </div>
-      <fieldset><legend>Ton écurie</legend>
-        <label v-for="i in 3" :key="i">Voiture {{ i }} <select v-model="ids[i-1]"><option v-for="id in Object.keys(save.cars)" :key="id" :value="id">{{ name(id) }} · coût {{ vehicleById.get(id)?.cost }}</option></select></label>
+      <fieldset><legend>{{ t('Ton écurie') }}</legend>
+        <label v-for="i in 3" :key="i">{{ t('Voiture {n}', { n: i }) }} <select v-model="ids[i-1]"><option v-for="id in Object.keys(save.cars)" :key="id" :value="id">{{ t('{name} · coût {cost}', { name: name(id), cost: vehicleById.get(id)?.cost ?? 0 }) }}</option></select></label>
       </fieldset>
-      <p v-if="problem">{{ problem }}</p>
-      <button class="button primary" :disabled="busy || !online || !!problem" @click="run(() => start())">{{ invitation ? 'Accepter le défi' : 'Créer la salle' }}</button>
+      <p v-if="problem">{{ ruleText(problem) }}</p>
+      <button class="button primary" :disabled="busy || !online || !!problem" @click="run(() => start())">{{ invitation ? t('Accepter le défi') : t('Créer la salle') }}</button>
     </template>
     <template v-else-if="room && state">
-      <p v-if="!error && online">Salle synchronisée</p>
+      <p v-if="!error && online">{{ t('Salle synchronisée') }}</p>
       <template v-if="room.state === 'open'">
-        <h2>Invite ton adversaire</h2>
-        <p>Code <strong>{{ room.code }}</strong> · Mise {{ room.stake }} ₡ · Expire dans {{ Math.floor(remaining / 60) }} min {{ remaining % 60 }} s</p>
-        <img v-if="qr" :src="qr" width="180" height="180" alt="QR code d’invitation">
-        <label>Lien d’invitation <input readonly :value="link" @focus="($event.target as HTMLInputElement).select()"></label>
+        <h2>{{ t('Invite ton adversaire') }}</h2>
+        <p>{{ t('Code') }} <strong>{{ room.code }}</strong> · {{ t('Mise {stake} ₡', { stake: room.stake }) }} · {{ t('Expire dans {min} min {sec} s', { min: Math.floor(remaining / 60), sec: remaining % 60 }) }}</p>
+        <img v-if="qr" :src="qr" width="180" height="180" :alt="t('QR code d’invitation')">
+        <label>{{ t('Lien d’invitation') }} <input readonly :value="link" @focus="($event.target as HTMLInputElement).select()"></label>
       </template>
       <template v-if="duel && opponent">
-        <h2>{{ room.circuit?.name ?? 'Circuit' }} · contre {{ state.players[opponent] }}</h2>
+        <h2>{{ t('{circuit} · contre {name}', { circuit: room.circuit ? t(room.circuit.name) : t('Circuit'), name: state.players[opponent] }) }}</h2>
         <p>{{ state.lineups[opponent].map(e => name(e.id)).join(' · ') }}</p>
-        <p>{{ duel.sectors.map((s,i) => sectorLabels[s] + ' (' + conditionLabels[duel!.conditions[i]] + ')').join(' · ') }}</p>
+        <p>{{ duel.sectors.map((s,i) => t(sectorLabels[s]) + ' (' + t(conditionLabels[duel!.conditions[i]]) + ')').join(' · ') }}</p>
         <template v-if="room.state === 'racing'">
-          <h3>Secteur {{ room.sector + 1 }}/5 · {{ sectorLabels[duel.sectors[room.sector]] }}</h3>
-          <p>{{ remaining }} s · {{ conditionLabels[duel.conditions[room.sector]] }}</p>
-          <p v-if="state.played" role="status">Choix enregistré · en attente de l’adversaire</p>
+          <h3>{{ t('Secteur {n}/5 · {sector}', { n: room.sector + 1, sector: t(sectorLabels[duel.sectors[room.sector]]) }) }}</h3>
+          <p>{{ remaining }} s · {{ t(conditionLabels[duel.conditions[room.sector]]) }}</p>
+          <p v-if="state.played" role="status">{{ t('Choix enregistré · en attente de l’adversaire') }}</p>
           <form v-else @submit.prevent="run(async () => { await move(room!.id, room!.sector, { car, stance, nitro }); await sync() })">
-            <label>Voiture <select v-model.number="car" @change="stance = 'normal'"><option v-for="(r,i) in duel[side].lineup" :key="r.id" :value="i">{{ name(r.id) }}</option></select></label>
-            <label>Consigne <select v-model="stance"><option>normal</option><option :disabled="!canAttack(duel[side], car)">attaque</option><option>gestion</option></select></label>
-            <label><input type="checkbox" v-model="nitro" :disabled="!duel[side].nitro"> Nitro ({{ duel[side].nitro }})</label>
-            <button class="button primary" :disabled="busy || !online || !remaining">Valider mon choix</button>
+            <label>{{ t('Voiture') }} <select v-model.number="car" @change="stance = 'normal'"><option v-for="(r,i) in duel[side].lineup" :key="r.id" :value="i">{{ name(r.id) }}</option></select></label>
+            <label>{{ t('Consigne') }} <select v-model="stance"><option value="normal">{{ t('normal') }}</option><option value="attaque" :disabled="!canAttack(duel[side], car)">{{ t('attaque') }}</option><option value="gestion">{{ t('gestion') }}</option></select></label>
+            <label><input type="checkbox" v-model="nitro" :disabled="!duel[side].nitro"> {{ t('Nitro ({n})', { n: duel[side].nitro }) }}</label>
+            <button class="button primary" :disabled="busy || !online || !remaining">{{ t('Valider mon choix') }}</button>
           </form>
         </template>
         <template v-if="last">
           <SectorRun :round="last" :running="false" :step="99" :arts="{}" :sprites="{ player: carSprite(state.lineups[room.host][last.player.car].id), rival: carSprite(state.lineups[room.guest!][last.rival.car].id) }" :backdrop="trackBackdrop(last.condition)" />
-          <p>Secteur {{ state.rounds.length }} · {{ last[side].score }} – {{ last[side === 'player' ? 'rival' : 'player'].score }} · {{ last.winner === 'tie' ? 'Égalité' : last.winner === side ? 'Gagné' : 'Perdu' }}</p>
+          <p>{{ t('Secteur {n} · {a} – {b} · {result}', { n: state.rounds.length, a: last[side].score, b: last[side === 'player' ? 'rival' : 'player'].score, result: last.winner === 'tie' ? t('Égalité') : last.winner === side ? t('Gagné') : t('Perdu') }) }}</p>
         </template>
       </template>
       <template v-if="terminal">
-        <h2>{{ room.state === 'expired' ? 'Invitation expirée' : !room.winner ? 'Égalité' : room.winner === save.versus.id ? 'Victoire !' : 'Défaite' }}</h2>
-        <p>Mise {{ room.stake }} ₡ · Montant versé {{ active.payout }} ₡</p>
-        <p v-if="room.guest">Pot {{ room.stake * 2 }} ₡ · Commission {{ room.winner && state.rounds.length === 5 && !Object.values(room.missed).some(n => n >= 2) ? room.stake * 2 * .1 : 0 }} ₡</p>
-        <button v-if="VERSUS_OPEN && room.state === 'done'" class="button primary" :disabled="busy || !online" @click="run(() => start(room!.id))">Revanche</button>
-        <button class="button quiet" @click="run(finish)">Retour aux défis</button>
+        <h2>{{ room.state === 'expired' ? t('Invitation expirée') : !room.winner ? t('Égalité') : room.winner === save.versus.id ? t('Victoire !') : t('Défaite') }}</h2>
+        <p>{{ t('Mise {stake} ₡ · Montant versé {payout} ₡', { stake: room.stake, payout: active.payout ?? 0 }) }}</p>
+        <p v-if="room.guest">{{ t('Pot {pot} ₡ · Commission {fee} ₡', { pot: room.stake * 2, fee: room.winner && state.rounds.length === 5 && !Object.values(room.missed).some(n => n >= 2) ? room.stake * 2 * .1 : 0 }) }}</p>
+        <button v-if="VERSUS_OPEN && room.state === 'done'" class="button primary" :disabled="busy || !online" @click="run(() => start(room!.id))">{{ t('Revanche') }}</button>
+        <button class="button quiet" @click="run(finish)">{{ t('Retour aux défis') }}</button>
       </template>
     </template>
-    <button v-else class="button" :disabled="busy || !online" @click="run(connect)">Reprendre la salle</button>
+    <button v-else class="button" :disabled="busy || !online" @click="run(connect)">{{ t('Reprendre la salle') }}</button>
   </section>
 </template>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onUnmounted, ref } from 'vue'
+import { t, tp } from '../i18n'
 import { edition } from '../game/art'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
@@ -168,31 +169,31 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
 <template>
   <main v-if="booster" class="play">
     <div class="play-heading">
-      <span class="eyebrow">{{ booster.tagline }}</span>
-      <h1 tabindex="-1">{{ recap ? 'Tes cinq cartes' : booster.name }}</h1>
+      <span class="eyebrow">{{ t(booster.tagline) }}</span>
+      <h1 tabindex="-1">{{ recap ? t('Tes cinq cartes') : t(booster.name) }}</h1>
     </div>
     <div v-if="!opening || tearing" class="sealed-stage" :class="`stage-${booster.id}`">
       <div class="pack-spotlight"></div>
       <TearPack :key="booster.id" :booster="booster.id" :legend="legendary" :torn="tearing" :reduced="reduced" @tear="openPack" />
       <div class="sealed-actions" :class="{ 'actions-hidden': tearing }">
-        <p>Glisse le doigt le long du bord supérieur.</p>
-        <button type="button" class="button primary" :disabled="tearing" @click="openPack">Ouvrir le sachet <span aria-hidden="true">↗</span></button>
+        <p>{{ t('Glisse le doigt le long du bord supérieur.') }}</p>
+        <button type="button" class="button primary" :disabled="tearing" @click="openPack">{{ t('Ouvrir le sachet') }} <span aria-hidden="true">↗</span></button>
       </div>
     </div>
     <div v-else-if="recap" class="recap">
-      <p class="recap-progress">{{ newCount }} {{ newCount === 1 ? 'nouvelle carte' : 'nouvelles cartes' }} dans ton garage</p>
+      <p class="recap-progress">{{ tp('{n} nouvelle carte dans ton garage', '{n} nouvelles cartes dans ton garage', newCount) }}</p>
       <div class="recap-grid">
         <button v-for="(pull, index) in recapPulls" :key="index" type="button" class="card-tile deal" :style="{ '--i': index }" @click="emit('inspect', pull.kind, pull.id)">
           <PullCard :pull="pull" compact />
-          <span v-if="pull.isNew" class="tile-tag">Nouveau</span>
+          <span v-if="pull.isNew" class="tile-tag">{{ t('Nouveau') }}</span>
         </button>
       </div>
       <div class="recap-actions">
-        <button v-if="remaining" type="button" class="button primary next-booster" :aria-label="`Ouvrir le booster suivant, encore ${remaining}`" @click="openNext">
-          Ouvrir le suivant ({{ remaining }}) <span aria-hidden="true">↗</span>
+        <button v-if="remaining" type="button" class="button primary next-booster" :aria-label="t('Ouvrir le booster suivant, encore {n}', { n: remaining })" @click="openNext">
+          {{ t('Ouvrir le suivant ({n})', { n: remaining }) }} <span aria-hidden="true">↗</span>
         </button>
-        <button type="button" class="button" :class="remaining ? 'ghost' : 'primary'" @click="emit('garage')">Voir le garage <span aria-hidden="true">→</span></button>
-        <button type="button" class="button quiet" @click="emit('shop')">Autre booster</button>
+        <button type="button" class="button" :class="remaining ? 'ghost' : 'primary'" @click="emit('garage')">{{ t('Voir le garage') }} <span aria-hidden="true">→</span></button>
+        <button type="button" class="button quiet" @click="emit('shop')">{{ t('Autre booster') }}</button>
       </div>
     </div>
     <RevealStack v-else :opening="opening" :face-up="faceUp" :flipping="flipping && !reduced" :entering="stackEntering"
@@ -200,19 +201,19 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
       <template #edition>
         <aside v-if="currentPull?.kind === 'car' && !currentPull.isNew" class="pull-edition" aria-live="polite">
           <template v-if="differentEdition">
-            <p>Tu as déjà cette voiture</p>
+            <p>{{ t('Tu as déjà cette voiture') }}</p>
             <div class="pull-edition-actions">
-              <button type="button" class="button ghost" @click="persist">Garder l’apparence actuelle</button>
-              <button type="button" class="button primary" @click="showEdition">Afficher cette édition</button>
+              <button type="button" class="button ghost" @click="persist">{{ t('Garder l’apparence actuelle') }}</button>
+              <button type="button" class="button primary" @click="showEdition">{{ t('Afficher cette édition') }}</button>
             </div>
           </template>
-          <p v-else>Doublon : +1 exemplaire</p>
+          <p v-else>{{ t('Doublon : +1 exemplaire') }}</p>
         </aside>
       </template>
     </RevealStack>
   </main>
   <main v-else class="play empty-state">
-    <h1 tabindex="-1">Aucun booster en cours</h1>
-    <button type="button" class="button primary" @click="emit('shop')">Choisir un booster <span aria-hidden="true">↗</span></button>
+    <h1 tabindex="-1">{{ t('Aucun booster en cours') }}</h1>
+    <button type="button" class="button primary" @click="emit('shop')">{{ t('Choisir un booster') }} <span aria-hidden="true">↗</span></button>
   </main>
 </template>

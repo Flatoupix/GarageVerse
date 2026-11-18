@@ -1,0 +1,56 @@
+import type { Dict } from './index'
+
+// Messages renvoyés par le serveur Versus (supabase/functions) ou levés par src/game/versus*.ts, affichés tels quels au joueur.
+// La clé est le texte exact du serveur ; les messages à valeurs variables ne sont pas couverts (voir le rapport).
+export const serveur: Dict = {
+  // Messages fixes du serveur
+  'Mise inconnue : choisis 0, 50, 100, 250, 500 crédits': 'Unknown stake: pick 0, 50, 100, 250 or 500 credits',
+  'Crédits déclarés invalides': 'Invalid declared credits',
+  'Pseudo de 2 à 20 caractères': 'Nickname must be 2 to 20 characters',
+  'Au plus 10 salles par heure': 'At most 10 rooms per hour',
+  'Voiture 0 à 2, consigne normal, attaque ou gestion, nitro oui ou non': 'Car 0 to 2, normal, attack or management stance, nitro yes or no',
+  'Plus de nitro': 'No nitro left',
+  'Attaque impossible : il faut deux secteurs d’endurance': 'Attack not possible: you need two sectors of endurance',
+  'Choisis trois voitures': 'Pick three cars',
+  'Choisis trois voitures différentes': 'Pick three different cars',
+  'Écurie mal formée': 'Malformed lineup',
+  'Atelier supplémentaire invalide': 'Invalid extra workshop',
+  'Plafond inconnu : choisis 9, 15, 22': 'Unknown cap: pick 9, 15 or 22',
+  'Course terminée': 'Race finished',
+  // Codes d’erreur sans message, affichés tels quels par le client
+  'UNAUTHORIZED': 'Sign-in required.',
+  'INVALID_REQUEST': 'Invalid request.',
+  'INVALID_LINEUP': 'Invalid lineup.',
+  'INVALID_STAKE': 'Invalid stake.',
+  'STAKE_TOO_HIGH': 'Stake too high.',
+  'NOT_YOUR_ROOM': 'This is not your room.',
+  'INVALID_MOVE': 'Invalid move.',
+  'NOT_DUE': 'Not due yet.',
+  'NOT_FINISHED': 'The race is not finished yet.',
+  'ALREADY_CLAIMED': 'Already claimed.',
+  'METHOD_NOT_ALLOWED': 'Method not allowed.',
+  'INTERNAL': 'Server error. Try again in a moment.',
+  // Codes déjà traduits en français par le client (src/game/versus.ts)
+  'Choisis un pseudo de 2 à 20 caractères.': 'Pick a nickname of 2 to 20 characters.',
+  'Salle déjà complète.': 'Room already full.',
+  'Salle introuvable.': 'Room not found.',
+  'Invitation expirée.': 'Invitation expired.',
+  'C’est ta propre invitation.': 'That’s your own invitation.',
+  'Limite de dix salles par heure atteinte.': 'Limit of ten rooms per hour reached.',
+  'Ton choix est déjà enregistré.': 'Your choice is already recorded.',
+  'Ce secteur est terminé.': 'This sector is over.',
+  'Le délai est écoulé.': 'Time’s up.',
+  'La salle n’est plus en course.': 'The room is no longer racing.',
+  'Inscription nécessaire.': 'Registration required.',
+  // Erreurs levées par le client
+  'Serveur indisponible.': 'Server unavailable.',
+  'Serveur indisponible. Réessaie dès que la connexion revient.': 'Server unavailable. Try again as soon as your connection is back.',
+  'Connexion au serveur impossible.': 'Can’t connect to the server.',
+  'Impossible de synchroniser la salle.': 'Can’t sync the room.',
+  'Impossible d’enregistrer la mise sur cet appareil.': 'Can’t save the stake on this device.',
+  'Le compte de cette sauvegarde est lié à une autre session.': 'This save’s account is tied to another session.',
+  'Compte Versus inattendu.': 'Unexpected Versus account.',
+  'Aucune salle en cours.': 'No room in progress.',
+  'Engagement impossible': 'Can’t commit to this',
+  'Règlement invalide': 'Invalid settlement',
+}

@@ -92,3 +92,43 @@ jobs:
           /tmp/butler/butler -V
       - name: Publier sur le canal html5
         run: /tmp/butler/butler push --if-changed dist-itch "$ITCHIO_TARGET:html5"
+
+  # Aperçu de dev : chaque push sur dev met à jour le canal html5-dev de la page itch.io (en brouillon, donc invisible du public).
+  # Sans les secrets de l'environnement itchio-dev, la tâche se termine sans rien envoyer et sans échec.
+  publish-dev:
+    needs: package
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment: itchio-dev
+    env:
+      BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}
+      ITCHIO_TARGET: ${{ secrets.ITCHIO_TARGET }}
+    steps:
+      - name: Vérifier la configuration de l'aperçu
+        id: config
+        run: |
+          if [ -n "$BUTLER_API_KEY" ] && [ -n "$ITCHIO_TARGET" ]; then echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else echo 'enabled=false' >> "$GITHUB_OUTPUT"; echo '::notice::Aperçu itch.io ignoré : secrets ITCHIO_API_KEY et ITCHIO_TARGET absents de l’environnement itchio-dev.'; fi
+      - uses: actions/download-artifact@v4
+        if: steps.config.outputs.enabled == 'true'
+        with:
+          name: garageverse-html5-itch
+          path: artifacts
+      - name: Extraire le package HTML5
+        if: steps.config.outputs.enabled == 'true'
+        run: mkdir dist-itch && unzip -q artifacts/garageverse-itch.zip -d dist-itch
+      # Même butler figé que la publication : voir la tâche publish pour changer de version.
+      - name: Installer butler officiel (version figée, empreinte vérifiée)
+        if: steps.config.outputs.enabled == 'true'
+        env:
+          BUTLER_VERSION: 15.32.0
+          BUTLER_SHA256: 2335971394ef6596f95ded0833e85ee28755e13761716ef4c91d6b11f69162f5
+        run: |
+          curl --fail --silent --show-error --location "https://broth.itch.zone/butler/linux-amd64/$BUTLER_VERSION/archive/default" --output /tmp/butler.zip
+          echo "$BUTLER_SHA256  /tmp/butler.zip" | sha256sum --check --strict
+          unzip -q /tmp/butler.zip -d /tmp/butler
+          chmod +x /tmp/butler/butler
+          /tmp/butler/butler -V
+      - name: Publier sur le canal html5-dev
+        if: steps.config.outputs.enabled == 'true'
+        run: /tmp/butler/butler push --if-changed dist-itch "$ITCHIO_TARGET:html5-dev"
