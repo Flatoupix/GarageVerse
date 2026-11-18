@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
+    "build:itch": "vue-tsc --noEmit && vite build --mode itch --outDir dist-itch --manifest --logLevel error && node scripts/package-itch.mjs",
     "preview": "vite preview",
     "art": "node pipeline/art.mjs",
     "art:review": "node pipeline/art.mjs --review",
@@ -22,6 +23,7 @@
     "@electric-sql/pglite": "0.5.16",
     "@types/qrcode": "1.5.6",
     "@vitejs/plugin-vue": "5.2.4",
+    "fflate": "0.8.2",
     "typescript": "5.9.3",
     "vite": "6.4.3",
     "vue-tsc": "3.3.10"

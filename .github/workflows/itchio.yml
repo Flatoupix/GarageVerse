@@ -1,0 +1,94 @@
+name: Package HTML5 itch.io
+
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'scripts/package-itch.mjs'
+      - '.github/workflows/itchio.yml'
+  pull_request:
+    branches: [dev]
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'scripts/package-itch.mjs'
+      - '.github/workflows/itchio.yml'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publier sur itch.io (uniquement depuis master)
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Pas de `cache: yarn` ici : setup-node l'évaluerait avec le Yarn 1 du runner, avant que Corepack n'active le Yarn 4
+      # du projet (packageManager), et l'étape échouerait.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - run: yarn install --immutable
+      - name: Vérifier les tests de jeu existants
+        run: for file in src/game/*.check.cjs; do node "$file"; done
+      - name: Vérifier le build GitHub Pages
+        run: yarn build
+      - name: Construire et empaqueter la version itch.io
+        run: yarn build:itch
+      - uses: actions/upload-artifact@v4
+        with:
+          name: garageverse-html5-itch
+          path: artifacts/garageverse-itch.zip
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: package
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master' && inputs.publish == true
+    runs-on: ubuntu-latest
+    environment: itchio-release
+    env:
+      BUTLER_API_KEY: ${{ secrets.ITCHIO_API_KEY }}
+      ITCHIO_TARGET: ${{ secrets.ITCHIO_TARGET }}
+    steps:
+      - name: Vérifier la configuration de publication
+        run: |
+          test -n "$BUTLER_API_KEY" || { echo 'Le secret ITCHIO_API_KEY manque dans l’environnement itchio-release.'; exit 1; }
+          test -n "$ITCHIO_TARGET" || { echo 'Le secret ITCHIO_TARGET manque dans l’environnement itchio-release.'; exit 1; }
+      - uses: actions/download-artifact@v4
+        with:
+          name: garageverse-html5-itch
+          path: artifacts
+      - name: Extraire le package HTML5
+        run: mkdir dist-itch && unzip -q artifacts/garageverse-itch.zip -d dist-itch
+      # butler figé et vérifié : l'étape reçoit la clé d'API itch.io, elle n'exécute qu'un binaire connu.
+      # Pour changer de version : télécharger la nouvelle archive, calculer son SHA-256 et mettre à jour les deux valeurs.
+      - name: Installer butler officiel (version figée, empreinte vérifiée)
+        env:
+          BUTLER_VERSION: 15.32.0
+          BUTLER_SHA256: 2335971394ef6596f95ded0833e85ee28755e13761716ef4c91d6b11f69162f5
+        run: |
+          curl --fail --silent --show-error --location "https://broth.itch.zone/butler/linux-amd64/$BUTLER_VERSION/archive/default" --output /tmp/butler.zip
+          echo "$BUTLER_SHA256  /tmp/butler.zip" | sha256sum --check --strict
+          unzip -q /tmp/butler.zip -d /tmp/butler
+          chmod +x /tmp/butler/butler
+          /tmp/butler/butler -V
+      - name: Publier sur le canal html5
+        run: /tmp/butler/butler push --if-changed dist-itch "$ITCHIO_TARGET:html5"
