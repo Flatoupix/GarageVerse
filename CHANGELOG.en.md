@@ -4,6 +4,16 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.17.0] — 2026-11-18
+
+### Added
+
+- **Livelier driving.** In manual driving, every move now has feel: countdown beeps, sparks and an exhaust flame on a **Perfect** shift, a jolt and a backfire when you miss, notes that burst on the target in corners. Chain **Perfect** moves to grow your **streak**, and clear a whole sector without a mistake for a small celebration. With reduced motion, effects stay subtle.
+
+### Changed
+
+- **Corners.** The arrows fall toward the target again, like in a rhythm game, with the two big left and right buttons right below.
+
 ## [0.16.0] — 2026-11-18
 
 ### Added
