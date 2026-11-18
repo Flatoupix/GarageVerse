@@ -19,6 +19,7 @@ const car = editions => ({ copies: 1, stage: 0, parts: [], editions, shown: edit
 // Une légendaire restée sur l'ancien défaut pixel prend sa nouvelle image.
 const legend = legends[0].id
 const old = JSON.parse(JSON.stringify(newSave()))
+delete old.exactEditions
 old.cars[legend] = car([PIXEL])
 const migrated = readSave(JSON.stringify(old))
 assert.equal(migrated.cars[legend].shown, defaultStyle(legend))

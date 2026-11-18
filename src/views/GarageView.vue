@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { locale, t, tp, tc } from '../i18n'
-import { boosterById, families, parts, rarities, rarityClass, series, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
+import { boosterById, families, parts, rarities, rarityClass, series, stylesOf, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
 import { claimSeries, craftCheck, seriesComplete, seriesProgress, freeParts, prepOf, totalMountedParts, uninstallAll } from '../game/save'
 import { act, narrow, ownedCount, reducedMotion, save } from '../game/store'
@@ -14,10 +14,11 @@ import PartCard from '../components/PartCard.vue'
 
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string] }>()
 const tab = ref<'cars' | 'parts' | 'series'>('cars')
-const garageFilter = ref<'owned' | 'favorites' | 'lineup' | 'collection'>('owned')
+const garageFilter = ref<'owned' | 'favorites' | 'lineup' | 'collection' | 'missing-editions'>('owned')
 const garageFilters = [
   { id: 'owned', label: t('Mes voitures') }, { id: 'favorites', label: t('★ Favoris') },
   { id: 'lineup', label: t('Écurie') }, { id: 'collection', label: t('Collection') },
+  { id: 'missing-editions', label: t('Éditions manquantes') },
 ] as const
 const query = ref('')
 const category = computed({
@@ -86,11 +87,17 @@ function setCols(value: number) {
 // Ordre de collection numérique : « 11 » avant « 100 » (les numéros sont des textes à partir de 100).
 const byNumber = (a: Vehicle, b: Vehicle) => Number(a.number) - Number(b.number)
 
-const carList = computed(() => vehicles.filter(v => {
-  const car = save.cars[v.id]
+function matchesGarageFilter(id: string) {
+  const car = save.cars[id]
   if (garageFilter.value !== 'collection' && !car) return false
   if (garageFilter.value === 'favorites' && !car?.favorite) return false
-  if (garageFilter.value === 'lineup' && !save.lineup.includes(v.id)) return false
+  if (garageFilter.value === 'lineup' && !save.lineup.includes(id)) return false
+  if (garageFilter.value === 'missing-editions') return stylesOf(id).some(style => !car?.editions.includes(style))
+  return true
+}
+
+const carList = computed(() => vehicles.filter(v => {
+  if (!matchesGarageFilter(v.id)) return false
   if (rarityFilter.value && v.rarity !== rarityFilter.value) return false
   if (category.value && !v.tags.includes(category.value) && !v.culture?.aura.includes(category.value)) return false
   return normalize(`${v.name} ${v.version} ${v.year}`).includes(search.value)
@@ -113,7 +120,7 @@ const carList = computed(() => vehicles.filter(v => {
   if (sort.value === 'year') return b.year - a.year || byNumber(a, b)
   return byNumber(a, b)
 }))
-const rarityCount = (rarity?: Rarity) => vehicles.filter(v => (!rarity || v.rarity === rarity) && (garageFilter.value === 'collection' || Boolean(save.cars[v.id])) && (garageFilter.value !== 'favorites' || save.cars[v.id]?.favorite) && (garageFilter.value !== 'lineup' || save.lineup.includes(v.id))).length
+const rarityCount = (rarity?: Rarity) => vehicles.filter(v => (!rarity || v.rarity === rarity) && matchesGarageFilter(v.id)).length
 const ownedParts = computed(() => parts.filter(p => (save.parts[p.id] ?? 0) > 0))
 const partGroups = computed(() => Object.entries(families)
   .filter(([id]) => !family.value || family.value === id)

@@ -35,8 +35,7 @@ function showEdition() {
   persist()
   focusRevealAction()
 }
-const recapPulls = computed(() => opening.value?.pulls.map(pull => pull.kind === 'car'
-  ? { ...pull, style: save.cars[pull.id]?.shown ?? pull.style } : pull) ?? [])
+const recapPulls = computed(() => opening.value?.pulls ?? [])
 const tearing = ref(false)
 // Après un achat groupé (ou avec des tickets), le récapitulatif propose d'enchaîner sur le sachet suivant.
 const remaining = computed(() => boosterId.value ? save.tickets[boosterId.value] ?? 0 : 0)

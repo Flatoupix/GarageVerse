@@ -39,6 +39,7 @@ export interface Save {
   series: string[]
   tutorial: Tutorial
   version: 2
+  exactEditions: true
   daily: { date: string; won: boolean; booster: boolean; streak: number; lastWin: string }
   credits: number
   tickets: Record<string, number>
@@ -60,7 +61,7 @@ export function newSave(): Save {
     versus: null, nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
-    version: 2, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
+    version: 2, exactEditions: true, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false, turnMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
@@ -132,10 +133,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     if (!v || !car) continue
     const styles = stylesOf(id)
     const editions = Array.isArray(car.editions) ? car.editions.filter(s => styles.includes(s)) : []
-    // Offre l’édition par défaut sans remplacer une apparence déjà choisie.
     const primary = defaultStyle(id)
-    const usesOldDefault = !editions.includes(primary)
-    if (usesOldDefault) editions.unshift(primary)
+    // Les anciennes sauvegardes pouvaient représenter une légendaire à image fixe par le seul style pixel.
+    const legacyLegend = input.exactEditions !== true && primary !== PIXEL && editions.length === 1 && editions[0] === PIXEL && car.shown === PIXEL
+    if (!editions.length || legacyLegend) editions.unshift(primary)
     const stage = int(car.stage, 0, 3, 0)
     const levels = { acc: 0, vit: 0, man: 0, end: 0 }
     for (const key of upgradeKeys) levels[key] = int(car.upgrades?.[key], 0, partUnlockLevel, 0)
@@ -151,10 +152,8 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       const sameFamily = installed.filter(p => partById.get(p)?.family === part.family).length
       if (sameFamily < (part.family === doubled ? 2 : 1)) installed.push(partId)
     }
-    // Une légendaire restée sur l'ancien défaut pixel prend sa nouvelle image fixe ; un autre choix du joueur est gardé.
-    const shownBefore = editions.includes(car.shown) ? car.shown : editions[0]
     save.cars[id] = { copies: int(car.copies, 1, 999, 1), stage, parts: installed, editions,
-      shown: primary !== PIXEL && usesOldDefault && shownBefore === PIXEL ? primary : shownBefore,
+      shown: !legacyLegend && editions.includes(car.shown) ? car.shown : editions[0],
       favorite: car.favorite === true, upgrades: levels, ...(extraSlot ? { extraSlot } : {}) }
   }
   save.credits = Math.min(1e7, save.credits + refunds)
@@ -318,6 +317,11 @@ export function drawPulls(save: Save, booster: Booster, rng: Rng): Pull[] {
     seen.add(`edition:${v.id}:${style}`)
     return pull
   })
+}
+
+// Les voitures hors collection restent consultables dans le catalogue du Showroom.
+export function showroomStyles(id: string, car: OwnedCar | undefined): EditionStyle[] {
+  return car?.editions ?? stylesOf(id)
 }
 
 export function sealedHasLegend(save: Save): boolean {
