@@ -20,15 +20,15 @@ const hidden = ref(document.hidden)
 const { notes, settings } = props.sequence
 const complete = computed(() => judgments.value.length === notes.length)
 const last = computed(() => judgments.value.at(-1))
-const target = 80
-const travel = 72
+const target = 74
+const travel = 62
 const targetRadius = travel * settings.good / settings.lead
 const visibleNotes = computed(() => {
   if (props.waiting) return []
   const visualTime = reducedMotion.value ? Math.round(elapsed.value / 125) * 125 : elapsed.value
   return notes.slice(judgments.value.length).filter(note => note.at - elapsed.value <= settings.lead).map(note => ({
     ...note,
-    position: Math.max(target - travel, Math.min(92, target + travel * (visualTime - note.at) / settings.lead)),
+    position: Math.min(86, target + travel * (visualTime - note.at) / settings.lead),
   }))
 })
 
@@ -96,10 +96,10 @@ onUnmounted(() => {
     <p v-if="demo">{{ t('Appuie quand la flèche atteint la cible.') }}</p>
     <div class="turn-lanes" aria-hidden="true">
       <div v-for="lane in lanes" :key="lane.direction" class="turn-track manual-track">
-        <span class="turn-target" :style="{ left: target - targetRadius + '%', width: 2 * targetRadius + '%' }"></span>
+        <span class="turn-lane-arrow">{{ lane.arrow }}</span>
+        <span class="turn-target" :style="{ top: target - targetRadius + '%', height: 2 * targetRadius + '%' }"></span>
         <template v-for="note in visibleNotes" :key="note.at">
-          <span v-if="note.direction === lane.direction" class="turn-note"
-            :style="{ left: note.position + '%', top: (22 + note.position * 0.53) + '%' }">{{ lane.arrow }}</span>
+          <span v-if="note.direction === lane.direction" class="turn-note" :style="{ top: note.position + '%' }">{{ lane.arrow }}</span>
         </template>
       </div>
     </div>
@@ -122,12 +122,14 @@ onUnmounted(() => {
 .turn-control p { margin: 0; }
 .turn-lanes, .turn-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .turn-track {
-  position: relative; min-width: 0; height: 44px;
-  background: var(--manual-stripes);
+  position: relative; min-width: 0; height: clamp(112px, 17svh, 150px); overflow: hidden; border: 1px solid var(--line); border-radius: 6px;
+  background: repeating-linear-gradient(135deg, transparent 0 12px, color-mix(in srgb, var(--text) 12%, transparent) 12px 13px);
 }
-.turn-target { position: absolute; inset-block: 0; background: var(--manual-target); }
+/* Les virages descendent vers la cible, comme les notes d'un jeu de rythme. */
+.turn-target { position: absolute; inset-inline: 0; background: var(--manual-target); }
+.turn-lane-arrow { position: absolute; inset: 4px 8px auto auto; font-size: 1rem; font-weight: 900; opacity: .7; }
 .turn-note {
-  position: absolute; transform: translate(-50%, -50%); display: grid; place-items: center;
+  position: absolute; left: 50%; transform: translate(-50%, -50%); display: grid; place-items: center;
   width: 1.1em; height: 1.1em; border: 2px solid currentColor; border-radius: 4px;
   background: var(--panel); color: var(--text); font-size: 1.2rem; font-weight: 900; line-height: 1;
 }
