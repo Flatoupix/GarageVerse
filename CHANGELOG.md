@@ -4,6 +4,21 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.15.0] — 2026-11-18
+
+### Ajouté
+
+- **Pilotage manuel (expérimental).** Dans les Réglages, onglet Paramètres, active « Mode timing (expérimental) » et « Direction dans les virages (expérimental) », puis choisis **Manuel** dans « Pilotage » sur l’onglet Course. Pendant la course, passe les rapports au bon moment sur le compte-tours et prends les virages en rythme avec les flèches gauche et droite : ton adresse remplace le hasard. Le mode **Automatique** reste comme avant, et tu peux y repasser en pleine course.
+- **Échanges entre amis (en test).** Une première version des échanges de voitures et de crédits entre amis arrive derrière le réglage « Échanges entre amis (expérimental) ». Elle est encore en essai : il est possible qu’elle ne fonctionne pas tout à fait.
+
+### Modifié
+
+- **Ouverture des boosters.** Le bouton pour retourner les cartes reste toujours à la même place, quels que soient les messages affichés autour de la carte.
+
+### Corrigé
+
+- **Un tirage, une tuile.** Une carte tirée dans une édition spéciale n’ajoute plus en plus l’édition Pixel 16 bits de base : tu n’as plus deux tuiles pour un seul tirage.
+
 ## [0.14.0] — 2026-11-18
 
 ### Ajouté
