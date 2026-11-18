@@ -2,7 +2,7 @@
 
 - **Type :** Bug visuel
 - **Priorité :** P2
-- **Statut :** À reproduire et corriger
+- **Statut :** Corrigé (palette de rareté commune au garage, à la fiche et aux vignettes, `src/themes/shared.css`) ; à valider sur appareil
 - **Signalement :** Retour joueur, 17 novembre 2026
 - **Fichiers à examiner :** [`src/components/CarCard.vue`](../src/components/CarCard.vue), [`src/views/GarageView.vue`](../src/views/GarageView.vue), [`src/views/CarSheet.vue`](../src/views/CarSheet.vue), styles partagés et thèmes dans `src/themes/`
 
