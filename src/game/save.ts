@@ -25,7 +25,7 @@ export type ThemeId = (typeof themeIds)[number]
 // Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; pilotMode?: PilotMode }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; friendsEnabled?: boolean; pilotMode?: PilotMode }
 export type Discovery = 'nitro' | 'heat' | 'daily' | 'perfect' | 'series' | 'stance'
 export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped'; seen: Discovery[] }
 export const tutorialSteps = 12
@@ -235,6 +235,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     touchHelp: input.preferences?.touchHelp !== false,
     timingMode: input.preferences?.timingMode === true,
     turnMode: input.preferences?.turnMode === true,
+    ...(input.preferences?.friendsEnabled === true ? { friendsEnabled: true } : {}),
     pilotMode: input.preferences?.pilotMode === 'manuel' ? 'manuel' : 'auto',
     sound: input.preferences?.sound !== false,
     music: input.preferences?.music ?? (input.preferences?.sound !== false),

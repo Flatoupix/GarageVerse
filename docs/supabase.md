@@ -228,3 +228,12 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 - **Revanche** : même mise et même plafond ; `create-room` accepte une salle d'origine pour recopier ses réglages.
 - **Planification des salles** : retenue via `pg_cron` + `pg_net`. Le script `supabase/scheduler/activate.sh` est lancé automatiquement après déploiement de `resolve-due` depuis `master` ; voir § 9. Les essais sur Supabase hébergé restent nécessaires pour confirmer l'exécution réelle.
 - **Reste à confirmer** : la région du projet.
+
+## Échanges entre amis
+
+La migration additive `20261118030000_echanges_amis.sql` crée `gv_friendships`. Elle conserve le demandeur, le destinataire, l’état (`pending` ou `accepted`) et la date de création. Une paire est unique quel que soit le sens de la demande. La RLS limite la lecture aux deux participants authentifiés. `gv_friends()` renvoie leurs lignes avec le pseudo et le code ami de l’autre participant, sans élargir la lecture de `gv_players`. Seul `service_role` écrit dans la table.
+
+- `request-friend` reçoit `{ code }`. Une demande croisée accepte la ligne existante. Une demande à soi-même ou répétée est refusée, de même qu’une onzième demande envoyée en attente ou une nouvelle demande si un des joueurs a déjà 50 amis.
+- `answer-friend` reçoit `{ id, action }`. Seul le destinataire peut accepter (`accept`) ou refuser (`refuse`) une demande en attente. L’acceptation vérifie la limite de 50 amis des deux joueurs. Chacun peut retirer une amitié acceptée (`remove`). Un refus ou un retrait supprime la ligne.
+
+Les fonctions vérifient le jeton du joueur via l’enveloppe HTTP commune et verrouillent les deux participants pendant la mutation pour appliquer les plafonds malgré des demandes simultanées. Le client réutilise la session anonyme et `register`. Le déploiement sur Supabase hébergé attend la relecture de la migration par le propriétaire et la fusion dans `master`.

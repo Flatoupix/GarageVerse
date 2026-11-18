@@ -28,7 +28,7 @@ Le Versus V1 reste en pause : les échanges n'en dépendent ni pour le client, n
 - Un joueur se présente par son **pseudo et son code ami** (6 caractères, déjà générés à l'inscription).
 - **Demande d'ami par code, acceptée par l'autre** : **retenu le 18 novembre 2026** (une vraie liste d'amis, plutôt qu'un échange direct par code), parce que la vitrine n'est visible que des amis.
 - Liste d'amis : pseudo, état de la demande, retrait d'un ami.
-- Limites : nombre d'amis plafonné (par exemple 50) et de demandes en attente (par exemple 10), pour éviter le courrier indésirable.
+- Limites : 50 amis et 10 demandes envoyées en attente par joueur, pour éviter le courrier indésirable.
 
 ## 5. Déroulement d'un échange
 
@@ -82,6 +82,8 @@ Fonctions : `request-friend`, `answer-friend`, `set-showcase`, `propose-trade`, 
 | `echange-serveur` | Migrations `gv_showcase`, `gv_trades`, `gv_trade_items`, `gv_trade_claims`, RLS, fonctions, expiration, tests serveur | `supabase/` |
 | `echange-client` | Client réseau, transit et réception dans la sauvegarde, reprise après rechargement | `src/game/` |
 | `echange-interface` | Vitrine, composition d'offre, offres reçues, contre-offre, historique | `src/views/`, `src/components/` |
+
+**Étape 1 (Amis) implémentée dans le dépôt.** Le réglage expérimental, désactivé par défaut, ouvre la liste depuis le Garage. Les demandes croisées valent acceptation. Le déploiement sur Supabase hébergé reste à faire après relecture par le propriétaire et fusion dans `master`.
 
 Chaque tâche ayant des migrations ou des règles de collection passe une **revue de sécurité** ; **les migrations sont relues par le propriétaire avant leur fusion dans `master`**, qui déclenche le déploiement.
 

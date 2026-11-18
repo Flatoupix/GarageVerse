@@ -24,7 +24,7 @@ const boundedFetch: typeof fetch = (input, init = {}) => {
   return fetch(input, { ...init, signal })
 }
 
-const db = createClient(import.meta.env.VITE_SUPABASE_URL || 'https://wqfukxadzwxaypqebtqw.supabase.co',
+export const db = createClient(import.meta.env.VITE_SUPABASE_URL || 'https://wqfukxadzwxaypqebtqw.supabase.co',
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable__Z5ER4kBYKflcgz2Q-wdcA_8UmRQhdh',
   { auth: { detectSessionInUrl: false }, global: { fetch: boundedFetch } })
 

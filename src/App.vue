@@ -37,8 +37,8 @@ import ShowroomView from './views/ShowroomView.vue'
 import { offlineReady } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
-type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus'
-type Setting = 'turnMode' | 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration'
+type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus' | 'friends'
+type Setting = 'turnMode' | 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration' | 'friendsEnabled'
 
 function initialScreen(): Screen {
   if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
@@ -47,6 +47,7 @@ function initialScreen(): Screen {
   return 'home'
 }
 const VersusView = defineAsyncComponent(() => import('./views/VersusView.vue'))
+const FriendsView = defineAsyncComponent(() => import('./views/FriendsView.vue'))
 const networkAvailable = ref(navigator.onLine)
 function updateNetwork() { networkAvailable.value = navigator.onLine }
 onMounted(() => {
@@ -380,6 +381,10 @@ function toggleSetting(key: Setting) {
   if (save.preferences[key] && (key === 'music' || key === 'sound')) onAudioGesture()
   persist()
 }
+
+watch(() => save.preferences.friendsEnabled, enabled => {
+  if (!enabled && screen.value === 'friends') go('garage')
+})
 </script>
 
 <template>
@@ -412,7 +417,8 @@ function toggleSetting(key: Setting) {
     <HomeView v-if="screen === 'home'" @go="go" />
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
     <BoosterView v-else-if="screen === 'booster'" @garage="go('garage')" @shop="go('shop')" @inspect="inspect" />
-    <GarageView v-else-if="screen === 'garage'" @inspect="inspect" />
+    <GarageView v-else-if="screen === 'garage'" @inspect="inspect" @friends="go('friends')" />
+    <FriendsView v-else-if="screen === 'friends' && save.preferences.friendsEnabled" :online="networkAvailable" @back="go('garage')" />
     <ShowroomView v-else-if="screen === 'showroom'" @close="go('home')" />
     <main v-else-if="screen === 'versus'" class="race">
       <VersusView v-if="networkAvailable" @back="go('home')" />
@@ -424,7 +430,7 @@ function toggleSetting(key: Setting) {
     <RaceView v-else @inspect="inspect" @go="go" />
 
     <nav class="tabbar" :aria-label="t('Navigation principale')">
-      <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'home' && screen === 'versus') || (tab.id === 'shop' && screen === 'booster') ? 'page' : undefined"
+      <button v-for="tab in tabs" :key="tab.id" type="button" :aria-current="screen === tab.id || (tab.id === 'home' && screen === 'versus') || (tab.id === 'shop' && screen === 'booster') || (tab.id === 'garage' && screen === 'friends') ? 'page' : undefined"
         @click="go(tab.id)">
         <span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path :d="tab.icon" /></svg></span>{{ tab.label }}
         <span v-if="tab.id === 'garage' && pendingSeries.length" class="tab-dot" :aria-label="t('Récompense de série à récupérer')"></span>
@@ -461,6 +467,8 @@ function toggleSetting(key: Setting) {
             <label v-for="l in locales" :key="l.id" class="setting"><span :lang="l.id">{{ l.name }}</span>
               <input type="radio" name="language" :value="l.id" :checked="locale === l.id" @change="setLocale(l.id as Locale)" /></label>
           </fieldset>
+          <label class="setting"><span>{{ t('Échanges entre amis (expérimental)') }}</span><input type="checkbox"
+            :checked="save.preferences.friendsEnabled === true" @change="toggleSetting('friendsEnabled')" /></label>
           <label class="setting"><span>{{ t('Mode timing (expérimental)') }}</span><input type="checkbox" :checked="save.preferences.timingMode" @change="toggleSetting('timingMode')" /></label>
           <label class="setting"><span>{{ t('Direction dans les virages (expérimental)') }}</span><input type="checkbox"
             :checked="save.preferences.timingMode && save.preferences.turnMode" :disabled="!save.preferences.timingMode" @change="toggleSetting('turnMode')" /></label>

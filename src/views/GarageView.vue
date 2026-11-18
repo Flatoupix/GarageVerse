@@ -12,7 +12,7 @@ import CarThumb from '../components/CarThumb.vue'
 import GvButton from '../components/GvButton.vue'
 import PartCard from '../components/PartCard.vue'
 
-const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string] }>()
+const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string]; friends: [] }>()
 const tab = ref<'cars' | 'parts' | 'series'>('cars')
 const garageFilter = ref<'owned' | 'favorites' | 'lineup' | 'collection' | 'missing-editions'>('owned')
 const garageFilters = [
@@ -142,6 +142,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
   <main class="garage">
     <div class="page-heading">
       <h1 tabindex="-1">{{ t('Mon garage') }}</h1>
+      <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('friends')">{{ t('Échanges') }}</button>
     </div>
     <div class="tabs garage-tabs" :aria-label="t('Inventaire')">
       <button type="button" :aria-pressed="tab === 'cars'" @click="selectTab('cars')">{{ t('Voitures') }} <span>{{ ownedCount }}/{{ vehicles.length }}</span></button>

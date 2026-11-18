@@ -18,3 +18,9 @@ verify_jwt = false
 
 [functions.claim-settlement]
 verify_jwt = false
+
+[functions.request-friend]
+verify_jwt = false
+
+[functions.answer-friend]
+verify_jwt = false
