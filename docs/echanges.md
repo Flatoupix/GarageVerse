@@ -1,6 +1,6 @@
 # Échange de cartes entre amis
 
-Statut : **étapes 1 à 3 implémentées dans le dépôt**. Décision du 18 novembre 2026 : les échanges sont **dissociés du Versus** et **livrés avant lui**. Les règles d'échange décidées le 17 novembre 2026 (anciennement `docs/versus.md` §7) restent valables et sont reprises ici.
+Statut : **étapes 1 à 4 implémentées dans le dépôt**. Décision du 18 novembre 2026 : les échanges sont **dissociés du Versus** et **livrés avant lui**. Les règles d'échange décidées le 17 novembre 2026 (anciennement `docs/versus.md` §7) restent valables et sont reprises ici.
 
 ## 1. Intention
 
@@ -87,7 +87,7 @@ Fonctions : `request-friend`, `answer-friend`, `set-showcase`, `propose-trade`, 
 
 **Étape 2 (Règles locales) implémentée dans le dépôt.** Les règles de validation, de transit, de livraison unique et de restitution sont décrites au § 7 et vérifiées par `src/game/trade.check.cjs`.
 
-**Étape 3 (Serveur) implémentée dans le dépôt.** Le serveur enregistre les offres, les contre-offres et les réclamations, puis prend une décision commune de livraison ou de retour. Les fonctions et la migration attendent le déploiement depuis `master` après relecture. Le client de l'étape 4 appliquera cette décision à la sauvegarde. Le serveur conserve les instantanés déclarés et le jeu contrôle les contraintes du garage local.
+**Étape 3 (Serveur) implémentée dans le dépôt.** Le serveur enregistre les offres, les contre-offres et les réclamations, puis prend une décision commune de livraison ou de retour. Les fonctions et la migration attendent le déploiement depuis `master` après relecture. Le serveur conserve les instantanés déclarés et le jeu contrôle les contraintes du garage local.
 
 Chaque tâche ayant des migrations ou des règles de collection passe une **revue de sécurité** ; **les migrations sont relues par le propriétaire avant leur fusion dans `master`**, qui déclenche le déploiement.
 
@@ -98,3 +98,16 @@ Chaque tâche ayant des migrations ou des règles de collection passe une **revu
 - [ ] Les récompenses de série déjà obtenues restent acquises.
 - [ ] Tests : proposition, contre-offre, refus, annulation, expiration, dernier exemplaire, progression transférée, doublon chez le destinataire, solde insuffisant, garage sous trois voitures, simultanéité des deux acceptations.
 - [ ] Le Versus reste inchangé et n'est pas requis pour échanger.
+
+**Étape 4 (Client) implémentée dans le dépôt.** Le jeu synchronise au démarrage, au retour au premier plan, au rétablissement de la connexion et à l’ouverture de l’écran Échanges si le réglage expérimental est actif.
+
+| État serveur | Application à la sauvegarde |
+| --- | --- |
+| `open` | `openTrade` réserve le lot du proposeur. |
+| `accepted` | `transitTrade` retire le lot local. Le client réclame après enregistrement du transit. |
+| `done` | `completeTrade` clôt le don, `receiveTrade` ajoute le lot entrant et `acknowledgeTrade` compacte le lot sortant dans une même écriture. Les deux marques dérivent de l’identifiant serveur et restent dans l’historique de la sauvegarde. |
+| `declined`, `countered`, `expired`, `returned` | `returnTrade` libère la réservation ou restitue le lot en transit. |
+
+Une réclamation interrompue est reprise avec le même identifiant. Le jeu attend une décision commune avant de livrer ou de restituer les lots. Si le serveur est inaccessible, un transit déjà enregistré reste en place.
+
+Avant de retirer les voitures, le client vérifie que la progression et les exemplaires du lot correspondent à l’instantané de l’offre. Un lot modifié depuis sa publication exige une nouvelle offre.

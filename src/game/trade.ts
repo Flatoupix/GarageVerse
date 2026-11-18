@@ -55,14 +55,19 @@ function validOffer(offer: unknown): offer is TradeOffer {
 function checkGoods(save: Save, offer: TradeOffer): string | undefined {
   if (!validOffer(offer)) return t('Offre d’échange invalide')
   if (offer.credits > save.credits) return t('Crédits insuffisants pour cet échange')
+  const problem = validateTradeShowcase(save, offer.cars)
+  if (problem) return problem
+  if (Object.keys(save.cars).length - offer.cars.length < 3) return t('Tu dois garder au moins trois voitures dans ton garage')
+}
+
+export function validateTradeShowcase(save: Save, cars: readonly string[]): string | undefined {
   const stakeLineup = save.versus?.active?.request?.lineup
-  for (const id of offer.cars) {
+  for (const id of cars) {
     if (!vehicleById.has(id) || !Object.hasOwn(save.cars, id)) return t('Voiture absente du garage')
     if (save.lineup.includes(id) || save.nightLineup.includes(id) || save.dailyLineup?.includes(id)
       || save.duel?.player.lineup.some(car => car.id === id) || save.night?.lineup.includes(id)
       || (Array.isArray(stakeLineup) && stakeLineup.some(car => car?.id === id))) return t('Cette voiture est engagée et ne peut pas être échangée')
   }
-  if (Object.keys(save.cars).length - offer.cars.length < 3) return t('Tu dois garder au moins trois voitures dans ton garage')
 }
 
 export function validateTradeOffer(save: Save, offer: TradeOffer): string | undefined {
@@ -103,7 +108,7 @@ function copyCar(car: OwnedCar): OwnedCar {
   return { ...car, parts: [...car.parts], editions: [...car.editions], upgrades: { ...car.upgrades } }
 }
 
-export function transitTrade(save: Save, id: string, offer?: TradeOffer): string | undefined {
+export function transitTrade(save: Save, id: string, offer?: TradeOffer, advertised?: TradeGoods): string | undefined {
   const record = entry(save, id)
   if (!validId(id) || save.tradeHistory?.includes(id) || (record && record.state !== 'ouverte')) return t('Échange indisponible')
   const outgoing = record?.offer ?? offer
@@ -116,6 +121,15 @@ export function transitTrade(save: Save, id: string, offer?: TradeOffer): string
     credits: outgoing.credits,
   })
   if (!goods) return t('Offre d’échange invalide')
+  if (advertised) {
+    const expected = normalizeGoods(advertised)
+    // Les pièces montées et le favori restent des choix du garage qui donne.
+    const transferable = (car: OwnedCar) => JSON.stringify({ ...car, parts: [], favorite: false })
+    if (!expected || expected.credits !== goods.credits || Object.keys(expected.cars).length !== Object.keys(goods.cars).length
+      || Object.entries(goods.cars).some(([carId, car]) => !expected.cars[carId] || transferable(car) !== transferable(expected.cars[carId]))) {
+      return t('Le lot a changé depuis la proposition.')
+    }
+  }
   const { cars } = goods
   const mounted = partCounts(cars)
   if (mounted.some(([partId, count]) => (save.parts[partId] ?? 0) < count)) return t('Stock de pièces incohérent pour cet échange')

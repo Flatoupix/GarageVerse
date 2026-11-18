@@ -4,6 +4,8 @@ export const echanges = {
   'Cette voiture est engagée et ne peut pas être échangée': 'This car is committed and can’t be traded',
   'Tu as déjà dix offres d’échange ouvertes': 'You already have ten open trade offers',
   'Cette voiture figure déjà dans une offre d’échange': 'This car is already in a trade offer',
+  'Impossible d’enregistrer cet échange sur cet appareil.': 'This trade couldn’t be saved on this device.',
+  'Le lot a changé depuis la proposition.': 'The trade offer has changed since it was made.',
   'Échange indisponible': 'Trade unavailable',
   'Stock de pièces incohérent pour cet échange': 'Part inventory is inconsistent for this trade',
   'Échanges entre amis (expérimental)': 'Trading with friends (experimental)',

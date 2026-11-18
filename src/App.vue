@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { locale, locales, setLocale, t, tp, type Locale } from './i18n'
 import { VERSUS_OPEN } from './game/features'
+import { syncTrades } from './game/trade-client'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
@@ -59,6 +60,20 @@ onUnmounted(() => {
   window.removeEventListener('offline', updateNetwork)
 })
 const screen = ref<Screen>(initialScreen())
+function resumeTrades() {
+  if (document.visibilityState !== 'visible' || save.preferences.friendsEnabled !== true) return
+  void syncTrades().catch(cause => {
+    if (save.preferences.friendsEnabled === true) notify(cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.'), 'error')
+  })
+}
+onMounted(() => {
+  resumeTrades()
+  document.addEventListener('visibilitychange', resumeTrades)
+})
+onUnmounted(() => document.removeEventListener('visibilitychange', resumeTrades))
+watch([screen, networkAvailable, () => save.preferences.friendsEnabled], ([destination, online, enabled], [previous, wasOnline, wasEnabled]) => {
+  if ((destination === 'friends' && previous !== 'friends') || (online && !wasOnline) || (enabled && !wasEnabled)) resumeTrades()
+})
 const settings = ref<HTMLDialogElement>()
 const activeDemo = ref<'timing' | 'turn' | null>(null)
 const demoImagesReady = ref(false)
@@ -134,7 +149,7 @@ async function importSave(event: Event) {
     if (!window.confirm(t('Importer cette sauvegarde ? Tu vas remplacer ta partie actuelle.'))) return
     // Écrire avant de remplacer la partie : un stockage indisponible laisse le garage intact.
     localStorage.setItem(SAVE_KEY, JSON.stringify(restored))
-    Object.assign(save, restored)
+    Object.assign(save, { trades: undefined, tradeHistory: undefined }, restored)
     applyTheme(save.preferences.theme)
     themeFx(save.preferences.theme)
     inspected.value = null
