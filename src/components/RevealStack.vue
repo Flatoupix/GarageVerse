@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
+import { t } from '../i18n'
 import { partById, vehicleById } from '../game/data'
 import { reducedMotion } from '../game/store'
 import type { Opening } from '../game/save'
@@ -12,8 +13,8 @@ const emit = defineEmits<{ flip: []; next: []; quick: []; swipe: [] }>()
 const slot = computed(() => props.faceUp ? props.opening.revealed - 1 : props.opening.revealed)
 const pull = computed(() => props.opening.pulls[slot.value])
 const title = computed(() => pull.value.kind === 'car'
-  ? `${vehicleById.get(pull.value.id)!.name} · ${vehicleById.get(pull.value.id)!.rarity}`
-  : `${partById.get(pull.value.id)!.name} · Mécanique`)
+  ? `${vehicleById.get(pull.value.id)!.name} · ${t(vehicleById.get(pull.value.id)!.rarity)}`
+  : `${partById.get(pull.value.id)!.name} · ${t('Mécanique')}`)
 const total = computed(() => props.opening.pulls.length)
 // Le geste reste local à la pile ; la progression passe toujours par BoosterView.
 const offset = ref(0)
@@ -97,7 +98,7 @@ function pointerCancel(event: PointerEvent) {
         <div v-if="slot < total - 1" class="stack-edge" aria-hidden="true"></div>
         <div class="swipe-card">
           <div :key="slot" class="flip-card" :class="{ 'is-flipping': flipping }">
-            <button v-if="!faceUp" type="button" class="card-back has-art" :class="tell && `tell-${tell}`" :aria-label="`Retourner la carte ${slot + 1}`" @click="$emit('flip')">
+            <button v-if="!faceUp" type="button" class="card-back has-art" :class="tell && `tell-${tell}`" :aria-label="t('Retourner la carte {n}', { n: slot + 1 })" @click="$emit('flip')">
               <CardBackFace />
             </button>
             <div v-else class="card-back has-art back-decoration" aria-hidden="true">
@@ -105,26 +106,26 @@ function pointerCancel(event: PointerEvent) {
             </div>
             <div v-if="faceUp" class="flip-front">
               <div><PullCard :pull="pull" :cinematic="cinematic" /></div>
-              <span v-if="pull.isNew" class="new-badge">Nouveau</span>
+              <span v-if="pull.isNew" class="new-badge">{{ t('Nouveau') }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
     <slot v-if="faceUp" name="edition" />
-    <p v-if="faceUp && opening.revealed === 1" class="swipe-hint">Glisse la carte pour passer à la suivante</p>
+    <p v-if="faceUp && opening.revealed === 1" class="swipe-hint">{{ t('Glisse la carte pour passer à la suivante') }}</p>
     <div class="stack-indicators" aria-hidden="true">
       <span v-for="position in total" :key="position" :class="{ revealed: position <= opening.revealed, current: position === slot + 1 }"></span>
     </div>
-    <p class="stack-status" role="status">{{ faceUp ? title : `Carte ${slot + 1} sur ${total}` }}</p>
+    <p class="stack-status" role="status">{{ faceUp ? title : t('Carte {n} sur {total}', { n: slot + 1, total }) }}</p>
     <div class="stack-actions">
       <button v-if="faceUp" type="button" class="button primary" :disabled="leaving" @click="$emit('next')">
-        {{ opening.revealed === total ? 'Voir le récapitulatif' : 'Carte suivante' }} <span aria-hidden="true">→</span>
+        {{ opening.revealed === total ? t('Voir le récapitulatif') : t('Carte suivante') }} <span aria-hidden="true">→</span>
       </button>
       <button v-else type="button" class="button primary" :disabled="leaving" @click="$emit('flip')">
-        Retourner la carte <span aria-hidden="true">↻</span>
+        {{ t('Retourner la carte') }} <span aria-hidden="true">↻</span>
       </button>
-      <button v-if="opening.revealed < total" type="button" class="button quiet" :disabled="leaving" @click="$emit('quick')">Tout révéler</button>
+      <button v-if="opening.revealed < total" type="button" class="button quiet" :disabled="leaving" @click="$emit('quick')">{{ t('Tout révéler') }}</button>
     </div>
   </div>
 </template>

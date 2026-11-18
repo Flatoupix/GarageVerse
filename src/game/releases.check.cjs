@@ -21,6 +21,16 @@ for (const r of releases) {
 }
 assert.equal(new Set(releases.map(r => r.version)).size, releases.length, 'version en double')
 
+// Parité des notes françaises et anglaises : mêmes versions et dates, au moins une puce par entrée, aucun astérisque visible.
+const english = parseChangelog(fs.readFileSync(path.join(root, 'CHANGELOG.en.md'), 'utf8'))
+assert.ok(english.some(r => r.version === version), `CHANGELOG.en.md sans entrée pour ${version}`)
+assert.deepEqual(english.map(r => [r.version, r.date]), releases.map(r => [r.version, r.date]), 'CHANGELOG.en.md : versions ou dates différentes de CHANGELOG.md')
+for (const [i, r] of english.entries()) {
+  assert.ok(r.sections.some(s => s.items.length), `aucune note anglaise pour ${r.version}`)
+  assert.deepEqual(r.sections.map(s => s.items.length), releases[i].sections.map(s => s.items.length), `CHANGELOG.en.md : rubriques ou puces différentes pour ${r.version}`)
+  for (const s of r.sections) for (const item of s.items) assert.ok(item.every(part => !part.text.includes('*')), `astérisque visible dans les notes anglaises de ${r.version}`)
+}
+
 // Analyse : entrée non publiée ignorée, rubriques et puces, gras et italique en segments.
 const sample = [
   '# Notes', 'Intro **ignorée**.', '## [Non publié]', '### Ajouté', '- Pas encore sortie.',

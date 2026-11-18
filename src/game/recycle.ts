@@ -1,3 +1,4 @@
+import { t } from '../i18n'
 import { progression, vehicleById } from './data'
 import { scrapCar, type Save } from './save'
 
@@ -8,9 +9,9 @@ export function recycle(save: Save, id: string, now = Date.now()): RecycleReceip
   return { id, car, credits: progression.scrap[vehicleById.get(id)!.rarity], expires: now + 6000, used: false }
 }
 export function undoRecycle(save: Save, receipt: RecycleReceipt, id: string, now = Date.now()): string | undefined {
-  if (receipt.used || now >= receipt.expires || receipt.id !== id || save.cars[id] !== receipt.car) return 'Annulation expirée'
+  if (receipt.used || now >= receipt.expires || receipt.id !== id || save.cars[id] !== receipt.car) return t('Annulation expirée')
   // Les crédits gagnés ont pu être dépensés entre-temps : on refuse plutôt que de passer en négatif.
-  if (save.credits < receipt.credits) return `Il te manque ${receipt.credits - save.credits} crédits pour annuler`
+  if (save.credits < receipt.credits) return t('Il te manque {n} crédits pour annuler', { n: receipt.credits - save.credits })
   // Reprend seulement le gain du recyclage, sans écraser les autres actions.
   save.cars[id].copies++
   save.credits -= receipt.credits

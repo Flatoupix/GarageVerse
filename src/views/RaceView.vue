@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref } from 'vue'
+import { locale, t, tp } from '../i18n'
+import { ruleText } from '../game/rules-text'
 import { NIGHT_CAP, nightRival } from '../game/endless'
 import { createNightRound, finishNight, nightLineupCheck, settleNight, startNight } from '../game/save'
 import { constraintCap, constraintText } from '../game/daily'
@@ -104,7 +106,21 @@ const recommendedCars = computed(() => priorities.value.map(priority => {
   return { ...priority, best }
 }))
 const statArticle = { acc: 'l’', end: 'l’', vit: 'la ', man: 'la ' } as const
-const pointsText = (value: number) => value.toFixed(1).replace('.', ',')
+const pointsText = (value: number) => locale === 'fr' ? value.toFixed(1).replace('.', ',') : value.toFixed(1)
+const rangeLabel = (value: number) => { const [low, high] = luckRange(value); return t('de {low} à {high} points', { low, high }) }
+// Phrase de l'objectif du premier secteur, coupée autour de la statistique qui s'affiche en gras.
+function goalParts(stat: StatKey) {
+  const marker = '\u0001'
+  const text = statArticle[stat] === 'l’' ? t('Ici, c’est l’{stat} qui compte : choisis ta voiture.', { stat: marker }) : t('Ici, c’est la {stat} qui compte : choisis ta voiture.', { stat: marker })
+  const [before, after] = text.split(marker)
+  return { before, after: after ?? '', stat: t(statLabels[stat]) }
+}
+// Même texte que constraintText, mais traduit.
+function constraintLabel(rule: Parameters<typeof constraintText>[0]) {
+  return rule.type === 'cost' ? t('Plafond de coût : {n}', { n: rule.cap })
+    : rule.type === 'category' ? t('Au moins une voiture de catégorie {value}', { value: t(rule.value) })
+      : t('Au moins une voiture de rareté {value}', { value: t(rule.value) })
+}
 // Score attendu avec sa part de hasard : « 7-9 », ou une seule valeur quand la forme du jour ne change rien.
 const rangeText = (value: number) => { const [low, high] = luckRange(value); return low === high ? String(value) : `${low}-${high}` }
 
@@ -113,8 +129,8 @@ const overBy = (id: string, price: number) => lineup.value.includes(id) ? 0 : Ma
 function toggle(id: string) {
   act(() => {
     if (lineup.value.includes(id)) lineup.value = lineup.value.filter(x => x !== id)
-    else if (lineup.value.length >= 3) return 'Retire d’abord une voiture'
-    else if (overBy(id, vehicleById.get(id)?.cost ?? 0) > 0) return 'Cette voiture dépasse le plafond de coût'
+    else if (lineup.value.length >= 3) return t('Retire d’abord une voiture')
+    else if (overBy(id, vehicleById.get(id)?.cost ?? 0) > 0) return t('Cette voiture dépasse le plafond de coût')
     else lineup.value = [...lineup.value, id]
   })
   void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, lineup.value.indexOf(id) + 1)})`, 1.1))
@@ -134,7 +150,7 @@ const picked = ref(0)
 const nitro = ref(false)
 // Consigne de pilotage du secteur : attaque, normal ou gestion.
 const stance = ref<Stance>('normal')
-const stanceHints: Record<Stance, string> = { gestion: '−2 · 0 secteur', normal: '1 secteur', attaque: '+2 · 2 secteurs' }
+const stanceHints: Record<Stance, string> = { gestion: t('−2 · 0 secteur'), normal: t('1 secteur'), attaque: t('+2 · 2 secteurs') }
 const stanceBlocked = (key: Stance) => Boolean(duel.value) && (key === 'attaque' ? !canAttack(duel.value!.player, picked.value)
   : key === 'gestion' && overheated(duel.value!.player, picked.value))
 function setStance(key: Stance) {
@@ -173,8 +189,8 @@ const tieBreak = computed(() => {
   const round = shown.value, d = duel.value
   if (!round || !d || round.player.score !== round.rival.score) return ''
   const mine = d.player.lineup[round.player.car].stats.end, theirs = d.rival.lineup[round.rival.car].stats.end
-  return round.winner === 'tie' ? `Égalité à ${round.player.score}, et même Endurance (${mine}) : personne ne marque.`
-    : `Égalité à ${round.player.score} : l’Endurance départage, ${mine} pour toi contre ${theirs}.`
+  return round.winner === 'tie' ? t('Égalité à {score}, et même Endurance ({mine}) : personne ne marque.', { score: round.player.score, mine })
+    : t('Égalité à {score} : l’Endurance départage, {mine} pour toi contre {theirs}.', { score: round.player.score, mine, theirs })
 })
 const counts = reactive({ player: 0, rival: 0 })
 const rewardShown = ref(0)
@@ -231,8 +247,8 @@ function settle(round: Round, immediateBoost = false) {
     pop('.scoreboard', 1.25)
     for (const who of ['player', 'rival'] as const) {
       const at = `.duel-col.${who} .duel-score`, luck = round[who].luck
-      if (luck === 'perfect') { floatText(at, 'Parfait !', tone.gold, 20); sparks(at, palettes.gold, 36, 1.2); if (who === 'player') flash(tone.gold, 0.25) }
-      if (luck === 'incident') { floatText(at, round[who].lines.at(-1)!.label, tone.rose, 16); shake(2); if (who === 'player') buzz([40, 30, 40]) }
+      if (luck === 'perfect') { floatText(at, t('Parfait !'), tone.gold, 20); sparks(at, palettes.gold, 36, 1.2); if (who === 'player') flash(tone.gold, 0.25) }
+      if (luck === 'incident') { floatText(at, ruleText(round[who].lines.at(-1)!.label), tone.rose, 16); shake(2); if (who === 'player') buzz([40, 30, 40]) }
     }
   })
 }
@@ -331,55 +347,55 @@ function cashNight(returnGarage = false) {
 function abandon() {
   if (isNight.value) { clear(); shown.value = null; cashNight(); sound('lose'); return }
 
-  act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0, perfect: false }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, 'Course abandonnée')
+  act(s => { if (s.duel) { if (!s.duel.rivalId.startsWith('daily:')) { s.record[s.duel.rivalId] ??= { wins: 0, losses: 0, perfect: false }; s.record[s.duel.rivalId].losses++ }; s.duel = null } }, t('Course abandonnée'))
 }
 // Libellés courts pour la piste, qui doit tenir sur une ligne de cinq cases à 320 px.
-const trackLabels = { depart: 'Départ', virage: 'Virages', ligne: 'Droite', endurance: 'Endur.' } as const
+const trackLabels = { depart: t('Départ'), virage: t('Virages'), ligne: t('Droite'), endurance: t('Endur.') } as const
 const name = (id: string) => `${vehicleById.get(id)!.name}`
 </script>
 
 <template>
   <main ref="raceRoot" class="race" :class="{ 'daily-race': isDaily && !duel, 'night-race': isNight }">
     <section v-if="nightEnd" class="race-end night-panel">
-      <h1 tabindex="-1">Nuit terminée</h1>
-      <p><span v-help="'nightRound'">Manches gagnées</span> : {{ nightEnd.wins }}</p>
-      <p>{{ nightEnd.credits }} crédits versés</p>
-      <p v-if="nightEnd.newRecord" v-help="'nightRecord'" role="status">Nouveau record !</p>
-      <div class="race-actions"><button type="button" class="button primary wide" @click="nightEnd = null; chosen = null; emit('go', 'garage')">Rentrer au garage</button></div>
+      <h1 tabindex="-1">{{ t('Nuit terminée') }}</h1>
+      <p><span v-help="'nightRound'">{{ t('Manches gagnées :') }}</span> {{ nightEnd.wins }}</p>
+      <p>{{ tp('{n} crédit versé', '{n} crédits versés', nightEnd.credits) }}</p>
+      <p v-if="nightEnd.newRecord" v-help="'nightRecord'" role="status">{{ t('Nouveau record !') }}</p>
+      <div class="race-actions"><button type="button" class="button primary wide" @click="nightEnd = null; chosen = null; emit('go', 'garage')">{{ t('Rentrer au garage') }}</button></div>
     </section>
     <section v-else-if="isNight && save.night?.resting" class="race-end night-panel">
-      <h1 tabindex="-1"><span v-help="'nightRound'">Manche suivante</span> : {{ save.night.round }}</h1>
-      <p>{{ nightOpponent.circuit.name }}</p>
-      <p>{{ conditionLabels[Object.keys(nightOpponent.circuit.conditions)[0] as Condition] }}</p>
-      <p><span v-help="'nightGains'">Gains accumulés</span> : {{ save.night.gains }} crédits</p>
-      <p v-if="save.night.newRecord" v-help="'nightRecord'" role="status">Nouveau record !</p>
-      <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
+      <h1 tabindex="-1"><span v-help="'nightRound'">{{ t('Manche suivante :') }}</span> {{ save.night.round }}</h1>
+      <p>{{ t(nightOpponent.circuit.name) }}</p>
+      <p>{{ t(conditionLabels[Object.keys(nightOpponent.circuit.conditions)[0] as Condition]) }}</p>
+      <p><span v-help="'nightGains'">{{ t('Gains accumulés :') }}</span> {{ tp('{n} crédit', '{n} crédits', save.night.gains) }}</p>
+      <p v-if="save.night.newRecord" v-help="'nightRecord'" role="status">{{ t('Nouveau record !') }}</p>
+      <p v-help="'nightRecord'">{{ tp('Record : {n} manche', 'Record : {n} manches', save.nightRecord) }}</p>
       <div class="recap-actions race-actions">
-        <button type="button" class="button primary" @click="nextNightRound">Manche suivante</button>
-        <button type="button" class="button quiet" @click="cashNight(true)">Rentrer au garage</button>
+        <button type="button" class="button primary" @click="nextNightRound">{{ t('Manche suivante') }}</button>
+        <button type="button" class="button quiet" @click="cashNight(true)">{{ t('Rentrer au garage') }}</button>
       </div>
     </section>
     <!-- Résultat final -->
     <section v-else-if="reward" class="race-end" :class="lastWinner === 'player' ? 'won' : 'lost'">
-      <span class="eyebrow">{{ rival?.circuit.name }}</span>
-      <h1 tabindex="-1">{{ reward.perfect ? 'Victoire parfaite' : lastWinner === 'player' ? 'Victoire !' : 'Pas cette fois.' }}</h1>
-      <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> Tu as gagné tous les secteurs !</p>
-      <blockquote v-if="rivalReply" class="rival-reply"><p>« {{ rivalReply }} »</p><cite>{{ character?.name }}</cite></blockquote>
-      <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? 'Défi déjà récompensé aujourd’hui.' : 'Retente le défi quand tu veux.' }}</p>
-      <p v-else :aria-label="`+${reward.credits} crédits`">Crédits : +{{ rewardShown }} au total</p>
-      <p v-if="reward.perfect">Crédits de course : +{{ reward.credits / 2 }} · bonus de victoire parfaite : +{{ reward.credits / 2 }} crédits</p>
-      <p v-if="reward.ticket">Ticket de booster : +1 ticket {{ boosterById.get(reward.ticket)?.name }} · première victoire</p>
-      <p v-if="reward.perfectTicket">Bonus de victoire parfaite : +1 ticket de booster {{ boosterById.get(reward.perfectTicket)?.name }}</p>
-      <p v-if="reward.car" class="perfect-banner">Voiture gagnée : {{ vehicleById.get(reward.car)?.name }} {{ vehicleById.get(reward.car)?.version }} rejoint ton garage !</p>
-      <ol v-if="recap.length" class="race-recap" aria-label="Résumé des secteurs">
+      <span class="eyebrow">{{ t(rival?.circuit.name ?? '') }}</span>
+      <h1 tabindex="-1">{{ reward.perfect ? t('Victoire parfaite') : lastWinner === 'player' ? t('Victoire !') : t('Pas cette fois.') }}</h1>
+      <p v-if="reward.perfect" class="perfect-banner"><span aria-hidden="true">★</span> {{ t('Tu as gagné tous les secteurs !') }}</p>
+      <blockquote v-if="rivalReply" class="rival-reply"><p>« {{ t(rivalReply) }} »</p><cite>{{ character?.name }}</cite></blockquote>
+      <p v-if="isDaily && !reward.credits">{{ lastWinner === 'player' ? t('Défi déjà récompensé aujourd’hui.') : t('Retente le défi quand tu veux.') }}</p>
+      <p v-else :aria-label="tp('+{n} crédit', '+{n} crédits', reward.credits)">{{ t('Crédits : +{n} au total', { n: rewardShown }) }}</p>
+      <p v-if="reward.perfect">{{ t('Crédits de course : +{race} · bonus de victoire parfaite : +{bonus} crédits', { race: reward.credits / 2, bonus: reward.credits / 2 }) }}</p>
+      <p v-if="reward.ticket">{{ t('Ticket de booster : +1 ticket {booster} · première victoire', { booster: t(boosterById.get(reward.ticket)?.name ?? '') }) }}</p>
+      <p v-if="reward.perfectTicket">{{ t('Bonus de victoire parfaite : +1 ticket de booster {booster}', { booster: t(boosterById.get(reward.perfectTicket)?.name ?? '') }) }}</p>
+      <p v-if="reward.car" class="perfect-banner">{{ t('Voiture gagnée : {car} rejoint ton garage !', { car: `${vehicleById.get(reward.car)?.name} ${vehicleById.get(reward.car)?.version}` }) }}</p>
+      <ol v-if="recap.length" class="race-recap" :aria-label="t('Résumé des secteurs')">
         <li v-for="(r, i) in recap" :key="i" :class="r.winner" :style="{ '--i': i }">
-          <span class="recap-sector"><span aria-hidden="true">{{ sectorIcons[r.sector] }} {{ conditionIcons[r.condition] }}</span><span class="visually-hidden">{{ sectorLabels[r.sector] }}, {{ conditionLabels[r.condition] }} : </span></span>
+          <span class="recap-sector"><span aria-hidden="true">{{ sectorIcons[r.sector] }} {{ conditionIcons[r.condition] }}</span><span class="visually-hidden">{{ t('{sector}, {condition} :', { sector: t(sectorLabels[r.sector]), condition: t(conditionLabels[r.condition]) }) }} </span></span>
           <span class="recap-car">{{ r.player }}</span><b>{{ r.scores[0] }} – {{ r.scores[1] }}</b><span class="recap-car">{{ r.rival }}</span>
         </li>
       </ol>
       <div class="recap-actions race-actions">
-        <button type="button" class="button primary" @click="reward = null; chosen = null">Rivaux <span aria-hidden="true">⟶</span></button>
-        <button type="button" class="button quiet" @click="emit('go', reward?.ticket || reward?.perfectTicket ? 'shop' : 'garage')">{{ reward.ticket || reward.perfectTicket ? 'Ouvrir les tickets' : 'Préparer au garage' }}</button>
+        <button type="button" class="button primary" @click="reward = null; chosen = null">{{ t('Rivaux') }} <span aria-hidden="true">⟶</span></button>
+        <button type="button" class="button quiet" @click="emit('go', reward?.ticket || reward?.perfectTicket ? 'shop' : 'garage')">{{ reward.ticket || reward.perfectTicket ? t('Ouvrir les tickets') : t('Préparer au garage') }}</button>
       </div>
     </section>
 
@@ -388,64 +404,64 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="race-head">
         <img v-if="art.rival(rival.id)" :src="art.rival(rival.id)" alt="" class="rival-face" />
         <span v-else class="rival-face" aria-hidden="true">{{ rival.name[0] }}</span>
-        <div><span class="eyebrow">{{ rival.circuit.name }}</span><h1 tabindex="-1"><span v-if="isNight" v-help="'nightRound'">{{ rival.name }}</span><template v-else>{{ rival.name }}</template></h1></div>
-        <div class="scoreboard" aria-label="Score"><b :key="`p${points.player}`">{{ points.player }}</b><span>—</span><b :key="`r${points.rival}`">{{ points.rival }}</b></div>
+        <div><span class="eyebrow">{{ t(rival.circuit.name) }}</span><h1 tabindex="-1"><span v-if="isNight" v-help="'nightRound'">{{ rival.name }}</span><template v-else>{{ rival.name }}</template></h1></div>
+        <div class="scoreboard" :aria-label="t('Score')"><b :key="`p${points.player}`">{{ points.player }}</b><span>—</span><b :key="`r${points.rival}`">{{ points.rival }}</b></div>
       </div>
       <ol class="track">
         <li v-for="(sector, i) in duel.sectors" :key="i" :style="{ '--i': i }" :class="{ current: i === trackIndex, done: i < trackIndex,
           win: i < trackIndex && duel.rounds[i]?.winner === 'player', loss: i < trackIndex && duel.rounds[i]?.winner === 'rival' }">
           <span class="track-icon" aria-hidden="true">{{ sectorIcons[sector] }}</span>
-          <span class="track-name" :title="sectorLabels[sector]">{{ trackLabels[sector] }}</span>
-          <span class="track-cond">{{ known(i) ? `${conditionIcons[duel.conditions[i]]} ${conditionLabels[duel.conditions[i]]}` : '? Inconnu' }}</span>
+          <span class="track-name" :title="t(sectorLabels[sector])">{{ trackLabels[sector] }}</span>
+          <span class="track-cond">{{ known(i) ? `${conditionIcons[duel.conditions[i]]} ${t(conditionLabels[duel.conditions[i]])}` : t('? Inconnu') }}</span>
         </li>
       </ol>
 
       <section v-if="shown" class="round-result" :class="settled ? shown.winner : 'pending'">
-        <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? 'Secteur gagné' : shown.winner === 'rival' ? 'Secteur perdu' : 'Égalité parfaite' }}</h2>
-        <h2 v-else>{{ sectorLabels[shown.sector] }} · {{ conditionLabels[shown.condition] }}</h2>
+        <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
+        <h2 v-else>{{ t(sectorLabels[shown.sector]) }} · {{ t(conditionLabels[shown.condition]) }}</h2>
         <SectorRun :round="shown" :step="step" :running="!settled" :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
         <p v-if="settled && tieBreak" class="tie-note">{{ tieBreak }}</p>
         <div class="duel-columns">
           <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col"
             :class="[who, { winner: settled && shown.winner === who, loser: settled && shown.winner !== who && shown.winner !== 'tie', boosted: shown[who].nitro }]">
-            <span class="duel-who">{{ who === 'player' ? 'Toi' : rival.name }} <span v-if="shown[who].nitro" class="clash-nitro">Nitro</span></span>
+            <span class="duel-who">{{ who === 'player' ? t('Toi') : rival.name }} <span v-if="shown[who].nitro" class="clash-nitro">{{ t('Nitro') }}</span></span>
             <strong>{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
-            <span class="duel-score" :aria-label="`${shown[who].score} points`">{{ counts[who] }}</span>
-            <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ l.label }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
+            <span class="duel-score" :aria-label="tp('{n} point', '{n} points', shown[who].score)">{{ counts[who] }}</span>
+            <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ ruleText(l.label) }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
           </div>
         </div>
-        <div v-if="settled" class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? 'Voir le résultat' : 'Secteur suivant' }} <span aria-hidden="true">⟶</span></button></div>
+        <div v-if="settled" class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? t('Voir le résultat') : t('Secteur suivant') }} <span aria-hidden="true">⟶</span></button></div>
       </section>
 
       <section v-else-if="duel.winner" class="round-result">
-        <h2>Course terminée · {{ duel.player.points }} – {{ duel.rival.points }}</h2>
-        <div class="race-actions"><button type="button" class="button primary wide" @click="proceed">Voir le résultat <span aria-hidden="true">⟶</span></button></div>
+        <h2>{{ t('Course terminée · {a} – {b}', { a: duel.player.points, b: duel.rival.points }) }}</h2>
+        <div class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ t('Voir le résultat') }} <span aria-hidden="true">⟶</span></button></div>
       </section>
 
       <section v-else class="engage">
-        <p v-if="index === 0" class="engage-goal">Le plus gros score gagne le secteur. Remporte le plus de secteurs sur {{ duel.sectors.length }}. Ici, c’est {{ statArticle[sectorStat[duel.sectors[index]]] }}<b>{{ statLabels[sectorStat[duel.sectors[index]]] }}</b> qui compte : choisis ta voiture.</p>
-        <p class="engage-brief">Secteur {{ index + 1 }}/{{ duel.sectors.length }} · <b v-help="duel.sectors[index]">{{ sectorLabels[duel.sectors[index]] }}</b> (<span v-help="sectorStat[duel.sectors[index]]">{{ statLabels[sectorStat[duel.sectors[index]]] }}</span>)
-          · <span v-help="duel.conditions[index]">{{ conditionIcons[duel.conditions[index]] }} {{ conditionLabels[duel.conditions[index]] }}</span></p>
-        <h2 class="engage-rival-title">{{ isNight ? `Voitures adverses · ${rival.name}` : `Voitures de ${rival.name}` }} <small>Nitro ×{{ duel.rival.nitro }}</small></h2>
-        <div class="engage-cars engage-rivals" aria-label="Écurie adverse">
+        <p v-if="index === 0" class="engage-goal">{{ t('Le plus gros score gagne le secteur. Remporte le plus de secteurs sur {n}.', { n: duel.sectors.length }) }} {{ goalParts(sectorStat[duel.sectors[index]]).before }}<b>{{ goalParts(sectorStat[duel.sectors[index]]).stat }}</b>{{ goalParts(sectorStat[duel.sectors[index]]).after }}</p>
+        <p class="engage-brief">{{ t('Secteur {n}/{total}', { n: index + 1, total: duel.sectors.length }) }} · <b v-help="duel.sectors[index]">{{ t(sectorLabels[duel.sectors[index]]) }}</b> (<span v-help="sectorStat[duel.sectors[index]]">{{ t(statLabels[sectorStat[duel.sectors[index]]]) }}</span>)
+          · <span v-help="duel.conditions[index]">{{ conditionIcons[duel.conditions[index]] }} {{ t(conditionLabels[duel.conditions[index]]) }}</span></p>
+        <h2 class="engage-rival-title">{{ isNight ? t('Voitures adverses · {name}', { name: rival.name }) : t('Voitures de {name}', { name: rival.name }) }} <small>{{ t('Nitro ×{n}', { n: duel.rival.nitro }) }}</small></h2>
+        <div class="engage-cars engage-rivals" :aria-label="t('Écurie adverse')">
           <button v-for="(r, car) in duel.rival.lineup" :key="car" type="button"
             class="engage-car engage-rival" :class="{ hot: overheated(duel.rival, car) }"
-            :aria-label="`Voiture adverse : ${r.vehicle.name}, de ${luckRange(rivalProjections[car])[0]} à ${luckRange(rivalProjections[car])[1]} points`" aria-controls="engage-detail"
+            :aria-label="t('Voiture adverse : {name}, {range}', { name: r.vehicle.name, range: rangeLabel(rivalProjections[car]) })" aria-controls="engage-detail"
             @click="detail = { side: 'rival', car }">
             <img v-if="carArt('rival', car)" :src="carArt('rival', car)" alt="" />
             <span class="engage-name">{{ r.vehicle.name }}</span>
-            <span class="engage-score" :aria-label="`de ${luckRange(rivalProjections[car])[0]} à ${luckRange(rivalProjections[car])[1]} points`">{{ rangeText(rivalProjections[car]) }}</span>
-            <span class="engage-uses">{{ r.uses - duel.rival.used[car] }} secteur{{ r.uses - duel.rival.used[car] > 1 ? 's' : '' }}</span>
-            <span v-if="overheated(duel.rival, car)" class="engage-heat">Surchauffe −3</span>
+            <span class="engage-score" :aria-label="rangeLabel(rivalProjections[car])">{{ rangeText(rivalProjections[car]) }}</span>
+            <span class="engage-uses">{{ tp('{n} secteur', '{n} secteurs', r.uses - duel.rival.used[car]) }}</span>
+            <span v-if="overheated(duel.rival, car)" class="engage-heat">{{ t('Surchauffe −3') }}</span>
           </button>
         </div>
-        <div class="engage-cars" role="radiogroup" aria-label="Voiture engagée">
+        <div class="engage-cars" role="radiogroup" :aria-label="t('Voiture engagée')">
           <button v-for="(r, car) in duel.player.lineup" :key="car" type="button" role="radio" :aria-checked="picked === car"
             aria-controls="engage-detail" class="engage-car" :class="{ hot: overheated(duel.player, car) }" @click="pick(car, $event)">
             <img v-if="edition(r.id, save.cars[r.id]?.shown).art" :src="edition(r.id, save.cars[r.id]?.shown).art" alt="" />
             <span class="engage-name">{{ r.vehicle.name }}</span>
-            <span :key="projections[car]" class="engage-score" :aria-label="`de ${luckRange(projections[car])[0]} à ${luckRange(projections[car])[1]} points`">{{ rangeText(projections[car]) }}</span>
-            <span class="engage-uses">{{ overheated(duel.player, car) ? 'Surchauffe −3' : `${r.uses - duel.player.used[car]} secteur${r.uses - duel.player.used[car] > 1 ? 's' : ''}` }}</span>
+            <span :key="projections[car]" class="engage-score" :aria-label="rangeLabel(projections[car])">{{ rangeText(projections[car]) }}</span>
+            <span class="engage-uses">{{ overheated(duel.player, car) ? t('Surchauffe −3') : tp('{n} secteur', '{n} secteurs', r.uses - duel.player.used[car]) }}</span>
           </button>
         </div>
         <section v-if="carDetail" id="engage-detail" class="engage-detail" aria-labelledby="engage-detail-title">
@@ -453,30 +469,30 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <dl class="engage-stats">
             <div v-for="stat in (['acc', 'vit', 'man', 'end'] as const)" :key="stat"
               :class="{ 'sector-stat': stat === carDetail.stat }" :aria-current="stat === carDetail.stat ? 'true' : undefined">
-              <dt><span v-help="stat">{{ statLabels[stat] }}</span><small v-if="stat === carDetail.stat"> · secteur en cours</small></dt>
+              <dt><span v-help="stat">{{ t(statLabels[stat]) }}</span><small v-if="stat === carDetail.stat"> · {{ t('secteur en cours') }}</small></dt>
               <dd>{{ carDetail.car.stats[stat] }}</dd>
             </div>
           </dl>
-          <p><span v-help="'secteurs'">Secteurs restants</span> : {{ carDetail.remaining }}</p>
-          <p><span v-help="'forme'">Fourchette de score</span> sur ce secteur : <strong>{{ carDetail.range[0] }}–{{ carDetail.range[1] }}</strong> points · sans nitro</p>
+          <p><span v-help="'secteurs'">{{ t('Secteurs restants :') }}</span> {{ carDetail.remaining }}</p>
+          <p><span v-help="'forme'">{{ t('Fourchette de score') }}</span> {{ t('sur ce secteur :') }} <strong>{{ carDetail.range[0] }}–{{ carDetail.range[1] }}</strong> {{ t('points · sans nitro') }}</p>
         </section>
-        <p class="engage-hint">Sous chaque voiture : <span v-help="'forme'">fourchette de score</span> et <span v-help="'secteurs'">secteurs restants</span>.</p>
+        <p class="engage-hint">{{ t('Sous chaque voiture :') }} <span v-help="'forme'">{{ t('fourchette de score') }}</span> {{ t('et') }} <span v-help="'secteurs'">{{ t('secteurs restants') }}</span>.</p>
         <!-- Toujours à portée de pouce : la nitro et le bouton restent collés au bas de l'écran. -->
         <div class="engage-actions race-actions">
-          <div class="stance-toggle" :class="{ set: stance !== 'normal' }" role="radiogroup" aria-label="Consigne de pilotage">
-            <span v-help="'consigne'">Consigne</span>
+          <div class="stance-toggle" :class="{ set: stance !== 'normal' }" role="radiogroup" :aria-label="t('Consigne de pilotage')">
+            <span v-help="'consigne'">{{ t('Consigne') }}</span>
             <button v-for="key in (['gestion', 'normal', 'attaque'] as const)" :key="key" type="button" role="radio" :class="key"
               :aria-checked="stance === key" :disabled="stanceBlocked(key)" @click="setStance(key)">
-              <b>{{ stances[key].label }}</b><small>{{ stanceHints[key] }}</small>
+              <b>{{ t(stances[key].label) }}</b><small>{{ stanceHints[key] }}</small>
             </button>
           </div>
           <label class="nitro-toggle" :class="{ off: !duel.player.nitro, armed: nitro }">
             <input v-model="nitro" type="checkbox" :disabled="!duel.player.nitro" @change="armNitro" />
-            <span><span v-help="'nitro'">Nitro</span> <small>{{ duel.player.nitro }} charge{{ duel.player.nitro > 1 ? 's' : '' }} · +2</small></span>
+            <span><span v-help="'nitro'">{{ t('Nitro') }}</span> <small>{{ tp('{n} charge · +2', '{n} charges · +2', duel.player.nitro) }}</small></span>
           </label>
-          <button type="button" class="button primary" :class="{ 'nitro-armed': nitro }" @click="engage">Engager <span class="engage-pick">{{ duel.player.lineup[picked].vehicle.name }}</span> <span aria-hidden="true">⟶</span></button>
+          <button type="button" class="button primary" :class="{ 'nitro-armed': nitro }" @click="engage">{{ t('Engager') }} <span class="engage-pick">{{ duel.player.lineup[picked].vehicle.name }}</span> <span aria-hidden="true">⟶</span></button>
         </div>
-        <button type="button" class="button quiet wide" @click="abandon">Abandonner</button>
+        <button type="button" class="button quiet wide" @click="abandon">{{ t('Abandonner') }}</button>
       </section>
     </template>
 
@@ -486,83 +502,83 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="race-prep">
       <div class="race-prep-brief">
       <div class="page-heading">
-        <button type="button" class="back-link" @click="chosen = null"><span aria-hidden="true">←</span> Rivaux</button>
-        <span v-if="!isNight" class="eyebrow">{{ league.name }} · plafond {{ cap }}</span>
-        <h1 v-if="isNight" tabindex="-1"><span v-help="'endless'">Nuit sans fin</span></h1>
-        <h1 v-else tabindex="-1">{{ rival.circuit.name }}</h1>
-        <p v-if="!isNight">Contre {{ rival.name }}</p>
+        <button type="button" class="back-link" @click="chosen = null"><span aria-hidden="true">←</span> {{ t('Rivaux') }}</button>
+        <span v-if="!isNight" class="eyebrow">{{ t('{league} · plafond {cap}', { league: t(league.name ?? ''), cap }) }}</span>
+        <h1 v-if="isNight" tabindex="-1"><span v-help="'endless'">{{ t('Nuit sans fin') }}</span></h1>
+        <h1 v-else tabindex="-1">{{ t(rival.circuit.name) }}</h1>
+        <p v-if="!isNight">{{ t('Contre {name}', { name: rival.name }) }}</p>
         <template v-else>
-          <p>Enchaîne les courses contre des adversaires de plus en plus forts : ta nuit s’arrête à la première défaite.</p>
-          <p v-help="'nightRecord'">Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</p>
-          <p v-help="'nightCap'">Plafond de coût : {{ NIGHT_CAP }}</p>
+          <p>{{ t('Enchaîne les courses contre des adversaires de plus en plus forts : ta nuit s’arrête à la première défaite.') }}</p>
+          <p v-help="'nightRecord'">{{ tp('Record : {n} manche', 'Record : {n} manches', save.nightRecord) }}</p>
+          <p v-help="'nightCap'">{{ t('Plafond de coût : {n}', { n: NIGHT_CAP }) }}</p>
         </template>
-        <p v-if="special">{{ save.record[rival.id]?.wins ? rival.replay : rival.reward }} crédits · {{ save.record[rival.id]?.wins ? 'rejeu' : 'première victoire (doublés si parfaite)' }}<template v-if="rival.completionTicket && !save.record[rival.id]?.wins"> · un ticket à la première victoire</template></p>
+        <p v-if="special">{{ tp('{n} crédit', '{n} crédits', (save.record[rival.id]?.wins ? rival.replay : rival.reward) ?? 0) }} · {{ save.record[rival.id]?.wins ? t('rejeu') : t('première victoire (doublés si parfaite)') }}<template v-if="rival.completionTicket && !save.record[rival.id]?.wins"> · {{ t('un ticket à la première victoire') }}</template></p>
       </div>
-      <section v-if="hasPersonality && character" class="rival-character" :aria-label="`Portrait de ${character.name}`">
+      <section v-if="hasPersonality && character" class="rival-character" :aria-label="t('Portrait de {name}', { name: character.name })">
         <img v-if="art.rival(character.id)" :src="art.rival(character.id)" alt="" class="rival-face" />
         <div class="rival-character-text">
-          <p class="rival-character-title">{{ character.title }} <span v-if="character.style" class="rival-style">{{ character.style }}</span></p>
-          <p v-if="character.likes">Aime {{ character.likes }}</p>
-          <blockquote v-if="character.intro">« {{ character.intro }} »</blockquote>
+          <p class="rival-character-title">{{ t(character.title) }} <span v-if="character.style" class="rival-style">{{ t(character.style) }}</span></p>
+          <p v-if="character.likes">{{ t('Aime {likes}', { likes: t(character.likes) }) }}</p>
+          <blockquote v-if="character.intro">« {{ t(character.intro) }} »</blockquote>
         </div>
       </section>
-      <section v-if="rivalStepList.length" class="rival-steps-box" aria-label="Étapes du rival">
+      <section v-if="rivalStepList.length" class="rival-steps-box" :aria-label="t('Étapes du rival')">
         <div class="rival-steps-tabs">
           <GvButton v-for="stepItem in rivalStepList" :key="stepItem.id" variant="filter"
             :aria-pressed="chosen === stepItem.id"
             :disabled="!unlockedSteps.includes(stepItem.id)"
             @click="chosen = stepItem.id">
             <span aria-hidden="true">{{ !unlockedSteps.includes(stepItem.id) ? '🔒' : save.record[stepItem.id]?.wins ? '✓' : '◆' }}</span>
-            <span>{{ stepItem.stepLabel }}</span>
+            <span>{{ t(stepItem.stepLabel ?? '') }}</span>
           </GvButton>
         </div>
         <p class="hint">
-          Récompense : {{ save.record[rival.id]?.wins ? rival.replay : rival.reward }} crédits<template v-if="rival.completionTicket && !save.record[rival.id]?.wins"> + 1 ticket {{ boosterById.get(rival.completionTicket)?.name }}</template><template v-if="rival.rewardCar && !save.record[rival.id]?.wins && !save.cars[rival.rewardCar]"> + {{ vehicleById.get(rival.rewardCar)?.name }} {{ vehicleById.get(rival.rewardCar)?.version }}</template>
+          {{ tp('Récompense : {n} crédit', 'Récompense : {n} crédits', (save.record[rival.id]?.wins ? rival.replay : rival.reward) ?? 0) }}<template v-if="rival.completionTicket && !save.record[rival.id]?.wins"> + {{ t('1 ticket {booster}', { booster: t(boosterById.get(rival.completionTicket)?.name ?? '') }) }}</template><template v-if="rival.rewardCar && !save.record[rival.id]?.wins && !save.cars[rival.rewardCar]"> + {{ vehicleById.get(rival.rewardCar)?.name }} {{ vehicleById.get(rival.rewardCar)?.version }}</template>
         </p>
       </section>
-      <section v-if="isDaily" class="daily-panel"><h2>Contrainte</h2><p>{{ constraintText(challenge.constraint) }}</p><p>{{ challenge.reward }} crédits à la première victoire du jour.</p></section>
+      <section v-if="isDaily" class="daily-panel"><h2>{{ t('Contrainte') }}</h2><p>{{ constraintLabel(challenge.constraint) }}</p><p>{{ tp('{n} crédit à la première victoire du jour.', '{n} crédits à la première victoire du jour.', challenge.reward) }}</p></section>
       <div class="cap-meter" :class="{ over: cost > cap }">
-        <span v-help="isNight ? 'nightCap' : 'plafond'">Coût d’écurie</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
+        <span v-help="isNight ? 'nightCap' : 'plafond'">{{ t('Coût d’écurie') }}</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
       </div>
-      <div class="race-actions"><button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isNight ? 'Commencer la nuit' : isDaily ? `Lancer le défi${problem ? ' · ' + problem : ''}` : problem ?? 'Lancer la course' }} <span v-if="!problem && !isNight" aria-hidden="true">⟶</span></button></div>
-      <p v-if="isNight && problem" class="hint" role="status">{{ problem }}</p>
+      <div class="race-actions"><button type="button" class="button primary wide race-launch" :disabled="Boolean(problem)" @click="start">{{ isNight ? t('Commencer la nuit') : isDaily ? (problem ? t('Lancer le défi · {problem}', { problem: t(problem) }) : t('Lancer le défi')) : problem === undefined ? t('Lancer la course') : t(problem) }} <span v-if="!problem && !isNight" aria-hidden="true">⟶</span></button></div>
+      <p v-if="isNight && problem" class="hint" role="status">{{ t(problem) }}</p>
       <section class="race-briefing" aria-labelledby="briefing-title">
-        <div class="section-row"><h2 id="briefing-title">Préparer ta course</h2><span v-if="!isNight && !isDaily && rival.league === 'neon'" class="race-intro-badge">Accessible d’origine</span></div>
-        <p v-if="isNight">{{ rival.circuit.name }}</p>
-        <ol class="race-sector-order" aria-label="Ordre des secteurs">
-          <li v-for="(sector, i) in rival.circuit.sectors" :key="i"><span aria-hidden="true">{{ sectorIcons[sector] }}</span><span v-help="sector">{{ sectorLabels[sector] }}</span></li>
+        <div class="section-row"><h2 id="briefing-title">{{ t('Préparer ta course') }}</h2><span v-if="!isNight && !isDaily && rival.league === 'neon'" class="race-intro-badge">{{ t('Accessible d’origine') }}</span></div>
+        <p v-if="isNight">{{ t(rival.circuit.name) }}</p>
+        <ol class="race-sector-order" :aria-label="t('Ordre des secteurs')">
+          <li v-for="(sector, i) in rival.circuit.sectors" :key="i"><span aria-hidden="true">{{ sectorIcons[sector] }}</span><span v-help="sector">{{ t(sectorLabels[sector]) }}</span></li>
         </ol>
-        <div class="race-conditions" aria-label="Conditions possibles">
-          <span v-for="c in conditions" :key="c.key"><span aria-hidden="true">{{ conditionIcons[c.key] }}</span> <span v-help="c.key">{{ conditionLabels[c.key] }}</span> {{ c.chance }} %</span>
+        <div class="race-conditions" :aria-label="t('Conditions possibles')">
+          <span v-for="c in conditions" :key="c.key"><span aria-hidden="true">{{ conditionIcons[c.key] }}</span> <span v-help="c.key">{{ t(conditionLabels[c.key]) }}</span> {{ t('{n} %', { n: c.chance }) }}</span>
         </div>
         <ul class="race-priorities">
           <li v-for="p in recommendedCars" :key="p.sector">
-            <div><b v-help="p.stat">{{ statLabels[p.stat] }}</b><small>{{ p.times }} {{ p.times > 1 ? 'secteurs' : 'secteur' }} · {{ sectorLabels[p.sector] }}</small></div>
-            <button v-if="p.best" class="race-prepare" type="button" :aria-label="`Préparer ${p.best.name} · ${statLabels[p.stat]}`"
+            <div><b v-help="p.stat">{{ t(statLabels[p.stat]) }}</b><small>{{ tp('{n} secteur', '{n} secteurs', p.times) }} · {{ t(sectorLabels[p.sector]) }}</small></div>
+            <button v-if="p.best" class="race-prepare" type="button" :aria-label="t('Préparer {name} · {stat}', { name: p.best.name, stat: t(statLabels[p.stat]) })"
               @click="emit('inspect', 'car', p.best.id, rival.circuit, p.stat)">
-              <b>{{ p.best.name }}</b><small>{{ pointsText(p.best.score) }} pts estimés <span aria-hidden="true">↗</span></small>
+              <b>{{ p.best.name }}</b><small>{{ t('{n} pts estimés', { n: pointsText(p.best.score) }) }} <span aria-hidden="true">↗</span></small>
             </button>
           </li>
         </ul>
-        <p v-if="lineup.length" class="hint">Scores moyens estimés selon le terrain, hors nitro et bonus liés à l’adversaire ou à l’écurie. Touche une voiture pour ouvrir l’atelier.</p>
+        <p v-if="lineup.length" class="hint">{{ t('Scores moyens estimés selon le terrain, hors nitro et bonus liés à l’adversaire ou à l’écurie. Touche une voiture pour ouvrir l’atelier.') }}</p>
       </section>
       </div>
       <div class="race-prep-pick">
       <div class="lineup-slots">
         <button v-for="n in 3" :key="n" type="button" class="lineup-slot" :disabled="!lineup[n - 1]" @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">
           <CarCard v-if="lineup[n - 1]" :id="lineup[n - 1]" :style-name="save.cars[lineup[n - 1]]?.shown" :prep="prepOf(save, lineup[n - 1])" compact />
-          <span v-else class="slot-placeholder">Place {{ n }}</span>
+          <span v-else class="slot-placeholder">{{ t('Place {n}', { n }) }}</span>
         </button>
       </div>
-      <p class="rival-preview">Écurie adverse · {{ rivalLineup(rival).map(e => name(e.id)).join(' · ') }}</p>
+      <p class="rival-preview">{{ t('Écurie adverse · {cars}', { cars: rivalLineup(rival).map(e => name(e.id)).join(' · ') }) }}</p>
 
-      <h2 class="list-title">Ton garage</h2>
+      <h2 class="list-title">{{ t('Ton garage') }}</h2>
       <ul class="pick-list">
         <li v-for="{ v, car, scores } in garageCars" :key="v.id">
           <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="overBy(v.id, v.cost) > 0" @click="toggle(v.id)">
             <span class="pick-cost" :data-cost="v.cost">{{ v.cost }}</span>
-            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" aria-label="Favori">★ </span>{{ v.name }}</b><small>{{ overBy(v.id, v.cost) > 0 ? `Dépasse le plafond de ${overBy(v.id, v.cost)}` : `${v.version} · ${car.uses} secteurs avant surchauffe` }}</small></span>
-            <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ s.label }} {{ pointsText(s.average) }} pts</span></span>
+            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" :aria-label="t('Favori')">★ </span>{{ v.name }}</b><small>{{ overBy(v.id, v.cost) > 0 ? t('Dépasse le plafond de {n}', { n: overBy(v.id, v.cost) }) : tp('{version} · {n} secteur avant surchauffe', '{version} · {n} secteurs avant surchauffe', car.uses, { version: v.version }) }}</small></span>
+            <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ t('{label} {n} pts', { label: t(s.label), n: pointsText(s.average) }) }}</span></span>
           </button>
         </li>
       </ul>
@@ -573,9 +589,9 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
     <!-- Échelle des rivaux -->
     <template v-else>
       <div class="page-heading">
-        <span class="eyebrow"><span></span> Course en secteurs</span>
-        <h1 tabindex="-1">Rivaux de la nuit</h1>
-        <p>Engage une voiture par secteur, en secret. Chaque voiture court un nombre limité de secteurs selon son Endurance.</p>
+        <span class="eyebrow"><span></span> {{ t('Course en secteurs') }}</span>
+        <h1 tabindex="-1">{{ t('Rivaux de la nuit') }}</h1>
+        <p>{{ t('Engage une voiture par secteur, en secret. Chaque voiture court un nombre limité de secteurs selon son Endurance.') }}</p>
       </div>
       <ul class="rival-list">
         <li v-for="(r, i) in rivals" :key="r.id" class="deal" :style="{ '--i': i }">
@@ -583,36 +599,36 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
             <span class="rival-info">
-              <b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" aria-label="Victoire parfaite obtenue">★</span></b>
-              <small>{{ r.title }}<template v-if="r.style"> · {{ r.style }}</template> · {{ leagueById.get(r.league)!.name }} (plafond {{ leagueById.get(r.league)!.cap }})</small>
-              <small>3 étapes · finale : {{ leagueById.get(r.league)!.reward }} ₡ + ticket {{ boosterById.get(leagueById.get(r.league)!.ticket)?.name }}<template v-if="r.rewardCar"> + {{ vehicleById.get(r.rewardCar)?.name }}</template></small>
+              <b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" :aria-label="t('Victoire parfaite obtenue')">★</span></b>
+              <small>{{ t(r.title) }}<template v-if="r.style"> · {{ t(r.style) }}</template> · {{ t(leagueById.get(r.league)!.name) }} ({{ t('plafond {n}', { n: leagueById.get(r.league)!.cap }) }})</small>
+              <small>{{ t('3 étapes · finale : {n} ₡ + ticket {booster}', { n: leagueById.get(r.league)!.reward, booster: t(boosterById.get(leagueById.get(r.league)!.ticket)?.name ?? '') }) }}<template v-if="r.rewardCar"> + {{ vehicleById.get(r.rewardCar)?.name }}</template></small>
             </span>
-            <span class="rival-status">{{ !unlocked.includes(r.id) ? 'Verrouillé' : save.record[r.id]?.wins ? `✓ 3/3 (${save.record[r.id].wins} vict.)` : `Étape ${rivalStepsDone(save, r.id) + 1}/3` }}</span>
+            <span class="rival-status">{{ !unlocked.includes(r.id) ? t('Verrouillé') : save.record[r.id]?.wins ? tp('✓ 3/3 ({n} vict.)', '✓ 3/3 ({n} vict.)', save.record[r.id].wins) : t('Étape {n}/3', { n: rivalStepsDone(save, r.id) + 1 }) }}</span>
           </button>
         </li>
         <li class="deal" :style="{ '--i': 0 }">
           <button type="button" class="rival-row night-entry" @click="nightSeed = String(Date.now()); chosen = 'night'">
             <span class="rival-initial" aria-hidden="true">∞</span>
-            <span class="rival-info"><b>Nuit sans fin</b><small>Record : {{ save.nightRecord }} {{ save.nightRecord > 1 ? 'manches' : 'manche' }}</small></span>
-            <span class="rival-status">Commencer</span>
+            <span class="rival-info"><b>{{ t('Nuit sans fin') }}</b><small>{{ tp('Record : {n} manche', 'Record : {n} manches', save.nightRecord) }}</small></span>
+            <span class="rival-status">{{ t('Commencer') }}</span>
           </button>
         </li>
       </ul>
       <section class="specials">
-        <h2 v-help="'special'">Spéciales</h2>
-        <p v-if="!specialsOpen(save)" v-help="'specialUnlock'">Bats toute la Ligue Néon pour les ouvrir.</p>
+        <h2 v-help="'special'">{{ t('Spéciales') }}</h2>
+        <p v-if="!specialsOpen(save)" v-help="'specialUnlock'">{{ t('Bats toute la Ligue Néon pour les ouvrir.') }}</p>
         <div class="special-grid">
           <article v-for="(s, i) in specials" :key="s.id" class="special-card" :style="{ '--i': i }">
-            <span class="special-sector" aria-hidden="true">{{ sectorIcons[s.sector] }}</span><span class="visually-hidden">{{ sectorLabels[s.sector] }}</span>
-            <h3>{{ s.name }} · {{ s.tiers.filter(r => save.record[r.id]?.wins).length }}/{{ s.tiers.length }}</h3>
-            <ol class="special-tiers" aria-label="Paliers de la spéciale">
+            <span class="special-sector" aria-hidden="true">{{ sectorIcons[s.sector] }}</span><span class="visually-hidden">{{ t(sectorLabels[s.sector]) }}</span>
+            <h3>{{ t(s.name) }} · {{ s.tiers.filter(r => save.record[r.id]?.wins).length }}/{{ s.tiers.length }}</h3>
+            <ol class="special-tiers" :aria-label="t('Paliers de la spéciale')">
               <li v-for="(r, tier) in s.tiers" :key="r.id" :class="`special-tier-${tier}`">
                 <GvButton variant="filter" tone="var(--tier-tone)" :class="{ 'tier-won': save.record[r.id]?.wins }"
                   :aria-current="unlockedSpecials(save).includes(r.id) && !save.record[r.id]?.wins ? 'step' : undefined"
                   :disabled="!unlockedSpecials(save).includes(r.id)" @click="chosen = r.id">
                   <span aria-hidden="true">{{ !unlockedSpecials(save).includes(r.id) ? '🔒' : save.record[r.id]?.wins ? '✓' : '◆' }}</span>
-                  <span v-help="'specialTier'">{{ r.title }}</span>
-                  <small :aria-label="`${save.record[r.id]?.wins ? r.replay : r.reward} crédits`">₡ {{ save.record[r.id]?.wins ? r.replay : r.reward }}</small>
+                  <span v-help="'specialTier'">{{ t(r.title) }}</span>
+                  <small :aria-label="tp('{n} crédit', '{n} crédits', (save.record[r.id]?.wins ? r.replay : r.reward) ?? 0)">₡ {{ save.record[r.id]?.wins ? r.replay : r.reward }}</small>
                 </GvButton>
               </li>
             </ol>
