@@ -60,10 +60,17 @@ function checkGoods(save: Save, offer: TradeOffer): string | undefined {
   if (Object.keys(save.cars).length - offer.cars.length < 3) return t('Tu dois garder au moins trois voitures dans ton garage')
 }
 
+export function inTransit(save: Save, id: string): OwnedCar | undefined {
+  for (const record of Object.values(save.trades ?? {})) {
+    if (record.state === 'transit' && Object.hasOwn(record.goods.cars, id)) return record.goods.cars[id]
+  }
+}
+
 export function validateTradeShowcase(save: Save, cars: readonly string[]): string | undefined {
   const stakeLineup = save.versus?.active?.request?.lineup
   for (const id of cars) {
     if (!vehicleById.has(id) || !Object.hasOwn(save.cars, id)) return t('Voiture absente du garage')
+    if (inTransit(save, id)) return t('En transit')
     if (save.lineup.includes(id) || save.nightLineup.includes(id) || save.dailyLineup?.includes(id)
       || save.duel?.player.lineup.some(car => car.id === id) || save.night?.lineup.includes(id)
       || (Array.isArray(stakeLineup) && stakeLineup.some(car => car?.id === id))) return t('Cette voiture est engagée et ne peut pas être échangée')
@@ -217,7 +224,7 @@ export function returnTrade(save: Save, id: string): string | undefined {
   write(save, { id, state: 'rendue' })
 }
 
-function normalizeCar(id: string, car: unknown): OwnedCar | undefined {
+export function normalizeTradeCar(id: string, car: unknown): OwnedCar | undefined {
   const vehicle = vehicleById.get(id)
   if (!vehicle || !object(car) || !amount(car.copies) || !car.copies || car.copies > TRADE_INVENTORY_LIMIT || !amount(car.stage) || car.stage > 3
     || !Array.isArray(car.parts) || !Array.isArray(car.editions) || !car.editions.length || !object(car.upgrades)
@@ -252,7 +259,7 @@ function normalizeGoods(value: unknown): TradeGoods | undefined {
   if (!object(value) || !amount(value.credits) || value.credits > TRADE_CREDIT_LIMIT || !object(value.cars)) return
   const cars: Record<string, OwnedCar> = {}
   for (const [id, data] of Object.entries(value.cars)) {
-    const car = normalizeCar(id, data)
+    const car = normalizeTradeCar(id, data)
     if (!car) return
     cars[id] = car
   }

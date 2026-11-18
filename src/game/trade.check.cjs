@@ -6,9 +6,9 @@ require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileMo
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
 
-const { claimSeries, freeParts, install, newSave, readSave } = require('./save.ts')
+const { claimSeries, freeParts, install, newSave, nightLineupCheck, readSave, sellCar, sellCheck } = require('./save.ts')
 const { series, stylesOf, vehicles } = require('./data.ts')
-const { acknowledgeTrade, completeTrade, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer } = require('./trade.ts')
+const { acknowledgeTrade, completeTrade, inTransit, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer } = require('./trade.ts')
 
 const id = 'f40'
 const offer = { cars: [id], credits: 25 }
@@ -140,7 +140,13 @@ assert.deepEqual(reload(restored).trades, restored.trades)
 const reacquired = garage()
 assert.equal(transitTrade(reacquired, 'booster', offer), undefined)
 reacquired.cars[id] = car(['Synthwave'])
+assert.deepEqual(inTransit(reacquired, id), original)
+assert.match(sellCheck(reacquired, id), /transit/)
+refused(reacquired, () => sellCar(reacquired, id))
+assert.match(validateTradeOffer(reacquired, offer), /transit/)
+assert.equal(nightLineupCheck({ ...reacquired, nightLineup: [id, ...reacquired.lineup.slice(0, 2)] }), 'Voiture absente du garage')
 assert.equal(returnTrade(reacquired, 'booster'), undefined)
+assert.equal(inTransit(reacquired, id), undefined)
 assert.deepEqual(reacquired.cars[id], {
   ...original, copies: original.copies + 1, editions: ['Synthwave', ...original.editions], shown: 'Synthwave', favorite: false,
 })

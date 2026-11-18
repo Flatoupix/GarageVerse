@@ -1,6 +1,6 @@
 # Échange de cartes entre amis
 
-Statut : **étapes 1 à 4 implémentées dans le dépôt**. Décision du 18 novembre 2026 : les échanges sont **dissociés du Versus** et **livrés avant lui**. Les règles d'échange décidées le 17 novembre 2026 (anciennement `docs/versus.md` §7) restent valables et sont reprises ici.
+Statut : **étapes 1 à 5 implémentées dans le dépôt**. Décision du 18 novembre 2026 : les échanges sont **dissociés du Versus** et **livrés avant lui**. Les règles d'échange décidées le 17 novembre 2026 (anciennement `docs/versus.md` §7) restent valables et sont reprises ici.
 
 ## 1. Intention
 
@@ -111,3 +111,8 @@ Chaque tâche ayant des migrations ou des règles de collection passe une **revu
 Une réclamation interrompue est reprise avec le même identifiant. Le jeu attend une décision commune avant de livrer ou de restituer les lots. Si le serveur est inaccessible, un transit déjà enregistré reste en place.
 
 Avant de retirer les voitures, le client vérifie que la progression et les exemplaires du lot correspondent à l’instantané de l’offre. Un lot modifié depuis sa publication exige une nouvelle offre.
+
+
+**Étape 5 (Interface) implémentée dans le dépôt.** Garage → Échanges donne accès aux amis, à la vitrine, aux offres et à l’historique. Une contre-offre reprend les deux lots inversés. Si une carte demandée a disparu de la vitrine de l’ami, il faut la retirer de la contre-offre avant de l’envoyer. La composition et l’acceptation signalent que les pièces montées sur les voitures données reviennent au stock à la livraison. Le Garage affiche les lots locaux « En transit » et les exclut des écuries, des courses et de la vente.
+
+L’historique affiche au plus 50 offres terminées, rendues ou expirées, classées de la date de création la plus récente à la plus ancienne. Le serveur ne fournit pas de date de clôture. Les marqueurs de la sauvegarde conservent leur fonctionnement décrit au § 7.

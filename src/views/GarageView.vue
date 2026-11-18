@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { inTransit } from '../game/trade'
 import { locale, t, tp, tc } from '../i18n'
 import { boosterById, families, parts, rarities, rarityClass, series, stylesOf, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
@@ -87,8 +88,13 @@ function setCols(value: number) {
 // Ordre de collection numérique : « 11 » avant « 100 » (les numéros sont des textes à partir de 100).
 const byNumber = (a: Vehicle, b: Vehicle) => Number(a.number) - Number(b.number)
 
+const transitCars = computed(() => Object.fromEntries(vehicles.flatMap(v => {
+  const car = inTransit(save, v.id)
+  return car ? [[v.id, car] as const] : []
+})))
+
 function matchesGarageFilter(id: string) {
-  const car = save.cars[id]
+  const car = save.cars[id] ?? transitCars.value[id]
   if (garageFilter.value !== 'collection' && !car) return false
   if (garageFilter.value === 'favorites' && !car?.favorite) return false
   if (garageFilter.value === 'lineup' && !save.lineup.includes(id)) return false
@@ -243,7 +249,13 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
         :style="cols > 0 ? { '--garage-cols': String(cols) } : undefined"
       >
         <div v-for="v in carList" :key="v.id" class="garage-tile">
-          <template v-if="save.cars[v.id]">
+          <button v-if="transitCars[v.id]" type="button" class="card-tile"
+            :aria-label="t('{name} · En transit', { name: v.name })" @click="emit('inspect', 'car', v.id)">
+            <CarThumb v-if="sheet" :id="v.id" :style-name="transitCars[v.id].shown" />
+            <CarCard v-else :id="v.id" :style-name="transitCars[v.id].shown" :prep="transitCars[v.id]" :compact="cols !== 1" />
+            <span class="transit-tag">{{ t('En transit') }}</span>
+          </button>
+          <template v-else-if="save.cars[v.id]">
             <button type="button" class="card-tile" :aria-label="t('Voir {name} {version}', { name: v.name, version: v.version })" @click="emit('inspect', 'car', v.id)">
               <span v-if="!save.seenCars?.includes(v.id)" class="new-car-badge">{{ t('Nouveau') }}</span>
               <CarThumb v-if="sheet" :id="v.id" :style-name="save.cars[v.id].shown" />
@@ -309,3 +321,17 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
     </div>
   </main>
 </template>
+
+
+<style scoped>
+.transit-tag {
+  display: block;
+  padding: 3px;
+  background: var(--night);
+  color: var(--text);
+  font-size: .75rem;
+  font-weight: 700;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+</style>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { inTransit } from '../game/trade'
 import { computed, nextTick, onMounted, onUnmounted, onUpdated, reactive, ref, shallowRef } from 'vue'
 import { locale, t, tp } from '../i18n'
 import { ruleText } from '../game/rules-text'
@@ -98,7 +99,7 @@ const conditions = computed(() => {
 const garageCars = computed(() => {
   if (!rival.value) return []
   const circuit = rival.value.circuit
-  return vehicles.filter(v => save.cars[v.id]).map(v => {
+  return vehicles.filter(v => save.cars[v.id] && !inTransit(save, v.id)).map(v => {
     const car = racer(v.id, prepOf(save, v.id))
     const scores = circuitScores(car, circuit)
     const average = scores.reduce((total, s) => total + s.average * s.times, 0) / circuit.sectors.length
@@ -137,6 +138,7 @@ const overBy = (id: string, price: number) => lineup.value.includes(id) ? 0 : Ma
 function toggle(id: string) {
   act(() => {
     if (lineup.value.includes(id)) lineup.value = lineup.value.filter(x => x !== id)
+    else if (inTransit(save, id)) return t('En transit')
     else if (lineup.value.length >= 3) return t('Retire d’abord une voiture')
     else if (overBy(id, vehicleById.get(id)?.cost ?? 0) > 0) return t('Cette voiture dépasse le plafond de coût')
     else lineup.value = [...lineup.value, id]

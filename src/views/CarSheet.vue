@@ -8,6 +8,7 @@ import { circuitScores, compatibility, engagements, EXTRA_SLOT_POTENTIAL, EXTRA_
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
 import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionDuplicates, editionPrice, extraSlotCheck, freeParts, install, installCheck, isCarMaxedForExtraSlot, partReplacedOnInstall, prepOf,
   selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, unlockExtraSlot, upgrade, upgradeCheck, upgradeStat } from '../game/save'
+import { inTransit } from '../game/trade'
 import { recycle, undoRecycle, type RecycleReceipt } from '../game/recycle'
 import { act, buzz, save } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
@@ -17,7 +18,15 @@ import { t, tp, tc } from '../i18n'
 const props = defineProps<{ id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean }>()
 const emit = defineEmits<{ open: [id: string]; close: [] }>()
 const v = computed(() => vehicleById.get(props.id)!)
-const car = computed(() => save.cars[props.id])
+const transit = computed(() => inTransit(save, props.id))
+const car = computed(() => transit.value ? undefined : save.cars[props.id])
+function toggleFavorite() {
+  act(s => {
+    const owned = s.cars[props.id]
+    if (!owned || inTransit(s, props.id)) return
+    owned.favorite = !owned.favorite
+  })
+}
 const panel = ref<'overview' | 'workshop' | 'card'>(props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview')
 watch(() => props.id, () => {
   panel.value = props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview'
@@ -33,7 +42,7 @@ function clearRecycle() {
 }
 watch(() => props.id, id => {
   clearRecycle()
-  if (save.cars[id] && !save.seenCars?.includes(id)) act(s => { (s.seenCars ??= []).push(id) })
+  if (save.cars[id] && !inTransit(save, id) && !save.seenCars?.includes(id)) act(s => { (s.seenCars ??= []).push(id) })
 }, { immediate: true })
 onBeforeUnmount(clearRecycle)
 function confirmRecycle() {
@@ -57,7 +66,7 @@ function sell() {
 const selected = ref<StatKey | undefined>(props.suggestedStat)
 const prep = computed(() => prepOf(save, props.id))
 const stats = computed(() => statsOf(v.value, prep.value))
-const image = computed(() => edition(props.id, car.value?.shown).art)
+const image = computed(() => edition(props.id, (transit.value ?? car.value)?.shown).art)
 const next = computed(() => stageCost(save, props.id))
 const stageProblem = computed(() => {
   if (!car.value || !next.value) return t('Préparation maximale atteinte')
@@ -179,10 +188,11 @@ function workshop(key?: StatKey) {
       <div class="car-sheet-title">
         <p>{{ v.version }}</p>
         <h2>{{ v.name }}</h2>
+        <p v-if="transit">{{ t('En transit') }}</p>
         <span>{{ t('{rarity} · Coût d’écurie {cost}', { rarity: t(v.rarity), cost: v.cost }) }}</span>
       </div>
       <button v-if="car" type="button" class="favorite-button" :aria-label="t('Favori')" :aria-pressed="car.favorite"
-        @click="act(() => { car.favorite = !car.favorite })"><span aria-hidden="true">{{ car.favorite ? '★' : '☆' }}</span></button>
+        @click="toggleFavorite"><span aria-hidden="true">{{ car.favorite ? '★' : '☆' }}</span></button>
     </header>
 
     <div v-if="car" class="tabs car-sheet-tabs" :aria-label="t('Fiche voiture')">
@@ -194,11 +204,14 @@ function workshop(key?: StatKey) {
     <div class="car-sheet-layout" :class="{ 'has-car': Boolean(car) }">
       <aside class="car-sheet-aside" :class="{ 'mobile-hidden': car && panel !== 'card' }">
         <div class="sheet-card" @dragstart.prevent>
-          <div v-tilt><CarCard :id="id" :style-name="car?.shown" :prep="car ? prep : undefined" /></div>
+          <div v-tilt><CarCard :id="id" :style-name="(transit ?? car)?.shown" :prep="transit ?? (car ? prep : undefined)" /></div>
         </div>
       </aside>
 
-      <div class="car-sheet-main">
+      <div v-if="transit" class="car-sheet-main">
+        <p role="status">{{ saleProblem }}</p>
+      </div>
+      <div v-else class="car-sheet-main">
         <section v-if="receipt" class="sheet-section" role="status">
           <p>{{ t('Doublon recyclé · +{n} crédits', { n: receipt.credits }) }}</p>
           <button type="button" class="button ghost" @click="cancelRecycle">{{ tc('retour', 'Annuler') }}</button>

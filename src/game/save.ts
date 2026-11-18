@@ -1,7 +1,7 @@
 // Sauvegarde locale, économie du garage et tirage des boosters.
 import { t, tp } from '../i18n'
 import { ruleText } from './rules-text'
-import { readTrades, TRADE_CREDIT_LIMIT, TRADE_INVENTORY_LIMIT, type TradeRecord } from './trade'
+import { inTransit, readTrades, TRADE_CREDIT_LIMIT, TRADE_INVENTORY_LIMIT, type TradeRecord } from './trade'
 import { NIGHT_CAP, nightRival, nightReward, type Night } from './endless'
 import { constraintCheck, dailyChallenge, dailyRng, localDate, previousDate, validDailyLineup } from './daily'
 import {
@@ -548,6 +548,7 @@ export function sellPrice(save: Save, id: string): number {
 }
 
 export function sellCheck(save: Save, id: string): string | undefined {
+  if (inTransit(save, id)) return t('Tu ne peux pas vendre une voiture en transit.')
   if (!save.cars[id]) return t('Voiture absente du garage')
   if (save.night?.lineup.includes(id)) return t('Cette voiture est engagée dans ta Nuit sans fin en cours')
   if (save.nightLineup.includes(id)) return t('Retire cette voiture de l’écurie Nuit sans fin avant de la vendre')
@@ -800,7 +801,7 @@ export function lineupCheck(save: Save, ids: string[], rivalId: string): string 
   if (rival.baseRivalId && !unlockedRivalSteps(save, rival.baseRivalId).includes(rivalId)) return t('Étape verrouillée')
   const cap = rival.cap ?? league!.cap
   if (ids.length !== 3 || new Set(ids).size !== 3) return t('Choisis trois voitures différentes')
-  if (ids.some(id => !save.cars[id])) return t('Voiture absente du garage')
+  if (ids.some(id => !save.cars[id] || inTransit(save, id))) return t('Voiture absente du garage')
   const cost = lineupCost(ids)
   if (cost > cap) return t('Écurie trop chère : {cost} / {cap}', { cost, cap })
 }
@@ -909,7 +910,7 @@ export const currentRivalStep = (save: Save, baseRivalId: string): string => {
 }
 
 // Défi du jour vu par ce joueur : la contrainte tient compte des voitures qu'il possède.
-export const todayChallenge = (save: Save, date = save.daily.date) => dailyChallenge(date, Object.keys(save.cars))
+export const todayChallenge = (save: Save, date = save.daily.date) => dailyChallenge(date, Object.keys(save.cars).filter(id => !inTransit(save, id)))
 
 export function refreshDaily(save: Save, date = localDate()) {
   if (save.daily.date === date) return
@@ -925,12 +926,12 @@ export function claimDailyBooster(save: Save) {
   save.tickets.neon = (save.tickets.neon ?? 0) + 1
 }
 export function dailyLineupCheck(save: Save) {
-  if ((save.dailyLineup ?? []).some(id => !save.cars[id])) return t('Voiture absente du garage')
+  if ((save.dailyLineup ?? []).some(id => !save.cars[id] || inTransit(save, id))) return t('Voiture absente du garage')
   return constraintCheck(save.dailyLineup ?? [], todayChallenge(save).constraint)
 }
 export function prepareDaily(save: Save) {
   refreshDaily(save)
-  save.dailyLineup = validDailyLineup(Object.keys(save.cars), todayChallenge(save).constraint) ?? []
+  save.dailyLineup = validDailyLineup(Object.keys(save.cars).filter(id => !inTransit(save, id)), todayChallenge(save).constraint) ?? []
 }
 export function startDaily(save: Save) {
   if (save.night || save.duel) return t('Termine d’abord la course en cours')
@@ -956,7 +957,7 @@ export function claimSeries(save: Save, id: string): string | undefined {
 
 // ——— Nuit sans fin ———
 export function nightLineupCheck(save: Save) {
-  if (save.nightLineup.some(id => !save.cars[id])) return t('Voiture absente du garage')
+  if (save.nightLineup.some(id => !save.cars[id] || inTransit(save, id))) return t('Voiture absente du garage')
   return constraintCheck(save.nightLineup, { type: 'cost', cap: NIGHT_CAP })
 }
 export function createNightRound(save: Save) {

@@ -40,6 +40,8 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 | Vendre une voiture | Retire tous ses exemplaires de la collection et libère ses pièces. Prix : 2 × progression.scrap[rareté] + 10 × Stage + ⌊crédits d’atelier dépensés / 2⌋ + progression.scrap[rareté] × (exemplaires − 1). Refus si engagée dans une écurie (défi du jour compris), dans une course en cours, ou si le garage passerait sous trois voitures différentes. Les évolutions peuvent aussi être vendues. |
 | Recycler un doublon | 10, 30, 80 ou 200 crédits selon la rareté. Moitié prix pour une pièce libre. |
 
+**Échanges entre amis.** Active le réglage expérimental pour accéder à la vitrine, aux offres et à l’historique depuis le Garage. Une voiture marquée « En transit » reste visible dans le Garage pendant l’échange. Elle est indisponible pour la vente et pour les écuries, défi du jour et Nuit sans fin compris. Voir [Échange de cartes entre amis](echanges.md).
+
 Les doublons alimentent la progression, comme le demande la bible. Le garage de départ contient la Clio III, la Twingo I et la Panda 4×4, trois pièces, 300 crédits et deux tickets Neon Drive.
 
 **Écussons d’amélioration sur la carte.** Sur le flanc gauche de l’illustration, la carte d’une voiture possédée affiche quatre petits écussons en colonne (un par groupe d’atelier, dans l’ordre des statistiques) : éteint d’origine, à moitié allumé au niveau 1, pleinement allumé au niveau 2. Deux voyants signalent les pièces montées, colorés selon leur rareté. Les styles communs à tous les thèmes vivent dans `src/themes/shared.css`.

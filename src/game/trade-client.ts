@@ -3,17 +3,18 @@ import { t } from '../i18n'
 import { VERSUS_OPEN } from './features'
 import { SAVE_KEY, type Save } from './save'
 import { save, storageWarning } from './store'
-import { acknowledgeTrade, completeTrade, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods, type TradeOffer } from './trade'
+import { acknowledgeTrade, completeTrade, normalizeTradeCar, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods, type TradeOffer } from './trade'
 
-type Side = 'proposer' | 'recipient'
+export type Side = 'proposer' | 'recipient'
 type State = 'open' | 'accepted' | 'done' | 'returned' | 'declined' | 'countered' | 'expired'
 type Item = { side: Side; car_id: string | null; snapshot: Save['cars'][string] | null; credits: number | null }
-interface Trade {
+export interface Trade {
   id: string
   proposer: string
   recipient: string
   previous_id: string | null
   state: State
+  created_at: string
   expires_at: string
   gv_trade_items: Item[]
   gv_trade_claims: { player_id: string }[]
@@ -27,7 +28,7 @@ const sideOf = (trade: Trade, player: string): Side => trade.proposer === player
 const otherSide = (side: Side): Side => side === 'proposer' ? 'recipient' : 'proposer'
 const receiptId = (id: string) => id + ':reception'
 
-function goodsOf(trade: Trade, side: Side): TradeGoods {
+export function goodsOf(trade: Trade, side: Side): TradeGoods {
   const items = trade.gv_trade_items.filter(item => item.side === side)
   return {
     cars: Object.fromEntries(items.flatMap(item => item.car_id !== null && item.snapshot ? [[item.car_id, item.snapshot]] : [])),
@@ -77,6 +78,8 @@ async function call({ db, guard }: Connection, name: string, body: object, confl
     const refusal = await error.context.json().catch(() => null)
     if (conflicts.includes(refusal?.error)) return
     if (refusal?.error === 'NOT_REGISTERED') throw connectionRequired()
+    if (refusal?.error === 'CAR_NOT_IN_SHOWCASE') throw new Error(t('Cette voiture ne figure plus dans la vitrine de ton ami.'))
+    if (refusal?.error === 'OPEN_TRADE_LIMIT') throw new Error(t('Tu as déjà dix offres d’échange ouvertes'))
     if (refusal?.error) throw invalid()
   }
   if (error || data?.ok !== true) throw unavailable()
@@ -88,7 +91,7 @@ async function read({ db, guard }: Connection) {
   for (let offset = 0; ; offset += size) {
     guard()
     const { data, error } = await db.from('gv_trades')
-      .select('id, proposer, recipient, previous_id, state, expires_at, gv_trade_items(side, car_id, snapshot, credits), gv_trade_claims(player_id)')
+      .select('id, proposer, recipient, previous_id, state, created_at, expires_at, gv_trade_items(side, car_id, snapshot, credits), gv_trade_claims(player_id)')
       .order('id').range(offset, offset + size - 1).returns<Trade[]>()
     guard()
     if (error || !data) throw unavailable()
@@ -201,13 +204,32 @@ export const publishShowcase = (carIds: readonly string[]) => run(async connecti
   await call(connection, 'set-showcase', { cars: Object.fromEntries(carIds.map(id => [id, save.cars[id]])) })
 })
 
-export const listShowcase = (player: string) => run(async ({ db, guard }) => {
+async function readShowcase({ db, guard }: Connection, owner: string) {
   guard()
-  const { data, error } = await db.from('gv_showcase').select('car_id, snapshot').eq('player_id', player)
+  const { data, error } = await db.from('gv_showcase').select('car_id, snapshot').eq('player_id', owner)
     .returns<{ car_id: string; snapshot: Save['cars'][string] }[]>()
   guard()
   if (error || !data) throw unavailable()
-  return Object.fromEntries(data.map(row => [row.car_id, row.snapshot]))
+  const cars: TradeGoods['cars'] = {}
+  for (const row of data) {
+    const car = normalizeTradeCar(row.car_id, row.snapshot)
+    if (car) cars[row.car_id] = car
+  }
+  return cars
+}
+
+export const listShowcase = (player?: string) => run(connection => readShowcase(connection, player ?? connection.player))
+
+export const listFriendShowcase = (id: string) => run(async connection => {
+  const { db, player, guard } = connection
+  guard()
+  const { data, error } = await db.from('gv_friendships').select('requester, recipient')
+    .eq('id', id).eq('state', 'accepted').maybeSingle<{ requester: string; recipient: string }>()
+  guard()
+  if (error) throw unavailable()
+  if (!data) throw invalid()
+  const owner = data.requester === player ? data.recipient : data.requester
+  return { owner, cars: await readShowcase(connection, owner) }
 })
 
 function payload(give: TradeOffer, want: TradeOffer) {
