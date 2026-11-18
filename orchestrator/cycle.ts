@@ -3,17 +3,17 @@ import { realpathSync } from 'node:fs'
 import { appendFile, mkdir, readdir, readFile, realpath, rename, rm, symlink, writeFile } from 'node:fs/promises'
 import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
-import { invoke } from './agents.ts'
-import type { Phase, Report } from './agents.ts'
+import { PROFILES, chainFor, describeLink, invoke, orderChain, profileFor, validateChains } from './agents.ts'
+import type { Chains, Phase, Profile, Report } from './agents.ts'
 import { execute, failure, redact, sessionEnv } from './process.ts'
 import type { Result, RunOptions } from './process.ts'
 
 // Une étape de parcours propre à la tâche, jouée après le scénario commun : onglet, bouton, texte attendu, capture ou remise à zéro.
 type FlowStep = { tab: string } | { tap: string } | { expect: string } | { capture: string } | { reset: true }
-type Task = { id: string; title: string; brief: string; requirements: string[]; paths: string[]; browser: 'booster' | 'neon'; flow?: FlowStep[] }
+type Task = { id: string; title: string; brief: string; requirements: string[]; paths: string[]; browser: 'booster' | 'neon'; flow?: FlowStep[]; profile?: Profile }
 const captureName = /^\d+-[a-z0-9][a-z0-9-]{0,39}\.png$/
 type Config = {
-  repository: string; base: string; cli: Record<'claude' | 'codex' | 'agy' | 'chrome', string>
+  repository: string; base: string; cli: Record<'claude' | 'codex' | 'agy' | 'chrome', string>; models?: Chains
   limits: { cycleMinutes: number; stepMinutes: number; corrections: number; agentCalls: number; reportedTokens: number; claudeBudgetUsdPerCall: number }
 }
 type Stage = 'prepare' | Phase | 'tests' | 'finish'
@@ -53,6 +53,7 @@ function validate(task: Task, config: Config) {
     if (key === 'capture') return typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,29}$/.test(value)
     return ['tab', 'tap', 'expect'].includes(key) && typeof value === 'string' && value.length > 0 && value.length <= 80
   }
+  if (task.profile !== undefined && !PROFILES.includes(task.profile)) throw new Error('Profil de tâche invalide')
   if (!slug.test(task.id) || !task.title || !task.brief || !['booster', 'neon'].includes(task.browser) ||
       (task.flow !== undefined && (!Array.isArray(task.flow) || task.flow.length > 30 || task.browser !== 'neon' || !task.flow.every(safeStep))) ||
       !Array.isArray(task.requirements) || !task.requirements.length ||
@@ -65,6 +66,7 @@ function validate(task: Task, config: Config) {
       !['claude', 'codex', 'agy', 'chrome'].every(key => typeof config.cli?.[key as keyof Config['cli']] === 'string' && config.cli[key as keyof Config['cli']].length > 0)) {
     throw new Error('Configuration du dépôt, de la branche ou des CLI invalide')
   }
+  validateChains(config.models)
   const limits = config.limits
   if (!limits || ![limits.cycleMinutes, limits.stepMinutes, limits.corrections, limits.agentCalls,
       limits.reportedTokens, limits.claudeBudgetUsdPerCall].every(value => Number.isFinite(value) && value >= 0) ||
@@ -364,11 +366,13 @@ async function cycle(directory: string, resume: boolean) {
           state.calls++
           state.unknownUsage++
           await save()
+          const profile = profileFor(state.task, state.correction)
+          const chain = orderChain(chainFor(state.config.models, stage), profile)
+          await log(`${stage} · profil ${profile} · premier modèle ${describeLink(chain[0])}`)
           const reply = await invoke(stage, state.config.cli, agentPrompt(stage, state, context), step, options(workspace),
-            state.config.limits.claudeBudgetUsdPerCall, join(here, 'evidence.ts'))
+            state.config.limits.claudeBudgetUsdPerCall, join(here, 'evidence.ts'), chain)
           if (reply.tokens !== undefined) { state.tokens += reply.tokens; state.unknownUsage-- }
-          if (reply.relay) await log(stage === 'ux' ? 'Antigravity indisponible · Claude a pris le relais de la revue visuelle' : 'Codex indisponible · Claude a pris le relais de l’implémentation')
-          if (reply.model && !reply.relay) await log(`Antigravity : modèle par défaut à court de quota, relais par ${reply.model}`)
+          if (reply.switched) await log(`${stage} · modèle principal indisponible, relais par ${reply.switched}`)
           // La contre-revue est un avis : son absence (quota, session) ne bloque pas le cycle.
           if (stage === 'critique' && (!reply.report || reply.report.status === 'blocked')) {
             await log('Contre-revue Antigravity indisponible · ' + (reply.problem ?? reply.report?.summary ?? 'rapport absent'))
@@ -498,6 +502,18 @@ async function main() {
     const agy = await execute(config.cli.agy, ['models'], { cwd: here, env: sessionEnv(), timeout: 7_000 })
     console.log('Antigravity · ' + (agy.code === 0 ? 'catalogue accessible, appel IA à confirmer' : failure(agy)))
     if (!claudeActive || !codexActive || agy.code !== 0) process.exitCode = 1
+    // Chaînes de modèles : seul le catalogue Antigravity est consultable, les modèles Claude et Codex se confirment au premier appel.
+    const catalog = new Set(agy.stdout.split('\n').map(line => line.split('\t')[0].trim()).filter(Boolean))
+    for (const phase of ['plan', 'implement', 'ux', 'critique', 'review'] as const) {
+      const chain = chainFor(config.models, phase)
+      console.log('Modèles · ' + phase + ' · ' + chain.map(describeLink).join(' → '))
+      for (const link of chain) {
+        if (link.engine === 'agy' && link.model && agy.code === 0 && !catalog.has(link.model)) {
+          console.log('  ! ' + link.model + ' absent du catalogue Antigravity')
+          process.exitCode = 1
+        }
+      }
+    }
     return
   }
   if (command === 'status' || command === 'resume' || command === 'integrate') {
