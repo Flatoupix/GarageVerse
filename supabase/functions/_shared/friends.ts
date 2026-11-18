@@ -11,7 +11,7 @@ export type FriendResult = ReturnType<typeof fail> | ReturnType<typeof ok>
 const fields = (body: unknown) => body && typeof body === 'object' ? body as Record<string, unknown> : {}
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
-async function withPlayers(sql: Sql, a: string, b: string, change: () => Promise<FriendResult>) {
+export async function withPlayers<T>(sql: Sql, a: string, b: string, change: () => Promise<T>) {
   await sql('begin isolation level read committed')
   try {
     await sql('set local role service_role')
@@ -90,4 +90,12 @@ export async function answerFriend({ sql, player, body }: Context) {
     await sql('delete from gv_friendships where id = $1', [id])
     return ok()
   })
+}
+
+export async function areFriends(sql: Sql, a: string, b: string) {
+  const { rows } = await sql(`select 1 from gv_friendships
+    where least(requester, recipient) = least($1::uuid, $2::uuid)
+      and greatest(requester, recipient) = greatest($1::uuid, $2::uuid)
+      and state = 'accepted'`, [a, b])
+  return rows.length > 0
 }

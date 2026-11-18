@@ -219,7 +219,6 @@ Secrets utilisés : `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_P
 ## 11. Après la V1
 
 - **V2 · Amis et palmarès** : `gv_friends (player, friend, created_at)`, vue `gv_head_to_head` (victoires et défaites entre deux joueurs).
-- **V3 · Échange de cartes** : `gv_trades (id, from, to, state, expires_at)` et `gv_trade_items (trade, side, kind 'car'|'credits', car_id, prep, amount)`, fonctions `propose-trade`, `answer-trade`, `claim-trade`, avec le même principe de réception unique que les mises (`docs/versus.md` § 7).
 
 ## 12. Décisions et points restants
 
@@ -237,3 +236,23 @@ La migration additive `20261118030000_echanges_amis.sql` crée `gv_friendships`.
 - `answer-friend` reçoit `{ id, action }`. Seul le destinataire peut accepter (`accept`) ou refuser (`refuse`) une demande en attente. L’acceptation vérifie la limite de 50 amis des deux joueurs. Chacun peut retirer une amitié acceptée (`remove`). Un refus ou un retrait supprime la ligne.
 
 Les fonctions vérifient le jeton du joueur via l’enveloppe HTTP commune et verrouillent les deux participants pendant la mutation pour appliquer les plafonds malgré des demandes simultanées. Le client réutilise la session anonyme et `register`. Le déploiement sur Supabase hébergé attend la relecture de la migration par le propriétaire et la fusion dans `master`.
+
+### Vitrine, offres et réclamations
+
+La migration additive `20261118040000_echanges.sql` crée les tables suivantes. Elles ont toutes une politique RLS de lecture pour les joueurs authentifiés. Les écritures passent par les fonctions Edge sous `service_role`.
+
+| Table | Contenu | Lecture |
+| --- | --- | --- |
+| `gv_showcase` | Joueur, identifiant de voiture et instantané déclaré | Propriétaire et amis acceptés |
+| `gv_trades` | Proposeur, destinataire, état, offre précédente et échéance | Les deux participants |
+| `gv_trade_items` | Voiture avec sa préparation transmise ou crédits, par côté | Les deux participants |
+| `gv_trade_claims` | Horodatage de la réclamation, unique par échange et joueur | Les deux participants |
+
+- `set-showcase` reçoit `{ cars }`, un dictionnaire d'instantanés par identifiant de voiture. Il remplace la vitrine de ton compte. Un dictionnaire vide la vide.
+- `propose-trade` reçoit `{ recipient, give, want }`. `give` contient `{ cars, credits }` avec les instantanés que tu proposes. `want` contient `{ cars, credits }` avec les identifiants demandés. Le serveur copie ces voitures depuis la vitrine de ton ami. Les pièces montées sont exclues du lot transmis. Chaque joueur peut participer à dix offres ouvertes au maximum. Les codes `NOT_FRIENDS`, `OPEN_TRADE_LIMIT`, `CAR_NOT_IN_SHOWCASE` et `INVALID_OFFER` distinguent ces refus.
+- `answer-trade` reçoit `{ id, action }`. Le destinataire peut accepter (`accept`), refuser (`refuse`) ou contre-proposer (`counter`, avec `give` et `want` comme pour une proposition). Le proposeur peut annuler (`cancel`). Refus et annulations donnent l'état `declined`. Une contre-offre rend l'ancienne offre `countered` et ouvre une nouvelle offre pour 24 heures. Le verrou de l'échange garantit une seule acceptation. Une offre déjà traitée renvoie `TRADE_NOT_OPEN`. Un tiers reçoit `TRADE_UNAVAILABLE`.
+- `claim-trade` reçoit `{ id }` et renvoie le même reçu `{ id, side, goods }` à chaque appel réussi du même joueur. `goods` contient exclusivement le lot de l'autre côté. Le reçu confirme la demande de livraison. Attends l'état `done` avant d'appliquer `goods` à la sauvegarde. Les deux réclamations déclenchent ensemble cette décision. En cas de `returned`, restaure tes biens depuis ton transit local, même si tu avais déjà obtenu un reçu.
+
+L'appel planifié de `resolve-due` ajoute les échanges traités à sa réponse. Une offre encore ouverte à son échéance passe à `expired`. À compter de l'acceptation, les deux joueurs ont 24 heures pour réclamer. Si le délai s'écoule avant la seconde réclamation, l'état `returned` autorise le retour des biens aux deux garages. Le planificateur utilise la tâche existante du § 9.
+
+Le contrôle du format des offres est extrait de `src/game/trade.ts` lors de la synchronisation. Les contrôles du solde, des engagements et du contenu réel des garages s'effectuent dans les sauvegardes locales. Le serveur conserve les instantanés déclarés et l'unicité des décisions et réclamations. Le déploiement hébergé attend la relecture des migrations et la fusion dans `master`.

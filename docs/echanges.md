@@ -1,6 +1,6 @@
 # Échange de cartes entre amis
 
-Statut : **spécifié, à valider avant toute implémentation**. Décision du 18 novembre 2026 : les échanges sont **dissociés du Versus** et **livrés avant lui**. Les règles d'échange décidées le 17 novembre 2026 (anciennement `docs/versus.md` §7) restent valables et sont reprises ici.
+Statut : **étapes 1 à 3 implémentées dans le dépôt**. Décision du 18 novembre 2026 : les échanges sont **dissociés du Versus** et **livrés avant lui**. Les règles d'échange décidées le 17 novembre 2026 (anciennement `docs/versus.md` §7) restent valables et sont reprises ici.
 
 ## 1. Intention
 
@@ -84,6 +84,8 @@ Fonctions : `request-friend`, `answer-friend`, `set-showcase`, `propose-trade`, 
 | `echange-interface` | Vitrine, composition d'offre, offres reçues, contre-offre, historique | `src/views/`, `src/components/` |
 
 **Étape 1 (Amis) implémentée dans le dépôt.** Le réglage expérimental, désactivé par défaut, ouvre la liste depuis le Garage. Les demandes croisées valent acceptation. Le déploiement sur Supabase hébergé reste à faire après relecture par le propriétaire et fusion dans `master`.
+
+**Étape 3 (Serveur) implémentée dans le dépôt.** Le serveur enregistre les offres, les contre-offres et les réclamations, puis prend une décision commune de livraison ou de retour. Les fonctions et la migration attendent le déploiement depuis `master` après relecture. Le client de l'étape 4 appliquera cette décision à la sauvegarde. Le serveur conserve les instantanés déclarés et le jeu contrôle les contraintes du garage local.
 
 Chaque tâche ayant des migrations ou des règles de collection passe une **revue de sécurité** ; **les migrations sont relues par le propriétaire avant leur fusion dans `master`**, qui déclenche le déploiement.
 

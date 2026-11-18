@@ -24,3 +24,15 @@ verify_jwt = false
 
 [functions.answer-friend]
 verify_jwt = false
+
+[functions.set-showcase]
+verify_jwt = false
+
+[functions.propose-trade]
+verify_jwt = false
+
+[functions.answer-trade]
+verify_jwt = false
+
+[functions.claim-trade]
+verify_jwt = false
