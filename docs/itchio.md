@@ -79,3 +79,16 @@ Joue à ton rythme, collectionne, règle ton garage et relève les défis dans u
 itch.io demande de déclarer les contenus issus d’IA générative dans la section dédiée de la page, avec les catégories pertinentes (graphismes, son, texte/dialogues, code). Les règles indiquent que cette déclaration s’applique aussi aux contenus retouchés manuellement et que les pages de jeux doivent être renseignées. Faire l’inventaire réel des ressources avant de sélectionner les catégories ; les éléments générés par procédure classique ne relèvent pas de cette définition. [Règles officielles sur la divulgation IA](https://itch.io/docs/creators/quality-guidelines#ai-disclosure)
 
 Le dépôt contient des noms de modèles et des références visuelles/culturelles qui peuvent évoquer des marques, des designs protégés ou des franchises. Le créateur doit vérifier les licences et autorisations nécessaires pour les illustrations, les noms, les marques, les sons, les polices et les références à des œuvres (par exemple Bond, KITT ou Retour vers le futur) avant la publication. La page ne doit pas laisser entendre une affiliation ou une approbation officielle. itch.io place la responsabilité des droits sur la personne qui publie ; cette documentation ne vaut pas avis juridique. [Conditions itch.io sur les droits du contenu publié](https://itch.io/docs/legal/terms)
+
+## Aperçu de `dev` (canal `html5-dev`)
+
+Chaque push sur `dev` qui touche le jeu envoie le même package sur le canal `html5-dev` de la page itch.io, sans passer par `master` ni par GitHub Pages. La page restant en brouillon, seul son propriétaire (ou les personnes à qui il donne accès) la voit. La publication sur le canal `html5` reste réservée à `master` et à l'environnement `itchio-release`.
+
+Mise en place, une fois (Settings › Environments du dépôt) :
+
+1. Créer l'environnement `itchio-dev`, avec *Deployment branches* limité à `dev`.
+2. Y ajouter les secrets `ITCHIO_API_KEY` (clé d'API itch.io) et `ITCHIO_TARGET` (`utilisateur/nom-du-jeu`).
+3. Sur itch.io, au premier envoi, cocher « This file will be played in the browser » pour le fichier du canal `html5-dev`.
+
+Tant que ces secrets manquent, la tâche `publish-dev` se termine sans rien envoyer et sans échec.
+
