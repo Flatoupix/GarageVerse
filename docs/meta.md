@@ -190,7 +190,7 @@ Le tirage est reproductible à partir de la graine de la nuit. Les trois voiture
 
 Chaque manche gagnée ajoute **60 + 20 × numéro de manche** crédits aux gains accumulés (80 pour la première, 100 pour la deuxième…). Entre deux manches, tu peux continuer ou rentrer au garage pour les encaisser. La première défaite, une égalité ou un abandon termine la nuit et verse uniquement les gains des manches déjà gagnées. L’encaissement a lieu une seule fois. Le record compte les manches gagnées consécutivement et se met à jour dès qu’il est battu, avec célébration sonore et visuelle existante ; en mouvement réduit, l’annonce textuelle reste et les effets visuels sont coupés.
 
-La clé existante `garageverse:v2` contient `nightRecord` (0 par défaut), `nightLineup` (écurie dédiée) et `night` (ou `null`). La nuit conserve `seed`, `round`, `wins`, `gains`, `lineup`, `resting` (écran intermédiaire) et `newRecord`. Le champ `duel` existant conserve toute la course, ses secteurs joués, ses points, utilisations et charges de nitro. Après rechargement, l’accueil propose de reprendre la nuit au bon écran. Les anciennes sauvegardes v2 et la migration v1 restent acceptées. Une nuit empêche de lancer une autre course et protège ses voitures de la vente jusqu’à sa fin.
+La clé existante `garageverse:v2` contient `nightRecord` (0 par défaut), `nightLineup` (écurie dédiée) et `night` (ou `null`). La nuit conserve `seed`, `round`, `wins`, `gains`, `lineup`, `resting` (écran intermédiaire), `newRecord`, `pilotMode` et `lastPilot`. Le champ `duel` existant conserve toute la course, ses secteurs joués, ses points, utilisations et charges de nitro. Après rechargement, l’accueil propose de reprendre la nuit au bon écran. Les anciennes sauvegardes v2 et la migration v1 restent acceptées. Une nuit empêche de lancer une autre course et protège ses voitures de la vente jusqu’à sa fin.
 
 ## Mode hors ligne et sauvegarde exportable
 
@@ -321,8 +321,20 @@ Ton choix est mémorisé pour les prochaines courses. Si tu désactives le mode 
 courses se jouent en automatique. En course manuelle, **Passer en automatique pour la suite**
 rétablit le hasard dès le premier secteur encore à résoudre. Tu continues à choisir tes voitures
 et la bascule reste acquise pour cette course, même après rechargement. Le bilan précise le mode
-de chaque secteur et celui de la course. Le Défi du jour, la Nuit sans fin et le Versus gardent
-leur fonctionnement habituel.
+de chaque secteur et celui de la course. Le Défi du jour et le Versus gardent leur fonctionnement
+habituel.
+
+**Nuit sans fin (T-035).** Avec le mode timing activé, le même choix **Automatique / Manuel** apparaît
+dans la préparation de la nuit (avant « Commencer la nuit ») et sur l’écran **Manche suivante**.
+L’automatique est la valeur par défaut. Le choix de la série est enregistré dans `night.pilotMode`
+(et `preferences.nightPilotMode` pour la prochaine nuit, indépendant du choix des rivaux) ; chaque
+manche fige le sien dans `duel.pilot` à sa création (`createNightRound`), donc changer de réglage
+pendant une manche ne la modifie pas. **Passer en automatique pour la suite** agit sur la manche en
+cours seulement : la série garde son choix pour la manche suivante, modifiable à chaque intermanche.
+Ni la graine, ni les victoires, gains, record, écurie ou nitro ne changent. L’écran intermédiaire et
+le bilan de fin de nuit indiquent le pilotage de la dernière manche (`night.lastPilot` : Automatique,
+Manuel ou Manuel puis automatique). Sans mode timing, la nuit reste automatique et aucun sélecteur
+n’est affiché. Les nuits enregistrées avant ce choix reprennent en automatique.
 
 ## Passage de vitesses expérimental (T-026)
 

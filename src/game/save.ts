@@ -10,7 +10,7 @@ import {
 } from './data'
 import { circuitPriorities, compatibility, createRace, rivalLineup, createDuel, engagements, EXTRA_SLOT_PRICE, extraSlotFamily, lineupCost, partUnlockLevel, potential, prepUsed, racer,
   STAT_CAP, statsOf, upgradeForFamily, upgradeKeys, upgradePrices, upgrades, type Prep, type Rng } from './rules'
-import type { PilotMode } from './pilot'
+import { pilotSummary, racePilot, type PilotMode } from './pilot'
 import type { SoloDuel } from './timing'
 
 export const SAVE_KEY = 'garageverse:v2'
@@ -25,7 +25,7 @@ export type ThemeId = (typeof themeIds)[number]
 // Dos des cartes au choix : Blason (a), Carbone (b), Autoroute (c, par défaut) et Motif (d).
 export const cardBackIds = ['a', 'b', 'c', 'd'] as const
 export type CardBackId = (typeof cardBackIds)[number]
-export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; friendsEnabled?: boolean; pilotMode?: PilotMode }
+export interface Preferences { sound: boolean; music: boolean; reducedMotion: boolean; vibration: boolean; theme: ThemeId; garageCols?: number; garageSort?: string; garageRarity?: Rarity; garageCategory?: string; touchHelp?: boolean; cardBack?: CardBackId; timingMode?: boolean; turnMode?: boolean; friendsEnabled?: boolean; pilotMode?: PilotMode; nightPilotMode?: PilotMode }
 const discoveries = ['nitro', 'heat', 'daily', 'perfect', 'series', 'stance', 'manuel', 'virages'] as const
 export type Discovery = typeof discoveries[number]
 export type ManualDiscovery = Extract<Discovery, 'manuel' | 'virages'>
@@ -189,7 +189,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   }
   const night = input.night
   if (night && typeof night.seed === 'string' && Array.isArray(night.lineup) && night.lineup.length === 3 && new Set(night.lineup).size === 3 && night.lineup.every(id => save.cars[id])) {
-    save.night = { seed: night.seed, round: int(night.round, 1, 100000, 1), wins: int(night.wins, 0, 100000, 0), gains: int(night.gains, 0, 1e7, 0), lineup: [...night.lineup], resting: night.resting === true, newRecord: night.newRecord === true }
+    save.night = { seed: night.seed, round: int(night.round, 1, 100000, 1), wins: int(night.wins, 0, 100000, 0), gains: int(night.gains, 0, 1e7, 0), lineup: [...night.lineup], resting: night.resting === true, newRecord: night.newRecord === true,
+      // Les nuits antérieures au choix de pilotage repartent en automatique.
+      pilotMode: night.pilotMode === 'manuel' ? 'manuel' : 'auto',
+      ...(night.lastPilot === 'auto' || night.lastPilot === 'manuel' || night.lastPilot === 'mixed' ? { lastPilot: night.lastPilot } : {}) }
   }
   save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
   save.lineup = (input.lineup ?? []).filter(id => save.cars[id]).slice(0, 3)
@@ -204,7 +207,7 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       if (choice && (duel.winner || duel.rounds.length >= duel.sectors.length || !Number.isInteger(choice.car)
         || !duel.player.lineup[choice.car] || typeof choice.nitro !== 'boolean'
         || (choice.stance !== 'normal' && choice.stance !== 'attaque' && choice.stance !== 'gestion'))) delete duel.timingChoice
-      if (rivalById.has(duel.rivalId)) {
+      if (!duel.rivalId.startsWith('daily:')) {
         const pilot = duel.pilot
         if (pilot?.mode === 'manuel') {
           const from = pilot.automaticFrom
@@ -224,7 +227,6 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       save.duel = duel
     }
   } catch { save.duel = null }
-  if (save.night && !save.night.resting && !save.duel) createNightRound(save)
   const tutorial = input.tutorial
   if (tutorial) save.tutorial = {
     step: int(tutorial.step, 0, tutorialSteps - 1, 0),
@@ -249,7 +251,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
     ...(input.preferences?.garageRarity && rarities.includes(input.preferences.garageRarity) ? { garageRarity: input.preferences.garageRarity } : {}),
     ...(cardBackIds.includes(input.preferences?.cardBack as CardBackId) ? { cardBack: input.preferences!.cardBack } : {}),
     ...(Number.isInteger(input.preferences?.garageCols) ? { garageCols: int(input.preferences?.garageCols, 0, 6, 0) } : {}),
+    ...(input.preferences?.nightPilotMode === 'manuel' ? { nightPilotMode: 'manuel' } : {}),
   }
+  // Après les préférences : la manche recréée fige le pilotage avec le mode timing réel.
+  if (save.night && !save.night.resting && !save.duel) createNightRound(save)
   return save
 }
 
@@ -813,9 +818,7 @@ export function startDuel(save: Save, rivalId: string, rng: Rng): string | undef
   const problem = lineupCheck(save, save.lineup, rivalId)
   if (problem) return problem
   save.duel = createDuel(rivalId, save.lineup.map(id => ({ id, prep: prepOf(save, id) })), rng)
-  save.duel.pilot = save.preferences.timingMode && save.preferences.pilotMode === 'manuel'
-    ? { mode: 'manuel', turn: save.preferences.turnMode === true }
-    : { mode: 'auto' }
+  save.duel.pilot = racePilot(save.preferences.pilotMode, save.preferences.timingMode, save.preferences.turnMode)
 }
 
 export interface Reward { credits: number; ticket?: string; perfect?: true; perfectTicket?: string; car?: string }
@@ -967,28 +970,38 @@ export function createNightRound(save: Save) {
   if (!night || save.duel) return
   const rival = nightRival(night.seed, night.round)
   save.duel = createRace(rival.id, rival.circuit, night.lineup.map(id => ({ id, prep: prepOf(save, id) })), rivalLineup(rival), dailyRng(`${night.seed}:${night.round}`))
+  // Le choix de la série est figé pour cette manche : changer un réglage ensuite ne la bascule pas.
+  save.duel.pilot = racePilot(night.pilotMode, save.preferences.timingMode, save.preferences.turnMode)
   night.resting = false
 }
 export function startNight(save: Save, seed = String(Date.now())) {
   if (save.duel || save.night) return t('Termine d’abord la course en cours')
   const problem = nightLineupCheck(save)
   if (problem) return problem
-  save.night = { seed, round: 1, wins: 0, gains: 0, lineup: [...save.nightLineup], resting: false, newRecord: false }
+  save.night = { seed, round: 1, wins: 0, gains: 0, lineup: [...save.nightLineup], resting: false, newRecord: false,
+    pilotMode: save.preferences.nightPilotMode ?? 'auto' }
   createNightRound(save)
+}
+// Choix Auto / Manuel de la Nuit sans fin : avant de la commencer, ou entre deux manches. Jamais pendant une manche engagée.
+export function setNightPilot(save: Save, mode: PilotMode) {
+  save.preferences.nightPilotMode = mode
+  if (save.night?.resting) save.night.pilotMode = mode
 }
 export function finishNight(save: Save) {
   const night = save.night
   if (!night) return
+  const pilot = save.duel?.rounds.length ? pilotSummary(save.duel.rounds) : undefined
   save.credits += night.gains
   save.night = null
   save.duel = null
-  return { wins: night.wins, credits: night.gains, newRecord: night.newRecord }
+  return { wins: night.wins, credits: night.gains, newRecord: night.newRecord, ...(pilot ? { pilot } : {}) }
 }
 export function settleNight(save: Save) {
   const night = save.night, duel = save.duel
   if (!night || !duel?.winner) return
   if (duel.winner !== 'player') return finishNight(save)
   night.wins++
+  night.lastPilot = pilotSummary(duel.rounds)
   night.gains += nightReward(night.round)
   night.newRecord = night.wins > save.nightRecord
   save.nightRecord = Math.max(save.nightRecord, night.wins)
