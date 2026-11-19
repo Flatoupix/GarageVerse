@@ -46,7 +46,7 @@ export async function setShowcase({ sql, player, body }: Context) {
     if (!rows.length) return fail('NOT_REGISTERED', 403)
     await sql('delete from gv_showcase where player_id = $1', [player])
     await sql(`insert into gv_showcase (player_id, car_id, snapshot)
-      select $1, key, value from jsonb_each($2::jsonb)`, [player, JSON.stringify(cars)])
+      select $1, key, value from jsonb_each($2::text::jsonb)`, [player, JSON.stringify(cars)])
     return ok(null)
   })
 }
@@ -68,7 +68,7 @@ async function createOffer(ctx: Context, proposer: string, recipient: string, of
     limit 1 offset 9`, [proposer, now])
   if (limits.length) return fail('OPEN_TRADE_LIMIT', 409)
   const { rows: requested } = await sql(`select car_id, snapshot from gv_showcase
-    where player_id = $1 and car_id in (select jsonb_array_elements_text($2::jsonb))`, [recipient, JSON.stringify(offer.want.cars)])
+    where player_id = $1 and car_id in (select jsonb_array_elements_text($2::text::jsonb))`, [recipient, JSON.stringify(offer.want.cars)])
   if (requested.length !== offer.want.cars.length) return fail('CAR_NOT_IN_SHOWCASE', 409)
   const { rows: [trade] } = await sql(`insert into gv_trades (proposer, recipient, previous_id, created_at, expires_at)
     values ($1, $2, $3, $4::timestamptz, $4::timestamptz + interval '24 hours') returning id`, [proposer, recipient, previous, now])
@@ -79,7 +79,7 @@ async function createOffer(ctx: Context, proposer: string, recipient: string, of
   ]) {
     // Les pièces montées restent au donneur. Le reste de l'instantané est conservé.
     await sql(`insert into gv_trade_items (trade_id, side, car_id, snapshot)
-      select $1, $2, key, value || '{"parts":[]}'::jsonb from jsonb_each($3::jsonb)`, [trade!.id, side, JSON.stringify(cars)])
+      select $1, $2, key, value || '{"parts":[]}'::jsonb from jsonb_each($3::text::jsonb)`, [trade!.id, side, JSON.stringify(cars)])
     if (credits) await sql('insert into gv_trade_items (trade_id, side, credits) values ($1, $2, $3)', [trade!.id, side, credits])
   }
   if (previous) await sql("update gv_trades set state = 'countered' where id = $1", [previous])

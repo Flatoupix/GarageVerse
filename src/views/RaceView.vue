@@ -19,6 +19,7 @@ import { currentRivalStep, perfectSteps, rivalStepsDone, specialsOpen, unlockedR
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { playTimingRound, playTurnRound, shiftsPerSector, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
 import { pilotSummary, playPilotRound, roundPilot, sectorPilot, switchToAutomatic, type PilotMode, type PilotSummary } from '../game/pilot'
+import { perfectStepsText } from '../game/perfect-steps-text'
 import { signedTiming, timingFeedback, timingSummary } from '../game/timing-text'
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
@@ -100,7 +101,7 @@ const rivalStepList = computed(() => {
     perfect: perfect[i],
   }))
 })
-const rivalProgress = computed(() => rivals.map(r => ({ r, perfectCount: perfectSteps(save, r.id).filter(Boolean).length })))
+const rivalProgress = computed(() => rivals.map(r => ({ r, perfect: perfectStepsText(save, r.id) })))
 const hasPersonality = computed(() => character.value && [character.value.bio, character.value.style, character.value.likes, character.value.intro].some(Boolean))
 const league = computed(() => rival.value?.cap !== undefined ? { name: special.value?.name, cap: rival.value.cap } : rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
@@ -948,15 +949,15 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p>{{ t('Engage une voiture par secteur, en secret. Chaque voiture court un nombre limité de secteurs selon son Endurance.') }}</p>
       </div>
       <ul class="rival-list">
-        <li v-for="({ r, perfectCount }, i) in rivalProgress" :key="r.id" class="deal" :style="{ '--i': i }">
+        <li v-for="({ r, perfect }, i) in rivalProgress" :key="r.id" class="deal" :style="{ '--i': i }">
           <button type="button" class="rival-row" :disabled="!unlocked.includes(r.id)" @click="chosen = currentRivalStep(save, r.id)">
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
             <span class="rival-info">
               <b>{{ r.name }}</b>
               <span>
-                <span aria-hidden="true">{{ '★'.repeat(perfectCount) + '☆'.repeat(3 - perfectCount) }}</span>
-                <span class="visually-hidden">{{ tp('{n} victoire parfaite sur 3', '{n} victoires parfaites sur 3', perfectCount) }}</span>
+                <span aria-hidden="true">{{ perfect.stars }}</span>
+                <span class="visually-hidden">{{ perfect.label }}</span>
               </span>
               <small>{{ t(r.title) }}<template v-if="r.style"> · {{ t(r.style) }}</template> · {{ t(leagueById.get(r.league)!.name) }} ({{ t('plafond {n}', { n: leagueById.get(r.league)!.cap }) }})</small>
               <small>{{ t('3 étapes · finale : {n} ₡ + ticket {booster}', { n: leagueById.get(r.league)!.reward, booster: t(boosterById.get(leagueById.get(r.league)!.ticket)?.name ?? '') }) }}<template v-if="r.rewardCar"> + {{ vehicleById.get(r.rewardCar)?.name }}</template></small>

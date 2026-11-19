@@ -4,6 +4,13 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.20.1] — 2026-11-19
+
+### Fixed
+
+- **Trades.** Sending an offer or saving your showcase always showed “Server unavailable”: that’s fixed, you can finally offer trades to your friends.
+- **Rival stars.** In the rival list, each star keeps its place, Trials, Qualifying then Finale: ★☆★ means you still have Qualifying to perfect.
+
 ## [0.20.0] — 2026-11-19
 
 ### Added
