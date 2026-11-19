@@ -18,6 +18,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
 | [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
 | [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
+| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : une seule couleur par rareté (booster, effets et pièces encore différents du garage) | P2 |
 | [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
 | [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
 | [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
@@ -44,7 +45,6 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-029](029-boutons-pilotage-automatique.md) | Boutons du choix Automatique / Manuel (`PilotPicker`) | v0.15.0 à v0.19.0 |
 | [T-035](035-nuit-sans-fin-pilotage-auto-manuel.md) | Nuit sans fin : Auto / Manuel sans perdre sa série | v0.19.0 |
 | [T-008](008-echanges-de-cartes.md) | Échanges entre amis (expérimental) ; bugs dans T-037 | v0.15.0 |
-| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Couleur de rareté identique entre garage et plein écran | corrigé |
 | [T-015](015-equilibrage-overdrive.md) | Playtest réel Overdrive | — |
 | [T-016](016-economie-booster-bricole-mecanique.md) | Ressenti Bricole/Mécanique (rééquilibrés en v0.6) | v0.6.0 |
 
