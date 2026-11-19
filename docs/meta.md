@@ -484,3 +484,9 @@ Le logo s’affiche dès le premier rendu. La progression apparaît si l’essen
 - `filled` donne un fond plein et sobre aux actions secondaires positives et au retour « Rivaux ».
 - `ghost` sert aux annulations, aux retours ordinaires et à la vente avant confirmation.
 - `quiet` garde les actions de retrait et les commandes moins prioritaires discrètes.
+
+### Mise à jour du jeu
+
+En production, le jeu relit `index.html` au lancement, au retour dans l’onglet, au retour du réseau et toutes les 30 minutes si l’onglet est visible et en ligne. La requête porte un marqueur unique, utilise `cache: 'no-store'` et le service worker laisse passer ce marqueur. Le nom haché du script d’entrée identifie le déploiement et « Plus tard » mémorise la version masquée.
+
+Sur GitHub Pages, le jeu vérifie aussi le service worker. « Mettre à jour » écrit la sauvegarde, active le worker en attente et recharge dès que la partie le permet. Sur itch.io, la vérification relit l’index à l’adresse du jeu ouvert. Si une publication change l’adresse de l’iframe, l’onglet itch.io doit être rouvert pour rejoindre cette adresse.

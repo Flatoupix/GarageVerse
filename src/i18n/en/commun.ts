@@ -5,6 +5,12 @@ export const commun: Dict = {
   'Chargement du garage…': 'Loading the garage…',
   'Chargement des images…': 'Loading images…',
   'Passer': 'Skip',
+  'Mise à jour disponible': 'Update available',
+  'Mettre à jour': 'Update',
+  'Plus tard': 'Later',
+  'Termine d’abord ta course.': 'Finish your race first.',
+  'Termine d’abord ton booster.': 'Finish opening your booster first.',
+  'Attends la fin de la synchronisation des échanges.': 'Wait for trades to finish syncing.',
   // Raretés : valeurs de logique restées françaises, affichées par t(rareté).
   'Courante': 'Common',
   'Rare': 'Rare',

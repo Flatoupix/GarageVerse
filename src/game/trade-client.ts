@@ -1,4 +1,5 @@
 // Le serveur décide de la livraison. La sauvegarde fait foi pour les mouvements déjà appliqués.
+import { computed, ref } from 'vue'
 import { t } from '../i18n'
 import { VERSUS_OPEN } from './features'
 import { discardEditionPurchase, SAVE_KEY, type Save } from './save'
@@ -224,9 +225,12 @@ async function refreshShowcase(connection: Connection) {
 }
 
 // Une seule opération locale à la fois, même si plusieurs événements demandent une reprise.
+const queuedTrades = ref(0)
+export const tradeBusy = computed(() => queuedTrades.value > 0)
 let pending: Promise<unknown> = Promise.resolve()
 function run<T>(action: (connection: Connection) => Promise<T>): Promise<T> {
-  const result = pending.then(async () => action(await connect()))
+  queuedTrades.value++
+  const result = pending.then(async () => action(await connect())).finally(() => { queuedTrades.value-- })
   pending = result.catch(() => {})
   return result
 }

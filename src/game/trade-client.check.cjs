@@ -75,7 +75,7 @@ const db = {
 }
 
 let imports = 0
-const mocks = { './trade': rules, './save': { SAVE_KEY: 'save', discardEditionPurchase }, './store': store,
+const mocks = { vue: require('vue'), './trade': rules, './save': { SAVE_KEY: 'save', discardEditionPurchase }, './store': store,
   './features': { VERSUS_OPEN: false }, '../i18n': { t: text => text }, './versus': { db } }
 function loadClient() {
   const exports = {}
@@ -97,8 +97,13 @@ async function run() {
   const offer = { cars: [], credits: 25 }
   const want = { cars: [], credits: 10 }
   const sync = () => client.syncTrades()
-  await assert.rejects(sync(), /Connexion nécessaire/)
-  await assert.rejects(client.publishShowcase([]), /Connexion nécessaire/)
+  assert.equal(client.tradeBusy.value, false)
+  const first = sync()
+  const second = client.publishShowcase([])
+  assert.equal(client.tradeBusy.value, true)
+  await assert.rejects(first, /Connexion nécessaire/)
+  await assert.rejects(second, /Connexion nécessaire/)
+  assert.equal(client.tradeBusy.value, false)
   assert.equal(imports, 0)
   assert.equal(calls, 0)
   store.save.preferences.friendsEnabled = true

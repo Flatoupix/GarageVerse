@@ -1,6 +1,7 @@
-const CACHE_NAME = 'garageverse-v1'
+const CACHE_NAME = 'garageverse-v2'
 const ROOT = new URL('./', self.location.href)
-const PAGE = new URL('./index.html', ROOT).href
+const PAGE_URL = new URL('./index.html', ROOT)
+const PAGE = PAGE_URL.href
 
 async function remember(request) {
   const response = await fetch(request)
@@ -35,7 +36,10 @@ async function prepare(url, seen = new Set()) {
 
 self.addEventListener('install', event => {
   event.waitUntil(prepare(PAGE))
-  // Le worker en attente prendra la main au prochain lancement, sans mélanger deux versions.
+  // Le worker attend un nouveau lancement ou une demande du joueur.
+})
+self.addEventListener('message', event => {
+  if (event.data === 'garageverse:apply-update') event.waitUntil(self.skipWaiting())
 })
 self.addEventListener('activate', event => {
   event.waitUntil((async () => {
@@ -47,6 +51,7 @@ self.addEventListener('fetch', event => {
   const request = event.request
   const url = new URL(request.url)
   if (request.method !== 'GET' || url.origin !== ROOT.origin) return
+  if (url.pathname === PAGE_URL.pathname && url.searchParams.has('gv-update')) return
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME)
     if (request.mode === 'navigate') {
