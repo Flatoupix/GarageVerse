@@ -1,5 +1,5 @@
 import type { Directive } from 'vue'
-import type { Rarity } from './data'
+import { rarities, rarityClass, type Rarity } from './data'
 import { reducedMotion } from './store'
 import { theme, type Theme } from './theme'
 
@@ -9,14 +9,14 @@ type Kind = 'spark' | 'confetti' | 'streak' | 'ring' | 'text'
 interface Particle { kind: Kind; x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; color: string; rot: number; spin: number; text?: string }
 export type Target = Element | string | { x: number; y: number } | null | undefined
 
-// Couleurs des effets par thème. Les tableaux sont modifiés sur place pour que rarityPalette suive le thème.
+// Couleurs des effets propres à chaque thème.
 type Palettes = Record<'cyan' | 'pink' | 'sun' | 'gold' | 'fire', string[]>
 type Tones = Record<'light' | 'gold' | 'rose' | 'cyan', string>
 const themed: Record<Theme, { palettes: Palettes; tone: Tones }> = {
   neon: {
-    palettes: { cyan: ['#2de2ff', '#8ff3ff', '#ffffff'], pink: ['#ff5fd2', '#ff9be0', '#ffffff'], sun: ['#ffb347', '#ff7a3d', '#ffd27a'],
-      gold: ['#ffd27a', '#ff5fd2', '#8ff3ff', '#8b5cff', '#ffffff'], fire: ['#ffb347', '#ff5e3a', '#ff2a8a', '#ffffff'] },
-    tone: { light: '#ffffff', gold: '#ffd27a', rose: '#ff5fd2', cyan: '#2de2ff' },
+    palettes: { cyan: ['#2de2ff', '#8ff3ff', '#ffffff'], pink: ['rgb(255 95 210)', '#ff9be0', '#ffffff'], sun: ['#ffb347', '#ff7a3d', '#ffd27a'],
+      gold: ['#ffd27a', 'rgb(255 95 210)', '#8ff3ff', '#8b5cff', '#ffffff'], fire: ['#ffb347', '#ff5e3a', '#ff2a8a', '#ffffff'] },
+    tone: { light: '#ffffff', gold: '#ffd27a', rose: 'rgb(255 95 210)', cyan: '#2de2ff' },
   },
   pixel: {
     palettes: { cyan: ['#5a6988', '#ead4aa'], pink: ['#0099db', '#2ce8f5'], sun: ['#b55088', '#68386c', '#ead4aa'],
@@ -58,14 +58,25 @@ const themed: Record<Theme, { palettes: Palettes; tone: Tones }> = {
 const blocky = new Set<Theme>(['pixel', 'arcade', 'console', 'dos'])
 export const palettes: Palettes = { cyan: [], pink: [], sun: [], gold: [], fire: [] }
 export const tone: Tones = { ...themed.neon.tone }
+export const rarityPalette: Record<Rarity, string[]> = { Courante: [], Rare: [], Épique: [], Légendaire: [] }
 let font = 'Orbitron, sans-serif'
+
+// Le canevas lit les mêmes teintes que les cartes et calcule deux reflets plus clairs.
+function rarityColors(color: string) {
+  const rgb = [1, 3, 5].map(offset => parseInt(color.slice(offset, offset + 2), 16))
+  return [color, ...[0.35, 0.7].map(light => `rgb(${rgb.map(channel => Math.round(channel + (255 - channel) * light)).join(' ')})`)]
+}
 export function themeFx(id: Theme) {
   for (const key of Object.keys(palettes) as (keyof Palettes)[]) palettes[key].splice(0, Infinity, ...themed[id].palettes[key])
   Object.assign(tone, themed[id].tone)
-  font = getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || 'sans-serif'
+  const styles = getComputedStyle(document.documentElement)
+  font = styles.getPropertyValue('--display').trim() || 'sans-serif'
+  for (const rarity of rarities) {
+    const color = styles.getPropertyValue(`--rarity-${rarityClass[rarity]}`).trim()
+    if (color) rarityPalette[rarity] = rarityColors(color)
+  }
 }
 themeFx('neon')
-export const rarityPalette: Record<Rarity, string[]> = { Courante: palettes.cyan, Rare: palettes.pink, Épique: palettes.sun, Légendaire: palettes.gold }
 
 let canvas: HTMLCanvasElement | undefined
 let ctx: CanvasRenderingContext2D | null = null

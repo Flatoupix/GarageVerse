@@ -136,15 +136,12 @@
   opacity: .55;
 }
 .mod-slot.mod-crest .mod-lamps i.fitted {
-  --lamp: #dfe7f5;
+  --lamp: var(--rarity-color);
   opacity: 1;
   border-color: var(--lamp);
   background: var(--lamp);
   box-shadow: 0 0 1.5cqw var(--lamp);
 }
-.mod-slot.mod-crest .mod-lamps i.rarity-rare { --lamp: #4aa8ff; }
-.mod-slot.mod-crest .mod-lamps i.rarity-epic { --lamp: #ff5fd2; }
-.mod-slot.mod-crest .mod-lamps i.rarity-legendary { --lamp: #ffc64a; }
 .car-card.compact .mod-slot.mod-crest {
   width: 8.6cqw;
   height: 9cqw;
@@ -470,7 +467,7 @@
   clip-path: polygon(0 2%, 5% 0, 10% 2%, 15% 0, 20% 2%, 25% 0, 30% 2%, 35% 0, 40% 2%, 45% 0, 50% 2%, 55% 0, 60% 2%, 65% 0, 70% 2%, 75% 0, 80% 2%, 85% 0, 90% 2%, 95% 0, 100% 2%, 100% 98%, 95% 100%, 90% 98%, 85% 100%, 80% 98%, 75% 100%, 70% 98%, 65% 100%, 60% 98%, 55% 100%, 50% 98%, 45% 100%, 40% 98%, 35% 100%, 30% 98%, 25% 100%, 20% 98%, 15% 100%, 10% 98%, 5% 100%, 0 98%); }
 .pack-art.pack-night { --foil-a: #ad6dff; --foil-b: #17275b; }
 .pack-art.pack-overdrive { --foil-a: #ffd56a; --foil-b: #d52a36; }
-.pack-art.pack-legend { --foil-a: #ffe594; --foil-b: #b77b15; }
+.pack-art.pack-legend { --foil-a: color-mix(in srgb, var(--rarity-legendary) 65%, white); --foil-b: color-mix(in srgb, var(--rarity-legendary) 70%, black); }
 .pack-art .pack-picture { inset: 8% 5%; width: 90%; height: 84%; object-fit: cover; border: 1px solid #fff9; }
 .pack-art::before { z-index: 1; content: ''; position: absolute; inset: 8% 5%; background: linear-gradient(#070a20e8, transparent 48%, #070a20ee 88%); }
 .pack-art.pack-art::after { display: block; content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 3;
@@ -484,10 +481,10 @@
 .pack-art .pack-footer { display: block; padding: 3cqw 0 0; background: none; border: 0; border-top: 1px solid #ffe8b2aa;
   color: #fff; font: 700 5.1cqw/1.3 Arial, sans-serif; letter-spacing: 0; text-transform: none; white-space: nowrap; text-shadow: 0 1px 3px #000; }
 .pack-art .pack-crimp { z-index: 4; height: 7%; background: repeating-linear-gradient(90deg, #fff6 0 1px, #160f2366 1px 3px, transparent 3px 5px); border-block: 1px solid #fff7; }
-.pack-ribbon { padding: 2cqw 1cqw; background: linear-gradient(100deg, #a56a12, #ffe9a0, #d6a12f); color: #261500;
+.pack-ribbon { padding: 2cqw 1cqw; background: linear-gradient(100deg, var(--foil-b), var(--foil-a), var(--rarity-legendary)); color: #261500;
   text-align: center; font: 800 5.3cqw/1.2 Arial, sans-serif; box-shadow: 0 2px 6px #0008; }
-.pack-sparkles { position: absolute; z-index: 2; top: 48%; left: 10%; right: 10%; text-align: center; color: #ffe19a; font-size: 12cqw; text-shadow: 0 0 8px #ffb71f; }
-.tear-pack.is-legend { filter: drop-shadow(0 0 18px #ffc94d99) drop-shadow(0 12px 15px #0009); }
+.pack-sparkles { position: absolute; z-index: 2; top: 48%; left: 10%; right: 10%; text-align: center; color: var(--foil-a); font-size: 12cqw; text-shadow: 0 0 8px var(--rarity-legendary); }
+.tear-pack.is-legend { filter: drop-shadow(0 0 18px color-mix(in srgb, var(--rarity-legendary) 60%, transparent)) drop-shadow(0 12px 15px #0009); }
 .tear-pack.is-legend:not(.is-dragging):not(.is-torn) { animation: legendary-tremble 5s infinite; }
 @keyframes foil-sweep { 0%, 35% { background-position: 150% 0; } 100% { background-position: -60% 0; } }
 @keyframes legendary-tremble { 0%, 80%, 90%, 100% { transform: rotate(0); } 82%, 86% { transform: rotate(-1.4deg); } 84%, 88% { transform: rotate(1.4deg); } }
@@ -512,19 +509,32 @@
 .car-sheet .button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .car-sale-actions { flex-wrap: wrap; }
 
-/* Même palette pour les cartes de voiture, les vignettes et les filtres. */
-.car-card.finish-common, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-common { --rarity-color: #aabbd0; }
-.car-card.finish-rare, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-rare { --rarity-color: #4aa8ff; }
-.car-card.finish-epic, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-epic { --rarity-color: #ff5fd2; }
-.car-card.finish-legendary, :is(.car-thumb, .missing-card, .gv-button--filter).rarity-legendary { --rarity-color: #ffc64a; }
-.gv-card.car-card {
+/* Palette de référence pour les cartes, le booster, les filtres et les effets. */
+:root {
+  --rarity-common: #aabbd0;
+  --rarity-rare: #4aa8ff;
+  --rarity-epic: #ff5fd2;
+  --rarity-legendary: #ffc64a;
+}
+:is(.finish-common, .rarity-common, .tell-common, .glow-common) { --rarity-color: var(--rarity-common); }
+:is(.finish-rare, .rarity-rare, .tell-rare, .glow-rare) { --rarity-color: var(--rarity-rare); }
+:is(.finish-epic, .rarity-epic, .tell-epic, .glow-epic) { --rarity-color: var(--rarity-epic); }
+:is(.finish-legendary, .rarity-legendary, .tell-legendary, .glow-legendary) { --rarity-color: var(--rarity-legendary); }
+.gv-card:is(.car-card, .part-card) {
   --glow: var(--rarity-color);
   --frame: var(--rarity-color);
   border-color: var(--rarity-color);
   box-shadow: 0 0 12px color-mix(in srgb, var(--rarity-color) 35%, transparent);
 }
-.car-rarity, .garage .missing-card > span:first-child {
-  color: var(--rarity-color); background: #141827; padding: 2px 4px; border-radius: 3px;
+.card-back.tell-common, .stack-stage:is(.glow-common, .glow-rare, .glow-epic, .glow-legendary) {
+  border-color: var(--rarity-color);
+}
+.car-rarity, .garage .missing-card > span:first-child, .picker-car .rarity-label {
+  padding: 2px 4px; border-radius: 3px;
+}
+.car-rarity, .part-card .card-top .rarity, .garage .missing-card > span:first-child,
+.picker-car .rarity-label, .car-thumb-number, .gv-button--filter .rarity-gem {
+  color: var(--rarity-color); background: #141827;
 }
 .garage .missing-card { border-color: var(--rarity-color); box-shadow: inset 3px 0 var(--rarity-color); }
 .garage .new-car-badge, .garage .copy-count, .garage .tile-tag.lineup-tag {
@@ -574,7 +584,7 @@
 .pick-cost[data-cost="2"] { background: #2de2ff; }
 .pick-cost[data-cost="3"] { background: #5aa0ff; }
 .pick-cost[data-cost="4"] { background: #9b7bff; }
-.pick-cost[data-cost="5"] { background: #ff5fd2; }
+.pick-cost[data-cost="5"] { background: rgb(255 95 210); }
 .pick-cost[data-cost="6"] { background: #ff2a8a; }
 .pick-cost[data-cost="7"] { background: #ff7a2a; }
 .pick-cost[data-cost="8"] { background: #ffb347; }
@@ -652,7 +662,7 @@
 .gv-button:focus-visible { outline: 3px solid var(--text); outline-offset: -5px; }
 .gv-button:disabled { filter: grayscale(1); opacity: .65; cursor: default; }
 .gv-button-content { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; overflow-wrap: anywhere; }
-.gv-button--filter .rarity-gem { color: var(--gv-tone); font-size: 1.2rem; text-shadow: 0 2px var(--night); }
+.gv-button--filter .rarity-gem { font-size: 1.2rem; border-radius: 3px; padding-inline: 2px; line-height: 1; }
 .gv-button--icon { padding-inline: 6px; }
 
 .race-pilot { min-width: 0; max-width: 24rem; margin-bottom: 16px; }
@@ -855,7 +865,8 @@ main.race { animation-name: race-view-in; }
 .showroom-filters { display: flex; flex-wrap: wrap; gap: 6px; }
 .showroom-filters button { min-height: 40px; padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--radius, 8px); background: var(--night);
   color: var(--text); font: 600 .85rem var(--body); }
-.showroom-filters button[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 -3px var(--accent); }
+.showroom-filters .showroom-rarity { color: var(--rarity-color); background: #141827; }
+.showroom-filters button[aria-pressed="true"] { border-color: var(--rarity-color, var(--accent)); box-shadow: inset 0 -3px var(--rarity-color, var(--accent)); }
 .showroom-count { margin: 10px 0 6px; color: var(--muted); }
 .showroom-tag { pointer-events: none; }
 .showroom-modal[open] { display: flex; flex-direction: column; width: min(96vw, 460px); overflow: hidden; }
@@ -882,8 +893,8 @@ main.race { animation-name: race-view-in; }
 .car-thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .car-thumb-blank { display: grid; place-items: center; height: 100%; color: var(--muted); font: 700 1.2rem var(--display, sans-serif); opacity: .5; }
 .car-thumb.missing { border-style: dashed; opacity: .7; }
-.car-thumb-number { position: absolute; inset: auto 0 0; padding: 1px 3px; background: color-mix(in srgb, var(--night) 80%, transparent);
-  color: var(--rarity-color); font: 700 .55rem/1.3 var(--mono, monospace); text-align: center; white-space: nowrap; }
+.car-thumb-number { position: absolute; inset: auto 0 0; padding: 1px 3px;
+  font: 700 .55rem/1.3 var(--mono, monospace); text-align: center; white-space: nowrap; }
 .grid-sheet .favorite-button, .grid-sheet .tile-tag, .grid-sheet .new-car-badge { display: none; }
 .grid-sheet .copy-count { font-size: .55rem; padding: 0 3px; }
 .showroom-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin: 10px 0 6px; }

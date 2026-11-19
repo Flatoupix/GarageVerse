@@ -74,7 +74,7 @@ function celebrate(rarity: Rarity, target = '.card-stack') {
   ring(target, colors[0])
   if (rarity === 'Rare') { sparks(target, colors, 28); buzz(15); return }
   if (rarity === 'Épique') { flash(colors[0], 0.28); sparks(target, colors, 46, 1.2); shake(1, target); buzz([15, 30, 25]); return }
-  flash(tone.light, 0.75); shake(3, target); sparks(target, colors, 80, 1.5); ring(target, tone.gold, 900); confetti(); buzz([30, 50, 40, 50, 60])
+  flash(colors[1], 0.75); shake(3, target); sparks(target, colors, 80, 1.5); ring(target, colors[0], 900); confetti(colors); buzz([30, 50, 40, 50, 60])
 }
 
 // Une carte légendaire ou une édition animée reçoit la mise en scène exceptionnelle.
@@ -105,8 +105,9 @@ async function openPack() {
   sound(legendaryTear.value ? 'legend' : 'tear')
   buzz(25)
   const pack = document.querySelector('.tear-pack')?.getBoundingClientRect()
-  flash(legendaryTear.value ? tone.gold : tone.rose, 0.35); shake(2, '.tear-pack')
-  if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, legendaryTear.value ? palettes.gold : [...palettes.pink, ...palettes.cyan], 44, 1.1)
+  const legendColors = rarityPalette.Légendaire
+  flash(legendaryTear.value ? legendColors[0] : tone.rose, 0.35); shake(2, '.tear-pack')
+  if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, legendaryTear.value ? legendColors : [...palettes.pink, ...palettes.cyan], 44, 1.1)
   if (reduced.value) { focusRevealAction(); return }
   tearing.value = true
   tearTimer = setTimeout(() => {

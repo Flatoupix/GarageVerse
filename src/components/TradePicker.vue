@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { locale, t, tp } from '../i18n'
-import { rarityMark, rarities, vehicleById } from '../game/data'
+import { rarityClass, rarityMark, rarities, vehicleById } from '../game/data'
 import type { TradeGoods } from '../game/trade'
 import { edition } from '../game/art'
 import TradeCard from './TradeCard.vue'
@@ -68,7 +68,7 @@ const visible = computed(() => matches.value.filter(item => reveal.value || !ite
           <span>
             <strong>{{ item.name }}</strong>
             <small v-if="item.version">{{ item.version }}</small>
-            <small v-if="item.rarity">{{ rarityMark[item.rarity] }} {{ t(item.rarity) }}</small>
+            <small v-if="item.rarity" class="rarity-label" :class="`rarity-${rarityClass[item.rarity]}`"><span aria-hidden="true">{{ rarityMark[item.rarity] }}</span> {{ t(item.rarity) }}</small>
             <small v-if="item.car && item.car.copies > 1">{{ tp('{n} exemplaire', '{n} exemplaires', item.car.copies) }}</small>
           </span>
           <span v-if="item.selected" class="picker-tick" aria-hidden="true">✓</span>

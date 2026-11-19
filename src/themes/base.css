@@ -209,10 +209,7 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
   position: relative; isolation: isolate; overflow: hidden; width: 100%; aspect-ratio: .72; border-radius: var(--radius); padding: 2.4cqw;
   background: var(--frame); box-shadow: var(--lift);
   text-align: left; color: var(--text); font-family: var(--body); }
-.finish-rare { --frame: var(--slate); --glow: var(--sand); }
-.finish-epic { --frame: var(--slate); --glow: var(--orange); }
-.finish-legendary { --frame: var(--slate); --glow: var(--yellow);
-  animation: none; }
+.finish-legendary { animation: none; }
 @property --holo { syntax: '<angle>'; inherits: false; initial-value: 0deg; }
 @keyframes holo { to { --holo: 360deg; } }
 .gv-card::after { content: ''; position: absolute; inset: 0; z-index: 4; pointer-events: none; border-radius: var(--radius); mix-blend-mode: screen;
@@ -540,15 +537,15 @@ main { animation: view-in 280ms var(--ease) backwards; }
 @keyframes card-deal { from { translate: 42% 6%; rotate: 9deg; opacity: 0; } }
 button.card-back { animation: none; }
 @keyframes back-bob { 50% { translate: 0 -5px; } }
-.card-back.tell-rare { border-color: var(--pink); box-shadow: var(--lift); }
-.card-back.tell-epic { --tell: var(--yellow); border-color: var(--sun); animation: none; }
-.card-back.tell-legendary { --tell: var(--yellow); border-color: var(--yellow); animation: none; }
+.card-back.tell-rare { border-color: var(--rarity-color); box-shadow: var(--lift); }
+.card-back.tell-epic { --tell: var(--rarity-color); border-color: var(--rarity-color); animation: none; }
+.card-back.tell-legendary { --tell: var(--rarity-color); border-color: var(--rarity-color); animation: none; }
 @keyframes tell-pulse { 0%, 100% { box-shadow: var(--lift); } 50% { box-shadow: var(--lift); } }
 @keyframes back-rattle { 0%, 100% { translate: 0 0; rotate: 0deg; } 25% { translate: -1.5px 1px; rotate: -.8deg; } 75% { translate: 1.5px -1px; rotate: .8deg; } }
 .stack-stage { transition: border-color 300ms, box-shadow 300ms; }
-.glow-rare { border-color: var(--pink); box-shadow: var(--lift); }
-.glow-epic { border-color: var(--sun); box-shadow: var(--lift); }
-.glow-legendary { border-color: var(--yellow); box-shadow: var(--lift); }
+.glow-rare { border-color: var(--rarity-color); box-shadow: var(--lift); }
+.glow-epic { border-color: var(--rarity-color); box-shadow: var(--lift); }
+.glow-legendary { border-color: var(--rarity-color); box-shadow: var(--lift); }
 .stage-rays { position: absolute; z-index: -1; inset: -60%;
   background: var(--night-2);
   animation: none; }
@@ -795,10 +792,7 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 .pack-topline, .pack-footer { font-family: var(--body); font-size: max(15px, 4.4cqw); letter-spacing: 0; flex-wrap: wrap; }
 .tilt { transform: none; }
 .gv-card { --frame: var(--slate); --glow: var(--text); --ink: var(--night); padding: 3px; border: 3px solid var(--frame); background: var(--frame); aspect-ratio: auto; overflow: hidden; }
-.finish-rare { --frame: var(--blue); }
-.finish-epic { --frame: var(--rose); }
-.finish-legendary { --frame: var(--yellow); }
-.finish-legendary, .car-card.finish-legendary { --accent: var(--yellow); --rail: var(--yellow); }
+.car-card.finish-legendary { --accent: var(--rarity-legendary); --rail: var(--rarity-legendary); }
 .gv-card::after { display: none; }
 .gv-card.finish-legendary::after { display: block; content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 0 45%, var(--text) 45% 55%, transparent 55%); opacity: .18; animation: pixel-sheen 3s var(--ease) infinite; mix-blend-mode: normal; }
 @keyframes pixel-sheen { from { translate: -100% 0; } to { translate: 100% 0; } }

@@ -219,7 +219,8 @@ function unlock(id: string, open = false) {
   const e = vehicleById.get(id)!
   if (!act(s => craft(s, id), t('{name} {version} débloquée', { name: e.name, version: e.version }), 'legend')) return
   buzz([30, 50, 40, 50, 60])
-  flash(tone.light, 0.6); shake(2); confetti(rarityPalette[e.rarity]); sparks('.sheet-card', rarityPalette[e.rarity], 60, 1.3)
+  const colors = rarityPalette[e.rarity]
+  flash(colors[1], 0.6); shake(2); confetti(colors); sparks('.sheet-card', colors, 60, 1.3)
   if (open) emit('open', id)
 }
 function toggleLineup() {
