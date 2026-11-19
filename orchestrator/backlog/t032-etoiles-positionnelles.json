@@ -1,0 +1,15 @@
+{
+  "id": "t032-etoiles-positionnelles",
+  "title": "Étoiles de victoire parfaite à place fixe Essais / Qualifs / Finale dans la liste des rivaux",
+  "profile": "light",
+  "brief": "Ticket T-032 (tickets/032-etoile-victoire-parfaite-par-etape.md, à lire en entier ; c'est une correction d'une livraison précédente). Constat : dans src/views/RaceView.vue vers la ligne 958, la liste des rivaux construit l'indicateur avec `'★'.repeat(perfectCount) + '☆'.repeat(3 - perfectCount)` : les étoiles acquises se tassent à gauche, si bien qu'Essais + Finale parfaites s'affichent ★★☆ au lieu de ★☆★. À FAIRE : construire les trois symboles directement depuis les trois booléens ordonnés de `perfectSteps(save, rival.id)` (src/game/save.ts), dans l'ordre Essais / Qualifs / Finale, sans jamais les réordonner ; une étape verrouillée reste ☆. Libellé accessible par position (« Essais : parfaite ; Qualifs : non parfaite ; Finale : parfaite »), en français et en anglais, le compteur « 2 sur 3 » pouvant rester en complément. Ne toucher ni aux scores, ni aux récompenses, ni à la structure de la sauvegarde ; aucune migration. Ajouter ou compléter une vérification .check.cjs couvrant les 8 combinaisons. CONTRAINTES : ne pas modifier src/game/rules.ts ni src/game/data.ts (recopiés côté serveur), ne rien changer sous supabase/. Bilingue : tout texte visible passe par t('…') avec sa traduction anglaise dans src/i18n/en/ ; i18n.check.cjs, toutes les vérifications de src/game/ et le typage passent. Textes français, tutoiement. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français.",
+  "requirements": [
+    "Les trois étoiles de chaque rival suivent l'ordre fixe Essais / Qualifs / Finale : Essais + Finale parfaites donnent exactement ★☆★, seule Qualifs donne ☆★☆.",
+    "Libellé accessible par position en français et en anglais ; les 8 combinaisons sont couvertes par une vérification automatique.",
+    "Aucun changement de score, de récompense ni de structure de sauvegarde ; aucune modification de rules.ts, data.ts ni supabase/ ; i18n, typage, vérifications de src/game/ et build verts."
+  ],
+  "paths": [
+    "src/"
+  ],
+  "browser": "neon"
+}
