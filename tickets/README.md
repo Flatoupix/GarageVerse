@@ -52,6 +52,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | Ticket | Sujet | Priorité |
 |---|---|---|
 | [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
+| [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | P2 |
 | [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : couleur de rareté différente entre garage et plein écran | P2 |
