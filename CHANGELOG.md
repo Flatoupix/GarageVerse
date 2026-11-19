@@ -4,6 +4,26 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.20.0] — 2026-11-19
+
+### Ajouté
+
+- **Ouvrir 5 ou 10 boosters d’un coup.** Si tu as assez de tickets, **Révéler 5 boosters** ou **Révéler 10 boosters** ouvre tout le lot en une fois. Un récapitulatif te montre les cartes booster par booster, avec un filtre par rareté et un autre pour les nouveautés. L’ouverture un par un reste là pour le plaisir de déchirer.
+- **Annuler un achat de style.** Toucher un style que tu n’as pas encore te le montre d’abord en aperçu, sans rien dépenser : un bouton **Débloquer** confirme l’achat. Si tu changes d’avis, **Annuler** te rend crédits et doublons pendant quelques secondes.
+- **Une étoile par étape.** Chaque étape d’un rival (Essais, Qualifs, Finale) gagnée en victoire parfaite affiche son étoile, et la liste des rivaux te montre celles qu’il te reste à parfaire.
+
+### Modifié
+
+- **Préparer une course plus simplement.** Ton écurie est en haut avec **Retirer** et **Atelier** sous chaque voiture. Le coût de chaque voiture est écrit en clair, une coche marque celles choisies, et la jauge coût / plafond reste visible avec **Lancer la course** juste en dessous.
+- **Échanges en trois étapes.** Ce que tu donnes, ce que tu demandes, puis un récapitulatif avant d’envoyer, avec de petites vignettes, un tri et une recherche.
+- **Décompte à chaque mini-jeu.** En pilotage manuel, « 3, 2, 1, Partez ! » revient avant chaque secteur, plus seulement au premier.
+- **Une seule couleur par rareté.** Courante gris-bleu, Rare bleu, Épique rose, Légendaire or : partout, de l’ouverture du booster jusqu’au garage, y compris sur les pièces.
+
+### Corrigé
+
+- **Échanges.** Un doublon tiré entre-temps ne bloque plus un échange : tu donnes le nombre d’exemplaires annoncé et tu gardes le reste. Les voitures de tes écuries peuvent être échangées. Une offre que tu ne peux plus tenir est annulée avec un message, la vitrine se met à jour toute seule, l’écran Échanges s’actualise de lui-même, et une pastille signale les offres et demandes d’ami en attente.
+- **Ouverture des boosters.** Le bouton principal ne bouge plus d’une carte à l’autre.
+
 ## [0.19.0] — 2026-11-19
 
 ### Ajouté

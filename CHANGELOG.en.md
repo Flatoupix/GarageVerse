@@ -4,6 +4,26 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.20.0] — 2026-11-19
+
+### Added
+
+- **Open 5 or 10 boosters at once.** If you have enough tickets, **Reveal 5 boosters** or **Reveal 10 boosters** opens the whole batch in one go. A summary shows the cards booster by booster, with a rarity filter and a new-cards filter. Opening one at a time is still there for the joy of tearing.
+- **Undo a style purchase.** Tapping a style you don’t own yet first shows it as a preview, without spending anything: an **Unlock** button confirms the purchase. If you change your mind, **Cancel** gives your credits and duplicates back for a few seconds.
+- **One star per stage.** Each rival step (Trials, Qualifying, Final) won with a perfect victory shows its star, and the rival list shows which ones you still have to perfect.
+
+### Changed
+
+- **Simpler race preparation.** Your team is at the top with **Remove** and **Workshop** under each car. Each car’s cost is spelled out, a check mark shows the ones you picked, and the cost / cap gauge stays visible with **Start the race** right below it.
+- **Trades in three steps.** What you give, what you ask for, then a summary before sending, with small thumbnails, sorting and search.
+- **Countdown before every mini-game.** In manual driving, “3, 2, 1, Go!” comes back before every sector, not just the first.
+- **One colour per rarity.** Common blue-grey, Rare blue, Epic pink, Legendary gold: everywhere, from opening a booster to the garage, parts included.
+
+### Fixed
+
+- **Trades.** A duplicate pulled in the meantime no longer blocks a trade: you give the announced number of copies and keep the rest. Cars in your teams can be traded. An offer you can no longer honour is cancelled with a message, your showcase updates itself, the Trades screen refreshes on its own, and a badge shows pending offers and friend requests.
+- **Opening boosters.** The main button no longer moves from one card to the next.
+
 ## [0.19.0] — 2026-11-19
 
 ### Added
