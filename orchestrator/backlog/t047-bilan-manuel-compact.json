@@ -1,0 +1,17 @@
+{
+  "id": "t047-bilan-manuel-compact",
+  "title": "Pilotage manuel : alléger les résultats techniques après chaque geste",
+  "profile": "standard",
+  "brief": "Ticket T-047 (tickets/047-pilotage-manuel-bilan-compact.md, à lire en entier ; lire aussi T-048 tickets/048-course-manuelle-animation-jusqu-arrivee.md pour ne rien empêcher, sans l'implémenter). Retour du joueur : « Direction +2, 1 Parfait, 1 Bien, 0 Raté, score de base… on s'en fout », ou alors beaucoup mieux intégré. Constat : après un mini-jeu manuel, src/views/RaceView.vue (paragraphes `shown.direction`, `shown.timing`, bilan de secteur) empile compteurs de jugements, équation « score de base + direction = total » et sous-scores ; textes de src/game/turn-text.ts et src/game/timing-text.ts ; scène dans src/components/SectorRun.vue. À FAIRE : pendant l'action, seulement Parfait / Bien / Raté près de la voiture ou de la piste avec un retour visuel et sonore léger ; à la fin du secteur, le verdict, le score du joueur face au rival et, si utile, un bonus compact (« Trajectoire +2 ») ; les compteurs détaillés, l'équation et les sous-scores répétés vont dans un détail « Détails du secteur » replié par défaut (réutiliser le mécanisme de détail existant s'il y en a un). Même présentation pour le passage des vitesses et les virages. Ne pas cacher un échec ni un malus important. Garder la célébration d'une série parfaite. Lecteurs d'écran : ne pas annoncer les lignes repliées. Ne changer AUCUN calcul, modificateur, récompense, le mode Automatique ni la reprise de sauvegarde ; si turn-text.ts ou timing-text.ts sont modifiés, leurs vérifications .check.cjs restent vertes et sont adaptées. Retirer les textes et traductions devenus inutiles. CONTRAINTES : ne pas modifier src/game/rules.ts ni src/game/data.ts (recopiés côté serveur), ne rien changer sous supabase/. Bilingue : tout texte visible passe par t('…') avec sa traduction anglaise dans src/i18n/en/ ; i18n.check.cjs, toutes les vérifications de src/game/ et le typage passent. Textes français, tutoiement. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Mouvement réduit respecté. Décrire la présentation en quelques lignes dans docs/meta.md.",
+  "requirements": [
+    "Après un virage ou un passage de vitesses, l'empilement « Direction, Parfait / Bien / Raté, score de base, formule, total » n'est plus visible par défaut ; il reste accessible dans un détail replié.",
+    "Le retour immédiat et le score du secteur face au rival restent clairs ; un échec ou un malus important reste visible ; même présentation pour vitesses et virages.",
+    "À 320 et 390 px, la piste et les commandes restent visibles sans être déplacées par le bilan.",
+    "Calculs, modificateurs, récompenses, mode Automatique et reprise inchangés ; aucune modification de rules.ts, data.ts ni supabase/ ; i18n, typage, vérifications de src/game/ et build verts ; aucune erreur dans la console."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon"
+}

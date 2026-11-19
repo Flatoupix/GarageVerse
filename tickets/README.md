@@ -14,15 +14,8 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Priorité |
 |---|---|---|
-| [T-037](037-echanges-synchro-lot-change.md) | Bug échanges : « Le lot a changé », voitures d'écurie bloquées, pas d'actualisation | P1 |
-| [T-038](038-ux-selection-voitures-course-echanges.md) | UX sélection de voitures : partie visuelle à revoir dans T-046 ; échanges séparés | P2 |
 | [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
-| [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
-| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : une seule couleur par rareté (booster, effets et pièces encore différents du garage) | P2 |
-| [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
-| [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
-| [T-042](042-decompte-a-chaque-secteur.md) | Décompte complet « 3, 2, 1, Partez ! » avant chaque mini-jeu manuel, pas seulement le premier | P2 |
 | [T-043](043-bouton-mise-a-jour.md) | Bouton « Mettre à jour » quand une nouvelle version est publiée (GitHub Pages et itch.io) | P2 |
 | [T-044](044-fiche-voiture-bouton-fermer-et-boutons-pleins.md) | Fiche de voiture : × trop proche du favori, et plus de boutons pleins (hiérarchie des actions) | P2 |
 | [T-032](032-etoile-victoire-parfaite-par-etape.md) | Correction : étoiles de victoire parfaite aux positions fixes Essais / Qualifs / Finale (ex. ★☆★) | P2 |
@@ -45,11 +38,18 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Livré en |
 |---|---|---|
+| [T-037](037-echanges-synchro-lot-change.md) | Échanges : lot changé, voitures d'écurie, actualisation | v0.20.0 |
+| [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style | v0.20.0 |
+| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Une seule couleur par rareté | v0.20.0 |
+| [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton d'ouverture de booster à place fixe | v0.20.0 |
+| [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters | v0.20.0 |
+| [T-042](042-decompte-a-chaque-secteur.md) | Décompte complet avant chaque mini-jeu | v0.20.0 |
+| [T-038](038-ux-selection-voitures-course-echanges.md) | Sélection de voitures (présentation reprise dans T-046) | v0.20.0 |
 | [T-026](026-prototype-passage-vitesses-timing.md) | Pilotage manuel : passage des vitesses | v0.15.0 à v0.17.0 |
 | [T-027](027-prototype-direction-virages.md) | Pilotage manuel : virages en jeu de rythme | v0.15.0 à v0.17.0 |
 | [T-028](028-pilotage-automatique-ou-manuel.md) | Choix Automatique / Manuel, bascule en course | v0.15.0 |
 | [T-029](029-boutons-pilotage-automatique.md) | Boutons du choix Automatique / Manuel (`PilotPicker`) | v0.15.0 à v0.19.0 |
-| [T-035](035-nuit-sans-fin-pilotage-auto-manuel.md) | Nuit sans fin : Auto / Manuel sans perdre sa série | v0.19.0 |
+| [T-035](035-nuit-sans-fin-pilotage-auto-manuel.md) | Nuit sans fin : Auto / Manuel sans perdre sa série | v0.20.0 |
 | [T-008](008-echanges-de-cartes.md) | Échanges entre amis (expérimental) ; bugs dans T-037 | v0.15.0 |
 | [T-015](015-equilibrage-overdrive.md) | Playtest réel Overdrive | — |
 | [T-016](016-economie-booster-bricole-mecanique.md) | Ressenti Bricole/Mécanique (rééquilibrés en v0.6) | v0.6.0 |

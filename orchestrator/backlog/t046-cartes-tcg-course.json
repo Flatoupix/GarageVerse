@@ -1,0 +1,18 @@
+{
+  "id": "t046-cartes-tcg-course",
+  "title": "Préparation de course : retrouver les vraies cartes TCG des voitures",
+  "profile": "heavy",
+  "brief": "Ticket T-046 (tickets/046-cartes-tcg-selection-course.md, à lire en entier ; lire aussi T-038 tickets/038-ux-selection-voitures-course-echanges.md et T-041 pour ne rien empêcher, sans implémenter T-041). Retour du joueur sur la refonte T-038 : « Je veux le système d'avant, c'était mieux » ; l'écurie montre de petites vignettes avec Retirer / Atelier et le garage une liste textuelle, l'identité « jeu de cartes à collectionner » est perdue. RÉFÉRENCE : l'ancienne présentation est celle d'avant le commit 5a2021a (passe 1 de t038) ; la lire avec `git show 5a2021a^:src/views/RaceView.vue` (lecture seule ; si git n'est pas disponible pour toi, l'étape d'implémentation le peut, et le ticket décrit les éléments à retrouver) et rétablir ses cartes plutôt qu'inventer une troisième présentation. À FAIRE : 1) les trois emplacements de l'écurie montrent de vraies cartes (src/components/CarCard.vue ou une variante compacte fidèle : illustration, habillage, rareté, édition), à une taille reconnaissable ; 2) le choix dans le garage met les cartes au premier plan (grille ou défilement horizontal contrôlé), la carte choisie restant nettement marquée (coche, aria-pressed) ; 3) garder les apports utiles de T-038 : trois emplacements, choisir / remplacer / retirer en un geste, compteur coût / plafond toujours visible, raison sur les voitures hors plafond, bouton Lancer bien placé et désactivé avec la raison, zones tactiles d'au moins 44 px ; 4) actions claires : sélectionner / retirer évident, fiche de la voiture accessible en touchant la carte si c'était le comportement d'avant, Atelier en action secondaire qui ne recouvre pas l'illustration ; 5) sur mobile, cartes visibles sans être écrasées ni imposer un défilement interminable ; éditions spéciales, Pixel, thèmes, favoris et contraintes de coût lisibles. Même fonctionnement pour les rivaux, le défi du jour et la Nuit sans fin (`lineupCheck`, `dailyLineupCheck`, `nightLineupCheck`). Ne pas changer la logique d'échange ni les règles ; aucune régression des sauvegardes ni des scores. Mettre à jour la description du parcours dans docs/meta.md. CONTRAINTES : ne pas modifier src/game/rules.ts ni src/game/data.ts (recopiés côté serveur), ne rien changer sous supabase/. Bilingue : tout texte visible passe par t('…') avec sa traduction anglaise dans src/i18n/en/ ; i18n.check.cjs, toutes les vérifications de src/game/ et le typage passent. Textes français, tutoiement. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Cohérence avec les huit thèmes (src/themes/) et le mouvement réduit.",
+  "requirements": [
+    "Les trois voitures de l'écurie apparaissent comme de vraies cartes, reconnaissables comme au garage, fidèles à la présentation d'avant T-038.",
+    "Le choix dans le garage garde les codes visuels TCG ; les cartes choisies sont nettement distinguées ; coût total et plafond restent lisibles.",
+    "Choisir, retirer, fiche et atelier sont compréhensibles sans masquer l'illustration ni déclencher d'action involontaire ; même fonctionnement pour rivaux, défi du jour et Nuit sans fin.",
+    "Aucune régression des sauvegardes, des scores, des échanges ; aucune modification de rules.ts, data.ts ni supabase/ ; i18n, typage, vérifications de src/game/ et build verts.",
+    "Aucune erreur dans la console ni débordement à 320, 390 et 1280 px dans au moins deux thèmes, avec trois cartes choisies et un garage volumineux."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon"
+}
