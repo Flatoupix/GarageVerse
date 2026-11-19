@@ -1,10 +1,10 @@
-# T-037 · Suggestions d'écurie avant une course
+# T-041 · Suggestions d'écurie avant une course
 
 - **Type :** Ergonomie / aide à la décision
 - **Priorité :** P2
 - **Statut :** À valider (maquette à 320/390 px avant code) ; pas de choix automatique imposé au joueur
 - **Demande :** retour du joueur du 19 novembre 2026 : « faire des suggestions de sélection de voiture pour une course ». Les suggestions d'amélioration (atelier) ont été écartées par le joueur : **hors périmètre**.
-- **Tickets et sources liés :** [T-017 · Sélection course/garage](017-ux-selection-course-garage.md) (ne pas relancer la grille commune) ; [T-012 · Auras](012-aura-synergies-conditionnelles.md) ; [docs/meta.md](../docs/meta.md) « Choix des voitures d'une course » ; [RaceView.vue](../src/views/RaceView.vue) ; [rules.ts](../src/game/rules.ts) ; [save.ts](../src/game/save.ts).
+- **Tickets et sources liés :** [T-038 · Ergonomie de la sélection de voitures](038-ux-selection-voitures-course-echanges.md) (même écran, à concevoir ensemble) ; [T-017 · Sélection course/garage](017-ux-selection-course-garage.md) (ne pas relancer la grille commune) ; [T-012 · Auras](012-aura-synergies-conditionnelles.md) ; [docs/meta.md](../docs/meta.md) « Choix des voitures d'une course » ; [RaceView.vue](../src/views/RaceView.vue) ; [rules.ts](../src/game/rules.ts) ; [save.ts](../src/game/save.ts).
 
 ## 1. Intention
 

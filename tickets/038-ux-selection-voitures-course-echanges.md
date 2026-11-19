@@ -4,7 +4,7 @@
 - **Priorité :** P2
 - **Statut :** À concevoir puis implémenter ; aucune règle de jeu modifiée
 - **Signalement :** retour du joueur du 19 novembre 2026 : « l'UX est vraiment à revoir pour la partie sélection de voiture, c'est pas du tout intuitif », pour les **deux** écrans
-- **Tickets liés :** [T-017 · sélection course/garage](017-ux-selection-course-garage.md), [T-029 · boutons automatique / manuel](029-boutons-pilotage-automatique.md), [T-037 · bugs des échanges](037-echanges-synchro-lot-change.md), [T-008 · Échanges de cartes](008-echanges-de-cartes.md)
+- **Tickets liés :** [T-041 · suggestions d'écurie](041-suggestions-ecurie-avant-course.md) (à concevoir ensemble), [T-017 · sélection course/garage](017-ux-selection-course-garage.md), [T-029 · boutons automatique / manuel](029-boutons-pilotage-automatique.md), [T-037 · bugs des échanges](037-echanges-synchro-lot-change.md), [T-008 · Échanges de cartes](008-echanges-de-cartes.md)
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (préparation : `lineup`, `toggle`, `.lineup-slots`, `.pick-list`), [`src/views/FriendsView.vue`](../src/views/FriendsView.vue) (brouillon d'offre et vitrine), [`src/components/TradeCard.vue`](../src/components/TradeCard.vue), [`src/components/CarCard.vue`](../src/components/CarCard.vue), [`src/themes/base.css`](../src/themes/base.css)
 
 ## Constat : préparation de course (capture à 390 px, Boulevard Minitel)
