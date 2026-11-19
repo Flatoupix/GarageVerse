@@ -19,7 +19,6 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
 | [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : une seule couleur par rareté (booster, effets et pièces encore différents du garage) | P2 |
-| [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
 | [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
 | [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
@@ -77,11 +76,12 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil (à rapprocher de T-036) | P3 |
 | [T-024](024-verification-donnees-et-droits.md) | Fiches, histoires et provenance (analyse des droits dans T-040) | P3 |
 
-## Remplacés
+## Remplacés ou abandonnés
 
-| Ticket | Sujet | Remplacé par |
+| Ticket | Sujet | Remplacé par / décision |
 |---|---|---|
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | T-038 et T-041 |
+| [T-031](031-bug-edition-16-bits-de-base.md) | Bug du 16 bits en double, non reproduit | abandonné |
 
 Prochain numéro libre : **T-044**. Avant d'en créer un, vérifier `dev` sur GitHub : plusieurs sessions ajoutent des tickets en parallèle.
 

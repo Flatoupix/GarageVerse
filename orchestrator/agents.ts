@@ -174,12 +174,16 @@ async function attempt(
     binary = binaries.claude
     // En relais de Codex, Claude édite la copie jetable et ne peut lancer que la vérification de typage.
     const relay = phase === 'implement'
-    if (!relay) cwd = step
+    // Le plan et la revue lisent la copie isolée du cycle, sans rien pouvoir modifier ni exécuter : un bug se cherche dans le code.
+    const reader = phase === 'plan' || phase === 'review'
+    if (!relay && !reader) cwd = step
     args = [...modelArgs, '--print', '--output-format', 'json', '--json-schema', JSON.stringify(schema),
       ...(relay
         ? ['--permission-mode', 'acceptEdits', '--tools', 'Read,Edit,Write,Glob,Grep,Bash',
           '--allowedTools', 'Read,Edit,Write,Glob,Grep,Bash(node node_modules/.bin/vue-tsc --noEmit)']
-        : ['--permission-mode', 'plan', '--tools', '']),
+        : reader
+          ? ['--permission-mode', 'dontAsk', '--tools', 'Read,Glob,Grep', '--allowedTools', 'Read(./**),Glob,Grep']
+          : ['--permission-mode', 'plan', '--tools', '']),
       '--strict-mcp-config', '--setting-sources', '',
       '--no-session-persistence', '--no-chrome', '--max-budget-usd', String(relay ? budget * 3 : budget)]
     input = prompt
@@ -214,6 +218,12 @@ async function attempt(
   const output = result.stdout + '\n' + result.stderr
   // Bac à sable de Codex indisponible (bwrap sans espaces de noms utilisateur, par exemple dans un conteneur) : maillon suivant.
   if (codex && /bwrap:|unprivileged_userns|user namespace/i.test(output)) return { tokens, problem: 'bac à sable Codex indisponible', unavailable: true }
+  // Antigravity ne fait que relire (captures ou diff) : sans rapport, quelle qu'en soit la raison (quota épuisé, refus,
+  // délai), le maillon suivant reprend l'étape. La sortie brute est gardée pour comprendre le refus.
+  if (!final && engine === 'agy') {
+    await writeFile(join(step, `antigravity-${link.model ?? 'defaut'}.log`), redact(output).slice(-8000), { mode: 0o600 }).catch(() => {})
+    return { tokens, problem: failure(result), unavailable: true }
+  }
   // Quota, session, surcharge ou modèle absent : le maillon suivant de la chaîne reprend la même étape.
   if (!final && (unavailable.test(output) || /quota|authentification/.test(failure(result)))) {
     return { tokens, problem: failure(result), unavailable: true }

@@ -43,6 +43,12 @@ try {
     const errors: string[] = []
     page.on('pageerror', error => errors.push(error.name))
     const button = (name: string | RegExp) => page.getByRole('button', { name, exact: typeof name === 'string' })
+    // Une voiture déjà possédée tirée dans une autre édition demande d'abord quelle apparence garder : le tirage est aléatoire.
+    const keepAppearance = async (next: string | RegExp) => {
+      const keep = button('Garder l’apparence actuelle')
+      await button(next).or(keep).first().waitFor()
+      if (await keep.isVisible()) await keep.tap()
+    }
     const capture = async (name: string) => {
       const file = `${width}-${name}.png`
       // Une notification passagère ne doit pas figurer sur la capture.
@@ -87,6 +93,7 @@ try {
           await page.locator('.flip-front').waitFor()
           await capture('carte')
         }
+        await keepAppearance(slot === 4 ? /^Voir le récapitulatif/ : /^Carte suivante/)
         await button(slot === 4 ? /^Voir le récapitulatif/ : /^Carte suivante/).tap()
       }
       assert.equal(await page.locator('.recap-grid .card-tile').count(), 5)
@@ -153,6 +160,7 @@ try {
           await page.locator('.flip-front').waitFor()
           await capture('carte')
         }
+        await keepAppearance(slot === 4 ? 'Voir le récapitulatif' : 'Carte suivante')
         await button(slot === 4 ? 'Voir le récapitulatif' : 'Carte suivante').tap()
       }
       assert.equal(await page.locator('.recap-grid .card-tile').count(), 5)

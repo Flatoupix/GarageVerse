@@ -2,7 +2,7 @@
 
 - **Type :** Bug de collection
 - **Priorité :** P2
-- **Statut :** Non reproduit : un tirage en édition alternative d'une voiture déjà possédée en 16 bits donne bien une seule tuile au récapitulatif et au garage (test navigateur du 19 novembre 2026). Test de la règle renforcé dans `src/game/edition.check.cjs`. **En attente d'une capture du joueur** montrant l'écran où la carte apparaît en double
+- **Statut :** **Abandonné** le 19 novembre 2026, à la demande du joueur. Non reproduit au navigateur ; le test de la règle « un tirage = l'édition tirée » reste dans `src/game/edition.check.cjs`
 - **Signalement :** Retour du joueur, 18 novembre 2026 : « Il y a un souci avec le déblocage des cartes 16 bits de base, peu importe l'autre édition. Résultat : quand on a une autre édition sur 16 bits, on a deux [cartes]. »
 - **Précision du joueur (18 novembre 2026) :** « Deux tuiles pour un tirage, il ne faut qu'il n'y ait que le tirage courant. »
 - **Fichiers à examiner :** [`src/game/save.ts`](../src/game/save.ts) (tirage d'un booster, `addCar`, `unlockEdition`, `selectEdition`, normalisation à la lecture de sauvegarde), [`src/game/data.ts`](../src/game/data.ts) (`PIXEL`, `defaultStyle`, `stylesOf`, `altStyles`), [`src/views/GarageView.vue`](../src/views/GarageView.vue) et [`src/views/ShowroomView.vue`](../src/views/ShowroomView.vue) (une tuile par édition), [`src/views/CarSheet.vue`](../src/views/CarSheet.vue)
