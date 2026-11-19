@@ -9,6 +9,8 @@ export const vuesCourse: Dict = {
   'Pilotage : {mode}': 'Driving mode: {mode}',
   'En auto, le hasard joue sur ton score. En manuel, tu passes les vitesses et tu négocies les virages si tu les as activés.': 'In automatic, luck affects your score. In manual, you shift gears and steer through corners if you enabled them.',
   'Passer en automatique pour la suite': 'Switch to automatic for the rest of the race',
+  'Auto : le hasard décide de la variation. Manuel : c’est ton adresse.': 'Automatic: luck decides the variation. Manual: it’s down to your skill.',
+  'Pilotage de la dernière manche : {mode}': 'Last round’s driving mode: {mode}',
   'de {low} à {high} points': '{low} to {high} points',
   'Ici, c’est l’{stat} qui compte : choisis ta voiture.': 'Here, {stat} is what counts: pick your car.',
   'Ici, c’est la {stat} qui compte : choisis ta voiture.': 'Here, {stat} is what counts: pick your car.',

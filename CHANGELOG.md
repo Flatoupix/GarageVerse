@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.19.0] — 2026-11-19
+
+### Ajouté
+
+- **Nuit sans fin : Automatique ou Manuel.** Si le mode timing est activé, tu choisis maintenant ton pilotage avant de commencer la nuit, puis de nouveau à chaque **Manche suivante**, sans perdre ta série ni tes gains. L’automatique reste la valeur par défaut. En pleine manche manuelle, **Passer en automatique pour la suite** te laisse finir la manche au hasard. L’écran entre deux manches et le bilan de fin de nuit rappellent le pilotage utilisé.
+
 ## [0.18.0] — 2026-11-19
 
 ### Ajouté

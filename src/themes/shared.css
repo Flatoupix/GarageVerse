@@ -662,6 +662,8 @@
 .race-pilot-options .gv-button-content { white-space: nowrap; }
 .race-pilot small { display: block; margin-top: 6px; color: var(--muted); line-height: 1.4; }
 .pilot-switch { margin: 8px 0; white-space: normal; }
+.pilot-now { margin: 8px 0 0; color: var(--muted); font-size: .9rem; }
+.night-panel .race-pilot { margin: 12px auto 16px; width: 100%; text-align: left; }
 @keyframes gv-sweep { 25% { opacity: 1; } to { opacity: 0; transform: translateX(65%); } }
 .garage-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
 .garage-sort-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 3px; }

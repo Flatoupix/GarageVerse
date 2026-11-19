@@ -21,6 +21,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-005](005-versus-client-temps-reel.md) | Client Versus et reprise | P1 |
 | [T-006](006-versus-interface-mobile.md) | Interface de duel mobile | P1 |
 | [T-007](007-versus-amis-palmares-v2.md) | Palmarès V2 (la liste d'amis passe dans [T-008](008-echanges-de-cartes.md)) | P2 |
+| [T-037](037-echanges-synchro-lot-change.md) | Bug échanges : « Le lot a changé », voitures d'écurie bloquées, pas d'actualisation | P1 |
 | [T-008](008-echanges-de-cartes.md) | Échanges de cartes entre amis, dissociés du Versus et livrés avant lui | P2 |
 
 ## Gameplay, collection et économie
@@ -50,12 +51,16 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Priorité |
 |---|---|---|
+| [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
+| [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | P2 |
+| [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, sans choix imposé | P2 |
 | [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : couleur de rareté différente entre garage et plein écran | P2 |
 | [T-029](029-boutons-pilotage-automatique.md) | Boutons propres pour le choix automatique / manuel (dépend des prototypes T-026/T-027) | P2 |
 | [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
 | [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
+| [T-040](040-package-apk-android.md) | Package APK Android (Capacitor, hors ligne) et édition publique sans les 13 voitures sous licence | P2 |
 | [T-022](022-android-pwa-premier-lancement.md) | Android, PWA et accueil | P3 |
 | [T-036](036-refonte-musiques-bruitages.md) | Refonte artistique des musiques et du sound design, avec écoutes A/B et mixage mobile | P2 |
 | [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil | P3 |
