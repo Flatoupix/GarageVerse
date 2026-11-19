@@ -15,7 +15,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | Ticket | Sujet | Priorité |
 |---|---|---|
 | [T-037](037-echanges-synchro-lot-change.md) | Bug échanges : « Le lot a changé », voitures d'écurie bloquées, pas d'actualisation | P1 |
-| [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
+| [T-038](038-ux-selection-voitures-course-echanges.md) | UX sélection de voitures : partie visuelle à revoir dans T-046 ; échanges séparés | P2 |
 | [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
 | [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : une seule couleur par rareté (booster, effets et pièces encore différents du garage) | P2 |
@@ -25,7 +25,11 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-042](042-decompte-a-chaque-secteur.md) | Décompte complet « 3, 2, 1, Partez ! » avant chaque mini-jeu manuel, pas seulement le premier | P2 |
 | [T-043](043-bouton-mise-a-jour.md) | Bouton « Mettre à jour » quand une nouvelle version est publiée (GitHub Pages et itch.io) | P2 |
 | [T-044](044-fiche-voiture-bouton-fermer-et-boutons-pleins.md) | Fiche de voiture : × trop proche du favori, et plus de boutons pleins (hiérarchie des actions) | P2 |
-| [T-032](032-etoile-victoire-parfaite-par-etape.md) | Étoile de victoire parfaite sur chaque étape d'un rival (Essais, Qualifs, Finale) | P3 |
+| [T-032](032-etoile-victoire-parfaite-par-etape.md) | Correction : étoiles de victoire parfaite aux positions fixes Essais / Qualifs / Finale (ex. ★☆★) | P2 |
+| [T-045](045-bouton-retour-plus-grand-plein.md) | Bouton Retour / Back plus grand, plein et tactile sur la préparation de course | P2 |
+| [T-046](046-cartes-tcg-selection-course.md) | Rétablir les vraies cartes TCG en sélection de voitures de course (régression de T-038) | P2 |
+| [T-047](047-pilotage-manuel-bilan-compact.md) | Alléger les informations de score et de direction après les mini-jeux manuels | P2 |
+| [T-048](048-course-manuelle-animation-jusqu-arrivee.md) | Rendre la course du mini-jeu réelle et continue jusqu'à l'arrivée, sans second replay | P2 |
 
 ## Chantiers plus larges
 
@@ -84,7 +88,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | T-038 et T-041 |
 | [T-031](031-bug-edition-16-bits-de-base.md) | Bug du 16 bits en double, non reproduit | abandonné |
 
-Prochain numéro libre : **T-045**. Avant d'en créer un, vérifier `dev` sur GitHub : plusieurs sessions ajoutent des tickets en parallèle.
+Prochain numéro libre : **T-049**. Avant d'en créer un, vérifier `dev` sur GitHub : plusieurs sessions ajoutent des tickets en parallèle.
 
 ## Déjà livré, ne pas créer de nouveaux tickets identiques
 
