@@ -86,11 +86,12 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 
 Chaque booster contient cinq cartes, dont au plus `maxParts` pièces mécaniques (2 pour les trois boosters actuels, 1 par défaut si le champ est absent). Le jeu détermine le type puis la rareté de chaque carte et choisit des pièces et des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé dès que le sachet est scellé, à l’achat ou avec un ticket. L’ouverture réutilise exactement ce tirage ; les anciens sachets sans tirage enregistré tirent encore à la déchirure. Une couverture légendaire (illustration dédiée, cadre et halo dorés, étincelles et ruban « Édition légendaire ») signale la présence d’au moins une Légendaire ; la boutique garde la couverture normale. Le sachet métallisé porte le logo néon et les couleurs de sa collection. Son reflet et son frémissement légendaire sont immobiles en mouvement réduit. Un rechargement retrouve le même lot sans retirage, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
-Pendant l’ouverture, deux rangées d’actions sont réservées en bas de la scène,
-au-dessus des onglets et de la zone sûre. Les messages disposent d’une hauteur
-fixe au-dessus et défilent si besoin. Les choix d’édition prennent la place du
-bouton principal. Le récapitulatif utilise la même zone d’actions et sa grille
-de cartes défile au-dessus. Le guide du mécano défile sous le sachet.
+Pendant l’ouverture, la grille de la scène réserve deux rangées d’actions en
+bas, au-dessus des onglets et de la zone sûre. Leur hauteur reste la même avec
+un seul bouton, avec les choix d’édition et au récapitulatif. Les libellés
+peuvent revenir à la ligne. Les messages défilent dans une zone de hauteur fixe.
+La grille du récapitulatif défile au-dessus des actions et le guide du mécano
+défile sous le sachet.
 
 ## 7. Direction artistique et thèmes d’interface
 

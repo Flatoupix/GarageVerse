@@ -898,10 +898,13 @@ main.race { animation-name: race-view-in; }
   padding-bottom: 12px; animation-name: race-view-in;
 }
 .booster-stage {
-  display: grid; grid-template-rows: minmax(0, 1fr) 4.75rem auto;
+  --booster-action-row: max(52px, 3.75rem);
+  --booster-action-gap: 8px;
+  --booster-actions-height: calc(2 * var(--booster-action-row) + var(--booster-action-gap));
+  display: grid; grid-template-rows: minmax(0, 1fr) 4.75rem var(--booster-actions-height);
   gap: 8px; min-width: 0; text-align: center;
 }
-.booster-recap { grid-template-rows: minmax(0, 1fr) auto; }
+.booster-recap { grid-template-rows: minmax(0, 1fr) var(--booster-actions-height); }
 .booster-art {
   min-width: 0; overflow: hidden auto; overscroll-behavior: contain; container-type: size;
 }
@@ -923,8 +926,8 @@ main.race { animation-name: race-view-in; }
 
 /* Deux rangées réservées dès le sachet, au-dessus de la navigation. */
 .booster-stage .booster-actions {
-  display: grid; grid-template: repeat(2, 52px) / repeat(2, minmax(0, 1fr));
-  gap: 8px; width: 100%; max-width: 420px; margin: 0 auto;
+  display: grid; grid-template: repeat(2, var(--booster-action-row)) / repeat(2, minmax(0, 1fr));
+  gap: var(--booster-action-gap); width: 100%; max-width: 420px; margin: 0 auto;
 }
 .booster-actions > .button {
   grid-column: 1 / -1; min-width: 0; margin: 0; padding: 4px 8px;
