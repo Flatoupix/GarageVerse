@@ -4,6 +4,16 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.18.0] — 2026-11-19
+
+### Added
+
+- **Loading screen.** At launch, the game first loads everything the home screen and garage need, with a progress bar: no more late images or blank cards. The rest of the artwork then downloads in the background while you play. On a slow connection, a **Skip** button shows up after a few seconds.
+
+### Fixed
+
+- **No more white flash at launch.** The screen stays dark from the very first moment until the logo.
+
 ## [0.17.0] — 2026-11-18
 
 ### Added
