@@ -69,7 +69,7 @@ const glow = computed(() => {
 
 // Plus la carte est rare, plus la révélation est spectaculaire.
 function celebrate(rarity: Rarity, target = '.card-stack') {
-  const colors = rarityPalette[rarity]
+  const colors = rarityPalette(rarity)
   if (rarity === 'Courante') { sparks(target, colors, 10, 0.6); return }
   ring(target, colors[0])
   if (rarity === 'Rare') { sparks(target, colors, 28); buzz(15); return }
@@ -105,7 +105,7 @@ async function openPack() {
   sound(legendaryTear.value ? 'legend' : 'tear')
   buzz(25)
   const pack = document.querySelector('.tear-pack')?.getBoundingClientRect()
-  const legendColors = rarityPalette.Légendaire
+  const legendColors = rarityPalette('Légendaire')
   flash(legendaryTear.value ? legendColors[0] : tone.rose, 0.35); shake(2, '.tear-pack')
   if (pack) sparks({ x: pack.left + pack.width / 2, y: pack.top + pack.height * 0.1 }, legendaryTear.value ? legendColors : [...palettes.pink, ...palettes.cyan], 44, 1.1)
   if (reduced.value) { focusRevealAction(); return }

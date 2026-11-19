@@ -792,7 +792,7 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 .pack-topline, .pack-footer { font-family: var(--body); font-size: max(15px, 4.4cqw); letter-spacing: 0; flex-wrap: wrap; }
 .tilt { transform: none; }
 .gv-card { --frame: var(--slate); --glow: var(--text); --ink: var(--night); padding: 3px; border: 3px solid var(--frame); background: var(--frame); aspect-ratio: auto; overflow: hidden; }
-.car-card.finish-legendary { --accent: var(--rarity-legendary); --rail: var(--rarity-legendary); }
+.gv-card.finish-legendary { --accent: var(--rarity-legendary); --rail: var(--rarity-legendary); }
 .gv-card::after { display: none; }
 .gv-card.finish-legendary::after { display: block; content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, transparent 0 45%, var(--text) 45% 55%, transparent 55%); opacity: .18; animation: pixel-sheen 3s var(--ease) infinite; mix-blend-mode: normal; }
 @keyframes pixel-sheen { from { translate: -100% 0; } to { translate: 100% 0; } }

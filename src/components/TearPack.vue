@@ -43,7 +43,7 @@ function move(event: PointerEvent) {
   progress.value = Math.min(1, Math.max(0, horizontal / finger.distance))
   bend.value = progress.value * finger.direction * 5
   // Étincelles et petits crans sous le doigt pendant la déchirure.
-  if (progress.value > 0.04 && event.timeStamp - sparkAt > 45) { sparkAt = event.timeStamp; sparks({ x: event.clientX, y: event.clientY }, props.legend ? rarityPalette.Légendaire : palettes.pink, 3, 0.45) }
+  if (progress.value > 0.04 && event.timeStamp - sparkAt > 45) { sparkAt = event.timeStamp; sparks({ x: event.clientX, y: event.clientY }, props.legend ? rarityPalette('Légendaire') : palettes.pink, 3, 0.45) }
   if (Math.floor(progress.value * 8) !== notch) { notch = Math.floor(progress.value * 8); buzz(5) }
   if (progress.value >= 1 && vertical <= 86) {
     finger = undefined

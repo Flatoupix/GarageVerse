@@ -135,6 +135,7 @@
   border: 1px solid currentColor;
   opacity: .55;
 }
+:where(.mod-slot.mod-crest .mod-lamps i) { --rarity-color: var(--rarity-common); }
 .mod-slot.mod-crest .mod-lamps i.fitted {
   --lamp: var(--rarity-color);
   opacity: 1;
@@ -525,6 +526,10 @@
   --frame: var(--rarity-color);
   border-color: var(--rarity-color);
   box-shadow: 0 0 12px color-mix(in srgb, var(--rarity-color) 35%, transparent);
+}
+.gv-card.part-card {
+  background: linear-gradient(var(--night), var(--night)) content-box,
+    var(--part-frame-effect, none) var(--frame);
 }
 .card-back.tell-common, .stack-stage:is(.glow-common, .glow-rare, .glow-epic, .glow-legendary) {
   border-color: var(--rarity-color);
