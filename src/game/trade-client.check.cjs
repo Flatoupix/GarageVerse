@@ -7,7 +7,7 @@ const compile = filename => ts.transpileModule(fs.readFileSync(filename, 'utf8')
   compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, esModuleInterop: true },
 }).outputText
 require.extensions['.ts'] = (module, filename) => module._compile(compile(filename), filename)
-const { newSave, readSave, sellCheck } = require('./save.ts')
+const { discardEditionPurchase, newSave, readSave, sellCheck } = require('./save.ts')
 const rules = require('./trade.ts')
 const store = { save: newSave(), storageWarning: { value: false }, exchangeAlerts: { offers: 0, friends: 0 } }
 const navigator = { onLine: true }
@@ -75,7 +75,7 @@ const db = {
 }
 
 let imports = 0
-const mocks = { './trade': rules, './save': { SAVE_KEY: 'save' }, './store': store,
+const mocks = { './trade': rules, './save': { SAVE_KEY: 'save', discardEditionPurchase }, './store': store,
   './features': { VERSUS_OPEN: false }, '../i18n': { t: text => text }, './versus': { db } }
 function loadClient() {
   const exports = {}

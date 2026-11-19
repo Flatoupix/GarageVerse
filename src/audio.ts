@@ -95,13 +95,13 @@ export function unlockAudio() {
   } catch { /* Web Audio peut être indisponible. */ }
 }
 
-export function playSample(cue: string, ctx: AudioContext) {
+export function playSample(cue: string, ctx: AudioContext, output = effectsOutput()) {
   const sample = samples.find(name => name === cue)
   const buffer = sample && buffers.get(sample)
   if (!buffer) return false
   const source = ctx.createBufferSource()
   source.buffer = buffer
-  source.connect(effectsOutput())
+  source.connect(output)
   source.start()
   return true
 }

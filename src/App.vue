@@ -151,7 +151,7 @@ function transferFeedback(text: string, error = false) {
 function exportSave() {
   let url: string | undefined
   try {
-    url = URL.createObjectURL(new Blob([JSON.stringify(save, null, 2)], { type: 'application/json' }))
+    url = URL.createObjectURL(new Blob([JSON.stringify({ ...save, editionPurchase: undefined }, null, 2)], { type: 'application/json' }))
     const link = document.createElement('a')
     link.href = url
     link.download = `garageverse-${new Date().toISOString().slice(0, 10)}.json`

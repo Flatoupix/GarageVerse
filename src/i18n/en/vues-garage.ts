@@ -39,6 +39,8 @@ export const vuesGarage: Dict = {
   '{n}/{total} débloqué': '{n}/{total} unlocked',
   '{n}/{total} débloqués': '{n}/{total} unlocked',
   'Change l’apparence de ta carte ou débloque un autre style créé pour cette voiture avec des crédits et {n} doublons.': 'Change how your card looks, or unlock another style made for this car with credits and {n} duplicates.',
+  'Aperçu': 'Preview',
+  'Achat annulé : {credits} ₡ et {n} doublons rendus': 'Purchase undone: {credits} ₡ and {n} duplicates refunded',
   '✓ Affiché': '✓ Shown',
   'Appliquer': 'Apply',
   'Débloquer · {price} ₡ + {n} doublons': 'Unlock · {price} ₡ + {n} duplicates',

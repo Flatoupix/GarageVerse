@@ -35,7 +35,7 @@ window.addEventListener('storage', event => {
 
 export function persist() {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(save))
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...save, editionPurchase: undefined }))
     storageWarning.value = false
   } catch {
     storageWarning.value = true

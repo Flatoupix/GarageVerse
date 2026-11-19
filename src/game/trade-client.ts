@@ -1,7 +1,7 @@
 // Le serveur décide de la livraison. La sauvegarde fait foi pour les mouvements déjà appliqués.
 import { t } from '../i18n'
 import { VERSUS_OPEN } from './features'
-import { SAVE_KEY, type Save } from './save'
+import { discardEditionPurchase, SAVE_KEY, type Save } from './save'
 import { exchangeAlerts, save, storageWarning } from './store'
 import { acknowledgeTrade, completeTrade, normalizeTradeCar, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods, type TradeOffer } from './trade'
 
@@ -114,13 +114,14 @@ function update(connection: Connection, change: (draft: Save) => void) {
   const after = JSON.stringify(draft)
   if (after === before) return
   try {
-    localStorage.setItem(SAVE_KEY, after)
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...draft, editionPurchase: undefined }))
     storageWarning.value = false
   } catch {
     storageWarning.value = true
     throw new Error(t('Impossible d’enregistrer cet échange sur cet appareil.'))
   }
   const { cars, parts, credits, lineup, nightLineup, dailyLineup, seenCars, trades, tradeHistory } = draft
+  if (!draft.editionPurchase) delete save.editionPurchase
   Object.assign(save, { cars, parts, credits, lineup, nightLineup, dailyLineup, seenCars, trades, tradeHistory })
 }
 
@@ -215,6 +216,7 @@ async function refreshShowcase(connection: Connection) {
     const ids = Object.keys(shown).filter(id => Object.hasOwn(save.cars, id))
     const current = (id: string) => JSON.stringify(normalizeTradeCar(id, save.cars[id]))
     if (ids.length === Object.keys(shown).length && ids.every(id => current(id) === JSON.stringify(shown[id]))) return
+    for (const id of ids) discardEditionPurchase(save, id)
     await call(connection, 'set-showcase', { cars: Object.fromEntries(ids.map(id => [id, save.cars[id]])) })
   } catch {
     // La prochaine synchronisation réessaiera ; les échanges eux-mêmes ne dépendent pas de cette mise à jour.
@@ -240,6 +242,7 @@ export const claimTrade = (id: string) => run(connection => reconcile(connection
 
 export const publishShowcase = (carIds: readonly string[]) => run(async connection => {
   check(validateTradeShowcase(save, carIds))
+  for (const id of carIds) discardEditionPurchase(save, id)
   await call(connection, 'set-showcase', { cars: Object.fromEntries(carIds.map(id => [id, save.cars[id]])) })
 })
 

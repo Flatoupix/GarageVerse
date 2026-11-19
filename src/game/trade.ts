@@ -2,7 +2,7 @@
 import { t } from '../i18n'
 import { partById, stylesOf, vehicleById } from './data'
 import { compatibility, extraSlotFamily, partUnlockLevel, upgradeKeys } from './rules'
-import type { OwnedCar, Save } from './save'
+import { discardEditionPurchase, type OwnedCar, type Save } from './save'
 
 export interface TradeOffer { cars: readonly string[]; credits: number }
 export interface TradeGoods { cars: Record<string, OwnedCar>; credits: number }
@@ -101,6 +101,7 @@ export function openTrade(save: Save, id: string, offer: TradeOffer): string | u
   if (!validId(id) || used(save, id)) return t('Échange indisponible')
   const problem = validateTradeOffer(save, offer)
   if (problem) return problem
+  for (const carId of offer.cars) discardEditionPurchase(save, carId)
   write(save, { id, state: 'ouverte', offer: { cars: [...offer.cars], credits: offer.credits } })
 }
 
@@ -156,6 +157,7 @@ export function transitTrade(save: Save, id: string, offer?: TradeOffer, adverti
   if (mounted.some(([partId, count]) => (save.parts[partId] ?? 0) < count)) return t('Stock de pièces incohérent pour cet échange')
   for (const [partId, count] of mounted) save.parts[partId] -= count
   for (const carId of outgoing.cars) {
+    discardEditionPurchase(save, carId)
     if (surplus[carId]) save.cars[carId].copies = surplus[carId]
     else delete save.cars[carId]
   }

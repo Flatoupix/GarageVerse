@@ -120,3 +120,94 @@ for (const style of [defaultStyle(legend), PIXEL, 'Solarpunk']) {
   assert.equal(after.cars[legend].copies, 1)
 }
 console.log('Tirages : seules les éditions tirées sont ajoutées, même après rechargement : OK')
+
+const { scrapCar, sellCar, undoEditionUnlock } = require('./save.ts')
+const { inTransit, openTrade, returnTrade, transitTrade, TRADE_CREDIT_LIMIT } = require('./trade.ts')
+const at = 1000
+
+function garage(copies = 3) {
+  const state = newSave()
+  state.credits = TRADE_CREDIT_LIMIT
+  state.cars[id].copies = copies
+  state.lineup = []
+  state.nightLineup = []
+  state.cars.f40 = { ...structuredClone(state.cars[id]), copies: 3, editions: ['Solarpunk'], shown: 'Solarpunk' }
+  return state
+}
+
+function bought(copies) {
+  const state = garage(copies)
+  assert.equal(unlockEdition(state, id, 'Solarpunk', at), undefined)
+  return state
+}
+
+function refused(state, carId = id, now = at + 1) {
+  const before = JSON.stringify(state)
+  assert.equal(undoEditionUnlock(state, carId, now), undefined)
+  assert.equal(JSON.stringify(state), before)
+}
+
+const restored = bought()
+const receipt = restored.editionPurchase
+assert.deepEqual(receipt, { id, style: 'Solarpunk', previous: PIXEL, credits: price, duplicates: 2, remaining: 1, at })
+assert.equal(undoEditionUnlock(restored, id, at + 29_999), receipt)
+assert.equal(restored.credits, TRADE_CREDIT_LIMIT)
+assert.deepEqual(restored.cars[id], garage().cars[id])
+refused(restored)
+assert.equal(unlockEdition(restored, id, 'Solarpunk', at + 30_000), undefined)
+assert.equal(restored.credits, TRADE_CREDIT_LIMIT - price)
+assert.equal(restored.cars[id].copies, 1)
+
+refused(bought(), id, at + 30_000)
+refused(bought(), 'f40')
+refused(readSave(JSON.stringify(bought())))
+assert.equal(readSave(JSON.stringify({ ...bought(), editionPurchase: { credits: 100 } })).editionPurchase, undefined)
+const depleted = bought(4)
+depleted.cars[id].copies--
+refused(depleted)
+
+const capped = bought()
+capped.credits++
+refused(capped)
+
+const sold = bought()
+assert.equal(sellCar(sold, id), undefined)
+refused(sold)
+
+const recycled = bought(4)
+assert.equal(scrapCar(recycled, id), undefined)
+recycled.cars[id].copies++ // Un nouveau doublon ne réactive pas l’annulation.
+refused(recycled)
+
+const traded = bought()
+const offer = { cars: [id], credits: 0 }
+assert.equal(transitTrade(traded, 'transit', offer), undefined)
+assert.ok(inTransit(traded, id))
+refused(traded)
+assert.equal(returnTrade(traded, 'transit'), undefined)
+refused(traded)
+
+const offered = bought()
+assert.equal(openTrade(offered, 'offre', offer), undefined)
+refused(offered)
+assert.equal(returnTrade(offered, 'offre'), undefined)
+refused(offered)
+
+const alreadyOffered = garage()
+assert.equal(openTrade(alreadyOffered, 'offre', offer), undefined)
+assert.equal(unlockEdition(alreadyOffered, id, 'Solarpunk', at), undefined)
+refused(alreadyOffered)
+
+const twice = bought(5)
+assert.equal(unlockEdition(twice, id, 'Abandonnée', at + 1), undefined)
+assert.equal(twice.cars[id].copies, 1)
+assert.ok(unlockEdition(twice, id, 'Solarpunk', at + 2))
+assert.equal(undoEditionUnlock(twice, id, at + 2)?.style, 'Abandonnée')
+assert.equal(twice.cars[id].shown, 'Solarpunk')
+assert.equal(twice.cars[id].copies, 3)
+refused(twice)
+
+const another = bought()
+assert.equal(unlockEdition(another, 'f40', 'Abandonnée', at + 1), undefined)
+refused(another, id, at + 2)
+console.log('Annulation d’édition : restitution, délai, plafonds et invalidations : OK')

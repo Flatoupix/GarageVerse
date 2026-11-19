@@ -213,9 +213,14 @@ export function point(target: Target) {
 export function sparks(target: Target, colors = palettes.cyan, count = 26, power = 1, duration?: number) {
   if (!start()) return
   const { x, y } = point(target)
+  const burst: Particle[] = []
   for (let i = 0; i < count; i++) {
     const angle = rand(0, Math.PI * 2), speed = rand(140, 620) * power, life = duration ? rand(duration * 0.55, duration) : rand(0.35, 0.85)
-    particles.push({ kind: 'spark', x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 80, life, max: life, size: rand(1.5, 3.4), color: pick(colors), rot: 0, spin: 0 })
+    burst.push({ kind: 'spark', x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 80, life, max: life, size: rand(1.5, 3.4), color: pick(colors), rot: 0, spin: 0 })
+  }
+  particles.push(...burst)
+  return () => {
+    for (const particle of burst) particle.life = 0
   }
 }
 

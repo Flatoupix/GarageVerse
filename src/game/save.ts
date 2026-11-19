@@ -33,7 +33,19 @@ export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped';
 export const tutorialSteps = 12
 import type { VersusAccount } from './versus-wallet'
 
+interface EditionPurchase {
+  id: string
+  style: EditionStyle
+  previous: EditionStyle
+  credits: number
+  duplicates: number
+  remaining: number
+  at: number
+}
+
 export interface Save {
+  // Reçu de session, ignoré à la lecture et omis à l’enregistrement.
+  editionPurchase?: EditionPurchase
   trades?: Record<string, TradeRecord>
   tradeHistory?: string[]
   versus: VersusAccount | null
@@ -66,7 +78,7 @@ export function newSave(): Save {
     versus: null, nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
-    version: 2, exactEditions: true, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
+    version: 2, exactEditions: true, editionPurchase: undefined, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false, turnMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
@@ -479,6 +491,7 @@ export function upgrade(save: Save, id: string): string | undefined {
   if (save.credits < next.credits) return t('Il manque {n} crédits', { n: next.credits - save.credits })
   if (car.copies - 1 < next.duplicates) return tp('Il faut {n} doublon', 'Il faut {n} doublons', next.duplicates)
   save.credits -= next.credits
+  if (next.duplicates) discardEditionPurchase(save, id)
   car.copies -= next.duplicates
   car.stage = next.stage
 }
@@ -541,6 +554,7 @@ export function craft(save: Save, id: string): string | undefined {
 export function scrapCar(save: Save, id: string): string | undefined {
   const car = save.cars[id], v = vehicleById.get(id)
   if (!car || !v || car.copies < 2) return t('Aucun doublon')
+  discardEditionPurchase(save, id)
   car.copies--
   save.credits += progression.scrap[v.rarity]
 }
@@ -569,6 +583,7 @@ export function sellCar(save: Save, id: string): string | undefined {
   const problem = sellCheck(save, id)
   if (problem) return problem
   const price = sellPrice(save, id)
+  discardEditionPurchase(save, id)
   delete save.cars[id]
   save.credits += price
 }
@@ -610,14 +625,44 @@ export function unlockEditionCheck(save: Save, id: string, style: EditionStyle):
   if (missing.length) return missing.join(' · ')
 }
 
-export function unlockEdition(save: Save, id: string, style: EditionStyle): string | undefined {
+export function unlockEdition(save: Save, id: string, style: EditionStyle, now = Date.now()): string | undefined {
   const problem = unlockEditionCheck(save, id, style)
   if (problem) return problem
   const car = save.cars[id]
-  save.credits -= editionPrice(id)
+  const credits = editionPrice(id), previous = car.shown
+  save.credits -= credits
   car.copies -= editionDuplicates
   car.editions.push(style)
   car.shown = style
+  save.editionPurchase = { id, style, previous, credits, duplicates: editionDuplicates, remaining: car.copies, at: now }
+}
+
+export const editionUndoDuration = 30_000
+
+export function discardEditionPurchase(save: Save, id: string) {
+  if (save.editionPurchase?.id === id) delete save.editionPurchase
+}
+
+export function undoableEditionPurchase(save: Save, id: string, now = Date.now()) {
+  const purchase = save.editionPurchase, car = save.cars[id]
+  if (!purchase || purchase.id !== id || now < purchase.at || now - purchase.at >= editionUndoDuration || !car
+    || car.copies < purchase.remaining || car.copies + purchase.duplicates > TRADE_INVENTORY_LIMIT
+    || save.credits + purchase.credits > TRADE_CREDIT_LIMIT
+    || !car.editions.includes(purchase.style) || !car.editions.includes(purchase.previous)
+    || inTransit(save, id) || Object.values(save.trades ?? {}).some(record => record.state === 'ouverte' && record.offer.cars.includes(id))) return
+  return purchase
+}
+
+export function undoEditionUnlock(save: Save, id: string, now = Date.now()) {
+  const purchase = undoableEditionPurchase(save, id, now)
+  if (!purchase) return
+  const car = save.cars[id]
+  save.credits += purchase.credits
+  car.copies += purchase.duplicates
+  car.editions = car.editions.filter(style => style !== purchase.style)
+  car.shown = purchase.previous
+  discardEditionPurchase(save, id)
+  return purchase
 }
 
 // ——— Amélioration automatique ———
@@ -793,6 +838,7 @@ export function applyAutoUpgrade(save: Save, id: string, circuit?: Rival['circui
   if (!plan.steps.length) return plan.blockedReason ?? t('Aucune amélioration disponible')
   const car = save.cars[id]
   save.credits -= plan.credits
+  if (plan.duplicates) discardEditionPurchase(save, id)
   car.copies -= plan.duplicates
   car.stage = plan.stageAfter
   car.upgrades = { ...plan.upgradesAfter }
