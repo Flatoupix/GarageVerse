@@ -2,7 +2,7 @@
 
 - **Type :** Finition d'interface
 - **Priorité :** P2
-- **Statut :** À corriger ; **dépend des prototypes T-026, T-027 et du choix de pilotage (tâche T-028 du backlog), pas encore dans `dev`**
+- **Statut :** Livré : sélecteur [`PilotPicker.vue`](../src/components/PilotPicker.vue) en boutons `GvButton` filtre avec coche, aussi utilisé par la Nuit sans fin (v0.19.0), et bouton « Passer en automatique pour la suite » au même style ; **à valider à l'œil dans les huit thèmes**
 - **Signalement :** Retour du joueur, 18 novembre 2026 : « Je veux des boutons propres pour l'automatique, là c'est dégueulasse. »
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (sélecteur « Pilotage », boutons `input[name=race-pilot]`, bouton `.pilot-switch` « Passer en automatique pour la suite »), [`src/themes/shared.css`](../src/themes/shared.css) et les thèmes de `src/themes/`, [`src/components/GvButton.vue`](../src/components/GvButton.vue)
 

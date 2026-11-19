@@ -1,7 +1,7 @@
 # T-001 · Versus V1 : valider les arbitrages produit
 
 - **Priorité :** P1
-- **Statut :** À arbitrer
+- **Statut :** Arbitrages repris dans l'implémentation V1 ([docs/versus.md](../docs/versus.md)) ; à reconfirmer avant la réouverture du mode, en pause depuis la v0.13.1
 - **Sources :** [docs/versus.md](../docs/versus.md) §1–3, §5 et §11
 
 **Contexte.** La spécification du mode Versus porte explicitement le statut « à valider avant toute implémentation ». Le jeu est destiné à des amis, avec duels synchrones de cinq secteurs et mises en crédits **du jeu**, pas en argent réel.

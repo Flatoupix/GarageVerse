@@ -1,7 +1,7 @@
 # T-006 · Versus V1 : interface de duel entre amis
 
 - **Priorité :** P1
-- **Statut :** Implémenté et testé localement. Validation sur Supabase hébergé et deux téléphones physiques en attente.
+- **Statut :** Implémenté (migrations `20261118000000_versus_v1.sql` à `20261118020000_versus_secret_seed.sql`, fonctions `create-room`, `join-room`, `submit-move`, `resolve-due`, `claim-settlement`, client `src/game/versus.ts`) ; **mode en pause depuis la v0.13.1** (`VERSUS_OPEN = false` dans `src/game/features.ts`) ; validation sur deux téléphones avant réouverture
 - **Sources :** [docs/versus.md](../docs/versus.md) §3 et §8
 
 **À faire**

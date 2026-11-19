@@ -1,7 +1,7 @@
 # T-004 · Versus V1 : mises en crédits et règlement idempotent
 
 - **Priorité :** P1
-- **Statut :** Spécifié, à valider
+- **Statut :** Implémenté (migrations `20261118000000_versus_v1.sql` à `20261118020000_versus_secret_seed.sql`, fonctions `create-room`, `join-room`, `submit-move`, `resolve-due`, `claim-settlement`, client `src/game/versus.ts`) ; **mode en pause depuis la v0.13.1** (`VERSUS_OPEN = false` dans `src/game/features.ts`) ; validation sur deux téléphones avant réouverture
 - **Sources :** [docs/versus.md](../docs/versus.md) §5
 
 **Objectif.** Gérer une mise en crédits **fictifs du jeu**, conservée dans les sauvegardes locales, avec règlement serveur unique pour deux joueurs amis.

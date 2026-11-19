@@ -10,61 +10,78 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 - Ne pas écraser `docs/`, `README.md` ni `orchestrator/backlog/`. Un ticket ne remplace pas sa source.
 - Les références relatives partent du dossier `tickets/`.
 
-## Développement prioritaire (à valider)
+## À faire
 
 | Ticket | Sujet | Priorité |
 |---|---|---|
-| [T-001](001-versus-arbitrages-v1.md) | Arbitrages Versus V1 | P1 |
-| [T-002](002-versus-moteur-deterministe.md) | Moteur déterministe commun | P1 |
-| [T-003](003-versus-backend-supabase.md) | Supabase, RLS, salles | P1 |
-| [T-004](004-versus-mises-et-reglement.md) | Mises et règlement unique | P1 |
-| [T-005](005-versus-client-temps-reel.md) | Client Versus et reprise | P1 |
-| [T-006](006-versus-interface-mobile.md) | Interface de duel mobile | P1 |
-| [T-007](007-versus-amis-palmares-v2.md) | Palmarès V2 (la liste d'amis passe dans [T-008](008-echanges-de-cartes.md)) | P2 |
 | [T-037](037-echanges-synchro-lot-change.md) | Bug échanges : « Le lot a changé », voitures d'écurie bloquées, pas d'actualisation | P1 |
-| [T-008](008-echanges-de-cartes.md) | Échanges de cartes entre amis, dissociés du Versus et livrés avant lui | P2 |
-
-## Gameplay, collection et économie
-
-| Ticket | Sujet | Priorité |
-|---|---|---|
-| [T-026](026-prototype-passage-vitesses-timing.md) | Prototype de course au timing : passage des vitesses, zones de réussite et préparation auto | P2 |
-| [T-027](027-prototype-direction-virages.md) | Prototype de course : virages en jeu de rythme (deux pistes gauche/droite) | P2 |
-| [T-028](028-pilotage-automatique-ou-manuel.md) | Prototype de course : choisir entre course automatique (hasard) et pilotage manuel | P2 |
-| [T-035](035-nuit-sans-fin-pilotage-auto-manuel.md) | Nuit sans fin : sélectionner Auto / Manuel, basculer sans perdre sa série | P2 |
+| [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
+| [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
+| [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
+| [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
+| [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
+| [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
 | [T-032](032-etoile-victoire-parfaite-par-etape.md) | Étoile de victoire parfaite sur chaque étape d'un rival (Essais, Qualifs, Finale) | P3 |
+
+## Chantiers plus larges
+
+| Ticket | Sujet | Priorité |
+|---|---|---|
+| [T-036](036-refonte-musiques-bruitages.md) | Refonte artistique des musiques et du sound design, avec écoutes A/B et mixage mobile | P2 |
+| [T-040](040-package-apk-android.md) | Package APK Android (Capacitor, hors ligne) et édition publique sans les 13 voitures sous licence | P2 |
+| [T-013](013-pieces-performance-compatibilite.md) | Nouvelles pièces mécaniques | P2 |
+| [T-014](014-catalogue-futures-voitures.md) | 50 candidats de la bible à réconcilier avec le roster | P2 |
+| [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
+
+## Livré, à playtester ou valider sur appareil
+
+| Ticket | Sujet | Livré en |
+|---|---|---|
+| [T-026](026-prototype-passage-vitesses-timing.md) | Pilotage manuel : passage des vitesses | v0.15.0 à v0.17.0 |
+| [T-027](027-prototype-direction-virages.md) | Pilotage manuel : virages en jeu de rythme | v0.15.0 à v0.17.0 |
+| [T-028](028-pilotage-automatique-ou-manuel.md) | Choix Automatique / Manuel, bascule en course | v0.15.0 |
+| [T-029](029-boutons-pilotage-automatique.md) | Boutons du choix Automatique / Manuel (`PilotPicker`) | v0.15.0 à v0.19.0 |
+| [T-035](035-nuit-sans-fin-pilotage-auto-manuel.md) | Nuit sans fin : Auto / Manuel sans perdre sa série | v0.19.0 |
+| [T-008](008-echanges-de-cartes.md) | Échanges entre amis (expérimental) ; bugs dans T-037 | v0.15.0 |
+| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Couleur de rareté identique entre garage et plein écran | corrigé |
+| [T-015](015-equilibrage-overdrive.md) | Playtest réel Overdrive | — |
+| [T-016](016-economie-booster-bricole-mecanique.md) | Ressenti Bricole/Mécanique (rééquilibrés en v0.6) | v0.6.0 |
+
+## Versus (en pause depuis la v0.13.1)
+
+| Ticket | Sujet | Priorité |
+|---|---|---|
+| [T-001](001-versus-arbitrages-v1.md) | Arbitrages Versus V1, à reconfirmer avant réouverture | P1 |
+| [T-002](002-versus-moteur-deterministe.md) | Moteur déterministe commun (implémenté) | P1 |
+| [T-003](003-versus-backend-supabase.md) | Supabase, RLS, salles (implémenté) | P1 |
+| [T-004](004-versus-mises-et-reglement.md) | Mises et règlement unique (implémenté) | P1 |
+| [T-005](005-versus-client-temps-reel.md) | Client Versus et reprise (implémenté, test sur deux téléphones à faire) | P1 |
+| [T-006](006-versus-interface-mobile.md) | Interface de duel mobile (implémentée, test sur deux téléphones à faire) | P1 |
+| [T-007](007-versus-amis-palmares-v2.md) | Palmarès V2 (la liste d'amis existe déjà avec les échanges) | P2 |
+
+## Idées à arbitrer
+
+| Ticket | Sujet | Priorité |
+|---|---|---|
 | [T-009](009-modes-duel-alternatifs.md) | Modèles de duel alternatifs | P3 |
 | [T-010](010-deck-et-evolution-en-duel.md) | Deck et évolution tactique | P3 |
 | [T-011](011-fusion-de-cartes-doublons.md) | Fusion des doublons | P3 |
 | [T-012](012-aura-synergies-conditionnelles.md) | Auras conditionnelles | P3 |
-| [T-013](013-pieces-performance-compatibilite.md) | Nouvelles pièces mécaniques | P2 |
-| [T-014](014-catalogue-futures-voitures.md) | 50 candidats de la bible à réconcilier avec le roster | P2 |
-| [T-015](015-equilibrage-overdrive.md) | Playtest réel Overdrive | P2 |
-| [T-016](016-economie-booster-bricole-mecanique.md) | Ressenti Bricole/Mécanique (déjà rééquilibrés en v0.6) | P2 |
-| [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-019](019-nouveaux-rivaux-overdrive.md) | Personnages et rivaux Overdrive | P3 |
 | [T-020](020-series-speciales-extension.md) | Variantes futures de spéciales | P3 |
 | [T-021](021-demontage-voiture.md) | Démontage de véhicule, distinct du retrait des pièces | P3 |
+| [T-022](022-android-pwa-premier-lancement.md) | Android, PWA et accueil (la partie APK est dans T-040) | P3 |
+| [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil (à rapprocher de T-036) | P3 |
+| [T-024](024-verification-donnees-et-droits.md) | Fiches, histoires et provenance (analyse des droits dans T-040) | P3 |
 
-## Ergonomie, technique, finition
+## Remplacés
 
-| Ticket | Sujet | Priorité |
+| Ticket | Sujet | Remplacé par |
 |---|---|---|
-| [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
-| [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style fait trop vite | P2 |
-| [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | P2 |
-| [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, sans choix imposé | P2 |
-| [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
-| [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : couleur de rareté différente entre garage et plein écran | P2 |
-| [T-029](029-boutons-pilotage-automatique.md) | Boutons propres pour le choix automatique / manuel (dépend des prototypes T-026/T-027) | P2 |
-| [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
-| [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
-| [T-040](040-package-apk-android.md) | Package APK Android (Capacitor, hors ligne) et édition publique sans les 13 voitures sous licence | P2 |
-| [T-022](022-android-pwa-premier-lancement.md) | Android, PWA et accueil | P3 |
-| [T-036](036-refonte-musiques-bruitages.md) | Refonte artistique des musiques et du sound design, avec écoutes A/B et mixage mobile | P2 |
-| [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil | P3 |
-| [T-024](024-verification-donnees-et-droits.md) | Fiches, histoires et provenance | P3 |
+| [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | T-038 et T-041 |
+
+Prochain numéro libre : **T-042**. Avant d'en créer un, vérifier `dev` sur GitHub : plusieurs sessions ajoutent des tickets en parallèle.
 
 ## Déjà livré, ne pas créer de nouveaux tickets identiques
 

@@ -2,7 +2,7 @@
 
 - **Type :** Prototype gameplay
 - **Priorité :** P2
-- **Statut :** Prototype V0 présent dans `dev` ; à playtester sur mobile
+- **Statut :** Publié en v0.15.0 (choix « Pilotage » sur l'onglet Course, bascule en automatique pendant la course) ; **à playtester sur mobile**
 - **Signalement :** Retour du joueur, 18 novembre 2026 : laisser la possibilité d'automatiser les matchs comme avant, « au prix de l'aléatoire ».
 - **Tickets liés :** [T-026 · passage de vitesses](026-prototype-passage-vitesses-timing.md), [T-027 · virages en jeu de rythme](027-prototype-direction-virages.md), [T-029 · boutons du choix](029-boutons-pilotage-automatique.md)
 - **Fichiers :** [`src/game/pilot.ts`](../src/game/pilot.ts) et `pilot.check.cjs`, [`src/views/RaceView.vue`](../src/views/RaceView.vue), [`src/game/save.ts`](../src/game/save.ts), [`docs/meta.md`](../docs/meta.md)

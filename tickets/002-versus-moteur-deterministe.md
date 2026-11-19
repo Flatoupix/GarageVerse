@@ -1,7 +1,7 @@
 # T-002 · Versus V1 : moteur commun de duel déterministe
 
 - **Priorité :** P1
-- **Statut :** Spécifié, non réalisé
+- **Statut :** Implémenté (migrations `20261118000000_versus_v1.sql` à `20261118020000_versus_secret_seed.sql`, fonctions `create-room`, `join-room`, `submit-move`, `resolve-due`, `claim-settlement`, client `src/game/versus.ts`) ; **mode en pause depuis la v0.13.1** (`VERSUS_OPEN = false` dans `src/game/features.ts`) ; validation sur deux téléphones avant réouverture
 - **Sources :** [docs/versus.md](../docs/versus.md) §4 et §9 ; [docs/meta.md](../docs/meta.md) §5
 
 **Objectif.** Réutiliser exactement les règles du duel existant pour les humains et les rivaux, sans permettre aux deux clients de produire des résultats divergents.
