@@ -15,7 +15,7 @@ import {
 import { helpForLine, vHelp } from '../game/help'
 import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
 import { aiChoice, canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Choice, type Round, type Stance } from '../game/rules'
-import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type ManualDiscovery, type Reward } from '../game/save'
+import { currentRivalStep, perfectSteps, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type ManualDiscovery, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { playTimingRound, playTurnRound, shiftsPerSector, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
 import { pilotSummary, playPilotRound, roundPilot, sectorPilot, switchToAutomatic, type PilotMode, type PilotSummary } from '../game/pilot'
@@ -87,8 +87,20 @@ const rival = computed(() => isNight.value ? nightOpponent.value : isDaily.value
 const special = computed(() => chosen.value ? specialByRivalId.get(chosen.value) : undefined)
 // Seuls les rivaux de ligue portent une personnalité, même si un autre mode réutilise leur identifiant.
 const character = computed(() => !isNight.value && !isDaily.value && !special.value ? rivals.find(r => r.id === (rival.value?.baseRivalId ?? chosen.value)) : undefined)
-const rivalStepList = computed(() => character.value ? rivalStepMap.get(character.value.id) ?? [] : [])
-const unlockedSteps = computed(() => character.value ? unlockedRivalSteps(save, character.value.id) : [])
+const rivalStepList = computed(() => {
+  if (!character.value) return []
+  const id = character.value.id
+  const unlockedSteps = unlockedRivalSteps(save, id)
+  const perfect = perfectSteps(save, id)
+  return (rivalStepMap.get(id) ?? []).map((step, i) => ({
+    id: step.id,
+    stepLabel: step.stepLabel,
+    unlocked: unlockedSteps.includes(step.id),
+    won: (save.record[step.id]?.wins ?? 0) > 0,
+    perfect: perfect[i],
+  }))
+})
+const rivalProgress = computed(() => rivals.map(r => ({ r, perfectCount: perfectSteps(save, r.id).filter(Boolean).length })))
 const hasPersonality = computed(() => character.value && [character.value.bio, character.value.style, character.value.likes, character.value.intro].some(Boolean))
 const league = computed(() => rival.value?.cap !== undefined ? { name: special.value?.name, cap: rival.value.cap } : rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
@@ -845,10 +857,11 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <div class="rival-steps-tabs">
           <GvButton v-for="stepItem in rivalStepList" :key="stepItem.id" variant="filter"
             :aria-pressed="chosen === stepItem.id"
-            :disabled="loadingRace || !unlockedSteps.includes(stepItem.id)"
+            :disabled="loadingRace || !stepItem.unlocked"
             @click="chosen = stepItem.id">
-            <span aria-hidden="true">{{ !unlockedSteps.includes(stepItem.id) ? '🔒' : save.record[stepItem.id]?.wins ? '✓' : '◆' }}</span>
+            <span class="rival-step-mark" aria-hidden="true">{{ !stepItem.unlocked ? '🔒' : stepItem.won ? '✓' : '◆' }}<span v-if="stepItem.unlocked && stepItem.won && stepItem.perfect" class="rival-step-star">★</span></span>
             <span>{{ t(stepItem.stepLabel ?? '') }}</span>
+            <span v-if="stepItem.unlocked && stepItem.won" class="visually-hidden">{{ stepItem.perfect ? t('Victoire parfaite obtenue') : t('Victoire parfaite non obtenue') }}</span>
           </GvButton>
         </div>
         <p class="hint">
@@ -936,12 +949,16 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <p>{{ t('Engage une voiture par secteur, en secret. Chaque voiture court un nombre limité de secteurs selon son Endurance.') }}</p>
       </div>
       <ul class="rival-list">
-        <li v-for="(r, i) in rivals" :key="r.id" class="deal" :style="{ '--i': i }">
+        <li v-for="({ r, perfectCount }, i) in rivalProgress" :key="r.id" class="deal" :style="{ '--i': i }">
           <button type="button" class="rival-row" :disabled="!unlocked.includes(r.id)" @click="chosen = currentRivalStep(save, r.id)">
             <img v-if="art.rival(r.id)" :src="art.rival(r.id)" alt="" />
             <span v-else class="rival-initial" aria-hidden="true">{{ r.name[0] }}</span>
             <span class="rival-info">
-              <b>{{ r.name }} <span v-if="save.record[r.id]?.perfect" class="perfect-star" role="img" :aria-label="t('Victoire parfaite obtenue')">★</span></b>
+              <b>{{ r.name }}</b>
+              <span>
+                <span aria-hidden="true">{{ '★'.repeat(perfectCount) + '☆'.repeat(3 - perfectCount) }}</span>
+                <span class="visually-hidden">{{ tp('{n} victoire parfaite sur 3', '{n} victoires parfaites sur 3', perfectCount) }}</span>
+              </span>
               <small>{{ t(r.title) }}<template v-if="r.style"> · {{ t(r.style) }}</template> · {{ t(leagueById.get(r.league)!.name) }} ({{ t('plafond {n}', { n: leagueById.get(r.league)!.cap }) }})</small>
               <small>{{ t('3 étapes · finale : {n} ₡ + ticket {booster}', { n: leagueById.get(r.league)!.reward, booster: t(boosterById.get(leagueById.get(r.league)!.ticket)?.name ?? '') }) }}<template v-if="r.rewardCar"> + {{ vehicleById.get(r.rewardCar)?.name }}</template></small>
             </span>

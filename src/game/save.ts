@@ -950,6 +950,10 @@ export const unlockedRivalSteps = (save: Save, baseRivalId: string): string[] =>
   return steps.filter((step, idx) => idx === 0 || bossWon || (save.record[steps[idx - 1].id]?.wins ?? 0) > 0).map(s => s.id)
 }
 
+export function perfectSteps(save: Pick<Save, 'record'>, rivalId: string): boolean[] {
+  return (rivalStepMap.get(rivalId) ?? []).map(step => save.record[step.id]?.perfect === true)
+}
+
 export const rivalStepsDone = (save: Save, baseRivalId: string): number => {
   const steps = rivalStepMap.get(baseRivalId) ?? []
   if ((save.record[baseRivalId]?.wins ?? 0) > 0) return steps.length
