@@ -2,7 +2,7 @@
 import { t } from '../i18n'
 import { VERSUS_OPEN } from './features'
 import { SAVE_KEY, type Save } from './save'
-import { save, storageWarning } from './store'
+import { exchangeAlerts, save, storageWarning } from './store'
 import { acknowledgeTrade, completeTrade, normalizeTradeCar, openTrade, receiveTrade, returnTrade, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods, type TradeOffer } from './trade'
 
 export type Side = 'proposer' | 'recipient'
@@ -27,6 +27,11 @@ const live = (trade: Trade) => trade.state === 'open' || trade.state === 'accept
 const sideOf = (trade: Trade, player: string): Side => trade.proposer === player ? 'proposer' : 'recipient'
 const otherSide = (side: Side): Side => side === 'proposer' ? 'recipient' : 'proposer'
 const receiptId = (id: string) => id + ':reception'
+const lotChanged = () => t('Le lot a changé depuis la proposition.')
+// Une voiture en pleine course ou déjà en transit redevient disponible d'elle-même : l'offre attend.
+const passing = (problem: string) => problem === t('Cette voiture est en pleine course et ne peut pas être échangée') || problem === t('En transit')
+// Une erreur de livraison n'est signalée qu'une fois par échange, pas à chaque reprise de l'application.
+const reported = new Set<string>()
 
 export function goodsOf(trade: Trade, side: Side): TradeGoods {
   const items = trade.gv_trade_items.filter(item => item.side === side)
@@ -135,7 +140,10 @@ function apply(connection: Connection, trade: Trade) {
     if (side === 'proposer' && !record) update(connection, draft => check(openTrade(draft, id, offerOf(trade, side))))
   } else if (state === 'accepted') {
     if (!record || record.state === 'ouverte') {
-      update(connection, draft => check(transitTrade(draft, id, offerOf(trade, side), goodsOf(trade, side))))
+      update(connection, draft => {
+        const problem = transitTrade(draft, id, offerOf(trade, side), goodsOf(trade, side))
+        check(problem === lotChanged() ? t('Échange bloqué : ta voiture a changé depuis l’offre. Il sera annulé à l’échéance et tout te sera rendu.') : problem)
+      })
     }
   } else if (state === 'done') {
     // Une livraison exige un transit durable de ce garage, créé avant sa réclamation.
@@ -151,11 +159,25 @@ async function reconcile(connection: Connection, initial?: Trade[], only?: strin
   const applyEach = (rows: Trade[]) => {
     // Libérer les anciennes réservations avant d'ouvrir les nouvelles.
     for (const trade of [...rows.filter(trade => !live(trade)), ...rows.filter(live)]) {
-      try { apply(connection, trade) } catch (cause) { problem ??= cause }
+      try { apply(connection, trade) } catch (cause) {
+        if (!reported.has(trade.id)) problem ??= cause
+        reported.add(trade.id)
+      }
     }
   }
   applyEach(trades)
-  let claimed = false
+  // Une offre envoyée que ce garage ne pourrait plus honorer est annulée avant d'être acceptée, au lieu de rester bloquée en transit.
+  const notices: string[] = []
+  let changed = false
+  for (const trade of trades) {
+    if (trade.state !== 'open' || trade.proposer !== connection.player || save.trades?.[trade.id]?.state !== 'ouverte') continue
+    const refusal = transitTrade(JSON.parse(JSON.stringify(save)), trade.id, offerOf(trade, 'proposer'), goodsOf(trade, 'proposer'))
+    if (!refusal || passing(refusal)) continue
+    await call(connection, 'answer-trade', { id: trade.id, action: 'cancel' }, ['TRADE_EXPIRED', 'TRADE_NOT_OPEN'])
+    notices.push(t('Offre annulée : {reason}', { reason: refusal === lotChanged() ? t('ta voiture a changé depuis l’offre.') : refusal }))
+    changed = true
+  }
+  let claimed = changed
   for (const trade of trades) {
     if (trade.state !== 'accepted' || (only && trade.id !== only) || save.trades?.[trade.id]?.state !== 'transit'
       || trade.gv_trade_claims.some(claim => claim.player_id === connection.player)) continue
@@ -170,15 +192,32 @@ async function reconcile(connection: Connection, initial?: Trade[], only?: strin
     trades = await read(connection)
     applyEach(trades)
   }
+  await refreshShowcase(connection)
   if (problem) throw problem
-  return lists(trades, connection.player)
+  return lists(trades, connection.player, notices)
 }
 
-function lists(trades: Trade[], player: string) {
+function lists(trades: Trade[], player: string, notices: string[] = []) {
+  const received = trades.filter(trade => live(trade) && trade.recipient === player)
+  exchangeAlerts.offers = received.filter(trade => trade.state === 'open' && Date.parse(trade.expires_at) > Date.now()).length
   return {
-    received: trades.filter(trade => live(trade) && trade.recipient === player),
+    received,
     sent: trades.filter(trade => live(trade) && trade.proposer === player),
     history: trades.filter(trade => !live(trade)),
+    notices,
+  }
+}
+
+// La vitrine suit le garage : une voiture partie en est retirée, une voiture changée (doublon, niveau, style) y est mise à jour.
+async function refreshShowcase(connection: Connection) {
+  try {
+    const shown = await readShowcase(connection, connection.player)
+    const ids = Object.keys(shown).filter(id => Object.hasOwn(save.cars, id))
+    const current = (id: string) => JSON.stringify(normalizeTradeCar(id, save.cars[id]))
+    if (ids.length === Object.keys(shown).length && ids.every(id => current(id) === JSON.stringify(shown[id]))) return
+    await call(connection, 'set-showcase', { cars: Object.fromEntries(ids.map(id => [id, save.cars[id]])) })
+  } catch {
+    // La prochaine synchronisation réessaiera ; les échanges eux-mêmes ne dépendent pas de cette mise à jour.
   }
 }
 

@@ -951,3 +951,9 @@ main.race { animation-name: race-view-in; }
   .manual-key-hint { display: block; }
 }
 .manual-lesson .manual-key-hint { text-align: start; }
+
+/* Pastille du bouton Échanges : offres et demandes d'ami qui attendent une réponse. */
+.exchange-alert {
+  display: inline-grid; place-items: center; min-width: 1.4em; height: 1.4em; margin-inline-start: 6px; padding-inline: 4px;
+  border-radius: 999px; background: var(--magenta); color: var(--background); font-size: .75em; font-weight: 800; line-height: 1;
+}

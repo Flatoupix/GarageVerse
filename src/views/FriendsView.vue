@@ -8,7 +8,7 @@ import TradeCard from '../components/TradeCard.vue'
 import { TRADE_CREDIT_LIMIT, TRADE_OPEN_LIMIT, transitTrade, validateTradeOffer, validateTradeShowcase, type TradeGoods } from '../game/trade'
 import { answerTrade, counterTrade, goodsOf, listFriendShowcase, listShowcase, listTrades, proposeTrade, publishShowcase, syncTrades, type Side, type Trade } from '../game/trade-client'
 import { vehicleById } from '../game/data'
-import { save } from '../game/store'
+import { exchangeAlerts, save } from '../game/store'
 
 const props = defineProps<{ online: boolean; from?: 'home' | 'garage' }>()
 const emit = defineEmits<{ back: [] }>()
@@ -30,6 +30,7 @@ async function refresh() {
   const data = await loadFriends()
   profile.value = data.profile
   list.value = data.list
+  exchangeAlerts.friends = received.value.length
   if (!list.value.some(friend => friend.id === removing.value)) removing.value = undefined
 }
 
@@ -86,17 +87,26 @@ const tradeError = ref('')
 const tradeStatus = ref('')
 const showcase = ref<string[]>([])
 const showcaseReady = ref(false)
-const offers = ref<Awaited<ReturnType<typeof syncTrades>>>({ received: [], sent: [], history: [] })
+const offers = ref<Awaited<ReturnType<typeof syncTrades>>>({ received: [], sent: [], history: [], notices: [] })
 const now = ref(Date.now())
 let timer: ReturnType<typeof setInterval>
+let poll: ReturnType<typeof setInterval>
 onMounted(() => {
   timer = setInterval(() => { now.value = Date.now() }, 1000)
+  poll = setInterval(refreshQuietly, 30_000)
   document.addEventListener('visibilitychange', refreshVisible)
 })
 onUnmounted(() => {
   clearInterval(timer)
+  clearInterval(poll)
   document.removeEventListener('visibilitychange', refreshVisible)
 })
+// Toutes les 30 s, seulement à l'écran : un brouillon d'offre ou une vitrine en cours de modification ne sont jamais rechargés.
+function refreshQuietly() {
+  if (document.visibilityState !== 'visible' || !props.online || draft.value || busy.value || tradeBusy.value) return
+  if (tab.value === 'friends') void run()
+  else if (tab.value === 'offers' || tab.value === 'history') void runTrade(refreshTrades)
+}
 function refreshVisible() {
   if (document.visibilityState === 'visible' && (tab.value === 'offers' || tab.value === 'history') && !draft.value) {
     void runTrade(refreshTrades)
@@ -125,7 +135,9 @@ const acceptanceProblems = computed(() => Object.fromEntries(offers.value.receiv
   .filter(trade => trade.state === 'open')
   .map(trade => {
     const goods = goodsOf(trade, 'recipient')
-    return [trade.id, transitTrade(JSON.parse(JSON.stringify(save)), trade.id, asSelection(goods), goods)]
+    const problem = transitTrade(JSON.parse(JSON.stringify(save)), trade.id, asSelection(goods), goods)
+    return [trade.id, problem === t('Le lot a changé depuis la proposition.')
+      ? t('Ta voiture a changé depuis l’offre (niveau, amélioration ou style) : refuse l’offre ou fais une contre-proposition.') : problem]
   })))
 
 interface Draft {
@@ -176,7 +188,11 @@ async function runTrade(action: () => Promise<void>) {
     tradeBusy.value = false
   }
 }
-async function refreshTrades() { offers.value = await syncTrades() }
+function showOffers(next: typeof offers.value) {
+  offers.value = next
+  if (next.notices.length) tradeStatus.value = next.notices.join(' ')
+}
+async function refreshTrades() { showOffers(await syncTrades()) }
 async function refreshTab() {
   if (tab.value === 'friends') { await run(); return }
   await runTrade(async () => {
@@ -248,7 +264,7 @@ function sendTrade() {
   if (!current?.owner || !draftReady.value || draftProblems.value.length) return
   const { owner, previous, give, want } = current
   void runTrade(async () => {
-    offers.value = previous ? await counterTrade(previous.id, give, want) : await proposeTrade(owner, give, want)
+    showOffers(previous ? await counterTrade(previous.id, give, want) : await proposeTrade(owner, give, want))
     if (draft.value === current) {
       closeDraft()
       tab.value = 'offers'
@@ -257,7 +273,7 @@ function sendTrade() {
 }
 function answerOffer(trade: Trade, action: 'accept' | 'refuse' | 'cancel') {
   if (!canAnswer(trade)) return
-  void runTrade(async () => { offers.value = await answerTrade(trade.id, action) })
+  void runTrade(async () => { showOffers(await answerTrade(trade.id, action)) })
 }
 
 let refreshPending = false

@@ -9,13 +9,14 @@ const compile = filename => ts.transpileModule(fs.readFileSync(filename, 'utf8')
 require.extensions['.ts'] = (module, filename) => module._compile(compile(filename), filename)
 const { newSave, readSave, sellCheck } = require('./save.ts')
 const rules = require('./trade.ts')
-const store = { save: newSave(), storageWarning: { value: false } }
+const store = { save: newSave(), storageWarning: { value: false }, exchangeAlerts: { offers: 0, friends: 0 } }
 const navigator = { onLine: true }
 let stored
 let player = 'a'
 let fault
 let calls = 0
 const rows = []
+const showcases = {}
 const callsOf = []
 const unavailable = () => ({ error: { context: { status: 503 } } })
 const ok = { data: { ok: true } }
@@ -25,8 +26,8 @@ function create(recipient, give, want, previous_id = null) {
     ...(credits ? [{ side, car_id: null, snapshot: null, credits }] : []),
   ]
   rows.push({
-    id: String(rows.length + 1), proposer: player, recipient, previous_id, state: 'open',
-    gv_trade_items: [...items('proposer', Object.entries(give.cars), give.credits), ...items('recipient', [], want.credits)],
+    id: String(rows.length + 1), proposer: player, recipient, previous_id, state: 'open', expires_at: '2999-01-01T00:00:00Z',
+    gv_trade_items: [...items('proposer', Object.entries(give.cars), give.credits), ...items('recipient', (want.cars ?? []).map(id => [id, showcases[recipient][id]]), want.credits)],
     gv_trade_claims: [],
   })
 }
@@ -37,8 +38,11 @@ const db = {
     getSession: async () => ({ data: { session: { user: { id: player } } } }),
   },
   from(table) {
-    assert.equal(table, 'gv_trades')
     calls++
+    if (table === 'gv_showcase') return { select: () => ({ eq: (_, owner) => ({
+      returns: async () => ({ data: Object.entries(showcases[owner] ?? {}).map(([car_id, snapshot]) => ({ car_id, snapshot: structuredClone(snapshot) })) }),
+    }) }) }
+    assert.equal(table, 'gv_trades')
     return { select: () => ({ order: () => ({ range: () => ({
       returns: async () => fault === 'read' ? unavailable() : {
         data: structuredClone(rows.filter(row => [row.proposer, row.recipient].includes(player))),
@@ -50,6 +54,7 @@ const db = {
       callsOf.push(name)
       const row = rows.find(row => row.id === body.id)
       if (name === 'propose-trade') create(body.recipient, body.give, body.want)
+      if (name === 'set-showcase') showcases[player] = structuredClone(body.cars)
       if (name === 'answer-trade') {
         assert.equal(row.state, 'open')
         if (body.action === 'counter') {
@@ -190,6 +195,50 @@ async function run() {
   rows.at(-1).state = 'expired'
   await sync()
   assert.equal(store.save.trades['4'].state, 'rendue')
-  console.log('Échanges client · transit durable, livraison unique, reprise, retours et contre-offres')
+  // Vitrine publiée puis doublon tiré : l'échange aboutit, le donneur garde le surplus, le receveur reçoit le lot annoncé.
+  const shared = 'p205'
+  player = 'a'
+  store.save = readSave(a)
+  store.save.cars[shared] = { copies: 1, stage: 0, parts: [], editions: ['Solarpunk'], shown: 'Solarpunk', favorite: false, upgrades: { acc: 0, vit: 0, man: 0, end: 0 } }
+  await client.publishShowcase([shared])
+  a = JSON.stringify(store.save)
+  player = 'b'
+  store.save = readSave(delivered)
+  await client.proposeTrade('a', { cars: [], credits: 5 }, { cars: [shared], credits: 0 })
+  const wanted = rows.at(-1).id
+  const bWanted = stored
+  player = 'a'
+  store.save = readSave(a)
+  store.save.cars[shared].copies = 2
+  assert.equal(store.exchangeAlerts.offers, 0)
+  await sync()
+  assert.equal(store.exchangeAlerts.offers, 1)
+  assert.equal(showcases.a[shared].copies, 2) // La vitrine suit le garage.
+  await client.answerTrade(wanted, 'accept')
+  assert.equal(store.save.cars[shared].copies, 1)
+  player = 'b'
+  store.save = readSave(bWanted)
+  await sync()
+  assert.equal(store.save.cars[shared].copies, 1)
+  player = 'a'
+  await sync()
+  assert.equal(rows.find(row => row.id === wanted).state, 'done')
+  assert.equal(store.save.cars[shared].copies, 1)
+  a = stored
+
+  // Offre envoyée puis voiture améliorée : l'offre est annulée avant d'être acceptée, avec un avis.
+  await client.proposeTrade('b', { cars: [shared], credits: 0 }, { cars: [], credits: 0 })
+  const stale = rows.at(-1).id
+  store.save.cars[shared].stage = 1
+  const { notices } = await sync()
+  assert.equal(rows.find(row => row.id === stale).state, 'declined')
+  assert.match(notices.join(), /Offre annulée/)
+  assert.equal(store.save.trades[stale].state, 'rendue')
+  assert.equal(store.save.cars[shared].stage, 1)
+  // Une voiture partie du garage quitte la vitrine.
+  delete store.save.cars[shared]
+  await sync()
+  assert.deepEqual(showcases.a, {})
+  console.log('Échanges client · transit durable, livraison unique, reprise, retours, contre-offres, doublons, annulation et vitrine à jour')
 }
 run().catch(error => { console.error(error); process.exitCode = 1 })

@@ -8,7 +8,7 @@ import { art } from '../game/art'
 import { constraintText } from '../game/daily'
 import { boosterById, conditionIcons, conditionLabels, rivalById, series, vehicles } from '../game/data'
 import { claimDailyBooster, prepareDaily, todayChallenge, unlockedRivals } from '../game/save'
-import { act, completedSeries, dailySelected, ownedCount, save } from '../game/store'
+import { act, completedSeries, exchangeAlerts, dailySelected, ownedCount, save } from '../game/store'
 
 const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race' | 'versus' | 'friends'] }>()
 const challenge = computed(() => todayChallenge(save))
@@ -41,7 +41,7 @@ const nextRival = computed(() => {
           </button>
           <button v-else type="button" class="button primary" @click="emit('go', 'race')">{{ t('Défier {name}', { name: t(nextRival.name) }) }} <span aria-hidden="true">⟶</span></button>
           <button v-if="VERSUS_OPEN || save.versus?.active" type="button" class="button ghost" @click="emit('go', 'versus')">{{ save.versus?.active ? t('Reprendre le duel Versus') : t('Versus · Défier un ami') }}</button>
-          <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('go', 'friends')">{{ t('Échanges') }} <span aria-hidden="true">⇄</span></button>
+          <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('go', 'friends')">{{ t('Échanges') }} <span aria-hidden="true">⇄</span><span v-if="exchangeAlerts.offers + exchangeAlerts.friends" class="exchange-alert">{{ exchangeAlerts.offers + exchangeAlerts.friends }}<span class="visually-hidden"> {{ t('en attente de réponse') }}</span></span></button>
         </div>
       </div>
     </section>

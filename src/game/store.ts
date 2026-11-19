@@ -9,6 +9,8 @@ function load(): Save {
 }
 
 export const storageWarning = ref(false)
+// Offres d'échange et demandes d'ami en attente de réponse, vues à la dernière synchronisation.
+export const exchangeAlerts = reactive({ offers: 0, friends: 0 })
 // Aucune partie enregistrée avant ce lancement : nouveau joueur, accueilli par le tutoriel plutôt que par les notes de version.
 export const firstLaunch = (() => { try { return !localStorage.getItem(SAVE_KEY) && !localStorage.getItem(LEGACY_KEY) } catch { return false } })()
 export const save = reactive(load()) as Save

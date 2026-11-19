@@ -1,7 +1,12 @@
 export const echanges = {
   'Offre d’échange invalide': 'Invalid trade offer',
   'Crédits insuffisants pour cet échange': 'Not enough credits for this trade',
-  'Cette voiture est engagée et ne peut pas être échangée': 'This car is committed and can’t be traded',
+  'Cette voiture est en pleine course et ne peut pas être échangée': 'This car is in a race right now and can’t be traded',
+  'Échange bloqué : ta voiture a changé depuis l’offre. Il sera annulé à l’échéance et tout te sera rendu.': 'Trade stuck: your car changed since the offer. It will be cancelled when it expires and everything will be returned to you.',
+  'Offre annulée : {reason}': 'Offer cancelled: {reason}',
+  'ta voiture a changé depuis l’offre.': 'your car changed since the offer.',
+  'Ta voiture a changé depuis l’offre (niveau, amélioration ou style) : refuse l’offre ou fais une contre-proposition.': 'Your car changed since the offer (stage, upgrade or style): decline the offer or make a counter-offer.',
+  'en attente de réponse': 'awaiting a reply',
   'Tu as déjà dix offres d’échange ouvertes': 'You already have ten open trade offers',
   'Cette voiture figure déjà dans une offre d’échange': 'This car is already in a trade offer',
   'Impossible d’enregistrer cet échange sur cet appareil.': 'This trade couldn’t be saved on this device.',

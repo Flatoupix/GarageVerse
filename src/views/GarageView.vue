@@ -5,7 +5,7 @@ import { locale, t, tp, tc } from '../i18n'
 import { boosterById, families, parts, rarities, rarityClass, series, stylesOf, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
 import { claimSeries, craftCheck, seriesComplete, seriesProgress, freeParts, prepOf, totalMountedParts, uninstallAll } from '../game/save'
-import { act, narrow, ownedCount, reducedMotion, save } from '../game/store'
+import { act, exchangeAlerts, narrow, ownedCount, reducedMotion, save } from '../game/store'
 import { edition } from '../game/art'
 import { confetti, palettes } from '../game/fx'
 import CarCard from '../components/CarCard.vue'
@@ -148,7 +148,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
   <main class="garage">
     <div class="page-heading">
       <h1 tabindex="-1">{{ t('Mon garage') }}</h1>
-      <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('friends')">{{ t('Échanges') }}</button>
+      <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('friends')">{{ t('Échanges') }}<span v-if="exchangeAlerts.offers + exchangeAlerts.friends" class="exchange-alert">{{ exchangeAlerts.offers + exchangeAlerts.friends }}<span class="visually-hidden"> {{ t('en attente de réponse') }}</span></span></button>
     </div>
     <div class="tabs garage-tabs" :aria-label="t('Inventaire')">
       <button type="button" :aria-pressed="tab === 'cars'" @click="selectTab('cars')">{{ t('Voitures') }} <span>{{ ownedCount }}/{{ vehicles.length }}</span></button>

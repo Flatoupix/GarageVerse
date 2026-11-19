@@ -2,7 +2,7 @@
 
 - **Type :** Bug / fonctionnalité réseau
 - **Priorité :** P1
-- **Statut :** À corriger ; diagnostic reproduit hors serveur le 19 novembre 2026
+- **Statut :** Corrigé dans `dev` (client uniquement, serveur inchangé) ; à valider sur deux téléphones avec le serveur réel
 - **Signalement :** retour du joueur du 19 novembre 2026 : « la synchro ne marche pas pour les échanges », avec un message d'erreur
 - **Tickets liés :** [T-008 · Échanges de cartes](008-echanges-de-cartes.md), [T-038 · ergonomie des sélections](038-ux-selection-voitures-course-echanges.md)
 - **Fichiers à examiner :** [`src/game/trade.ts`](../src/game/trade.ts), [`src/game/trade-client.ts`](../src/game/trade-client.ts), [`src/views/FriendsView.vue`](../src/views/FriendsView.vue), [`src/App.vue`](../src/App.vue), [`src/game/trade.check.cjs`](../src/game/trade.check.cjs), [`src/game/trade-client.check.cjs`](../src/game/trade-client.check.cjs), [`supabase/functions/_shared/trades.ts`](../supabase/functions/_shared/trades.ts), [`docs/echanges.md`](../docs/echanges.md)
