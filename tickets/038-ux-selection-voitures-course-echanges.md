@@ -4,8 +4,13 @@
 - **Priorité :** P2
 - **Statut :** Implémenté dans `dev` (préparation de course réorganisée, offres d'échange en trois étapes) ; à valider sur appareil
 - **Signalement :** retour du joueur du 19 novembre 2026 : « l'UX est vraiment à revoir pour la partie sélection de voiture, c'est pas du tout intuitif », pour les **deux** écrans
+- **Ticket de régression lié :** [T-046 · restaurer les cartes TCG en sélection de course](046-cartes-tcg-selection-course.md) (retour du 19 novembre 2026 : la nouvelle interface a perdu le rendu « cartes » apprécié auparavant).
 - **Tickets liés :** [T-041 · suggestions d'écurie](041-suggestions-ecurie-avant-course.md) (à concevoir ensemble), [T-017 · sélection course/garage](017-ux-selection-course-garage.md), [T-029 · boutons automatique / manuel](029-boutons-pilotage-automatique.md), [T-037 · bugs des échanges](037-echanges-synchro-lot-change.md), [T-008 · Échanges de cartes](008-echanges-de-cartes.md)
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (préparation : `lineup`, `toggle`, `.lineup-slots`, `.pick-list`), [`src/views/FriendsView.vue`](../src/views/FriendsView.vue) (brouillon d'offre et vitrine), [`src/components/TradeCard.vue`](../src/components/TradeCard.vue), [`src/components/CarCard.vue`](../src/components/CarCard.vue), [`src/themes/base.css`](../src/themes/base.css)
+
+## Complément de playtest du 19 novembre 2026
+
+La réorganisation des emplacements et des actions a été livrée, mais **le joueur préfère la représentation précédente des voitures en cartes TCG**, plutôt que les miniatures et les boutons séparés « Retirer / Atelier / Choisir ». **Ne pas considérer la partie visuelle de la sélection comme définitivement validée.** Restaurer les cartes via **T-046** sans annuler les améliorations fonctionnelles décrites ci-dessous.
 
 ## Constat : préparation de course (capture à 390 px, Boulevard Minitel)
 
