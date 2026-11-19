@@ -35,6 +35,29 @@ Obtenir un fichier **`.apk` installable sur un téléphone Android**, construit 
 - Une première étape peut produire un APK **debug**, installable en mode « sources inconnues ».
 - Une version **release** demande une clé de signature. Elle doit être créée par le propriétaire et rangée dans les **secrets GitHub**, jamais dans le dépôt ni dans une conversation. Si elle est perdue, plus aucune mise à jour n'est possible pour les joueurs qui ont déjà l'application installée.
 
+## Édition publique sans licences
+
+Analyse des droits du 19 novembre 2026, qui n'est pas un avis juridique. Avant une diffusion publique, en particulier sur le Play Store, les **13 véhicules de films, de séries et de vidéastes** sont le risque principal. Ils appartiennent à des studios qui défendent leurs licences, et la Batmobile est même reconnue comme « personnage » protégé (*DC Comics v. Towle*, 2015) :
+
+`bttf`, `kitt`, `brian`, `herbie`, `bond`, `taxi`, `ecto1`, `batmobile`, `eleanor`, `domcharger`, `jpjeep`, `interceptor`, `1000tipla`.
+
+**Cacher ces cartes ne suffit pas.** Une carte masquée ou déblocable reste dans le paquet : images, noms et textes peuvent en être extraits, et le Play Store analyse aussi ces fichiers. C'est la diffusion qui compte, pas l'affichage. Un déblocage secret montrerait en plus que le contenu a été caché volontairement.
+
+**Approche retenue : deux versions issues du même code.**
+
+1. Un mode de build **public** (sur le modèle du mode `itch`) retire ces cartes du roster avant le build. Leurs illustrations, éditions, pixel art et animations ne sont plus importées, donc absentes du `dist/`. La liste des cartes exclues vit dans un seul fichier, facile à compléter.
+2. Le build **privé** (GitHub Pages, APK personnel) garde le roster complet.
+3. **Sauvegardes :** un joueur qui ouvre la version publique avec une carte exclue reçoit une compensation définie à l'avance (crédits ou carte équivalente), une seule fois, sans plantage ni perte d'apparence sur ses autres cartes.
+4. **Échanges et Versus :** une carte exclue ne peut ni être proposée ni arriver par échange dans la version publique. Le serveur doit refuser l'échange vers un joueur qui ne peut pas la recevoir, ou les deux versions restent séparées.
+5. **Séries de collection, rivaux, défi du jour, Nuit sans fin :** ils restent complets et jouables sans ces cartes. Une série qui en dépend est adaptée ou masquée.
+6. **Plus tard, seulement si le Play Store l'exige :** la même mécanique peut produire une **édition sans marques**, avec des modèles renommés et des formes modifiées (voir T-022 et T-024).
+
+Autres points relevés par l'analyse :
+- Vérifier avec quel forfait Suno les musiques et bruitages ont été créés. Ceux créés avec le forfait gratuit sont réservés à un usage non commercial et restent la propriété de Suno.
+- Embarquer les polices Google Fonts (licence OFL) dans le paquet, avec le texte de leur licence.
+- Ajouter un écran de crédits avec les licences MIT (Vue, Supabase, qrcode, Capacitor) et la mention « non affilié aux constructeurs ni aux studios cités ».
+- Vérifier que le nom « GarageVerse » n'est pas déjà déposé avant une fiche Play Store.
+
 ## Critères de validation
 
 - [ ] L'APK s'installe sur un Android récent, et sur un plus ancien à choisir (par exemple Android 8).
@@ -46,6 +69,9 @@ Obtenir un fichier **`.apk` installable sur un téléphone Android**, construit 
 - [ ] Les Échanges et le Versus fonctionnent depuis l'APK, ou sont masqués proprement s'ils ne fonctionnent pas.
 - [ ] La version affichée dans les Réglages correspond à celle de l'APK.
 - [ ] `rules.ts`, `data.ts` et `supabase/` sont inchangés, sauf accord explicite.
+- [ ] Le build public ne contient aucun fichier, nom ni texte des 13 cartes exclues (vérifié par une recherche dans le `dist/` et l'APK).
+- [ ] Une ancienne sauvegarde qui contient une carte exclue s'ouvre dans la version publique avec la compensation prévue.
+- [ ] Aucun échange ne peut faire arriver une carte exclue dans la version publique.
 - [ ] Aucune diffusion (Play Store, itch.io Android, lien public) sans accord du propriétaire.
 
 ## À arbitrer
