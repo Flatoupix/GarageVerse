@@ -3,7 +3,7 @@ import { audioContext, duckMusic, effectsOutput, playSample } from './audio'
 export type Cue = 'tear' | 'flip' | 'drift' | 'collect' | 'legend' | 'revealLegend' | 'win' | 'lose' | 'nitro' | 'upgrade'
   | 'tap' | 'tick' | 'coin' | 'slam' | 'rare' | 'epic' | 'rev' | 'error' | 'whoosh' | 'debugCredits' | 'gearShift' | 'misfire'
 
-function tone(ctx: AudioContext, at: number, freq: number, duration: number, type: OscillatorType = 'sine', gain = 0.075, slideTo?: number) {
+function tone(ctx: AudioContext, at: number, freq: number, duration: number, type: OscillatorType = 'sine', gain = 0.075, slideTo?: number, output = effectsOutput()) {
   const oscillator = ctx.createOscillator()
   const volume = ctx.createGain()
   oscillator.type = type
@@ -12,7 +12,7 @@ function tone(ctx: AudioContext, at: number, freq: number, duration: number, typ
   volume.gain.setValueAtTime(0.001, at)
   volume.gain.exponentialRampToValueAtTime(gain, at + Math.min(0.022, duration / 3))
   volume.gain.exponentialRampToValueAtTime(0.001, at + duration)
-  oscillator.connect(volume).connect(effectsOutput())
+  oscillator.connect(volume).connect(output)
   oscillator.start(at)
   oscillator.stop(at + duration)
 }
@@ -34,6 +34,20 @@ function noise(ctx: AudioContext, at: number, duration: number, kind: BiquadFilt
   source.start(at)
 }
 
+function rareTone(ctx: AudioContext, at: number, output?: GainNode) {
+  ;[440, 660, 880].forEach((n, i) => tone(ctx, at + i * 0.06, n, 0.28, 'triangle', 0.08, undefined, output))
+}
+
+export function playEditionCue() {
+  try {
+    const ctx = audioContext()
+    const output = ctx.createGain()
+    output.connect(effectsOutput())
+    if (!playSample('rare', ctx, output)) rareTone(ctx, ctx.currentTime, output)
+    return () => output.disconnect()
+  } catch { /* Web Audio peut être indisponible. */ }
+}
+
 // Les effets synthétisés restent disponibles pendant le chargement ou en l’absence d’un fichier.
 const cues: Record<Exclude<Cue, 'revealLegend'>, (c: AudioContext, t: number) => void> = {
   tear: (c, t) => noise(c, t, 0.22, 'bandpass', 2200, 650, 0.30),
@@ -50,7 +64,7 @@ const cues: Record<Exclude<Cue, 'revealLegend'>, (c: AudioContext, t: number) =>
   flip: (c, t) => { noise(c, t, 0.12, 'bandpass', 900, 2600, 0.07); [440, 660].forEach((n, i) => tone(c, t + i * 0.035, n, 0.15)) },
   collect: (c, t) => [330, 440, 660].forEach((n, i) => tone(c, t + i * 0.09, n, 0.3)),
   upgrade: (c, t) => { [523, 659, 784, 1047].forEach((n, i) => tone(c, t + i * 0.07, n, 0.3, 'triangle')); noise(c, t, 0.3, 'highpass', 3000, 7000, 0.04) },
-  rare: (c, t) => [440, 660, 880].forEach((n, i) => tone(c, t + i * 0.06, n, 0.28, 'triangle', 0.08)),
+  rare: rareTone,
   epic: (c, t) => { tone(c, t, 98, 0.4, 'sine', 0.16, 49); [392, 523, 659, 1047].forEach((n, i) => tone(c, t + 0.05 + i * 0.07, n, 0.36, 'sawtooth', 0.05)) },
   legend: (c, t) => {
     tone(c, t, 82, 0.6, 'sine', 0.24, 36); noise(c, t, 0.4, 'lowpass', 1200, 100, 0.2)

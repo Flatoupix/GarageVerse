@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch } from 'vue'
-import { COUNTDOWN_STEP_MS, READY_STEP_MS } from '../game/countdown'
+import { COUNTDOWN_STEP_MS } from '../game/countdown'
 import { palettes, pop, streaks } from '../game/fx'
 import { sound } from '../game/store'
 import { t } from '../i18n'
 
-const props = defineProps<{ full: boolean }>()
 const emit = defineEmits<{ go: [] }>()
-const steps = props.full ? [t('3'), t('2'), t('1'), t('Partez !')] : [t('Prêt ?'), t('Partez !')]
-const duration = props.full ? COUNTDOWN_STEP_MS : READY_STEP_MS
+const steps = [t('3'), t('2'), t('1'), t('Partez !')]
 const label = ref('')
 const digit = ref<HTMLElement>()
 watch(label, value => {
@@ -17,7 +15,7 @@ watch(label, value => {
   if (value === steps.at(-1)) {
     sound('rev')
     streaks(palettes.fire, 8, 1, 0.28)
-  } else if (props.full) sound('tick')
+  } else sound('tick')
 }, { flush: 'post' })
 let frame = 0
 let since: number | undefined
@@ -27,7 +25,7 @@ let finished = false
 
 function tick() {
   if (document.hidden || since === undefined) return
-  const step = Math.floor((banked + performance.now() - since) / duration)
+  const step = Math.floor((banked + performance.now() - since) / COUNTDOWN_STEP_MS)
   label.value = steps[step] ?? ''
   if (!started && step >= steps.length - 1) {
     started = true

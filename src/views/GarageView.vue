@@ -2,10 +2,10 @@
 import { computed, ref } from 'vue'
 import { inTransit } from '../game/trade'
 import { locale, t, tp, tc } from '../i18n'
-import { boosterById, families, parts, rarities, rarityClass, series, stylesOf, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
+import { boosterById, families, parts, rarities, rarityClass, rarityMark, series, stylesOf, vehicleById, vehicles, type Rarity, type Vehicle } from '../game/data'
 import { statsOf } from '../game/rules'
 import { claimSeries, craftCheck, seriesComplete, seriesProgress, freeParts, prepOf, totalMountedParts, uninstallAll } from '../game/save'
-import { act, narrow, ownedCount, reducedMotion, save } from '../game/store'
+import { act, exchangeAlerts, narrow, ownedCount, reducedMotion, save } from '../game/store'
 import { edition } from '../game/art'
 import { confetti, palettes } from '../game/fx'
 import CarCard from '../components/CarCard.vue'
@@ -148,7 +148,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
   <main class="garage">
     <div class="page-heading">
       <h1 tabindex="-1">{{ t('Mon garage') }}</h1>
-      <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('friends')">{{ t('Échanges') }}</button>
+      <button v-if="save.preferences.friendsEnabled === true" type="button" class="button ghost" @click="emit('friends')">{{ t('Échanges') }}<span v-if="exchangeAlerts.offers + exchangeAlerts.friends" class="exchange-alert">{{ exchangeAlerts.offers + exchangeAlerts.friends }}<span class="visually-hidden"> {{ t('en attente de réponse') }}</span></span></button>
     </div>
     <div class="tabs garage-tabs" :aria-label="t('Inventaire')">
       <button type="button" :aria-pressed="tab === 'cars'" @click="selectTab('cars')">{{ t('Voitures') }} <span>{{ ownedCount }}/{{ vehicles.length }}</span></button>
@@ -168,7 +168,7 @@ const seriesCars = (ids: string[]) => ids.map(id => vehicleById.get(id)!)
           <template v-if="tab === 'cars'">
             <div class="garage-rarity-chips" role="group" :aria-label="t('Filtrer par rareté')">
               <GvButton variant="filter" :aria-label="t('Toutes, {n} voitures', { n: rarityCount() })" :aria-pressed="rarityFilter === ''" @click="rarityFilter = ''"><span aria-hidden="true">◈</span> {{ t('Toutes') }} <b>{{ rarityCount() }}</b></GvButton>
-              <GvButton variant="filter" tone="var(--rarity-color)" :aria-label="tp('{rarity}, {n} voiture', '{rarity}, {n} voitures', rarityCount(r), { rarity: t(r) })" v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarityFilter === r" @click="rarityFilter = r"><span class="rarity-gem" aria-hidden="true">◆</span><span class="visually-hidden">{{ t(r) }}</span><b>{{ rarityCount(r) }}</b></GvButton>
+              <GvButton variant="filter" tone="var(--rarity-color)" :aria-label="tp('{rarity}, {n} voiture', '{rarity}, {n} voitures', rarityCount(r), { rarity: t(r) })" v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarityFilter === r" @click="rarityFilter = r"><span class="rarity-gem" aria-hidden="true">{{ rarityMark[r] }}</span><span class="visually-hidden">{{ t(r) }}</span><b>{{ rarityCount(r) }}</b></GvButton>
             </div>
             <div class="garage-sort-chips" role="group" :aria-label="t('Trier les voitures')">
               <GvButton variant="tab" :aria-label="option.label" :title="option.label" v-for="option in quickSorts" :key="option.id" type="button" :aria-pressed="sort === option.id" @click="sort = option.id"><span aria-hidden="true">{{ option.icon }}</span><span class="visually-hidden">{{ option.label }}</span></GvButton>

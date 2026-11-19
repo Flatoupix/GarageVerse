@@ -2,13 +2,15 @@ import { computed, reactive, ref, watch } from 'vue'
 import { touchHelpEnabled } from './help'
 import { playCue, type Cue } from '../feedback'
 import { series, vehicles } from './data'
-import { seriesComplete, LEGACY_KEY, refreshDaily, readSave, SAVE_KEY, type Save } from './save'
+import { seriesComplete, LEGACY_KEY, refreshDaily, readSave, revealBatch, SAVE_KEY, type BatchSize, type Save } from './save'
 
 function load(): Save {
   try { return readSave(localStorage.getItem(SAVE_KEY), localStorage.getItem(LEGACY_KEY)) } catch { storageWarning.value = true; return readSave(null) }
 }
 
 export const storageWarning = ref(false)
+// Offres d'échange et demandes d'ami en attente de réponse, vues à la dernière synchronisation.
+export const exchangeAlerts = reactive({ offers: 0, friends: 0 })
 // Aucune partie enregistrée avant ce lancement : nouveau joueur, accueilli par le tutoriel plutôt que par les notes de version.
 export const firstLaunch = (() => { try { return !localStorage.getItem(SAVE_KEY) && !localStorage.getItem(LEGACY_KEY) } catch { return false } })()
 export const save = reactive(load()) as Save
@@ -32,12 +34,27 @@ window.addEventListener('storage', event => {
 })
 
 export function persist() {
+  writeSave(save)
+}
+
+function writeSave(state: Save) {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(save))
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, editionPurchase: undefined }))
     storageWarning.value = false
+    return true
   } catch {
     storageWarning.value = true
+    return false
   }
+}
+
+export function openBatch(booster: string, count: BatchSize, id: number) {
+  // Une seule écriture publie à la fois les tickets, la collection et le récapitulatif.
+  const draft: Save = JSON.parse(JSON.stringify(save))
+  const batch = revealBatch(draft, booster, count, id)
+  if (!batch || !writeSave(draft)) return false
+  Object.assign(save, draft)
+  return true
 }
 
 export function notify(text: string, tone: 'info' | 'error' = 'info') {

@@ -1,6 +1,15 @@
 import type { Dict } from './index'
 
 export const vuesCourse: Dict = {
+  'Plafond dépassé de {n}': 'Over the cost cap by {n}',
+  'Statistiques prioritaires': 'Most important stats',
+  'Écurie · {n}/3': 'Lineup · {n}/3',
+  'Retirer {name} de l’écurie': 'Remove {name} from the lineup',
+  'Atelier de {name}': 'Workshop for {name}',
+  '+ Choisir': '+ Pick',
+  'Coût {n}': 'Cost {n}',
+  'Encore {n} voiture': 'Pick {n} more car',
+  'Encore {n} voitures': 'Pick {n} more cars',
   // Écran de course : constitution de l'écurie, secteurs, résultat
   'Pilotage': 'Driving mode',
   'Automatique': 'Automatic',
@@ -120,6 +129,9 @@ export const vuesCourse: Dict = {
   'Rivaux de la nuit': 'Rivals of the night',
   'Engage une voiture par secteur, en secret. Chaque voiture court un nombre limité de secteurs selon son Endurance.': 'Enter one car per sector, in secret. Each car runs a limited number of sectors, based on its Endurance.',
   'Victoire parfaite obtenue': 'Perfect win earned',
+  'Victoire parfaite non obtenue': 'Perfect win not earned',
+  '{n} victoire parfaite sur 3': '{n} perfect win out of 3',
+  '{n} victoires parfaites sur 3': '{n} perfect wins out of 3',
   'plafond {n}': 'cap {n}',
   '3 étapes · finale : {n} ₡ + ticket {booster}': '3 stages · finale: {n} ₡ + {booster} ticket',
   'Verrouillé': 'Locked',

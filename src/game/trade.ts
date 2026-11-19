@@ -2,7 +2,7 @@
 import { t } from '../i18n'
 import { partById, stylesOf, vehicleById } from './data'
 import { compatibility, extraSlotFamily, partUnlockLevel, upgradeKeys } from './rules'
-import type { OwnedCar, Save } from './save'
+import { discardEditionPurchase, type OwnedCar, type Save } from './save'
 
 export interface TradeOffer { cars: readonly string[]; credits: number }
 export interface TradeGoods { cars: Record<string, OwnedCar>; credits: number }
@@ -67,14 +67,14 @@ export function inTransit(save: Save, id: string): OwnedCar | undefined {
   }
 }
 
+// Une voiture d'écurie reste échangeable : elle quitte l'écurie au départ du lot. Seule une course en cours la retient.
 export function validateTradeShowcase(save: Save, cars: readonly string[]): string | undefined {
   const stakeLineup = save.versus?.active?.request?.lineup
   for (const id of cars) {
     if (!vehicleById.has(id) || !Object.hasOwn(save.cars, id)) return t('Voiture absente du garage')
     if (inTransit(save, id)) return t('En transit')
-    if (save.lineup.includes(id) || save.nightLineup.includes(id) || save.dailyLineup?.includes(id)
-      || save.duel?.player.lineup.some(car => car.id === id) || save.night?.lineup.includes(id)
-      || (Array.isArray(stakeLineup) && stakeLineup.some(car => car?.id === id))) return t('Cette voiture est engagée et ne peut pas être échangée')
+    if (save.duel?.player.lineup.some(car => car.id === id) || save.night?.lineup.includes(id)
+      || (Array.isArray(stakeLineup) && stakeLineup.some(car => car?.id === id))) return t('Cette voiture est en pleine course et ne peut pas être échangée')
   }
 }
 
@@ -101,6 +101,7 @@ export function openTrade(save: Save, id: string, offer: TradeOffer): string | u
   if (!validId(id) || used(save, id)) return t('Échange indisponible')
   const problem = validateTradeOffer(save, offer)
   if (problem) return problem
+  for (const carId of offer.cars) discardEditionPurchase(save, carId)
   write(save, { id, state: 'ouverte', offer: { cars: [...offer.cars], credits: offer.credits } })
 }
 
@@ -124,26 +125,43 @@ export function transitTrade(save: Save, id: string, offer?: TradeOffer, adverti
   const problem = checkOffer(save, outgoing, record?.id)
   if (problem) return problem
 
-  const goods = normalizeGoods({
+  let goods = normalizeGoods({
     cars: Object.fromEntries(outgoing.cars.map(carId => [carId, save.cars[carId]])),
     credits: outgoing.credits,
   })
   if (!goods) return t('Offre d’échange invalide')
+  // Doublons tirés depuis l'annonce : le lot part avec le nombre annoncé, le surplus reste au garage.
+  const surplus: Record<string, number> = {}
   if (advertised) {
     const expected = normalizeGoods(advertised)
-    // Les pièces montées et le favori restent des choix du garage qui donne.
-    const transferable = (car: OwnedCar) => JSON.stringify({ ...car, parts: [], favorite: false })
+    // Pièces montées, favori et style affiché restent des choix du garage qui donne.
+    const transferable = (car: OwnedCar) => JSON.stringify({ ...car, copies: 0, parts: [], favorite: false, shown: '' })
     if (!expected || expected.credits !== goods.credits || Object.keys(expected.cars).length !== Object.keys(goods.cars).length
-      || Object.entries(goods.cars).some(([carId, car]) => !expected.cars[carId] || transferable(car) !== transferable(expected.cars[carId]))) {
+      || Object.entries(goods.cars).some(([carId, car]) => !expected.cars[carId] || car.copies < expected.cars[carId].copies
+        || transferable(car) !== transferable(expected.cars[carId]))) {
       return t('Le lot a changé depuis la proposition.')
+    }
+    goods = {
+      cars: Object.fromEntries(Object.entries(goods.cars).map(([carId, car]) => {
+        const extra = car.copies - expected.cars[carId].copies
+        if (!extra) return [carId, car]
+        surplus[carId] = extra
+        // La voiture gardée conserve ses pièces montées.
+        return [carId, { ...car, copies: expected.cars[carId].copies, parts: [] }]
+      })),
+      credits: goods.credits,
     }
   }
   const { cars } = goods
   const mounted = partCounts(cars)
   if (mounted.some(([partId, count]) => (save.parts[partId] ?? 0) < count)) return t('Stock de pièces incohérent pour cet échange')
   for (const [partId, count] of mounted) save.parts[partId] -= count
-  for (const carId of outgoing.cars) delete save.cars[carId]
-  const keep = (carId: string) => !Object.hasOwn(cars, carId)
+  for (const carId of outgoing.cars) {
+    discardEditionPurchase(save, carId)
+    if (surplus[carId]) save.cars[carId].copies = surplus[carId]
+    else delete save.cars[carId]
+  }
+  const keep = (carId: string) => !Object.hasOwn(cars, carId) || !!surplus[carId]
   save.lineup = save.lineup.filter(keep)
   save.nightLineup = save.nightLineup.filter(keep)
   if (save.dailyLineup) save.dailyLineup = save.dailyLineup.filter(keep)
@@ -217,8 +235,8 @@ export function returnTrade(save: Save, id: string): string | undefined {
     if (!releaseParts(save, goods)) return t('Stock de pièces incohérent pour cet échange')
     for (const [carId, car] of Object.entries(goods.cars)) {
       const current = save.cars[carId]
-      // Si un booster l'a redonnée entre-temps, le lot rendu garde ses pièces montées.
-      save.cars[carId] = current ? mergeTradeCars({ ...current, parts: car.parts }, car) : copyCar(car)
+      // Si un booster l'a redonnée entre-temps, le lot rendu garde ses pièces montées ; un surplus gardé garde les siennes.
+      save.cars[carId] = current ? mergeTradeCars({ ...current, parts: car.parts.length ? car.parts : current.parts }, car) : copyCar(car)
     }
     save.credits += goods.credits
   }

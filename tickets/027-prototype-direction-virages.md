@@ -1,7 +1,7 @@
 # T-027 · Prototype de course : prendre les virages avec les flèches gauche et droite
 
-- **Priorité** P2, à évaluer sur mobile avec le prototype de course.
-- **Statut** Prototype V0 présent dans `dev` sous la forme d'un **jeu de rythme** (voir ci-dessous) ; à playtester sur mobile en solo.
+- **Priorité :** P2, à évaluer sur mobile avec le prototype de course.
+- **Statut :** Publié en v0.15.0 (mode expérimental), virages en jeu de rythme rétablis en v0.17.0 ; **à playtester sur mobile**
 - **Ticket lié** [T-026 · Passage de vitesses au bon régime](026-prototype-passage-vitesses-timing.md).
 - **Contexte technique** [RaceView.vue](../src/views/RaceView.vue), [SectorRun.vue](../src/components/SectorRun.vue), [règles de course](../src/game/rules.ts) et [méta du jeu](../docs/meta.md).
 

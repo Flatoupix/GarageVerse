@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { playEditionCue } from '../feedback'
 import { art, edition } from '../game/art'
 import { families, partById, parts, progression, statLabels, styleLabel, stylesOf, vehicleById, vehicles, type EditionStyle, type Rival, type StatKey } from '../game/data'
 import { confetti, flash, palettes, pop, rarityPalette, ring, shake, sparks, vTilt, tone } from '../game/fx'
 import { vHelp } from '../game/help'
 import { circuitScores, compatibility, engagements, EXTRA_SLOT_POTENTIAL, EXTRA_SLOT_PRICE, extraSlotFamily, partUnlockLevel, potential, prepUsed, racer, STAT_CAP, statsOf, statUse,
   upgradeKeys, upgradePrices, upgrades } from '../game/rules'
-import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, editionDuplicates, editionPrice, extraSlotCheck, freeParts, install, installCheck, isCarMaxedForExtraSlot, partReplacedOnInstall, prepOf,
-  selectEdition, sellCar, sellCheck, sellPrice, stageCost, uninstall, unlockEdition, unlockEditionCheck, unlockExtraSlot, upgrade, upgradeCheck, upgradeStat } from '../game/save'
+import { applyAutoUpgrade, autoUpgradePlan, craft, craftCheck, discardEditionPurchase, editionDuplicates, editionPrice, editionUndoDuration, extraSlotCheck, freeParts, install, installCheck, isCarMaxedForExtraSlot, partReplacedOnInstall, prepOf,
+  selectEdition, sellCar, sellCheck, sellPrice, stageCost, undoableEditionPurchase, undoEditionUnlock, uninstall, unlockEdition, unlockEditionCheck, unlockExtraSlot, upgrade, upgradeCheck, upgradeStat } from '../game/save'
 import { inTransit } from '../game/trade'
 import { recycle, undoRecycle, type RecycleReceipt } from '../game/recycle'
-import { act, buzz, save } from '../game/store'
+import { act, buzz, persist, reducedMotion, save } from '../game/store'
 import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
 import { t, tp, tc } from '../i18n'
@@ -66,7 +67,9 @@ function sell() {
 const selected = ref<StatKey | undefined>(props.suggestedStat)
 const prep = computed(() => prepOf(save, props.id))
 const stats = computed(() => statsOf(v.value, prep.value))
-const image = computed(() => edition(props.id, (transit.value ?? car.value)?.shown).art)
+const previewStyle = ref<EditionStyle>()
+const shownStyle = computed(() => (car.value && previewStyle.value) || (transit.value ?? car.value)?.shown)
+const image = computed(() => edition(props.id, shownStyle.value).art)
 const next = computed(() => stageCost(save, props.id))
 const stageProblem = computed(() => {
   if (!car.value || !next.value) return t('Préparation maximale atteinte')
@@ -88,12 +91,11 @@ const allStyles = computed(() => stylesOf(props.id).map(style => ({
   style,
   label: styleLabel(v.value, style),
   owned: Boolean(car.value?.editions.includes(style)),
-  shown: car.value?.shown === style,
+  shown: shownStyle.value === style,
   price: editionPrice(props.id),
   problem: unlockEditionCheck(save, props.id, style),
 })))
-// Les crédits et doublons demandés sont les mêmes pour tous les styles d'une voiture : une seule raison est écrite.
-const lockedProblem = computed(() => allStyles.value.find(item => !item.owned && item.problem)?.problem)
+const preview = computed(() => allStyles.value.find(item => item.style === previewStyle.value && !item.owned))
 
 const modules = computed(() => upgradeKeys.map(key => {
   const config = upgrades[key]
@@ -132,15 +134,67 @@ function autoImprove() {
   flash(tone.cyan, 0.22)
   sparks('.car-sheet-portrait', palettes.cyan, 34, 1)
 }
+const purchase = shallowRef<typeof save.editionPurchase>()
+const undoPurchase = computed(() => purchase.value && undoableEditionPurchase(save, props.id) === purchase.value ? purchase.value : undefined)
+const editionMessage = ref('')
+let editionTimer: ReturnType<typeof setTimeout> | undefined
+let stopSparks: (() => void) | undefined
+let stopCue: (() => void) | undefined
+
+function stopEditionEffects() {
+  stopSparks?.()
+  stopCue?.()
+  stopSparks = stopCue = undefined
+}
+function clearEditionUndo() {
+  clearTimeout(editionTimer)
+  if (purchase.value && save.editionPurchase === purchase.value) discardEditionPurchase(save, purchase.value.id)
+  purchase.value = undefined
+  stopEditionEffects()
+}
+watch(undoPurchase, current => { if (!current) clearEditionUndo() })
+watch(reducedMotion, reduced => { if (reduced) stopEditionEffects() })
+watch(() => props.id, () => {
+  clearEditionUndo()
+  previewStyle.value = undefined
+  editionMessage.value = ''
+})
+onBeforeUnmount(clearEditionUndo)
+
 function chooseStyle(style: EditionStyle) {
-  const label = styleLabel(v.value, style)
-  if (car.value?.editions.includes(style)) {
-    act(s => selectEdition(s, props.id, style), t('Style {label} appliqué', { label: t(label) }), 'flip')
+  if (!car.value?.editions.includes(style)) {
+    previewStyle.value = style
     return
   }
-  if (!act(s => unlockEdition(s, props.id, style), t('Style {label} débloqué', { label: t(label) }), 'rare')) return
+  previewStyle.value = undefined
+  act(s => selectEdition(s, props.id, style), t('Style {label} appliqué', { label: t(styleLabel(v.value, style)) }), 'flip')
+}
+function buyStyle() {
+  const item = preview.value
+  if (!item || item.problem || !act(s => unlockEdition(s, props.id, item.style))) return
+  clearEditionUndo()
+  previewStyle.value = undefined
+  editionMessage.value = ''
+  const current = undoableEditionPurchase(save, props.id)
+  if (!current) {
+    discardEditionPurchase(save, props.id)
+    editionMessage.value = t('Style {label} débloqué', { label: t(item.label) })
+    return
+  }
+  purchase.value = current
+  editionTimer = setTimeout(clearEditionUndo, Math.max(0, current.at + editionUndoDuration - Date.now()))
+  if (reducedMotion.value) return
+  if (save.preferences.sound) stopCue = playEditionCue()
   buzz([15, 30, 20])
-  sparks('.car-sheet-portrait', palettes.pink, 28, 1)
+  stopSparks = sparks('.car-sheet-portrait', palettes.pink, 28, 1)
+}
+function cancelEdition() {
+  const result = undoPurchase.value && undoEditionUnlock(save, props.id)
+  clearEditionUndo()
+  if (!result) return
+  previewStyle.value = undefined
+  persist()
+  editionMessage.value = t('Achat annulé : {credits} ₡ et {n} doublons rendus', { credits: result.credits, n: result.duplicates })
 }
 function stageUp() {
   const stage = (car.value?.stage ?? 0) + 1
@@ -165,7 +219,8 @@ function unlock(id: string, open = false) {
   const e = vehicleById.get(id)!
   if (!act(s => craft(s, id), t('{name} {version} débloquée', { name: e.name, version: e.version }), 'legend')) return
   buzz([30, 50, 40, 50, 60])
-  flash(tone.light, 0.6); shake(2); confetti(rarityPalette[e.rarity]); sparks('.sheet-card', rarityPalette[e.rarity], 60, 1.3)
+  const colors = rarityPalette(e.rarity)
+  flash(colors[1], 0.6); shake(2); confetti(colors); sparks('.sheet-card', colors, 60, 1.3)
   if (open) emit('open', id)
 }
 function toggleLineup() {
@@ -202,9 +257,9 @@ function workshop(key?: StatKey) {
     </div>
 
     <div class="car-sheet-layout" :class="{ 'has-car': Boolean(car) }">
-      <aside class="car-sheet-aside" :class="{ 'mobile-hidden': car && panel !== 'card' }">
+      <aside class="car-sheet-aside" :class="{ 'mobile-hidden': car && panel !== 'card' && !preview }">
         <div class="sheet-card" @dragstart.prevent>
-          <div v-tilt><CarCard :id="id" :style-name="(transit ?? car)?.shown" :prep="transit ?? (car ? prep : undefined)" /></div>
+          <div v-tilt><CarCard :id="id" :style-name="shownStyle" :prep="transit ?? (car ? prep : undefined)" /></div>
         </div>
       </aside>
 
@@ -242,26 +297,36 @@ function workshop(key?: StatKey) {
           </template>
         </section>
 
-        <section v-if="car && (panel === 'overview' || panel === 'card')" class="sheet-section edition-section">
-          <div class="section-row">
-            <h3><span v-help="'edition'">{{ t('Styles & Éditions') }}</span></h3>
-            <small class="hint">{{ tp('{n}/{total} débloqué', '{n}/{total} débloqués', car.editions.length, { total: allStyles.length }) }}</small>
+        <section v-if="car && (panel !== 'workshop' || undoPurchase || editionMessage)" class="sheet-section edition-section">
+          <template v-if="panel !== 'workshop'">
+            <div class="section-row">
+              <h3><span v-help="'edition'">{{ t('Styles & Éditions') }}</span></h3>
+              <small class="hint">{{ tp('{n}/{total} débloqué', '{n}/{total} débloqués', car.editions.length, { total: allStyles.length }) }}</small>
+            </div>
+            <p class="hint">{{ t('Change l’apparence de ta carte ou débloque un autre style créé pour cette voiture avec des crédits et {n} doublons.', { n: editionDuplicates }) }}</p>
+            <div class="edition-picker">
+              <button v-for="item in allStyles" :key="item.style" type="button"
+                :class="{ 'is-locked': !item.owned }"
+                :aria-pressed="item.shown"
+                @click="chooseStyle(item.style)">
+                <b>{{ t(item.label) }}</b>
+                <small v-if="item.shown && item.owned">{{ t('✓ Affiché') }}</small>
+                <small v-else-if="item.owned">{{ t('Appliquer') }}</small>
+                <small v-else>{{ t('Aperçu') }}</small>
+              </button>
+            </div>
+            <template v-if="preview">
+              <button type="button" class="button primary wide" :disabled="Boolean(preview.problem)" @click="buyStyle">
+                {{ t('Débloquer · {price} ₡ + {n} doublons', { price: preview.price, n: editionDuplicates }) }}
+              </button>
+              <p v-if="preview.problem" class="hint">{{ preview.problem }}</p>
+            </template>
+            <p class="hint">{{ t('Éditions possédées : {list}', { list: car.editions.map(style => t(styleLabel(v, style))).join(', ') }) }}</p>
+          </template>
+          <div v-if="undoPurchase || editionMessage">
+            <p role="status">{{ undoPurchase ? t('Style {label} débloqué', { label: t(styleLabel(v, undoPurchase.style)) }) : editionMessage }}</p>
+            <button v-if="undoPurchase" type="button" class="button ghost" @click="cancelEdition">{{ t('Annuler') }}</button>
           </div>
-          <p class="hint">{{ t('Change l’apparence de ta carte ou débloque un autre style créé pour cette voiture avec des crédits et {n} doublons.', { n: editionDuplicates }) }}</p>
-          <div class="edition-picker">
-            <button v-for="item in allStyles" :key="item.style" type="button"
-              :class="{ 'is-locked': !item.owned }"
-              :aria-pressed="item.shown"
-              :disabled="!item.owned && Boolean(item.problem)"
-              @click="chooseStyle(item.style)">
-              <b>{{ t(item.label) }}</b>
-              <small v-if="item.shown">{{ t('✓ Affiché') }}</small>
-              <small v-else-if="item.owned">{{ t('Appliquer') }}</small>
-              <small v-else>{{ t('Débloquer · {price} ₡ + {n} doublons', { price: item.price, n: editionDuplicates }) }}</small>
-            </button>
-          </div>
-          <p v-if="lockedProblem" class="hint">{{ lockedProblem }}</p>
-          <p class="hint">{{ t('Éditions possédées : {list}', { list: car.editions.map(style => t(styleLabel(v, style))).join(', ') }) }}</p>
         </section>
 
         <template v-if="car && panel === 'overview'">

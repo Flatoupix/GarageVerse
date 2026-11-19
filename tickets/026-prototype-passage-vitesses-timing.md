@@ -1,7 +1,7 @@
 # T-026 · Prototype de course : passage de vitesses au bon régime
 
 - **Priorité :** P2 (prototype gameplay à évaluer sur mobile)
-- **Statut :** Prototype V0 présent dans `dev` (mode expérimental désactivé par défaut, démo dans Réglages › Paramètres) ; **à playtester sur mobile** ; **ne remplace pas le système de course existant**
+- **Statut :** Publié en v0.15.0 (mode expérimental, désactivé par défaut), enrichi en v0.16.0 (décompte, clavier, tutoriel) et v0.17.0 (effets) ; **à playtester sur mobile** ; ne remplace pas le système de course automatique
 - **Origine :** idée de gameplay exprimée le 18 novembre 2026
 - **Contexte technique :** [docs/meta.md](../docs/meta.md) §5 ; [src/game/rules.ts](../src/game/rules.ts) ; [src/views/RaceView.vue](../src/views/RaceView.vue) ; [src/components/SectorRun.vue](../src/components/SectorRun.vue)
 - **Ticket lié :** [T-009, modes de duel alternatifs](009-modes-duel-alternatifs.md) (autre piste, indépendante)

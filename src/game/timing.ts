@@ -16,6 +16,7 @@ export interface SoloDuel extends Duel {
   pilot?: RacePilot
   timingChoice?: Choice
   timingReview?: boolean
+  manualSector?: { index: number; choice: Choice; rivalChoice: Choice; turn: boolean }
 }
 
 export const shiftsPerSector: Record<Sector, number> = { depart: 2, ligne: 3, endurance: 2, virage: 2 }

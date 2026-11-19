@@ -2,7 +2,7 @@
 
 - **Type :** Fonctionnalité / ergonomie de course
 - **Priorité :** P2
-- **Statut :** Implémenté dans `dev` (contrôle `src/game/night-pilot.check.cjs`) ; à playtester sur mobile
+- **Statut :** Publié en v0.19.0 (contrôle `src/game/night-pilot.check.cjs`) ; **à playtester sur mobile**
 - **Signalement :** demande du joueur du 19 novembre 2026 : ne pas imposer le manuel en mode infini, et pouvoir repasser en automatique tout en conservant sa progression
 - **Tickets liés :** [T-028 · pilotage automatique ou manuel](028-pilotage-automatique-ou-manuel.md), [T-026 · passage de vitesses](026-prototype-passage-vitesses-timing.md), [T-027 · direction en virage](027-prototype-direction-virages.md), [T-034 · difficulté progressive](034-difficulte-pilotage-manuel-rivaux.md)
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue), [`src/game/save.ts`](../src/game/save.ts), [`src/game/pilot.ts`](../src/game/pilot.ts), [`src/game/endless.ts`](../src/game/endless.ts), [`src/game/pilot.check.cjs`](../src/game/pilot.check.cjs), [`src/game/endless.check.cjs`](../src/game/endless.check.cjs), [`docs/meta.md`](../docs/meta.md)

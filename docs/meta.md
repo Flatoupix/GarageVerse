@@ -10,7 +10,7 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 
 | Dimension | Traduction en jeu |
 | --- | --- |
-| Rareté | Courante, Rare, Épique, Légendaire. Elle règle la fréquence en booster et le cadre de la carte (gris bleu, bleu, rose, or à reflet par paliers). |
+| Rareté | Courante, Rare, Épique, Légendaire. Elle règle la fréquence en booster et le cadre de la carte. La palette de référence est définie sur `:root` dans `src/themes/shared.css` : Courante gris-bleu (`--rarity-common`, `#aabbd0`), Rare bleu (`--rarity-rare`, `#4aa8ff`), Épique rose (`--rarity-epic`, `#ff5fd2`), Légendaire or (`--rarity-legendary`, `#ffc64a`). Les cartes de voiture et de pièces, les vignettes, les filtres et les halos du booster utilisent ces variables. Les effets de révélation lisent les mêmes variables et en dérivent les reflets. |
 | Puissance | Quatre scores de base sur 10 (ACC, VIT, MAN, END), plafonnés à 12 après préparation, et le coût d’écurie. |
 | Aura | Les éditions culturelles portent leurs étiquettes (Cinéma, Série, Nostalgie, Tuning…). Elles gagnent +1 la Nuit. Certaines capacités comptent les alliés qui partagent une étiquette. |
 | Édition artistique | Synthwave, photo, gouache et rallye argentique. Classic et Pixel Art pour certaines cartes. Les éditions d’une voiture partagent les mêmes statistiques. |
@@ -36,7 +36,7 @@ Ce document arbitre les questions laissées ouvertes par la bible (§3, §4 et �
 | Stage 2 · 200 crédits et 1 doublon | +1 potentiel, +1 à la meilleure statistique d’origine |
 | Stage 3 · 450 crédits et 2 doublons | +1 potentiel, débloque les évolutions |
 | 3ᵉ emplacement de pièce · 250 crédits | Sur une voiture au Stage 3 dont les quatre ateliers sont au niveau 2 : +2 potentiel et une 2ᵉ pièce dans une seule famille, celle où en cumuler deux a du sens — Spécial (Transmission et nitro), Gestion moteur (Moteur et turbo) ou Châssis (Freins et châssis). Pas de 3ᵉ pièce en Pneus et suspension, jamais deux fois la même pièce. Le déplacer vers un autre atelier coûte de nouveau 250 crédits, après avoir retiré la 2ᵉ pièce. Un emplacement acheté sur Pneus et suspension avant cette règle est remboursé au chargement (`extraSlotFamily` dans `src/game/rules.ts`, `src/game/extraslot.check.cjs`). |
-| Débloquer / changer un style | Un tirage débloque et affiche uniquement l’édition tirée. Le Pixel 16 bits ne s’ajoute pas en plus et se débloque comme les autres éditions. Bascule gratuitement entre les éditions déjà possédées ou débloque un style artistique disponible (Synthwave, Pixel 16 bits, Classic, Photo, Gouache, Rallye argentique, et Solarpunk et Abandonnée sur les 129 voitures du jeu, liste `editionCars` de `src/game/data.ts`…) contre 40, 75, 120 ou 200 crédits selon la rareté **et deux doublons de la carte** (`editionDuplicates` dans `src/game/save.ts` ; un exemplaire reste toujours). Quand il manque quelque chose, la fiche l’écrit : « Il te manque 1 doublon », « Il te manque 30 crédits ». Les éditions déjà débloquées sont gardées. Les images viennent de `node pipeline/art.mjs --set edition --only id,id` (fichiers `src/assets/cars/<id>-solarpunk.webp` et `<id>-abandonnee.webp`). |
+| Débloquer / changer un style | Un tirage débloque et affiche uniquement l’édition tirée. Le Pixel 16 bits ne s’ajoute pas en plus et se débloque comme les autres éditions. Bascule gratuitement entre les éditions déjà possédées ou débloque un style artistique disponible (Synthwave, Pixel 16 bits, Classic, Photo, Gouache, Rallye argentique, et Solarpunk et Abandonnée sur les 129 voitures du jeu, liste `editionCars` de `src/game/data.ts`…) contre 40, 75, 120 ou 200 crédits selon la rareté **et deux doublons de la carte** (`editionDuplicates` dans `src/game/save.ts` ; un exemplaire reste toujours). Quand il manque quelque chose, la fiche l’écrit : « Il te manque 1 doublon », « Il te manque 30 crédits ». Essaie gratuitement un style sur la carte, puis confirme avec « Débloquer ». Seul le dernier achat est annulable, pendant 30 secondes au maximum et tant que la fiche reste ouverte. La trace est gardée en mémoire pour la session. Une vente, un recyclage, une dépense de doublons, une mise en vitrine, une offre ou un échange invalide l’annulation. Le remboursement doit tenir dans les plafonds de la sauvegarde. Les images viennent de `node pipeline/art.mjs --set edition --only id,id` (fichiers `src/assets/cars/<id>-solarpunk.webp` et `<id>-abandonnee.webp`). |
 | Vendre une voiture | Retire tous ses exemplaires de la collection et libère ses pièces. Prix : 2 × progression.scrap[rareté] + 10 × Stage + ⌊crédits d’atelier dépensés / 2⌋ + progression.scrap[rareté] × (exemplaires − 1). Refus si engagée dans une écurie (défi du jour compris), dans une course en cours, ou si le garage passerait sous trois voitures différentes. Les évolutions peuvent aussi être vendues. |
 | Recycler un doublon | 10, 30, 80 ou 200 crédits selon la rareté. Moitié prix pour une pièce libre. |
 
@@ -72,7 +72,9 @@ C’est la piste « épreuve en secteurs » de la bible, enrichie de choix simul
 
 Le joueur doit pouvoir expliquer son choix : le panneau de résultat détaille chaque bonus. **Aide rapide** (`src/game/help.ts`) : les termes soulignés en pointillé (statistiques, secteurs, météo, lignes du détail de score, nitro, Stage…) ouvrent une bulle d’explication ; l’onglet Aide des Réglages ouvre le lexique complet. Avant chaque secteur, une consigne rappelle le but et la statistique qui compte. Il peut se relancer après un mauvais départ grâce aux capacités « retour en force » et à la Nitro gardée pour la fin. Une carte commune garde un usage : une Twingo sous la pluie en ville vaut mieux qu’une hypercar.
 
-**Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. Une victoire parfaite signifie que tu as gagné tous les secteurs : les crédits de la ligue sont doublés et tu reçois un ticket supplémentaire (neon → neon, chrome → night, overdrive → overdrive), cumulable avec celui de première victoire. Le record conserve cet exploit et une étoile ★ apparaît sur le rival, nommée « Victoire parfaite obtenue » pour les lecteurs d’écran. L’arrivée célèbre « Victoire parfaite » avec le son legend et des effets renforcés, désactivés en mouvement réduit. L’IA voit les mêmes informations que le joueur.
+**Rivaux.** Six rivaux en trois ligues, chacun avec un circuit et une météo typés : Lola Minitel, DJ Cassette, Kenji Vapor, Roxy Turbo, Le Baron Chrome et Nyx. La première victoire contre un rival rapporte un ticket du booster de sa ligue. Une victoire parfaite signifie que tu as gagné tous les secteurs : les crédits de la ligue sont doublés et tu reçois un ticket supplémentaire (neon → neon, chrome → night, overdrive → overdrive), cumulable avec celui de première victoire. L’arrivée célèbre « Victoire parfaite » avec le son legend et des effets renforcés, désactivés en mouvement réduit. L’IA voit les mêmes informations que le joueur.
+
+Le palmarès des victoires parfaites lit le champ `perfect` dans les entrées `<rival>:1` (Essais), `<rival>:2` (Qualifs) et `<rival>` (Finale). Chaque étape gagnée parfaitement affiche une étoile ★ à côté de ✓ dans son onglet. La liste affiche l’avancement sur trois avec des étoiles pleines et vides (par exemple ★★☆ pour deux victoires parfaites sur trois).
 
 Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’écurie pour chaque secteur selon un score moyen estimé. Lola roule d’origine et en pilotage simple (champ `simple` : toujours en Normal), pour que le joueur découvre les consignes avec un avantage ; les rivaux suivants attaquent et gèrent, et montent aussi leurs groupes de statistiques à l’atelier (champ `upgrades` des écuries). Mesures de la simulation (`node pipeline/balance.mjs`) depuis l’ajout des consignes : garage de départ d’origine 78 % contre Lola et 64 % contre Cassette, 87 % et 69 % avec une amélioration par voiture ; contre des écuries Stage 1 de leur ligue, Kenji 77 %, Roxy 69 %, le Baron 62 % et Nyx 61 %. Les cibles d’avant les consignes étaient 70 et 57 %, 83 et 72 %, puis 75, 71, 56 et 55 %.
 
@@ -86,11 +88,21 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 
 Chaque booster contient cinq cartes, dont au plus `maxParts` pièces mécaniques (2 pour les trois boosters actuels, 1 par défaut si le champ est absent). Le jeu détermine le type puis la rareté de chaque carte et choisit des pièces et des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé dès que le sachet est scellé, à l’achat ou avec un ticket. L’ouverture réutilise exactement ce tirage ; les anciens sachets sans tirage enregistré tirent encore à la déchirure. Une couverture légendaire (illustration dédiée, cadre et halo dorés, étincelles et ruban « Édition légendaire ») signale la présence d’au moins une Légendaire ; la boutique garde la couverture normale. Le sachet métallisé porte le logo néon et les couleurs de sa collection. Son reflet et son frémissement légendaire sont immobiles en mouvement réduit. Un rechargement retrouve le même lot sans retirage, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
-Pendant l’ouverture, deux rangées d’actions sont réservées en bas de la scène,
-au-dessus des onglets et de la zone sûre. Les messages disposent d’une hauteur
-fixe au-dessus et défilent si besoin. Les choix d’édition prennent la place du
-bouton principal. Le récapitulatif utilise la même zone d’actions et sa grille
-de cartes défile au-dessus. Le guide du mécano défile sous le sachet.
+Avec assez de tickets d’un même booster, tu peux confirmer l’ouverture groupée de 5 ou 10 sachets,
+en comptant le sachet déjà préparé. Son tirage scellé est repris, puis chaque sachet suivant
+est tiré indépendamment avec les règles habituelles. La collection, le solde de tickets et le récapitulatif
+sont sauvegardés ensemble avant la célébration. Le rechargement retrouve les résultats et le même
+identifiant de lot ne peut pas les attribuer une deuxième fois. Les mentions Nouveau et Doublon suivent
+l’ordre des tirages. Les éditions obtenues s’ajoutent à la collection et tu peux choisir de les afficher
+depuis le détail, en gardant par défaut l’apparence déjà affichée au garage.
+
+Pendant l’ouverture, la grille de la scène réserve deux rangées d’actions en
+bas, au-dessus des onglets et de la zone sûre. Leur hauteur reste la même avec
+un seul bouton, avec les choix d’édition et au récapitulatif. Les libellés
+peuvent revenir à la ligne. Les messages occupent une zone de hauteur fixe qui
+défile si le texte déborde. La carte s’ajuste à la hauteur restante, et la
+grille du récapitulatif défile au-dessus des actions. Sur les écrans compacts,
+le guide du mécano s’affiche à côté du sachet dans la zone défilante.
 
 ## 7. Direction artistique et thèmes d’interface
 
@@ -101,13 +113,13 @@ Le thème Rétro pixel suit les règles ci-dessous.
 - **Palette Endesga 32.** Variables de `:root` : nuit `--night` #181425, fond `--background` #262b44, panneau `--panel` #3a4466, gris bleu `--slate` #5a6988, crème `--text` #ead4aa, sable `--sand` #e4a672, brun `--brown` #b86f50, rouge `--red` #e43b44, orange `--orange` #f77622, jaune `--yellow` #feae34, vert `--green` #63c74d, bleu `--blue` #0099db, bleu clair `--light-blue` #2ce8f5, prune `--plum` #68386c, rose `--rose` #b55088, contour `--outline` #0b0a12. Texte crème sur les surfaces sombres ; texte contour sur les boutons jaunes.
 - **Typographies.** Press Start 2P pour les titres, chiffres et étiquettes courtes, à taille modeste ; Pixelify Sans pour le texte courant, au moins 15 px.
 - **Menus de console et borne de course.** Damier discret immobile, contours pleins de 2 à 4 px, coins carrés, ombres pleines décalées sans flou. Les boutons descendent au toucher, avec une ombre réduite et un contour de focus clavier jaune.
-- **Cartes de voiture.** Le cadre et le libellé de rareté gardent la même teinte dans le garage et la fiche agrandie, dans les huit thèmes. La palette commune se trouve dans `src/themes/shared.css` (Courante gris bleu, Rare bleu, Épique rose, Légendaire or avec reflet animé). Coût en pièce pixel et statistiques en blocs segmentés.
+- **Cartes de voiture.** Le cadre et le libellé de rareté gardent la même teinte dans le garage et la fiche agrandie, dans les huit thèmes. Les cartes suivent la palette commune décrite en section 2. Coût en pièce pixel et statistiques en blocs segmentés.
 - **Illustrations.** Chaque carte a une édition par défaut en pixel art 16 bits, générée en basse définition (`node pipeline/art.mjs --set pixel`, fichiers `src/assets/pixel/<type>/<id>.px.webp`) et agrandie sans lissage. Les illustrations précédentes restent des éditions à collectionner : synthwave pour les cartes 1 à 50, photo, gouache et rallye argentique pour les voitures de départ, et un style propre à chaque carte 51 à 102 (champ `look` du roster : affiche, rallye argentique, bande dessinée, anime, magazine, aquarelle, pulp ou synthwave, avec son décor dans `setting`). Une voiture déjà possédée reçoit l’édition pixel au chargement sans perdre son apparence choisie.
 - **Légendaires : image fixe.** Les 14 cartes avec un champ `anim` ne s’animent plus sur la carte. Elles montrent par défaut une grande image fixe (`defaultStyle` dans `src/game/data.ts`) : pour les onze cartes d’origine en Synthwave, une illustration volontairement stylisée et irréaliste (style `LEGEND_STYLE` de `pipeline/art.mjs`, fichiers `src/assets/cars/<id>.webp`) ; pour Jeep Jurassic Park, Interceptor et 1000tipla, leur illustration de style propre (affiche, pulp, magazine). Le pixel 16 bits reste une édition possédée et à choisir. Une partie existante dont une légendaire affichait l’ancien pixel par défaut passe à l’image fixe au chargement (`readSave`), un autre choix du joueur est gardé (`src/game/legend.check.cjs`). Les calques animés (`node pipeline/art.mjs --set anim` : décor qui défile et voiture détourée de profil) ne servent plus qu’à la mini-course des secteurs. Le CSS de scène (`.pixel-scene`, `.scene-*`) n’est plus utilisé.
 - **Retours de jeu.** Sons et logique inchangés ; étincelles et confettis carrés à coordonnées entières, traits de vitesse pixel et carrés qui s’agrandissent à la place des anneaux. Flash et secousse conservés dans `src/game/fx.ts`. Animations d’entrée et de révélation par paliers.
 - **Mouvement réduit.** La préférence du jeu et celle du système coupent animations, reflet, particules, flash et secousse sans perte d’information.
 - **Nom et stage sur la carte.** Le nom d’une voiture tient toujours sur deux lignes au plus et n’est jamais coupé au milieu d’un mot : `CarCard` réduit sa taille jusqu’à ce qu’il rentre (recalcul au redimensionnement, au changement de thème et après le chargement des polices). Vérifié sur les 129 voitures, en quatre tailles de carte (346, 150, 110 et 95 px) et dans les huit thèmes. Le stage d’une voiture préparée s’affiche dans un badge jaune en haut à gauche de la carte, « Stage N » et trois crans ; sur les petites cartes, le chiffre et les crans seulement. Dans les thèmes dérivés de Rétro pixel, la case Coût des petites cartes suit la largeur de la carte pour laisser la place au nom.
-- **Ordinateur (1024 px et plus).** Le téléphone et la tablette ne changent pas. Sur ordinateur (règles en fin de `src/themes/shared.css`, valables pour les huit thèmes) : les quatre onglets quittent le bas de l’écran et se placent au centre de la barre du haut, entre le logo et les crédits ; l’action principale d’une course se colle alors au bas de la fenêtre (`measureActions` dans `RaceView.vue` détecte que les onglets sont en haut) ; la préparation d’une course passe en deux colonnes, briefing à gauche (circuit, rival, coût d’écurie, « Préparer ta course ») et écurie puis garage à droite (`.race-prep`, `.race-prep-brief`, `.race-prep-pick`, sans effet sur téléphone grâce à `display: contents`) ; la barre de filtres garde des commandes à leur taille au lieu de les étirer ; les voitures du duel sont centrées en colonnes de la taille des cartes. Borne d’arcade agrandit ses libellés d’onglets et Console 16 bits garde son curseur « ▶ » à gauche de l’onglet actif.
+- **Ordinateur (1024 px et plus).** Le téléphone et la tablette ne changent pas. Sur ordinateur (règles en fin de `src/themes/shared.css`, valables pour les huit thèmes) : les quatre onglets quittent le bas de l’écran et se placent au centre de la barre du haut, entre le logo et les crédits ; l’action principale d’une course se colle alors au bas de la fenêtre (`measureActions` dans `RaceView.vue` détecte que les onglets sont en haut) ; la préparation d’une course passe en deux colonnes, briefing à gauche (circuit, rival, écurie adverse) et écurie puis garage à droite (`.race-prep`, `.race-prep-brief`, `.race-prep-pick`, sans effet sur téléphone grâce à `display: contents`) ; la barre de filtres garde des commandes à leur taille au lieu de les étirer ; les voitures du duel sont centrées en colonnes de la taille des cartes. Borne d’arcade agrandit ses libellés d’onglets et Console 16 bits garde son curseur « ▶ » à gauche de l’onglet actif.
 
 ## 8. Production automatisée
 
@@ -250,7 +262,11 @@ Le dos d’une carte (visible à l’ouverture d’un booster avant de la retour
 
 ## Choix des voitures d’une course
 
-Dans « Ton garage » (écran de préparation d’une course, d’un défi du jour ou de la Nuit sans fin), chaque voiture montre son **coût d’écurie** dans un rond dont la couleur dépend du chiffre : 1 vert menthe, 2 cyan, 3 bleu, 4 violet, 5 rose, 6 rose vif, 7 orange, 8 or, 9 rouge, 10 jaune (`.pick-cost[data-cost]` dans `src/themes/shared.css`). Une voiture qui dépasserait le **plafond de coût** si on l’ajoutait à l’écurie est **grisée et désactivée**, avec « Dépasse le plafond de N » ; les voitures déjà choisies restent actives pour pouvoir être retirées. Une écurie déjà pleine (trois voitures) garde le message « Retire d’abord une voiture ».
+Le terrain et l’écurie adverse précèdent les trois emplacements. « + Choisir » mène à « Ton garage ». Une voiture choisie se retire depuis son emplacement, avec un accès séparé à l’atelier. Le garage affiche les voitures choisies en tête, puis les scores selon le terrain, avec les favoris départagés à score égal. Chaque ligne indique le coût et, le cas échéant, la raison du blocage. La barre de lancement reste au-dessus des onglets et rappelle le coût total, le plafond et la raison éventuelle de désactivation. La course contre un rival, le défi du jour et la Nuit sans fin gardent chacun leur écurie.
+
+## Composer une offre d’échange
+
+Choisis d’abord les voitures et les crédits que tu donnes, puis ceux que tu demandes. Les vignettes se sélectionnent directement, avec un accès au détail. Le tri, la recherche et l’affichage à la demande des voitures indisponibles aident à parcourir le garage. Vérifie les deux lots dans le récapitulatif avant l’envoi. La vitrine indique les modifications locales jusqu’à leur enregistrement, et la synchronisation périodique conserve le brouillon et la vitrine en cours d’édition.
 
 ## Version et notes de version
 
@@ -377,13 +393,14 @@ jugements de chaque type. Ce modificateur remplace les tirages de forme du jour,
 et d’incident du joueur. Le rival conserve ses tirages habituels.
 
 Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aiguille avance par paliers
-et les voitures restent fixes pendant les gestes. Si tu recharges avant la résolution, tu retrouves
-la sélection du secteur. Un secteur validé revient à son bilan.
+et les voitures restent fixes pendant les gestes. Un secteur validé revient à son bilan.
 
-Au premier secteur manuel d’une course, les voitures attendent sur la ligne pendant **3, 2, 1**.
-Le geste commence à **Partez !**. Chaque temps dure environ 0,6 s. Les secteurs manuels
-suivants affichent seulement **Prêt ?** puis **Partez !** (environ 0,9 s au total).
-Le décompte se suspend quand l’onglet est masqué, comme le chrono du geste.
+Chaque mini-jeu manuel, vitesses ou virages, est précédé de **3, 2, 1, Partez !**, à raison de
+0,6 s par étape. Le geste commence à **Partez !**. Les secteurs automatiques se jouent sans
+décompte, y compris après une bascule en cours de course. Si tu recharges ou reviens dans la
+course avant la résolution d’un secteur engagé, le décompte reprend à **3** avant le geste.
+Quand l’onglet est masqué, le décompte se suspend comme le chrono du geste. En mouvement
+réduit, il garde le même rythme et s’affiche sans animation ni particules.
 
 Au clavier, appuie sur **Espace** pour passer la vitesse et sur **←** ou **→** pour prendre un
 virage. Tu peux utiliser ces touches sans donner le focus aux boutons. Le jeu ignore les appuis

@@ -2,7 +2,7 @@
 
 - **Type :** Bug visuel
 - **Priorité :** P2
-- **Statut :** Corrigé (palette de rareté commune au garage, à la fiche et aux vignettes, `src/themes/shared.css`) ; à valider sur appareil
+- **Statut :** Corrigé dans `dev` (palette unique `--rarity-*` dans `src/themes/shared.css`, utilisée par les cartes, les pièces, le booster et les effets) ; vérifié en Néon et Sobre sur une carte Rare et une carte Épique ; à valider sur appareil
 - **Signalement :** Retour joueur, 17 novembre 2026
 - **Fichiers à examiner :** [`src/components/CarCard.vue`](../src/components/CarCard.vue), [`src/views/GarageView.vue`](../src/views/GarageView.vue), [`src/views/CarSheet.vue`](../src/views/CarSheet.vue), styles partagés et thèmes dans `src/themes/`
 

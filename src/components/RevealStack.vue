@@ -115,6 +115,7 @@ function pointerCancel(event: PointerEvent) {
       </div>
     </div>
     <div class="booster-messages">
+      <slot name="options" />
       <div class="stack-indicators" aria-hidden="true">
         <span v-for="position in total" :key="position" :class="{ revealed: position <= opening.revealed, current: position === slot + 1 }"></span>
       </div>

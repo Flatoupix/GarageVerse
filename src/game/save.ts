@@ -18,6 +18,8 @@ export const LEGACY_KEY = 'garageverse:v1'
 
 export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number>; extraSlot?: StatKey }
 export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean; showEdition?: boolean } | { kind: 'part'; id: string; isNew: boolean }
+export type BatchSize = 5 | 10
+export interface BoosterBatch { id: number; booster: string; packs: Pull[][] }
 export interface Opening { booster: string; pulls: Pull[]; revealed: number; view: 'back' | 'face' | 'recap'; collected: boolean }
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
@@ -33,7 +35,19 @@ export interface Tutorial { step: number; status: 'active' | 'done' | 'skipped';
 export const tutorialSteps = 12
 import type { VersusAccount } from './versus-wallet'
 
+interface EditionPurchase {
+  id: string
+  style: EditionStyle
+  previous: EditionStyle
+  credits: number
+  duplicates: number
+  remaining: number
+  at: number
+}
+
 export interface Save {
+  // Reçu de session, ignoré à la lecture et omis à l’enregistrement.
+  editionPurchase?: EditionPurchase
   trades?: Record<string, TradeRecord>
   tradeHistory?: string[]
   versus: VersusAccount | null
@@ -50,6 +64,8 @@ export interface Save {
   tickets: Record<string, number>
   cars: Record<string, OwnedCar>
   parts: Record<string, number>
+  batch?: BoosterBatch
+  batchSequence: number
   sealedPulls: Pull[] | null
   sealed: string | null
   opening: Opening | null
@@ -66,7 +82,7 @@ export function newSave(): Save {
     versus: null, nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
-    version: 2, exactEditions: true, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
+    version: 2, exactEditions: true, editionPurchase: undefined, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, batch: undefined, batchSequence: 0, sealedPulls: null, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false, turnMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
@@ -105,6 +121,11 @@ function migrate(raw: string | null, save: Save) {
 
 const int = (value: unknown, min: number, max: number, fallback: number) =>
   Number.isInteger(value) ? Math.max(min, Math.min(max, value as number)) : fallback
+
+function validPack(pulls: unknown): pulls is Pull[] {
+  return Array.isArray(pulls) && pulls.length === 5 && pulls.every(p => p &&
+    (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))
+}
 
 export function readSave(raw: string | null, legacy: string | null = null): Save {
   const save = newSave()
@@ -166,10 +187,12 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, TRADE_INVENTORY_LIMIT, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
-  if (save.sealed && Array.isArray(input.sealedPulls) && input.sealedPulls.length === 5 &&
-      input.sealedPulls.every(p => p && (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))) {
-    save.sealedPulls = input.sealedPulls
-  }
+  if (save.sealed && validPack(input.sealedPulls)) save.sealedPulls = input.sealedPulls
+  const batch = input.batch
+  save.batchSequence = int(input.batchSequence, 0, Number.MAX_SAFE_INTEGER, 0)
+  save.batch = batch && batch.id > 0 && batch.id === save.batchSequence && boosterById.has(batch.booster) &&
+    Array.isArray(batch.packs) && (batch.packs.length === 5 || batch.packs.length === 10) &&
+    batch.packs.every(validPack) ? batch : undefined
   const o = input.opening
   if (o && boosterById.has(o.booster) && Array.isArray(o.pulls) && o.pulls.length === 5 &&
       o.pulls.every(p => p.kind === 'car' ? vehicleById.has(p.id) : partById.has(p.id))) {
@@ -178,9 +201,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       view: o.collected || (revealed === 5 && o.view === 'recap') ? 'recap' : revealed && (o.view === 'face' || revealed === 5) ? 'face' : 'back' }
   }
   save.nightRecord = int(input.nightRecord, 0, 100000, 0)
-  save.nightLineup = (input.nightLineup ?? save.nightLineup).filter(id => Boolean(save.cars[id])).slice(0, 3)
-  // Écurie de la nuit incomplète (voitures vendues, ancienne sauvegarde) : on la complète avec les voitures les moins chères.
-  if (save.nightLineup.length < 3) {
+  const savedNightLineup = Array.isArray(input.nightLineup) ? input.nightLineup : undefined
+  save.nightLineup = (savedNightLineup ?? save.nightLineup).filter(id => Boolean(save.cars[id])).slice(0, 3)
+  // Une ancienne sauvegarde sans écurie de nuit reçoit une écurie de départ.
+  if (!savedNightLineup && save.nightLineup.length < 3) {
     const cheap = Object.keys(save.cars).filter(id => vehicleById.has(id) && !save.nightLineup.includes(id)).sort((x, y) => vehicleById.get(x)!.cost - vehicleById.get(y)!.cost)
     for (const id of cheap) {
       if (save.nightLineup.length === 3) break
@@ -194,7 +218,9 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       pilotMode: night.pilotMode === 'manuel' ? 'manuel' : 'auto',
       ...(night.lastPilot === 'auto' || night.lastPilot === 'manuel' || night.lastPilot === 'mixed' ? { lastPilot: night.lastPilot } : {}) }
   }
-  save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
+  if (!input.daily || input.daily.date === save.daily.date) {
+    save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
+  }
   save.lineup = (input.lineup ?? []).filter(id => save.cars[id]).slice(0, 3)
   save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)).map(([id, record]) => [id, {
     wins: int(record?.wins, 0, 100000, 0), losses: int(record?.losses, 0, 100000, 0), perfect: record?.perfect === true,
@@ -222,7 +248,16 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
           duel.pilot = { mode: 'auto' }
         }
       }
-      // Les anciennes manches en attente reprennent aussi à la sélection.
+      const pending = duel.manualSector
+      if (pending && (duel.winner || duel.timingReview || pending.index !== duel.rounds.length
+        || pending.index >= duel.sectors.length || typeof pending.turn !== 'boolean'
+        || !(['player', 'rival'] as const).every(who => {
+          const choice = who === 'player' ? pending.choice : pending.rivalChoice
+          return choice && Number.isInteger(choice.car) && duel[who].lineup[choice.car]
+            && typeof choice.nitro === 'boolean'
+            && (choice.stance === 'normal' || choice.stance === 'attaque' || choice.stance === 'gestion')
+        }))) delete duel.manualSector
+      // Les anciennes manches en attente reprennent à la sélection.
       delete duel.timingChoice
       save.duel = duel
     }
@@ -267,6 +302,7 @@ export function buyBooster(save: Save, id: string, rng: Rng = Math.random): stri
   if ((save.tickets[id] ?? 0) > 0) save.tickets[id]--
   else if (save.credits >= booster.price) save.credits -= booster.price
   else return t('Il manque {n} crédits', { n: booster.price - save.credits })
+  save.batch = undefined
   save.sealed = id
   save.sealedPulls = drawPulls(save, booster, rng)
   save.opening = null
@@ -345,15 +381,19 @@ export function tear(save: Save, rng: Rng) {
   if (!save.sealed) return
   const booster = boosterById.get(save.sealed)!
   const pulls = save.sealedPulls ?? drawPulls(save, booster, rng)
+  markNewPulls(save, pulls)
+  save.sealedPulls = null
+  save.opening = { booster: booster.id, pulls, revealed: 0, view: 'back', collected: false }
+  save.sealed = null
+}
+
+function markNewPulls(save: Save, pulls: Pull[]) {
   const seen = new Set<string>()
   for (const pull of pulls) {
     const key = `${pull.kind}:${pull.id}`
     pull.isNew = !owned(save, pull) && !seen.has(key)
     seen.add(key)
   }
-  save.sealedPulls = null
-  save.opening = { booster: booster.id, pulls, revealed: 0, view: 'back', collected: false }
-  save.sealed = null
 }
 
 // Apparence prévue après les cartes précédentes, avant leur attribution au récapitulatif.
@@ -395,6 +435,35 @@ export function collect(save: Save) {
   }
   opening.collected = true
   opening.view = 'recap'
+}
+
+export function batchStock(save: Save, booster: string) {
+  const prepared = save.sealed ?? (save.opening?.collected === false ? save.opening.booster : null)
+  if (save.batch || (prepared && prepared !== booster)) return 0
+  return (save.tickets[booster] ?? 0) + Number(prepared === booster)
+}
+
+// Résout le lot sur une copie de travail. Le récapitulatif contient des cartes déjà attribuées.
+export function revealBatch(save: Save, booster: string, count: BatchSize, id: number, rng: Rng = Math.random) {
+  if (id !== save.batchSequence + 1 || !boosterById.has(booster) ||
+      (count !== 5 && count !== 10) || batchStock(save, booster) < count) return
+
+  const packs: Pull[][] = []
+  while (packs.length < count) {
+    if (!save.opening || save.opening.collected) {
+      if (!save.sealed) buyBooster(save, booster, rng)
+      tear(save, rng)
+    } else {
+      markNewPulls(save, save.opening.pulls)
+    }
+    const opening = save.opening!
+    opening.revealed = opening.pulls.length
+    collect(save)
+    packs.push(opening.pulls)
+  }
+  save.opening = null
+  save.batchSequence = id
+  return save.batch = { id, booster, packs }
 }
 
 // ——— Garage ———
@@ -479,6 +548,7 @@ export function upgrade(save: Save, id: string): string | undefined {
   if (save.credits < next.credits) return t('Il manque {n} crédits', { n: next.credits - save.credits })
   if (car.copies - 1 < next.duplicates) return tp('Il faut {n} doublon', 'Il faut {n} doublons', next.duplicates)
   save.credits -= next.credits
+  if (next.duplicates) discardEditionPurchase(save, id)
   car.copies -= next.duplicates
   car.stage = next.stage
 }
@@ -541,6 +611,7 @@ export function craft(save: Save, id: string): string | undefined {
 export function scrapCar(save: Save, id: string): string | undefined {
   const car = save.cars[id], v = vehicleById.get(id)
   if (!car || !v || car.copies < 2) return t('Aucun doublon')
+  discardEditionPurchase(save, id)
   car.copies--
   save.credits += progression.scrap[v.rarity]
 }
@@ -569,6 +640,7 @@ export function sellCar(save: Save, id: string): string | undefined {
   const problem = sellCheck(save, id)
   if (problem) return problem
   const price = sellPrice(save, id)
+  discardEditionPurchase(save, id)
   delete save.cars[id]
   save.credits += price
 }
@@ -610,14 +682,44 @@ export function unlockEditionCheck(save: Save, id: string, style: EditionStyle):
   if (missing.length) return missing.join(' · ')
 }
 
-export function unlockEdition(save: Save, id: string, style: EditionStyle): string | undefined {
+export function unlockEdition(save: Save, id: string, style: EditionStyle, now = Date.now()): string | undefined {
   const problem = unlockEditionCheck(save, id, style)
   if (problem) return problem
   const car = save.cars[id]
-  save.credits -= editionPrice(id)
+  const credits = editionPrice(id), previous = car.shown
+  save.credits -= credits
   car.copies -= editionDuplicates
   car.editions.push(style)
   car.shown = style
+  save.editionPurchase = { id, style, previous, credits, duplicates: editionDuplicates, remaining: car.copies, at: now }
+}
+
+export const editionUndoDuration = 30_000
+
+export function discardEditionPurchase(save: Save, id: string) {
+  if (save.editionPurchase?.id === id) delete save.editionPurchase
+}
+
+export function undoableEditionPurchase(save: Save, id: string, now = Date.now()) {
+  const purchase = save.editionPurchase, car = save.cars[id]
+  if (!purchase || purchase.id !== id || now < purchase.at || now - purchase.at >= editionUndoDuration || !car
+    || car.copies < purchase.remaining || car.copies + purchase.duplicates > TRADE_INVENTORY_LIMIT
+    || save.credits + purchase.credits > TRADE_CREDIT_LIMIT
+    || !car.editions.includes(purchase.style) || !car.editions.includes(purchase.previous)
+    || inTransit(save, id) || Object.values(save.trades ?? {}).some(record => record.state === 'ouverte' && record.offer.cars.includes(id))) return
+  return purchase
+}
+
+export function undoEditionUnlock(save: Save, id: string, now = Date.now()) {
+  const purchase = undoableEditionPurchase(save, id, now)
+  if (!purchase) return
+  const car = save.cars[id]
+  save.credits += purchase.credits
+  car.copies += purchase.duplicates
+  car.editions = car.editions.filter(style => style !== purchase.style)
+  car.shown = purchase.previous
+  discardEditionPurchase(save, id)
+  return purchase
 }
 
 // ——— Amélioration automatique ———
@@ -793,6 +895,7 @@ export function applyAutoUpgrade(save: Save, id: string, circuit?: Rival['circui
   if (!plan.steps.length) return plan.blockedReason ?? t('Aucune amélioration disponible')
   const car = save.cars[id]
   save.credits -= plan.credits
+  if (plan.duplicates) discardEditionPurchase(save, id)
   car.copies -= plan.duplicates
   car.stage = plan.stageAfter
   car.upgrades = { ...plan.upgradesAfter }
@@ -901,6 +1004,10 @@ export const unlockedRivalSteps = (save: Save, baseRivalId: string): string[] =>
   return steps.filter((step, idx) => idx === 0 || bossWon || (save.record[steps[idx - 1].id]?.wins ?? 0) > 0).map(s => s.id)
 }
 
+export function perfectSteps(save: Pick<Save, 'record'>, rivalId: string): boolean[] {
+  return (rivalStepMap.get(rivalId) ?? []).map(step => save.record[step.id]?.perfect === true)
+}
+
 export const rivalStepsDone = (save: Save, baseRivalId: string): number => {
   const steps = rivalStepMap.get(baseRivalId) ?? []
   if ((save.record[baseRivalId]?.wins ?? 0) > 0) return steps.length
@@ -920,6 +1027,7 @@ export const todayChallenge = (save: Save, date = save.daily.date) => dailyChall
 export function refreshDaily(save: Save, date = localDate()) {
   if (save.daily.date === date) return
   save.daily.date = date
+  save.dailyLineup = undefined
   save.daily.won = false
   save.daily.booster = false
   if (save.daily.lastWin !== previousDate(date)) save.daily.streak = 0

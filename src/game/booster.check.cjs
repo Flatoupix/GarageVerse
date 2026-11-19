@@ -5,8 +5,8 @@ const ts = require('typescript')
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
-const { newSave, readSave, buyBooster, buyBoosters, drawPulls, tear, collect, sealedHasLegend } = require('./save.ts')
-const { boosters, vehicleById, partById } = require('./data.ts')
+const { newSave, readSave, buyBooster, buyBoosters, drawPulls, tear, collect, sealedHasLegend, batchStock, revealBatch } = require('./save.ts')
+const { boosters, stylesOf, vehicleById, partById } = require('./data.ts')
 const legendary = pulls => pulls.some(p => (p.kind === 'car' ? vehicleById : partById).get(p.id).rarity === 'Légendaire')
 const rngFor = seed => () => { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; return seed / 4294967296 }
 let sawLegend = false, sawNormal = false
@@ -53,6 +53,33 @@ const restored = readSave(JSON.stringify(old))
 assert.equal(sealedHasLegend(restored), false)
 tear(restored, rngFor(2))
 assert.equal(restored.opening.pulls.length, 5)
+
+// Les sauvegardes antérieures aux lots gardent leur progression au chargement.
+{
+  const v2 = newSave()
+  v2.tickets.neon = 6
+  buyBooster(v2, 'neon', rngFor(7))
+  delete v2.batch
+  delete v2.batchSequence
+  const restored = readSave(JSON.stringify(v2))
+  assert.equal(restored.batch, undefined)
+  assert.equal(restored.batchSequence, 0)
+  assert.deepEqual(restored.tickets, v2.tickets)
+  assert.deepEqual(restored.cars, v2.cars)
+  assert.equal(restored.sealed, v2.sealed)
+  assert.deepEqual(restored.sealedPulls, v2.sealedPulls)
+}
+{
+  const v1 = JSON.stringify({ version: 1, openings: {
+    neon: { collected: true, editions: ['venom-classic', 'venom-pixel'] },
+  } })
+  const restored = readSave(null, v1)
+  assert.equal(restored.version, 2)
+  assert.equal(restored.batch, undefined)
+  assert.equal(restored.batchSequence, 0)
+  assert.equal(restored.cars.venom.copies, 2)
+  assert.deepEqual(restored.cars.venom.editions, ['Classic', 'Pixel Art'])
+}
 console.log('Boosters : scellé, cinq cartes, probabilités, reprise, légendaire et ancienne sauvegarde : OK')
 
 for (const [index, booster] of boosters.entries()) {
@@ -100,3 +127,81 @@ assert.deepEqual(historical.opening.pulls, lot)
   assert.equal(buyBoosters(poor, 'neon', 11), 'Quantité invalide')
   console.log('Achat groupé de boosters : OK')
 }
+
+// Un lot suit exactement les tirages et les attributions des ouvertures successives.
+for (const booster of boosters) for (const count of [5, 10]) for (const source of ['achat', 'tickets', 'déchiré', 'stock']) {
+  const initial = newSave()
+  initial.credits = booster.price * count
+  initial.tickets = source === 'achat' ? {} : { [booster.id]: count }
+  const batchSave = structuredClone(initial)
+  const singleSave = structuredClone(initial)
+  const batchRng = rngFor(42), singleRng = rngFor(42)
+  for (const [state, rng] of [[batchSave, batchRng], [singleSave, singleRng]]) {
+    if (source === 'achat') assert.equal(buyBoosters(state, booster.id, count, rng), undefined)
+    else if (source !== 'stock') assert.equal(buyBooster(state, booster.id, rng), undefined)
+    if (source === 'déchiré') tear(state, rng)
+  }
+  const first = structuredClone(batchSave.sealedPulls ?? batchSave.opening?.pulls)
+  const credits = batchSave.credits
+  assert.equal(batchStock(batchSave, booster.id), count)
+  const batch = revealBatch(batchSave, booster.id, count, 1, batchRng)
+  assert.equal(batch.packs.length, count)
+  assert.equal(batch.packs.flat().length, count * 5)
+  if (first) assert.deepEqual(batch.packs[0], first)
+  for (const pack of batch.packs) {
+    if (!singleSave.sealed && (!singleSave.opening || singleSave.opening.collected)) {
+      assert.equal(buyBooster(singleSave, booster.id, singleRng), undefined)
+    }
+    tear(singleSave, singleRng)
+    assert.deepEqual(pack, singleSave.opening.pulls)
+    assert.ok(pack.filter(pull => pull.kind === 'part').length <= booster.maxParts)
+    singleSave.opening.revealed = 5
+    collect(singleSave)
+  }
+  assert.deepEqual(batchSave.cars, singleSave.cars)
+  assert.deepEqual(batchSave.parts, singleSave.parts)
+  assert.deepEqual(batchSave.tickets, singleSave.tickets)
+  assert.equal(batchSave.tickets[booster.id], 0)
+  assert.equal(batchSave.credits, credits)
+  const restored = readSave(JSON.stringify(batchSave))
+  assert.deepEqual(restored.batch, batch)
+  assert.deepEqual(restored.cars, batchSave.cars)
+  assert.deepEqual(restored.parts, batchSave.parts)
+  assert.deepEqual(restored.tickets, batchSave.tickets)
+  assert.equal(restored.credits, credits)
+  for (const state of [batchSave, restored]) {
+    const before = JSON.stringify(state)
+    assert.equal(revealBatch(state, booster.id, count, 1, () => assert.fail('Retirage du lot')), undefined)
+    collect(state)
+    assert.equal(JSON.stringify(state), before)
+  }
+  restored.batch = undefined
+  restored.tickets[booster.id] = count
+  assert.equal(revealBatch(restored, booster.id, count, 1), undefined)
+  assert.ok(revealBatch(restored, booster.id, count, 2, batchRng))
+}
+
+{
+  const save = newSave()
+  save.tickets = { neon: 4 }
+  assert.equal(batchStock(save, 'neon'), 4)
+  assert.equal(revealBatch(save, 'neon', 5, 1, () => assert.fail('Stock insuffisant')), undefined)
+  save.tickets.neon = 5
+  buyBooster(save, 'neon', rngFor(52))
+  const [ownedId, owned] = Object.entries(save.cars).find(([id]) => stylesOf(id).length > 1)
+  const shown = owned.shown
+  const other = stylesOf(ownedId).find(style => style !== shown)
+  const fresh = [...vehicleById.keys()].find(id => !save.cars[id])
+  save.sealedPulls.splice(0, 3,
+    { kind: 'car', id: ownedId, style: other, isNew: true },
+    { kind: 'car', id: fresh, style: stylesOf(fresh)[0], isNew: false },
+    { kind: 'car', id: fresh, style: stylesOf(fresh)[0], isNew: true })
+  const batch = revealBatch(save, 'neon', 5, 1, rngFor(53))
+  assert.deepEqual(batch.packs[0].slice(0, 3).map(pull => pull.isNew), [false, true, false])
+  assert.equal(save.cars[ownedId].shown, shown)
+  assert.ok(save.cars[ownedId].editions.includes(other))
+  const freshPulls = batch.packs.flat().filter(pull => pull.kind === 'car' && pull.id === fresh)
+  assert.equal(freshPulls.filter(pull => pull.isNew).length, 1)
+  assert.equal(save.cars[fresh].copies, freshPulls.length)
+}
+console.log('Ouverture groupée : 25/50 cartes, équivalence, éditions, tickets, reprise et idempotence : OK')

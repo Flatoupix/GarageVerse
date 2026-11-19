@@ -60,7 +60,7 @@ function onScroll() {
     <input v-model="query" class="showroom-search" type="search" :placeholder="t('Rechercher (nom, numéro, année, catégorie…)')" :aria-label="t('Rechercher une voiture')" />
     <div class="showroom-filters" role="group" :aria-label="t('Rareté')">
       <button type="button" :aria-pressed="rarity === null" @click="rarity = null">{{ t('Toutes') }}</button>
-      <button v-for="r in rarities" :key="r" type="button" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarity === r" @click="rarity = rarity === r ? null : r">
+      <button v-for="r in rarities" :key="r" type="button" class="showroom-rarity" :class="`rarity-${rarityClass[r]}`" :aria-pressed="rarity === r" @click="rarity = rarity === r ? null : r">
         <span aria-hidden="true">{{ rarityMark[r] }}</span> {{ t(r) }}
       </button>
     </div>

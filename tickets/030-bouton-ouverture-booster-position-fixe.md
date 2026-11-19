@@ -2,7 +2,7 @@
 
 - **Type :** Ergonomie
 - **Priorité :** P2
-- **Statut :** À reproduire et corriger
+- **Statut :** Corrigé dans `dev` (zone d'actions de hauteur fixe pendant l'ouverture) ; à valider sur appareil
 - **Signalement :** Retour du joueur, 18 novembre 2026 : « Corriger la place du bouton, quand on ouvre des boosters, pour qu'il ait toujours la même place, peu importe les messages. »
 - **Fichiers à examiner :** [`src/views/BoosterView.vue`](../src/views/BoosterView.vue), [`src/components/RevealStack.vue`](../src/components/RevealStack.vue), [`src/components/PullCard.vue`](../src/components/PullCard.vue), [`src/components/TearPack.vue`](../src/components/TearPack.vue), styles dans `src/themes/shared.css` et les thèmes
 

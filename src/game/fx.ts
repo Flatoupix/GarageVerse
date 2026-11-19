@@ -1,5 +1,5 @@
 import type { Directive } from 'vue'
-import type { Rarity } from './data'
+import { rarityClass, type Rarity } from './data'
 import { reducedMotion } from './store'
 import { theme, type Theme } from './theme'
 
@@ -9,14 +9,15 @@ type Kind = 'spark' | 'confetti' | 'streak' | 'ring' | 'text'
 interface Particle { kind: Kind; x: number; y: number; vx: number; vy: number; life: number; max: number; size: number; color: string; rot: number; spin: number; text?: string }
 export type Target = Element | string | { x: number; y: number } | null | undefined
 
-// Couleurs des effets par thème. Les tableaux sont modifiés sur place pour que rarityPalette suive le thème.
+// Couleurs des effets propres à chaque thème.
 type Palettes = Record<'cyan' | 'pink' | 'sun' | 'gold' | 'fire', string[]>
 type Tones = Record<'light' | 'gold' | 'rose' | 'cyan', string>
+const neonPink = 'rgb(255 95 210)'
 const themed: Record<Theme, { palettes: Palettes; tone: Tones }> = {
   neon: {
-    palettes: { cyan: ['#2de2ff', '#8ff3ff', '#ffffff'], pink: ['#ff5fd2', '#ff9be0', '#ffffff'], sun: ['#ffb347', '#ff7a3d', '#ffd27a'],
-      gold: ['#ffd27a', '#ff5fd2', '#8ff3ff', '#8b5cff', '#ffffff'], fire: ['#ffb347', '#ff5e3a', '#ff2a8a', '#ffffff'] },
-    tone: { light: '#ffffff', gold: '#ffd27a', rose: '#ff5fd2', cyan: '#2de2ff' },
+    palettes: { cyan: ['#2de2ff', '#8ff3ff', '#ffffff'], pink: [neonPink, '#ff9be0', '#ffffff'], sun: ['#ffb347', '#ff7a3d', '#ffd27a'],
+      gold: ['#ffd27a', neonPink, '#8ff3ff', '#8b5cff', '#ffffff'], fire: ['#ffb347', '#ff5e3a', '#ff2a8a', '#ffffff'] },
+    tone: { light: '#ffffff', gold: '#ffd27a', rose: neonPink, cyan: '#2de2ff' },
   },
   pixel: {
     palettes: { cyan: ['#5a6988', '#ead4aa'], pink: ['#0099db', '#2ce8f5'], sun: ['#b55088', '#68386c', '#ead4aa'],
@@ -59,13 +60,21 @@ const blocky = new Set<Theme>(['pixel', 'arcade', 'console', 'dos'])
 export const palettes: Palettes = { cyan: [], pink: [], sun: [], gold: [], fire: [] }
 export const tone: Tones = { ...themed.neon.tone }
 let font = 'Orbitron, sans-serif'
+
+// À la révélation, le canevas lit la teinte de la carte et calcule deux reflets plus clairs.
+export function rarityPalette(rarity: Rarity) {
+  const color = getComputedStyle(document.documentElement).getPropertyValue(`--rarity-${rarityClass[rarity]}`).trim()
+  if (!color) return [tone.light, tone.light]
+  const rgb = [1, 3, 5].map(offset => parseInt(color.slice(offset, offset + 2), 16))
+  return [color, ...[0.35, 0.7].map(light => '#' + rgb.map(channel => Math.round(channel + (255 - channel) * light).toString(16).padStart(2, '0')).join(''))]
+}
 export function themeFx(id: Theme) {
   for (const key of Object.keys(palettes) as (keyof Palettes)[]) palettes[key].splice(0, Infinity, ...themed[id].palettes[key])
   Object.assign(tone, themed[id].tone)
-  font = getComputedStyle(document.documentElement).getPropertyValue('--display').trim() || 'sans-serif'
+  const styles = getComputedStyle(document.documentElement)
+  font = styles.getPropertyValue('--display').trim() || 'sans-serif'
 }
 themeFx('neon')
-export const rarityPalette: Record<Rarity, string[]> = { Courante: palettes.cyan, Rare: palettes.pink, Épique: palettes.sun, Légendaire: palettes.gold }
 
 let canvas: HTMLCanvasElement | undefined
 let ctx: CanvasRenderingContext2D | null = null
@@ -153,7 +162,8 @@ function frame(now: number) {
     rest()
     return
   }
-  const dt = Math.min(0.05, (now - last) / 1000)
+  // L’horodatage de la première image peut précéder celui du lancement : un écart négatif ferait rétrécir un anneau sous zéro.
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000))
   last = now
   ctx.clearRect(0, 0, width, height)
   if (flashAlpha > 0.01) {
@@ -213,9 +223,14 @@ export function point(target: Target) {
 export function sparks(target: Target, colors = palettes.cyan, count = 26, power = 1, duration?: number) {
   if (!start()) return
   const { x, y } = point(target)
+  const burst: Particle[] = []
   for (let i = 0; i < count; i++) {
     const angle = rand(0, Math.PI * 2), speed = rand(140, 620) * power, life = duration ? rand(duration * 0.55, duration) : rand(0.35, 0.85)
-    particles.push({ kind: 'spark', x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 80, life, max: life, size: rand(1.5, 3.4), color: pick(colors), rot: 0, spin: 0 })
+    burst.push({ kind: 'spark', x, y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - 80, life, max: life, size: rand(1.5, 3.4), color: pick(colors), rot: 0, spin: 0 })
+  }
+  particles.push(...burst)
+  return () => {
+    for (const particle of burst) particle.life = 0
   }
 }
 

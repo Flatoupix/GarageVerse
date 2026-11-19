@@ -2,7 +2,7 @@
 
 - **Type :** Fonctionnalité / ergonomie des boosters
 - **Priorité :** P2
-- **Statut :** À implémenter dans une prochaine version de test ; pas encore livré
+- **Statut :** Implémenté dans `dev` (Révéler 5 / 10 boosters avec confirmation, récapitulatif groupé par booster, filtres) ; vérifié au navigateur : 25 cartes exactes, tickets décomptés une fois, reprise après rechargement ; à valider sur appareil
 - **Demande :** retour joueur du 18 novembre 2026 : « Pour l'ouverture des boosters, il faudrait pouvoir révéler les 5 ou 10 boosters en même temps. »
 - **Fichiers à examiner :** [`src/views/ShopView.vue`](../src/views/ShopView.vue), [`src/views/BoosterView.vue`](../src/views/BoosterView.vue), [`src/components/RevealStack.vue`](../src/components/RevealStack.vue), [`src/game/save.ts`](../src/game/save.ts), [`src/game/booster.check.cjs`](../src/game/booster.check.cjs)
 - **Ticket lié :** [T-030, position fixe du bouton d'ouverture](030-bouton-ouverture-booster-position-fixe.md)

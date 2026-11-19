@@ -2,6 +2,7 @@
 import { locale, locales, setLocale, t, tp, type Locale } from './i18n'
 import { VERSUS_OPEN } from './game/features'
 import { syncTrades } from './game/trade-client'
+import { loadFriends } from './game/friends'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
 import { debugTap, type DebugTaps } from './game/debug'
@@ -12,7 +13,7 @@ import { stylesOf, type Rival, type StatKey } from './game/data'
 import { carSprite, edition, editionImages } from './game/art'
 import { waitForImages } from './game/asset-loading'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
-import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
+import { act, buzz, exchangeAlerts, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themeGroups, themes, unlocked, type Theme } from './game/theme'
 import { cardBackOf, cardBacks } from './game/cardback'
 import type { CardBackId } from './game/save'
@@ -46,6 +47,7 @@ type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 've
 type Setting = 'turnMode' | 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration' | 'friendsEnabled'
 
 function initialScreen(): Screen {
+  if (save.batch) return 'booster'
   if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
   if (save.duel && !save.night) return 'race'
   if (save.sealed || (save.opening && save.opening.view !== 'recap')) return 'booster'
@@ -65,10 +67,16 @@ onUnmounted(() => {
 const screen = ref<Screen>(initialScreen())
 function resumeTrades() {
   if (document.visibilityState !== 'visible' || save.preferences.friendsEnabled !== true) return
-  void syncTrades().catch(cause => {
+  void syncTrades().then(({ notices }) => {
+    for (const notice of notices) notify(notice)
+  }, cause => {
     const message = cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.')
     if (save.preferences.friendsEnabled === true && screen.value !== 'friends' && message !== t('Connexion nécessaire')) notify(message, 'error')
   })
+  // Les demandes d'ami reçues alimentent la pastille du bouton Échanges ; une erreur ici reste silencieuse.
+  if (screen.value !== 'friends') void loadFriends().then(({ list }) => {
+    exchangeAlerts.friends = list.filter(friend => friend.state === 'pending' && !friend.outgoing).length
+  }, () => {})
 }
 onMounted(() => {
   resumeTrades()
@@ -144,7 +152,7 @@ function transferFeedback(text: string, error = false) {
 function exportSave() {
   let url: string | undefined
   try {
-    url = URL.createObjectURL(new Blob([JSON.stringify(save, null, 2)], { type: 'application/json' }))
+    url = URL.createObjectURL(new Blob([JSON.stringify({ ...save, editionPurchase: undefined }, null, 2)], { type: 'application/json' }))
     const link = document.createElement('a')
     link.href = url
     link.download = `garageverse-${new Date().toISOString().slice(0, 10)}.json`
@@ -244,7 +252,7 @@ const tabs: { id: Screen; label: string; icon: string }[] = [
   { id: 'race', label: t('Course'), icon: 'M5 21V3.5M5 4.5h14v9H5M9.7 4.5v9M14.3 4.5v9M5 9h14' },
 ]
 
-watch(() => save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
+watch(() => save.batch?.id ?? save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
 watch(() => save.preferences.sound, enableEffects, { immediate: true })
 watch(
   () => save.preferences.music && hasMusic ? (screen.value === 'race' && save.duel ? 'race' : 'garage') : undefined,
@@ -303,6 +311,10 @@ function cancelInspection() {
 
 function go(destination: Screen) {
   cancelInspection()
+  if (screen.value === 'booster' && destination !== 'booster' && save.batch) {
+    save.batch = undefined
+    persist()
+  }
   toast.value = null
   if (destination === 'friends' && (screen.value === 'home' || screen.value === 'garage')) friendsFrom.value = screen.value
   if (destination === 'shop' || destination === 'booster') tutorialAction(0, 1)

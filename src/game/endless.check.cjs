@@ -5,7 +5,8 @@ const ts = require('typescript')
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
-const { newSave, readSave, startNight, settleNight, createNightRound, finishNight, nightLineupCheck, startDaily, startDuel, settleDuel, sellCheck } = require('./save.ts')
+const { newSave, readSave, refreshDaily, startNight, settleNight, createNightRound, finishNight, nightLineupCheck, startDaily, startDuel, settleDuel, sellCheck } = require('./save.ts')
+const { previousDate } = require('./daily.ts')
 const { nightRival } = require('./endless.ts')
 const { rivals } = require('./data.ts')
 const { lineupCost, playRound, aiChoice } = require('./rules.ts')
@@ -94,6 +95,20 @@ assert.equal(startDuel(save, `${rivals[0].id}:1`, () => 0.5), undefined)
 save.duel.winner = 'rival'
 assert.ok(settleDuel(save))
 console.log('Nuit : génération, progression, reprise, record, encaissement unique, abandon, migration et rival : OK')
+
+// Les sélections partielles restent indépendantes lors du rechargement.
+const selection = newSave()
+selection.dailyLineup = selection.lineup.slice(0, 1)
+selection.nightLineup = selection.lineup.slice(0, 2)
+const sameDay = readSave(JSON.stringify(selection))
+assert.deepEqual(sameDay.dailyLineup, selection.dailyLineup)
+assert.deepEqual(sameDay.nightLineup, selection.nightLineup)
+assert.deepEqual(sameDay.lineup, selection.lineup)
+const date = selection.daily.date
+selection.daily.date = previousDate(date)
+assert.equal(readSave(JSON.stringify(selection)).dailyLineup, undefined)
+refreshDaily(selection, date)
+assert.equal(selection.dailyLineup, undefined)
 
 const invalid = newSave()
 invalid.nightLineup = invalid.nightLineup.slice(0, 2)

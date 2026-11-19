@@ -1,7 +1,7 @@
 # T-008 · Échanges de voitures et de crédits entre amis (indépendant du Versus)
 
 - **Priorité :** P2, **à livrer avant le Versus**
-- **Statut :** Spécifié ; à valider avant implémentation
+- **Statut :** Livré en test depuis la v0.15.0 (réglage « Échanges entre amis (expérimental) », bouton sur l'accueil en v0.16.0) ; bugs restants suivis dans [T-037](037-echanges-synchro-lot-change.md), ergonomie dans [T-038](038-ux-selection-voitures-course-echanges.md)
 - **Décision :** 18 novembre 2026, les échanges sont **dissociés du Versus**. Ils ne dépendent plus ni des salles ni des mises : seulement du compte anonyme et du code ami déjà posés par le Versus V1 (`gv_players`, fonction `register`).
 - **Spécification :** [docs/echanges.md](../docs/echanges.md) (reprend les règles du 17 novembre 2026, anciennement `docs/versus.md` §7)
 - **Tickets liés :** [T-007 · amis et palmarès](007-versus-amis-palmares-v2.md) (la liste d'amis passe dans ce chantier ; le palmarès reste au Versus), [T-031 · une édition par tirage](031-bug-edition-16-bits-de-base.md) (règle des éditions à respecter à la fusion des doublons)

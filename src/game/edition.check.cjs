@@ -5,8 +5,8 @@ const ts = require('typescript')
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
-const { collect, newSave, readSave, showroomStyles, unlockEdition, unlockEditionCheck, editionPrice, editionDuplicates } = require('./save.ts')
-const { defaultStyle, PIXEL, stylesOf, vehicles } = require('./data.ts')
+const { collect, newSave, readSave, seriesProgress, showroomStyles, unlockEdition, unlockEditionCheck, editionPrice, editionDuplicates } = require('./save.ts')
+const { defaultStyle, PIXEL, series, stylesOf, vehicles } = require('./data.ts')
 
 assert.equal(editionDuplicates, 2)
 const id = 'clio'
@@ -74,8 +74,11 @@ for (const style of ['Solarpunk', 'Abandonnée', 'Classic', 'Anime']) {
   const fresh = newSave()
   const { id } = vehicles.find(v => !v.anim && !fresh.cars[v.id] && stylesOf(v.id).includes(style))
   const beforeCount = Object.keys(fresh.cars).length
+  const beforeSeries = series.map(entry => seriesProgress(fresh, entry))
   const after = pullCar(fresh, id, style)
   assert.equal(Object.keys(after.cars).length, beforeCount + 1)
+  const expectedSeries = series.map((entry, index) => beforeSeries[index] + Number(entry.vehicles.includes(id)))
+  assert.deepEqual(series.map(entry => seriesProgress(after, entry)), expectedSeries)
   assert.deepEqual(after.cars[id].editions, [style])
   assert.deepEqual(showroomStyles(id, after.cars[id]), [style])
   assert.ok(stylesOf(id).includes(PIXEL))
@@ -85,13 +88,21 @@ for (const style of ['Solarpunk', 'Abandonnée', 'Classic', 'Anime']) {
   delete after.exactEditions
   assert.deepEqual(readSave(JSON.stringify(after)).cars[id], after.cars[id])
 
-  const duplicate = pullCar(after, id, PIXEL)
-  assert.deepEqual(duplicate.cars[id].editions, [style, PIXEL])
-  assert.equal(duplicate.cars[id].shown, style)
+  // Un doublon de l'alternative ne débloque toujours pas le Pixel.
+  const duplicate = pullCar(after, id, style)
+  assert.deepEqual(duplicate.cars[id].editions, [style])
   assert.equal(duplicate.cars[id].copies, 2)
-  const sameEdition = pullCar(duplicate, id, PIXEL)
-  assert.deepEqual(sameEdition.cars[id].editions, [style, PIXEL])
-  assert.equal(sameEdition.cars[id].copies, 3)
+  const pixel = pullCar(duplicate, id, PIXEL)
+  assert.deepEqual(pixel.cars[id].editions, [style, PIXEL])
+  assert.deepEqual(showroomStyles(id, pixel.cars[id]), [style, PIXEL])
+  assert.equal(pixel.cars[id].shown, style)
+  assert.equal(pixel.cars[id].copies, 3)
+  assert.equal(Object.keys(pixel.cars).length, beforeCount + 1)
+  assert.deepEqual(series.map(entry => seriesProgress(pixel, entry)), expectedSeries)
+
+  // Une sauvegarde v2 antérieure conserve ses deux éditions et son apparence.
+  delete pixel.exactEditions
+  assert.deepEqual(readSave(JSON.stringify(pixel)).cars[id], pixel.cars[id])
 }
 
 // Une voiture de départ garde son 16 bits et gagne uniquement l'édition tirée.
@@ -109,3 +120,94 @@ for (const style of [defaultStyle(legend), PIXEL, 'Solarpunk']) {
   assert.equal(after.cars[legend].copies, 1)
 }
 console.log('Tirages : seules les éditions tirées sont ajoutées, même après rechargement : OK')
+
+const { scrapCar, sellCar, undoEditionUnlock } = require('./save.ts')
+const { inTransit, openTrade, returnTrade, transitTrade, TRADE_CREDIT_LIMIT } = require('./trade.ts')
+const at = 1000
+
+function garage(copies = 3) {
+  const state = newSave()
+  state.credits = TRADE_CREDIT_LIMIT
+  state.cars[id].copies = copies
+  state.lineup = []
+  state.nightLineup = []
+  state.cars.f40 = { ...structuredClone(state.cars[id]), copies: 3, editions: ['Solarpunk'], shown: 'Solarpunk' }
+  return state
+}
+
+function bought(copies) {
+  const state = garage(copies)
+  assert.equal(unlockEdition(state, id, 'Solarpunk', at), undefined)
+  return state
+}
+
+function refused(state, carId = id, now = at + 1) {
+  const before = JSON.stringify(state)
+  assert.equal(undoEditionUnlock(state, carId, now), undefined)
+  assert.equal(JSON.stringify(state), before)
+}
+
+const restored = bought()
+const receipt = restored.editionPurchase
+assert.deepEqual(receipt, { id, style: 'Solarpunk', previous: PIXEL, credits: price, duplicates: 2, remaining: 1, at })
+assert.equal(undoEditionUnlock(restored, id, at + 29_999), receipt)
+assert.equal(restored.credits, TRADE_CREDIT_LIMIT)
+assert.deepEqual(restored.cars[id], garage().cars[id])
+refused(restored)
+assert.equal(unlockEdition(restored, id, 'Solarpunk', at + 30_000), undefined)
+assert.equal(restored.credits, TRADE_CREDIT_LIMIT - price)
+assert.equal(restored.cars[id].copies, 1)
+
+refused(bought(), id, at + 30_000)
+refused(bought(), 'f40')
+refused(readSave(JSON.stringify(bought())))
+assert.equal(readSave(JSON.stringify({ ...bought(), editionPurchase: { credits: 100 } })).editionPurchase, undefined)
+const depleted = bought(4)
+depleted.cars[id].copies--
+refused(depleted)
+
+const capped = bought()
+capped.credits++
+refused(capped)
+
+const sold = bought()
+assert.equal(sellCar(sold, id), undefined)
+refused(sold)
+
+const recycled = bought(4)
+assert.equal(scrapCar(recycled, id), undefined)
+recycled.cars[id].copies++ // Un nouveau doublon ne réactive pas l’annulation.
+refused(recycled)
+
+const traded = bought()
+const offer = { cars: [id], credits: 0 }
+assert.equal(transitTrade(traded, 'transit', offer), undefined)
+assert.ok(inTransit(traded, id))
+refused(traded)
+assert.equal(returnTrade(traded, 'transit'), undefined)
+refused(traded)
+
+const offered = bought()
+assert.equal(openTrade(offered, 'offre', offer), undefined)
+refused(offered)
+assert.equal(returnTrade(offered, 'offre'), undefined)
+refused(offered)
+
+const alreadyOffered = garage()
+assert.equal(openTrade(alreadyOffered, 'offre', offer), undefined)
+assert.equal(unlockEdition(alreadyOffered, id, 'Solarpunk', at), undefined)
+refused(alreadyOffered)
+
+const twice = bought(5)
+assert.equal(unlockEdition(twice, id, 'Abandonnée', at + 1), undefined)
+assert.equal(twice.cars[id].copies, 1)
+assert.ok(unlockEdition(twice, id, 'Solarpunk', at + 2))
+assert.equal(undoEditionUnlock(twice, id, at + 2)?.style, 'Abandonnée')
+assert.equal(twice.cars[id].shown, 'Solarpunk')
+assert.equal(twice.cars[id].copies, 3)
+refused(twice)
+
+const another = bought()
+assert.equal(unlockEdition(another, 'f40', 'Abandonnée', at + 1), undefined)
+refused(another, id, at + 2)
+console.log('Annulation d’édition : restitution, délai, plafonds et invalidations : OK')

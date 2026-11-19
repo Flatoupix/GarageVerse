@@ -36,10 +36,14 @@ function refused(save, action) {
 }
 
 assert.ok(validateTradeOffer(newSave(), offer))
+// Une voiture d'écurie part et quitte ses écuries ; seule une course en cours la retient.
+const lined = garage()
+lined.lineup = [id, ...lined.lineup.slice(0, 2)]
+lined.nightLineup = [id]
+lined.dailyLineup = [id]
+assert.equal(transitTrade(lined, 'écurie', offer), undefined)
+assert.ok(!lined.lineup.includes(id) && !lined.nightLineup.length && !lined.dailyLineup.length)
 for (const engage of [
-  save => { save.lineup = [id] },
-  save => { save.nightLineup = [id] },
-  save => { save.dailyLineup = [id] },
   save => { save.duel = { player: { lineup: [{ id }] } } },
   save => { save.night = { lineup: [id] } },
   save => { save.versus = { active: { request: { lineup: [{ id }] } } } },
@@ -150,6 +154,41 @@ assert.equal(inTransit(reacquired, id), undefined)
 assert.deepEqual(reacquired.cars[id], {
   ...original, copies: original.copies + 1, editions: ['Synthwave', ...original.editions], shown: 'Synthwave', favorite: false,
 })
+
+// Annonce faite avec 1 exemplaire, doublon tiré depuis : le lot part tel qu'annoncé, le surplus reste avec ses pièces.
+const announced = structuredClone(garage().cars[id])
+const grown = garage()
+grown.cars[id].copies = 3
+grown.cars[id].shown = 'Abandonnée'
+grown.lineup = [id, ...grown.lineup.slice(0, 2)]
+const grownParts = structuredClone(grown.parts)
+assert.equal(transitTrade(grown, 'surplus', offer, { cars: { [id]: announced }, credits: offer.credits }), undefined)
+assert.equal(grown.cars[id].copies, 2)
+assert.deepEqual(grown.cars[id].parts, announced.parts)
+assert.deepEqual(grown.parts, grownParts)
+assert.ok(grown.lineup.includes(id))
+assert.equal(grown.trades.surplus.goods.cars[id].copies, 1)
+assert.deepEqual(grown.trades.surplus.goods.cars[id].parts, [])
+assert.match(validateTradeOffer(grown, offer), /transit/)
+const grownBack = reload(grown)
+assert.equal(returnTrade(grownBack, 'surplus'), undefined)
+assert.equal(grownBack.cars[id].copies, 3)
+assert.deepEqual(grownBack.cars[id].parts, announced.parts)
+assert.deepEqual(grownBack.parts, grownParts)
+// Un exemplaire de moins, un niveau ou une amélioration de plus : le lot annoncé n'existe plus.
+for (const change of [
+  car => { car.copies = 0 },
+  car => { car.stage = 2 },
+  car => { car.upgrades.acc = 1 },
+  car => { car.editions = car.editions.slice(0, 1); car.shown = car.editions[0] },
+]) {
+  const save = garage()
+  const before = structuredClone(save.cars[id])
+  change(save.cars[id])
+  const advertised = { cars: { [id]: before }, credits: offer.credits }
+  if (!save.cars[id].copies) { save.cars[id].copies = 1; advertised.cars[id].copies = 2 }
+  refused(save, () => transitTrade(save, 'changé', offer, advertised))
+}
 
 const duplicate = newSave()
 duplicate.credits = 1e7

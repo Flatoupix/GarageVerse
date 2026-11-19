@@ -45,3 +45,5 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 progress, progress::-webkit-progress-bar, progress::-webkit-progress-value { border-radius: 99px; }
 .toast { border-radius: 14px; }
 .settings-modal h2 { font-size: 24px; margin-bottom: 8px; }
+
+.stack-stage:is(.glow-common, .glow-rare, .glow-epic, .glow-legendary) { outline: 1px solid var(--rarity-color); outline-offset: -1px; }
