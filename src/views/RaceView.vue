@@ -77,7 +77,7 @@ watch(chosen, (next, previous) => {
   window.scrollTo({ top: 0, behavior: 'instant' })
   raceRoot.value?.querySelector<HTMLElement>('.race-prep h1')?.focus({ preventScroll: true })
 }, { flush: 'post' })
-const challenge = computed(() => todayChallenge(save))
+const challenge = computed(() => todayChallenge(save, chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
 const isNight = computed(() => chosen.value?.startsWith('night'))
 const nightSeed = ref(String(Date.now()))
 const nightOpponent = computed(() => nightRival(save.night?.seed ?? nightSeed.value, save.night?.round ?? 1))
@@ -102,8 +102,8 @@ function checkLineup(ids: string[]) {
 }
 const problem = computed(() => {
   const missing = 3 - lineup.value.length
-  if (missing > 0) return tp('Encore {n} voiture', 'Encore {n} voitures', missing)
   if (cost.value > cap.value) return t('Plafond dépassé de {n}', { n: cost.value - cap.value })
+  if (missing > 0) return tp('Encore {n} voiture', 'Encore {n} voitures', missing)
   return ruleText(checkLineup(lineup.value))
 })
 const garageTitle = ref<HTMLElement>()
@@ -125,13 +125,16 @@ const conditions = computed(() => {
 const garageCars = computed(() => {
   if (!rival.value) return []
   const circuit = rival.value.circuit
-  return vehicles.filter(v => save.cars[v.id] && !inTransit(save, v.id)).map(v => {
-    const car = racer(v.id, prepOf(save, v.id))
+  const transit = Object.fromEntries(Object.values(save.trades ?? {}).flatMap(trade =>
+    trade.state === 'transit' ? Object.entries(trade.goods.cars) : []))
+  return vehicles.filter(v => save.cars[v.id] || transit[v.id]).map(v => {
+    const owned = save.cars[v.id] ?? transit[v.id]
+    const car = racer(v.id, save.cars[v.id] ? prepOf(save, v.id) : owned)
     const scores = circuitScores(car, circuit)
     const average = scores.reduce((total, s) => total + s.average * s.times, 0) / circuit.sectors.length
-    return { v, car, scores, average }
+    return { v, car, scores, average, favorite: save.cars[v.id]?.favorite }
   }).sort((a, b) => Number(lineup.value.includes(b.v.id)) - Number(lineup.value.includes(a.v.id)) ||
-    b.average - a.average || Number(save.cars[b.v.id].favorite) - Number(save.cars[a.v.id].favorite) || a.v.cost - b.v.cost)
+    b.average - a.average || Number(!!b.favorite) - Number(!!a.favorite) || a.v.cost - b.v.cost)
 })
 const recommendedCars = computed(() => priorities.value.map(priority => {
   const candidates = garageCars.value.filter(({ v }) => lineup.value.includes(v.id)).map(({ v, scores }) => ({
@@ -161,19 +164,20 @@ const rangeText = (value: number) => { const [low, high] = luckRange(value); ret
 
 function pickProblem(id: string, price: number) {
   if (lineup.value.includes(id)) return
+  if (inTransit(save, id)) return t('En transit')
+  if (lineup.value.length === 3) return t('Retire d’abord une voiture')
   const excess = cost.value + price - cap.value
   if (excess > 0) return t('Dépasse le plafond de {n}', { n: excess })
-  if (lineup.value.length === 3) return t('Retire d’abord une voiture')
   if (lineup.value.length === 2) return ruleText(checkLineup([...lineup.value, id]))
 }
 const garageChoices = computed(() => garageCars.value.map(car => ({ ...car, reason: pickProblem(car.v.id, car.v.cost) })))
 function toggle(id: string) {
+  if (loadingRace.value) return
   act(() => {
     if (lineup.value.includes(id)) lineup.value = lineup.value.filter(x => x !== id)
     else {
       const reason = pickProblem(id, vehicleById.get(id)?.cost ?? 0)
       if (reason) return reason
-      if (inTransit(save, id)) return t('En transit')
       lineup.value = [...lineup.value, id]
     }
   })
@@ -866,7 +870,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           <ul class="race-priorities">
             <li v-for="p in recommendedCars" :key="p.sector">
               <div><b v-help="p.stat">{{ t(statLabels[p.stat]) }}</b><small>{{ tp('{n} secteur', '{n} secteurs', p.times) }} · {{ t(sectorLabels[p.sector]) }}</small></div>
-              <button v-if="p.best" class="race-prepare" type="button" :aria-label="t('Préparer {name} · {stat}', { name: p.best.name, stat: t(statLabels[p.stat]) })"
+              <button v-if="p.best" class="race-prepare" type="button" :disabled="loadingRace" :aria-label="t('Préparer {name} · {stat}', { name: p.best.name, stat: t(statLabels[p.stat]) })"
                 @click="emit('inspect', 'car', p.best.id, rival.circuit, p.stat)">
                 <b>{{ p.best.name }}</b><small>{{ t('{n} pts estimés', { n: pointsText(p.best.score) }) }} <span aria-hidden="true">↗</span></small>
               </button>
@@ -886,22 +890,22 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
               <img v-if="carSprite(lineup[n - 1])" :src="carSprite(lineup[n - 1])" alt="">
               <strong>{{ name(lineup[n - 1]) }}</strong>
             </span>
-            <button type="button" class="button" :aria-label="t('Retirer {name} de l’écurie', { name: name(lineup[n - 1]) })"
+            <button type="button" class="button" :disabled="loadingRace" :aria-label="t('Retirer {name} de l’écurie', { name: name(lineup[n - 1]) })"
               @click="removeFromSlot(lineup[n - 1], $event)">{{ t('Retirer') }}</button>
-            <button type="button" class="button ghost" :aria-label="t('Atelier de {name}', { name: name(lineup[n - 1]) })"
+            <button type="button" class="button ghost" :disabled="loadingRace" :aria-label="t('Atelier de {name}', { name: name(lineup[n - 1]) })"
               @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">{{ t('Atelier') }}</button>
           </template>
-          <button v-else type="button" class="button slot-placeholder" @click="chooseCar">{{ t('+ Choisir') }}</button>
+          <button v-else type="button" class="button slot-placeholder" :disabled="loadingRace" @click="chooseCar">{{ t('+ Choisir') }}</button>
         </div>
       </div>
 
       <h2 ref="garageTitle" tabindex="-1" class="list-title">{{ t('Ton garage') }}</h2>
       <ul class="pick-list">
-        <li v-for="{ v, car, scores, reason } in garageChoices" :key="v.id">
+        <li v-for="{ v, car, scores, reason, favorite } in garageChoices" :key="v.id">
           <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="loadingRace || !!reason" @click="toggleFromList(v.id, $event)">
             <span class="pick-cost" :data-cost="v.cost">{{ t('Coût {n}', { n: v.cost }) }}</span>
             <span class="pick-name"><b><span v-if="lineup.includes(v.id)" class="pick-tick" aria-hidden="true">✓</span>
-              <span v-if="save.cars[v.id].favorite" :aria-label="t('Favori')">★ </span>{{ v.name }}</b>
+              <span v-if="favorite" :aria-label="t('Favori')">★ </span>{{ v.name }}</b>
               <small>{{ tp('{version} · {n} secteur avant surchauffe', '{version} · {n} secteurs avant surchauffe', car.uses, { version: t(v.version) }) }}</small></span>
             <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ t('{label} {n} pts', { label: t(s.label), n: pointsText(s.average) }) }}</span></span>
           </button>

@@ -85,6 +85,7 @@ const tabs = [
 const tab = ref<typeof tabs[number]['id']>('friends')
 const tradeBusy = ref(false)
 const tradeError = ref('')
+const showcaseSaveFailed = ref(false)
 const tradeStatus = ref('')
 const showcase = ref<string[]>([])
 const showcaseReady = ref(false)
@@ -160,16 +161,14 @@ const draftStep = ref(0)
 const stepTitle = ref<HTMLElement>()
 const stepLabels = [t('Tu donnes'), t('Tu demandes'), t('Récapitulatif')]
 const creditSteps = [50, 100, 500]
-const giveCreditLimit = computed(() => {
-  const reserved = Object.values(save.trades ?? {}).reduce((sum, trade) =>
-    sum + (trade.state === 'ouverte' ? trade.offer.credits : 0), 0)
-  return Math.max(0, Math.min(TRADE_CREDIT_LIMIT, save.credits - reserved))
-})
+const reservedCredits = computed(() => Object.values(save.trades ?? {}).reduce((sum, trade) =>
+  sum + (trade.state === 'ouverte' ? trade.offer.credits : 0), 0))
+const giveCreditLimit = computed(() => Math.max(0, Math.min(TRADE_CREDIT_LIMIT, save.credits - reservedCredits.value)))
 const validCredits = (n: number) => Number.isSafeInteger(n) && n >= 0 && n <= TRADE_CREDIT_LIMIT
 function creditProblem(side: 'give' | 'want') {
   const credits = draft.value?.[side].credits ?? 0
   if (!validCredits(credits)) return t('Saisis un nombre entier entre 0 et {n}.', { n: TRADE_CREDIT_LIMIT })
-  if (side === 'give' && credits > giveCreditLimit.value) return t('Crédits insuffisants pour cet échange')
+  if (side === 'give' && giveOfferProblem.value !== giveLotProblem.value) return giveOfferProblem.value
 }
 function addCredits(side: 'give' | 'want', amount: number) {
   if (!draft.value) return
@@ -178,6 +177,7 @@ function addCredits(side: 'give' | 'want', amount: number) {
     (validCredits(credits) ? credits : 0) + amount)
 }
 async function moveDraft(step: number) {
+  if (draftReady.value) tradeError.value = ''
   draftStep.value = step
   await nextTick()
   stepTitle.value?.focus()
@@ -193,10 +193,13 @@ const offeredCars = computed(() => {
   const selected = current?.give.cars.filter(id => Object.hasOwn(prior, id)) ?? []
   return { ...Object.fromEntries(selected.map(id => [id, prior[id]])), ...save.cars }
 })
+const emptyOfferProblem = computed(() => validateTradeOffer(save, { cars: [], credits: 0 }))
 function giveCarProblem(id: string) {
-  const selected = draft.value?.give.cars ?? []
-  return validateTradeShowcase(save, [id]) || validateTradeOffer(save, { cars: [id], credits: 0 })
-    || (!selected.includes(id) ? validateTradeOffer(save, { cars: [...selected, id], credits: 0 }) : undefined)
+  const problem = validateTradeOffer(save, { cars: [id], credits: 0 })
+  return validateTradeShowcase(save, [id]) || (problem !== emptyOfferProblem.value ? problem : undefined)
+}
+function giveSelectionProblem(id: string) {
+  return validateTradeOffer(save, { cars: [...(draft.value?.give.cars ?? []), id], credits: 0 })
 }
 function wantCarProblem(id: string) {
   if (draftReady.value && !Object.hasOwn(draft.value?.cars ?? {}, id)) return t('Cette voiture ne figure plus dans la vitrine de ton ami.')
@@ -209,6 +212,7 @@ const requestedCars = computed(() => {
   return { ...Object.fromEntries(current.want.cars.filter(id => Object.hasOwn(prior, id)).map(id => [id, prior[id]])), ...current.cars }
 })
 const giveLotProblem = computed(() => draft.value && validateTradeOffer(save, { cars: draft.value.give.cars, credits: 0 }))
+const giveOfferProblem = computed(() => draft.value && validateTradeOffer(save, draft.value.give))
 const draftProblems = computed(() => {
   const current = draft.value
   if (!current) return []
@@ -224,18 +228,24 @@ const draftProblems = computed(() => {
 const canSendTrade = computed(() => {
   const current = draft.value
   return !!current && draftReady.value && !draftProblems.value.length && !creditProblem('want')
-    && !creditProblem('give') && !validateTradeOffer(save, current.give) && !current.want.cars.some(wantCarProblem)
+    && !creditProblem('give') && !giveOfferProblem.value && !current.want.cars.some(wantCarProblem)
 })
 
-async function runTrade(action: () => Promise<void>) {
+async function runTrade(action: () => Promise<void>, savingShowcase = false) {
   if (!props.online || tradeBusy.value || save.preferences.friendsEnabled !== true) return
+  const activeTab = tab.value
+  const activeDraft = draft.value
+  showcaseSaveFailed.value = false
   tradeBusy.value = true
   tradeError.value = ''
   tradeStatus.value = ''
   try {
     await action()
   } catch (cause) {
-    tradeError.value = cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.')
+    if (tab.value === activeTab && draft.value === activeDraft) {
+      showcaseSaveFailed.value = savingShowcase
+      tradeError.value = cause instanceof Error ? cause.message : t('Serveur indisponible. Réessaie dès que la connexion revient.')
+    }
   } finally {
     tradeBusy.value = false
   }
@@ -278,12 +288,13 @@ function setCredits(side: 'give' | 'want', event: Event) {
   if (draft.value) draft.value[side].credits = input.validity.badInput ? NaN : input.value === '' ? 0 : input.valueAsNumber
 }
 function saveShowcase() {
+  if (!showcaseReady.value || showcaseProblem.value) return
   void runTrade(async () => {
     const ids = [...showcase.value]
     await publishShowcase(ids)
     savedShowcase.value = ids
     tradeStatus.value = t('Vitrine enregistrée.')
-  })
+  }, true)
 }
 function asSelection(goods?: TradeGoods) {
   return { cars: Object.keys(goods?.cars ?? {}), credits: goods?.credits ?? 0 }
@@ -363,9 +374,9 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
       <template v-if="!online">
         <p role="status">{{ t('Connexion nécessaire') }}</p>
       </template>
-      <template v-else-if="tradeError && (tab !== 'friends' || draft) && (!draft || draftStep < 2 || !draftReady)">
+      <template v-else-if="tradeError && !draft && tab !== 'friends' && tab !== 'showcase'">
         <p role="alert">{{ tradeError }}</p>
-        <GvButton @click="draft ? refreshDraft() : refreshTab()">{{ t('Réessayer') }}</GvButton>
+        <GvButton @click="refreshTab()">{{ t('Réessayer') }}</GvButton>
       </template>
       <template v-else-if="friendProblem && tab === 'friends' && !draft">
         <p :role="error ? 'alert' : 'status'">{{ friendProblem }}</p>
@@ -392,7 +403,9 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
                   :aria-invalid="!!creditProblem(side)" :disabled="tradeBusy" aria-describedby="draft-credit-info">
               </label>
               <div id="draft-credit-info">
-                <p v-if="side === 'give'">{{ t('Ton solde : {n} crédits', { n: save.credits }) }}</p>
+                <p v-if="side === 'give'">{{ t('Ton solde : {n} crédits', { n: save.credits }) }}
+                  <span v-if="reservedCredits">{{ t(' · dont {n} réservés pour tes offres', { n: reservedCredits }) }}</span>
+                </p>
                 <p v-else>{{ t('Le solde de ton ami est privé.') }}</p>
                 <p v-if="creditProblem(side)" role="status">{{ creditProblem(side) }}</p>
               </div>
@@ -402,7 +415,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
             </div>
             <p v-if="side === 'give' && giveLotProblem" role="status">{{ giveLotProblem }}</p>
             <p v-if="side === 'want' && draftReady && !Object.keys(draft.cars).length">{{ t('La vitrine est vide.') }}</p>
-            <TradePicker v-if="side === 'give'" :cars="offeredCars" :selected="draft.give.cars" :problem="giveCarProblem"
+            <TradePicker v-if="side === 'give'" :cars="offeredCars" :selected="draft.give.cars" :problem="giveCarProblem" :selection-problem="giveSelectionProblem"
               :disabled="tradeBusy" searchable @toggle="toggleCar(draft.give.cars, $event)" />
             <TradePicker v-else :cars="requestedCars" :selected="draft.want.cars" :problem="wantCarProblem"
               :disabled="tradeBusy || !draftReady" searchable @toggle="toggleCar(draft.want.cars, $event)" />
@@ -412,7 +425,7 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
           <div class="trade-sides">
             <section v-for="side in (['give', 'want'] as const)" :key="side">
               <h4>{{ side === 'give' ? t('Tu donnes') : t('Tu reçois') }}</h4>
-              <ul>
+              <ul v-if="draft[side].cars.length">
                 <li v-for="id in draft[side].cars" :key="id">
                   {{ carName(id) }}
                   <small v-if="side === 'give' ? giveCarProblem(id) : wantCarProblem(id)">
@@ -421,18 +434,20 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
                 </li>
               </ul>
               <p v-if="side === 'give' && giveLotProblem" role="status">{{ giveLotProblem }}</p>
-              <p>{{ creditProblem(side) || tp('{n} crédit', '{n} crédits', draft[side].credits) }}</p>
+              <p v-if="Number.isFinite(draft[side].credits)">{{ tp('{n} crédit', '{n} crédits', draft[side].credits) }}</p>
+              <p v-if="creditProblem(side)" role="status">{{ creditProblem(side) }}</p>
             </section>
           </div>
           <p v-if="hasParts(draft.give.cars)">{{ t('Les pièces montées sur tes voitures offertes retournent à ton stock si l’échange aboutit.') }}</p>
           <p v-if="draft.want.cars.some(id => requestedCars[id]?.parts.length)">{{ t('Les pièces montées sur les voitures demandées retournent au stock de ton ami si l’échange aboutit.') }}</p>
           <p v-for="problem in draftProblems" :key="problem" role="status">{{ problem }}</p>
-          <p v-if="tradeError && draftReady" role="alert">{{ tradeError }}</p>
         </template>
+        <p v-if="tradeError" role="alert">{{ tradeError }}</p>
+        <GvButton v-if="tradeError && !draftReady" :disabled="!online || tradeBusy" @click="refreshDraft">{{ t('Réessayer') }}</GvButton>
         <div class="friend-actions draft-actions">
           <GvButton :disabled="tradeBusy" @click="closeDraft">{{ t('Annuler') }}</GvButton>
-          <GvButton v-if="draftStep > 0" @click="moveDraft(draftStep - 1)">{{ t('Retour') }}</GvButton>
-          <GvButton v-if="draftStep < 2" variant="primary" @click="moveDraft(draftStep + 1)">{{ t('Suivant') }}</GvButton>
+          <GvButton v-if="draftStep > 0" :disabled="tradeBusy" @click="moveDraft(draftStep - 1)">{{ t('Retour') }}</GvButton>
+          <GvButton v-if="draftStep < 2" variant="primary" :disabled="tradeBusy" @click="moveDraft(draftStep + 1)">{{ t('Suivant') }}</GvButton>
           <GvButton v-else variant="primary" :disabled="!online || tradeBusy || !canSendTrade" @click="sendTrade">{{ t('Envoyer l’offre') }}</GvButton>
         </div>
       </section>
@@ -445,7 +460,11 @@ watch(() => props.online, online => { if (online) void run() }, { immediate: tru
           :disabled="!online || tradeBusy || !showcaseReady" searchable @toggle="toggleCar(showcase, $event)" />
         <p v-if="showcaseProblem" role="status">{{ showcaseProblem }}</p>
         <p v-if="showcaseDirty" role="status">{{ t('Modifications non enregistrées') }}</p>
-        <GvButton variant="primary" :disabled="!online || tradeBusy || !showcaseReady || !!showcaseProblem" @click="saveShowcase">{{ t('Enregistrer la vitrine') }}</GvButton>
+        <p v-if="tradeError" role="alert">{{ tradeError }}</p>
+        <GvButton v-if="tradeError && !showcaseSaveFailed && !showcaseDirty" :disabled="!online || tradeBusy" @click="refreshTab">{{ t('Réessayer') }}</GvButton>
+        <GvButton variant="primary" :disabled="!online || tradeBusy || !showcaseReady || !!showcaseProblem" @click="saveShowcase">
+          {{ tradeError && showcaseSaveFailed ? t('Réessayer') : t('Enregistrer la vitrine') }}
+        </GvButton>
       </section>
 
       <template v-else-if="tab !== 'friends'">

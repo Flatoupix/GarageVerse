@@ -10,6 +10,7 @@ const props = defineProps<{
   cars: TradeGoods['cars']
   selected: string[]
   problem: (id: string) => string | undefined
+  selectionProblem?: (id: string) => string | undefined
   disabled?: boolean
   searchable?: boolean
 }>()
@@ -22,9 +23,9 @@ const entries = computed(() => [...new Set([...Object.keys(props.cars), ...props
   const car = props.cars[id]
   const model = vehicleById.get(id)
   return {
-    id, car, name: model?.name ?? t('Carte indisponible'), version: model?.version,
+    id, car, name: model?.name ?? t('Carte indisponible'), version: model ? t(model.version) : undefined,
     rarity: model?.rarity, art: model ? edition(id, car?.shown).art : undefined,
-    selected: props.selected.includes(id), reason: props.problem(id),
+    selected: props.selected.includes(id), unavailable: props.problem(id),
   }
 }))
 const normalize = (value: string) => value.toLocaleLowerCase(locale).normalize('NFD').replace(/\p{M}/gu, '')
@@ -36,8 +37,10 @@ const matches = computed(() => {
     return rank || a.name.localeCompare(b.name, locale)
   })
 })
-const unavailable = computed(() => matches.value.filter(item => item.reason && !item.selected).length)
-const visible = computed(() => matches.value.filter(item => reveal.value || !item.reason || item.selected))
+const unavailable = computed(() => matches.value.filter(item => item.unavailable && !item.selected).length)
+const visible = computed(() => matches.value.filter(item => reveal.value || !item.unavailable || item.selected).map(item => ({
+  ...item, reason: item.unavailable || (!item.selected ? props.selectionProblem?.(item.id) : undefined),
+})))
 </script>
 
 <template>
@@ -52,7 +55,7 @@ const visible = computed(() => matches.value.filter(item => reveal.value || !ite
         </select>
       </label>
     </div>
-    <p v-if="query && !matches.length" role="status">{{ t('Aucune voiture ne correspond à ta recherche.') }}</p>
+    <p v-if="query.trim() && !matches.length" role="status">{{ t('Aucune voiture ne correspond à ta recherche.') }}</p>
     <button v-if="unavailable" type="button" class="button ghost picker-reveal" :aria-expanded="reveal"
       @click="reveal = !reveal">
       {{ reveal ? t('Masquer les voitures indisponibles') : t('Afficher les voitures indisponibles ({n})', { n: unavailable }) }}
@@ -64,7 +67,7 @@ const visible = computed(() => matches.value.filter(item => reveal.value || !ite
           <img v-if="item.art" :src="item.art" alt="" loading="lazy" decoding="async">
           <span>
             <strong>{{ item.name }}</strong>
-            <small v-if="item.version">{{ t(item.version) }}</small>
+            <small v-if="item.version">{{ item.version }}</small>
             <small v-if="item.rarity">{{ rarityMark[item.rarity] }} {{ t(item.rarity) }}</small>
             <small v-if="item.car && item.car.copies > 1">{{ tp('{n} exemplaire', '{n} exemplaires', item.car.copies) }}</small>
           </span>

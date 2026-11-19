@@ -88,6 +88,7 @@ export const echanges = {
   'Tu donnes': 'You give',
   'Tu demandes': 'You ask for',
   'Crédits': 'Credits',
+  ' · dont {n} réservés pour tes offres': ' · {n} reserved for your offers',
   'Ton solde : {n} crédits': 'Your balance: {n} credits',
   'Donner {name}': 'Give {name}',
   'Demander {name}': 'Ask for {name}',
