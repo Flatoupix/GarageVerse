@@ -8,7 +8,9 @@ import { debugTap, type DebugTaps } from './game/debug'
 import demoPlayerSprite from './assets/pixel/anim/r4l-car.px.webp?inline'
 import demoRivalSprite from './assets/pixel/anim/deuch-car.px.webp?inline'
 import demoBackdrop from './assets/pixel/anim/track-sec-bg.px.webp?inline'
-import type { Rival, StatKey } from './game/data'
+import { stylesOf, type Rival, type StatKey } from './game/data'
+import { carSprite, edition, editionImages } from './game/art'
+import { waitForImages } from './game/asset-loading'
 import { floatText, mountFx, pop, themeFx, tone, tween } from './game/fx'
 import { act, buzz, pendingSeries, notify, persist, reducedMotion, save, sound, storageWarning, systemReduced, toast } from './game/store'
 import { applyTheme, theme, themeGroups, themes, unlocked, type Theme } from './game/theme'
@@ -17,7 +19,6 @@ import type { CardBackId } from './game/save'
 import { glossary, glossaryOpen, glossarySections, openHelp, vHelp } from './game/help'
 import MechanicGuide from './components/MechanicGuide.vue'
 import ReleaseNotes from './components/ReleaseNotes.vue'
-import GameDaveSplash from './components/GameDaveSplash.vue'
 import { replayTutorial, tutorialAction } from './game/tutorial'
 import BoosterView from './views/BoosterView.vue'
 import SectorRun from './components/SectorRun.vue'
@@ -231,6 +232,9 @@ function versionTap() {
 }
 const bubble = ref<HTMLElement>()
 const sheet = ref<HTMLDialogElement>()
+const loadingSheet = ref(false)
+let inspection = 0
+let sheetLoading: AbortController | undefined
 const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
   // Tracés 24 × 24 : maison, sachet de cartes, porte de garage, drapeau à damier.
@@ -290,7 +294,15 @@ onMounted(() => {
 
 // L'écran Échanges s'ouvre depuis l'accueil ou le garage : son bouton de retour y ramène.
 const friendsFrom = ref<'home' | 'garage'>('garage')
+function cancelInspection() {
+  inspection++
+  sheetLoading?.abort()
+  sheetLoading = undefined
+  loadingSheet.value = false
+}
+
 function go(destination: Screen) {
+  cancelInspection()
   toast.value = null
   if (destination === 'friends' && (screen.value === 'home' || screen.value === 'garage')) friendsFrom.value = screen.value
   if (destination === 'shop' || destination === 'booster') tutorialAction(0, 1)
@@ -308,7 +320,24 @@ function go(destination: Screen) {
   })
 }
 
-function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+  const previous = sheetLoading
+  sheetLoading = undefined
+  const request = ++inspection
+  loadingSheet.value = kind === 'car'
+  if (kind === 'car') {
+    sheetLoading = new AbortController()
+    const images = waitForImages([
+      carSprite(id),
+      ...editionImages(edition(id, save.cars[id]?.shown)),
+      ...stylesOf(id).flatMap(style => editionImages(edition(id, style))),
+    ], sheetLoading.signal)
+    previous?.abort()
+    await images
+    if (request !== inspection) return
+    sheetLoading = undefined
+    loadingSheet.value = false
+  } else previous?.abort()
   inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)
@@ -334,8 +363,6 @@ async function toggleFullscreen() {
 // Version du jeu (semver), lue dans package.json au build et affichée en bas des Réglages.
 const appVersion = __APP_VERSION__
 const releaseNotes = ref<InstanceType<typeof ReleaseNotes>>()
-// Splash GAMEDAVE à chaque lancement ; les navigateurs pilotés par un outil de test (orchestrateur) le sautent.
-const splash = ref(!navigator.webdriver)
 function showReleaseNotes() {
   settings.value?.close()
   releaseNotes.value?.openAll()
@@ -454,8 +481,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
     <p v-if="storageWarning" class="storage-warning" role="alert">{{ t('La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.') }}</p>
 
     <MechanicGuide />
-    <ReleaseNotes ref="releaseNotes" :ready="!splash" />
-    <GameDaveSplash v-if="splash" @done="splash = false" />
+    <ReleaseNotes ref="releaseNotes" :ready="true" />
 
     <HomeView v-if="screen === 'home'" @go="go" />
     <ShopView v-else-if="screen === 'shop'" @open="go('booster')" />
@@ -483,6 +509,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 
     <canvas ref="fx" class="fx-canvas" aria-hidden="true"></canvas>
     <div v-if="toast" :key="toast.text" class="toast" :class="toast.tone" role="status">{{ toast.text }}</div>
+    <div v-if="loadingSheet && !inspected" class="toast sheet-loading-toast" role="status">{{ t('Chargement des images…') }}</div>
 
     <Teleport :to="bubbleHost">
     <div ref="bubble" popover="manual" class="help-bubble" :style="bubbleStyle" role="dialog" :aria-label="t('Explication')">
@@ -588,8 +615,9 @@ watch(() => save.preferences.friendsEnabled, enabled => {
       </div>
     </dialog>
 
-    <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="inspected = null">
+    <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="cancelInspection(); inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
+      <div v-if="loadingSheet" class="toast" role="status">{{ t('Chargement des images…') }}</div>
       <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
         :key="`c-${inspected.id}`" @open="id => inspect('car', id)" @close="sheet?.close()" />
       <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="(id, stat) => inspect('car', id, undefined, stat)" />
@@ -598,5 +626,6 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 </template>
 
 <style scoped>
+.toast + .sheet-loading-toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
 .turn-replay { margin-top: 8px; }
 </style>

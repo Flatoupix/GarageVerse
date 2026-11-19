@@ -13,6 +13,23 @@ const buffers = new Map<Asset, AudioBuffer>()
 const downloads = new Map<Asset, Promise<AudioBuffer | undefined>>()
 
 function urlOf(asset: Asset) { return files[`./assets/audio/${asset}.mp3`] }
+export const audioAssets = new Set(Object.values(files))
+const audioBytes = new Map<string, Promise<ArrayBuffer>>()
+
+export function preloadAudio(url: string, signal?: AbortSignal) {
+  let pending = audioBytes.get(url)
+  if (!pending) {
+    pending = fetch(url, { signal })
+      .then(response => {
+        if (!response.ok) throw new Error(`Audio HTTP ${response.status}`)
+        return response.arrayBuffer()
+      })
+      .catch(error => { audioBytes.delete(url); throw error })
+    audioBytes.set(url, pending)
+  }
+  return pending
+}
+
 export const hasMusic = Boolean(urlOf('garage') || urlOf('race'))
 
 let audio: AudioContext | undefined
@@ -49,14 +66,16 @@ function load(asset: Asset) {
   let pending = downloads.get(asset)
   if (!pending) {
     const ctx = audioContext()
-    pending = fetch(url)
-      .then(response => {
-        if (!response.ok) throw new Error(`Audio HTTP ${response.status}`)
-        return response.arrayBuffer()
+    pending = preloadAudio(url).catch(error => {
+      if (error instanceof DOMException && error.name === 'AbortError') return preloadAudio(url)
+      throw error
+    })
+      .then(bytes => {
+        audioBytes.delete(url)
+        return ctx.decodeAudioData(bytes)
       })
-      .then(bytes => ctx.decodeAudioData(bytes))
       .then(buffer => { buffers.set(asset, buffer); return buffer })
-      .catch(() => undefined)
+      .catch(() => { downloads.delete(asset); return undefined })
     downloads.set(asset, pending)
   }
   return pending

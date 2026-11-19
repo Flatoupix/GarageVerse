@@ -2,6 +2,9 @@ import type { Dict } from './index'
 
 // Libellés partagés par plusieurs zones et entrées « contexte|phrase » (voir `tc` et `tq` dans ../index.ts).
 export const commun: Dict = {
+  'Chargement du garage…': 'Loading the garage…',
+  'Chargement des images…': 'Loading images…',
+  'Passer': 'Skip',
   // Raretés : valeurs de logique restées françaises, affichées par t(rareté).
   'Courante': 'Common',
   'Rare': 'Rare',

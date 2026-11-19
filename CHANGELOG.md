@@ -4,6 +4,16 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.18.0] — 2026-11-19
+
+### Ajouté
+
+- **Écran de chargement.** Au lancement, le jeu charge d’abord tout ce qu’il faut pour l’accueil et le garage, avec une barre de progression : plus d’images qui apparaissent en retard ou de cartes vides. Le reste des illustrations se télécharge ensuite en arrière-plan pendant que tu joues. Si ta connexion est lente, un bouton **Passer** apparaît au bout de quelques secondes.
+
+### Corrigé
+
+- **Plus d’éclair blanc au lancement.** L’écran reste sombre du premier instant jusqu’au logo.
+
 ## [0.17.0] — 2026-11-18
 
 ### Ajouté
