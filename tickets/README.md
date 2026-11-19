@@ -21,6 +21,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-005](005-versus-client-temps-reel.md) | Client Versus et reprise | P1 |
 | [T-006](006-versus-interface-mobile.md) | Interface de duel mobile | P1 |
 | [T-007](007-versus-amis-palmares-v2.md) | Palmarès V2 (la liste d'amis passe dans [T-008](008-echanges-de-cartes.md)) | P2 |
+| [T-037](037-echanges-synchro-lot-change.md) | Bug échanges : « Le lot a changé », voitures d'écurie bloquées, pas d'actualisation | P1 |
 | [T-008](008-echanges-de-cartes.md) | Échanges de cartes entre amis, dissociés du Versus et livrés avant lui | P2 |
 
 ## Gameplay, collection et économie
@@ -50,6 +51,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Priorité |
 |---|---|---|
+| [T-038](038-ux-selection-voitures-course-echanges.md) | Ergonomie de la sélection de voitures : préparation de course et échanges | P2 |
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | P2 |
 | [T-018](018-desktop-et-themes-regressions.md) | Finitions desktop/thèmes | P2 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Bug : couleur de rareté différente entre garage et plein écran | P2 |
