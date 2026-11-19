@@ -9,7 +9,7 @@ import { t } from '../i18n'
 
 // Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
-const props = defineProps<{ round?: Round | null; live?: Condition; demo?: boolean; waiting?: boolean; feedback?: ManualFeedback | null; streak?: number; flawless?: boolean; keepControls?: boolean; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
+const props = defineProps<{ round?: Round | null; live?: Condition; demo?: boolean; waiting?: boolean; feedback?: ManualFeedback | null; streak?: number; flawless?: boolean; keepControls?: boolean; hideScoreTags?: boolean; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
 const emit = defineEmits<{ skip: []; tap: [event: MouseEvent] }>()
 const sides = ['player', 'rival'] as const
 const seriesLabel = ref<HTMLElement>()
@@ -84,7 +84,7 @@ const lanes = computed(() => sides.map(who => {
   return {
     who, position, art, sprite, feedback,
     kind: line ? kindOf(play, index) : '',
-    tag: line ? `${t(line.label)} ${index && line.value > 0 ? '+' : ''}${line.value}` : '',
+    tag: line && !props.hideScoreTags ? `${t(line.label)} ${index && line.value > 0 ? '+' : ''}${line.value}` : '',
     nitro: play.nitro && play.lines.findIndex(l => l.label === 'Nitro') < props.step,
   }
 }))

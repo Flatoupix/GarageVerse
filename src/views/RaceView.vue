@@ -303,13 +303,12 @@ const gauge = ref<InstanceType<typeof TimingGauge>>()
 const liveFeedback = ref<ManualFeedback | null>(null)
 const manualStreak = ref(0)
 const flawless = ref(false)
-const finishedTurns = shallowRef<TurnSequence>()
-const finalGear = ref<HTMLElement>()
+const finishedControls = shallowRef<{ turns?: TurnSequence; windows: typeof timingWindows.value }>()
 watch(duel, current => { manualStreak.value = current ? (raceStreaks.get(current) ?? 0) : 0 }, { immediate: true })
-watch(finalGear, gear => { if (gear) pop(gear, 1.13, 220) }, { flush: 'post' })
-function showJudgment(tag: string, grade: ManualGrade) {
+function showJudgment(grade: ManualGrade) {
+  const tags = { perfect: t('Parfait !'), good: t('Bien'), fair: t('Moyen'), miss: t('Raté') }
   manualStreak.value = grade === 'perfect' ? manualStreak.value + 1 : 0
-  liveFeedback.value = { tag: grade === 'perfect' ? t('Parfait !') : tag, grade, count: (liveFeedback.value?.count ?? 0) + 1 }
+  liveFeedback.value = { tag: tags[grade], grade, count: (liveFeedback.value?.count ?? 0) + 1 }
 }
 const picked = ref(pendingManual.value?.choice.car ?? 0)
 const nitro = ref(false)
@@ -338,6 +337,23 @@ const carDetail = computed(() => {
 })
 const restoredRound = duel.value?.timingReview ? duel.value.rounds.at(-1) : undefined
 const shown = ref<TimingRound | null>(restoredRound ?? null)
+const manualResult = computed(() => {
+  const round = shown.value
+  if (round?.direction) {
+    const direction = round.direction
+    return {
+      modifier: direction.modifier,
+      label: t('Trajectoire'),
+      judgments: 'parfait' in direction ? turnSummary(direction) : turnFeedback(direction.outcome),
+    }
+  }
+  if (round?.timing) return {
+    modifier: round.timing.modifier,
+    label: t('Passage de vitesses'),
+    judgments: round.shifts?.length ? timingSummary(round.shifts) : timingFeedback(round.timing.zone),
+  }
+  return null
+})
 const reward = ref<Reward | null>(null)
 // Résumé de la course affiché à l'arrivée : la course elle-même est effacée au règlement.
 const recap = ref<{ sector: Sector; condition: Condition; winner: Round['winner']; player: string; rival: string; scores: [number, number]; pilot: PilotMode }[]>([])
@@ -408,7 +424,7 @@ function skipRun() { if (shown.value && !settled.value) { clear(); settle(shown.
 
 function settle(round: Round, immediateBoost = false) {
   if (!reducedMotion.value) flawless.value = false
-  finishedTurns.value = undefined
+  finishedControls.value = undefined
   settled.value = true
   step.value = Math.max(round.player.lines.length, round.rival.lines.length) + 1
   counts.player = round.player.score
@@ -497,6 +513,7 @@ function steer(result: TurnResult) {
 function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>) => TimingRound) {
   const pending = pendingManual.value
   if (!pending || !manualStarted.value || shown.value) return
+  const windows = timingWindows.value
   delete pending.duel.manualSector
   const round = pilotedRace.value
     ? playPilotRound(pending.duel, pending.choice, Math.random, () => resolve(pending)) : resolve(pending)
@@ -504,10 +521,10 @@ function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>
   raceStreaks.set(pending.duel, manualStreak.value)
   flawless.value = Boolean(liveFeedback.value && manualStreak.value >= liveFeedback.value.count)
   showRound(round, true)
-  // La dernière note termine son effet pendant la transition vers le score.
-  if (pending.sequence && !reducedMotion.value) {
-    finishedTurns.value = pending.sequence
-    timers.push(setTimeout(() => { finishedTurns.value = undefined }, 260))
+  // Le dernier geste termine son effet sans déplacer les commandes.
+  if (!reducedMotion.value) {
+    finishedControls.value = { turns: pending.sequence, windows }
+    timers.push(setTimeout(() => { finishedControls.value = undefined }, 260))
   }
 }
 
@@ -544,7 +561,7 @@ function showRound(round: TimingRound, fromLive = false) {
       timers.push(setTimeout(() => settle(round), startDelay + steps * STEP_MS + 240))
     }
   }
-  void scrollToStage(true)
+  if (!fromLive) void scrollToStage(true)
   const free = d.player.lineup.findIndex((_, car) => !overheated(d.player, car))
   if (overheated(d.player, picked.value) && free >= 0) picked.value = free
 }
@@ -697,12 +714,12 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       </GvButton>
 
       <section v-if="shown || pendingManual" class="round-result" :class="[shown && settled ? shown.winner : 'pending', { 'manual-stage': pendingManual }]">
-        <template v-if="shown">
+        <template v-if="shown && !manualResult">
           <p v-if="pilotedRace && settled">{{ t('Pilotage : {mode}', { mode: pilotLabel(roundPilot(shown)) }) }}</p>
           <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
           <h2 v-else>{{ t(sectorLabels[shown.sector]) }} · {{ t(conditionLabels[shown.condition]) }}</h2>
         </template>
-        <h2 v-else>{{ t(sectorLabels[duel.sectors[index]]) }} · {{ t(conditionLabels[duel.conditions[index]]) }}</h2>
+        <h2 v-else>{{ t(sectorLabels[shown?.sector ?? duel.sectors[index]]) }} · {{ t(conditionLabels[shown?.condition ?? duel.conditions[index]]) }}</h2>
         <aside v-if="manualLesson" class="mechanic-guide manual-lesson" role="region" aria-live="polite" :aria-label="t('Le mécano')">
           <strong>{{ t('Le mécano') }}</strong>
           <template v-if="pendingManual?.sequence">
@@ -715,48 +732,59 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           </template>
           <div class="mechanic-actions"><button type="button" @click="acknowledgeManual">{{ t('C’est parti') }}</button></div>
         </aside>
-        <SectorRun v-else-if="pendingManual || shown?.timing || shown?.direction" :waiting="Boolean(pendingManual && !manualStarted)" :round="shown" :step="step"
+        <SectorRun v-else-if="pendingManual || manualResult" :waiting="Boolean(pendingManual && !manualStarted)" :round="shown" :step="step"
           :live="pendingManual ? duel.conditions[index] : undefined" :running="Boolean(shown && !settled)"
           :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown?.condition ?? duel.conditions[index])"
-          :feedback="liveFeedback" :streak="manualStreak" :flawless="flawless" :keep-controls="Boolean(finishedTurns)" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
+          :feedback="liveFeedback" hide-score-tags :streak="manualStreak" :flawless="flawless" :keep-controls="Boolean(finishedControls)" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
           <template #overlay>
             <ManualCountdown v-if="pendingManual" @go="manualStarted = true" />
-            <span ref="finalGear" v-if="shown?.shifts && liveFeedback && (step <= 1 || reducedMotion)" class="final-gear">
-              {{ t('Rapport {n}/{total}', { n: shown.shifts.length + 1, total: shown.shifts.length + 1 }) }}
-            </span>
           </template>
-          <TurnControl v-if="pendingManual?.sequence || finishedTurns" :sequence="(pendingManual?.sequence ?? finishedTurns)!" :waiting="!manualStarted" @turn="steer"
-            @judgment="result => showJudgment(turnFeedback(result.outcome), turnGrade[result.outcome])" />
-          <TimingGauge v-else-if="timingWindows.length" ref="gauge" :windows="timingWindows" :waiting="!manualStarted" @finish="shift"
-            @judgment="result => showJudgment(timingFeedback(result.zone), shiftGrade[result.zone])" />
+          <TurnControl v-if="pendingManual?.sequence || finishedControls?.turns" :sequence="(pendingManual?.sequence ?? finishedControls?.turns)!" :waiting="!manualStarted" @turn="steer"
+            @judgment="result => showJudgment(turnGrade[result.outcome])" />
+          <TimingGauge v-else-if="timingWindows.length || finishedControls?.windows.length" ref="gauge"
+            :windows="finishedControls?.windows ?? timingWindows" :waiting="!manualStarted || Boolean(finishedControls)" @finish="shift"
+            @judgment="result => showJudgment(shiftGrade[result.zone])" />
         </SectorRun>
         <template v-if="shown">
-          <p v-if="shown.timing && !shown.shifts?.length" role="status">{{ t('Référence {base} · Timing {zone} ({modifier}) = {total}', {
-            base: shown.player.score - shown.timing.modifier, zone: timingFeedback(shown.timing.zone),
-            modifier: signedTiming(shown.timing.modifier), total: shown.player.score,
-          }) }}</p>
-          <template v-if="shown.direction && 'parfait' in shown.direction">
-            <p>{{ t('Direction · {summary}', { summary: turnSummary(shown.direction) }) }}</p>
-            <p role="status">{{ t('Score de base {base} + Direction ({modifier}) = {total}', {
-              base: shown.player.score - shown.direction.modifier, modifier: signedTiming(shown.direction.modifier),
-              total: shown.player.score,
-            }) }}</p>
-          </template>
-          <p v-else-if="shown.direction" role="status">{{ t('Score de base {base} · Direction {outcome} ({modifier}) = {total}', {
-            base: shown.player.score - shown.direction.modifier, outcome: shown.direction.outcome === 'bien' ? t('Bien placé') : turnFeedback(shown.direction.outcome),
-            modifier: signedTiming(shown.direction.modifier), total: shown.player.score,
-          }) }}</p>
-          <SectorRun v-if="!shown.timing && !shown.direction" :round="shown" :step="step" :running="!settled" :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
-          <p v-if="settled && tieBreak" class="tie-note">{{ tieBreak }}</p>
-          <div class="duel-columns">
+          <SectorRun v-if="!manualResult" :round="shown" :step="step" :running="!settled" :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
+          <h2 v-if="manualResult && settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
+          <p v-if="settled && tieBreak && !manualResult" class="tie-note">{{ tieBreak }}</p>
+          <div class="duel-columns" :class="{ 'manual-scores': manualResult }">
             <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col"
               :class="[who, { winner: settled && shown.winner === who, loser: settled && shown.winner !== who && shown.winner !== 'tie', boosted: shown[who].nitro }]">
               <span class="duel-who">{{ who === 'player' ? t('Toi') : rival.name }} <span v-if="shown[who].nitro" class="clash-nitro">{{ t('Nitro') }}</span></span>
-              <strong>{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
+              <strong v-if="!manualResult">{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
               <span class="duel-score" :aria-label="tp('{n} point', '{n} points', shown[who].score)">{{ counts[who] }}</span>
-              <ul v-if="settled"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ l.label === 'Timing du passage' ? timingSummary(shown.shifts) : l.label === 'Direction' ? t('Direction') : ruleText(l.label) }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
+              <ul v-if="settled && !manualResult"><li v-for="(l, i) in shown[who].lines" :key="i" :style="{ '--i': i }"><span v-help="helpForLine(l.label)">{{ ruleText(l.label) }}</span><b>{{ l.value > 0 ? '+' : '' }}{{ l.value }}</b></li></ul>
+              <template v-if="settled && manualResult">
+                <small v-if="shown[who].overheated">{{ t('Surchauffe') }}</small>
+                <small v-if="shown[who].luck === 'incident'">{{ t('Incident') }}</small>
+              </template>
             </div>
           </div>
+          <template v-if="settled && manualResult">
+            <p v-if="manualResult.modifier" class="manual-modifier" :class="{ malus: manualResult.modifier < 0 }">
+              {{ t('{label} {modifier}', { label: manualResult.label, modifier: signedTiming(manualResult.modifier) }) }}
+            </p>
+            <p v-if="tieBreak" class="tie-note">{{ tieBreak }}</p>
+            <details class="race-terrain-detail sector-detail">
+              <summary>{{ t('Détails du secteur') }}</summary>
+              <p>{{ manualResult.judgments }}</p>
+              <p>{{ t('Score de base {base} + {label} ({modifier}) = {total}', {
+                base: shown.player.score - manualResult.modifier, label: manualResult.label,
+                modifier: signedTiming(manualResult.modifier), total: shown.player.score,
+              }) }}</p>
+              <div class="duel-columns">
+                <div v-for="who in (['player', 'rival'] as const)" :key="who" class="duel-col">
+                  <span class="duel-who">{{ who === 'player' ? t('Toi') : rival.name }}</span>
+                  <strong>{{ name(duel[who].lineup[shown[who].car].id) }}</strong>
+                  <ul><li v-for="(line, i) in shown[who].lines" :key="i">
+                    <span v-help="helpForLine(line.label)">{{ ruleText(line.label) }}</span><b>{{ signedTiming(line.value) }}</b>
+                  </li></ul>
+                </div>
+              </div>
+            </details>
+          </template>
           <div v-if="settled" class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? t('Voir le résultat') : t('Secteur suivant') }} <span aria-hidden="true">⟶</span></button></div>
         </template>
         <button v-else type="button" class="button quiet wide" @click="abandon">{{ t('Abandonner') }}</button>
@@ -1009,10 +1037,13 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 </template>
 
 <style scoped>
-.final-gear {
-  position: absolute; inset: 6px auto auto 8px; padding: 2px 7px; border-radius: 4px;
-  background: var(--panel); color: var(--text); font-size: .75rem; font-weight: 700;
-}
+.manual-scores, .sector-detail .duel-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-wrap: anywhere; }
+.manual-scores .duel-col.loser { opacity: 1; filter: none; }
+.manual-scores small, .manual-modifier.malus { color: var(--pink); }
+.manual-modifier { margin: 8px 0 0; font-weight: 700; text-align: center; }
+.sector-detail { margin-top: 4px; }
+.sector-detail summary { width: fit-content; }
+.sector-detail .duel-col li { animation: none; }
 .race-recap .recap-pilot { grid-column: 1 / -1; grid-row: 2; color: var(--muted); }
 .lineup-slot { display: grid; align-content: start; gap: 4px; min-width: 0; }
 .lineup-slot .button, .race-launch, .race-prepare { min-height: 44px; }

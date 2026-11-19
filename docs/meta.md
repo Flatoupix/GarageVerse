@@ -374,7 +374,12 @@ de la voiture marquent l’accélération. Un raté donne un léger à-coup et u
 En virage, la piste réagit sur la cible et la note ratée s’efface dans une teinte rose du thème.
 Après deux gestes parfaits de suite, **Série ×n** compte les Parfait consécutifs, vitesses et
 virages confondus. Tout autre jugement remet la série à zéro. Un secteur entièrement parfait
-affiche brièvement **Sans faute !** avant les lignes de score de la même scène.
+affiche brièvement **Sans faute !** sur la piste.
+
+Après les gestes, le bilan manuel affiche sous la piste le verdict et les scores face au rival,
+avec le bonus ou le malus du geste s’il est non nul. La surchauffe, l’incident et la nitro restent
+signalés près du score concerné. **Détails du secteur**, replié par défaut, rassemble les jugements,
+l’équation du score et les sous-scores des deux voitures.
 Les deux démos reprennent ces retours de jugement. Les réglages **Son** et **Vibration**
 s’appliquent. Le mouvement réduit conserve les textes et les sons et coupe les effets animés.
 
@@ -392,9 +397,9 @@ le générateur du duel. La cible est visible dès le départ de l’aiguille, q
 Un passage sans appui est raté. Un raté laisse la fenêtre et la vitesse du passage suivant intactes.
 
 Chaque passage rapporte −2 (Raté), −1 (Moyen), 0 (Bon) ou +1 (Parfait). La ligne **Timing du passage**
-affiche la moyenne arrondie à l’entier le plus proche, avec les demis vers zéro, et le nombre de
-jugements de chaque type. Ce modificateur remplace les tirages de forme du jour, de secteur parfait
-et d’incident du joueur. Le rival conserve ses tirages habituels.
+dans le détail affiche la moyenne arrondie à l’entier le plus proche, avec les demis vers zéro.
+Le détail indique aussi le nombre de jugements de chaque type. Ce modificateur remplace
+les tirages de forme du jour, de secteur parfait et d’incident du joueur. Le rival conserve ses tirages habituels.
 
 Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aiguille avance par paliers
 et les voitures restent fixes pendant les gestes. Un secteur validé revient à son bilan.
@@ -445,9 +450,9 @@ de la cible. Les paramètres du module permettent d’ajuster ces seuils, l’av
 notes, leur espacement, le barème et les bornes du total. Les fenêtres d’appui sont disjointes.
 La statistique MAN et les pièces agissent sur le score de base selon les règles habituelles.
 
-La ligne **Direction** indique le nombre de Parfaits, de Bien et de Ratés. La somme des
-modificateurs reste comprise entre **−2 et +2** par secteur. Le résultat affiche
-**score de base + direction = score du secteur**. Le rival garde sa résolution habituelle.
+La direction apporte un modificateur compris entre **−2 et +2** par secteur. Le détail
+affiche les nombres de Parfaits, de Bien et de Ratés, ainsi que le calcul
+**score de base + trajectoire = score du secteur**. Le rival garde sa résolution habituelle.
 Le départ, la ligne droite et l’endurance gardent le passage de vitesses, comme les virages
 quand l’option de direction est inactive.
 

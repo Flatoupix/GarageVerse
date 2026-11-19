@@ -14,7 +14,6 @@ export const turn = {
   'Appuie quand la flèche atteint la cible.': 'Press when the arrow reaches the target.',
   'Virage {n}/{total} · {judgment} ({modifier})': 'Turn {n}/{total} · {judgment} ({modifier})',
   'Bien': 'Good',
-  'Bien placé': 'Well timed',
   'Trop tôt': 'Too early',
   'Mauvais côté': 'Wrong way',
   'Trop tard': 'Too late',
@@ -25,8 +24,5 @@ export const turn = {
   '{n} Raté': '{n} Miss',
   '{n} Ratés': '{n} Misses',
   '{perfect} · {good} · {misses}': '{perfect} · {good} · {misses}',
-  'Direction · {summary}': 'Steering · {summary}',
   'Ton score estimé est affiché avant le virage.': 'Your estimated score is shown before steering.',
-  'Score de base {base} + Direction ({modifier}) = {total}': 'Base score {base} + Steering ({modifier}) = {total}',
-  'Score de base {base} · Direction {outcome} ({modifier}) = {total}': 'Base score {base} · Steering {outcome} ({modifier}) = {total}',
 }

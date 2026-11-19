@@ -129,7 +129,7 @@ onUnmounted(() => {
     <div class="timing-heading">
       <strong ref="gear">{{ t('Rapport {n}/{total}', { n: results.length + 1, total: windows.length + 1 }) }}</strong>
       <span ref="perfectLabel" class="timing-perfect" :style="{ color: tone.gold }" role="status">
-        {{ reducedMotion && results.at(-1)?.zone === 'perfect' ? t('Parfait !') : '' }}
+        {{ demo && reducedMotion && results.at(-1)?.zone === 'perfect' ? t('Parfait !') : '' }}
       </span>
     </div>
     <div ref="scale" class="timing-scale" :class="{ 'in-green': inGreen }" aria-hidden="true">
