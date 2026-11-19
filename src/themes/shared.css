@@ -503,9 +503,39 @@
   box-shadow: none !important; text-shadow: none !important; transform: none !important;
   translate: none !important; animation: none !important;
 }
+/* Actions secondaires positives, dans la palette du thème. */
+.button.filled {
+  min-width: 44px; min-height: 44px; padding-block: 6px;
+  background: color-mix(in srgb, var(--panel), var(--text) 10%); color: var(--text);
+  border: 2px solid color-mix(in srgb, var(--panel), var(--text) 48%);
+  box-shadow: none; text-transform: none;
+  transition: none;
+}
+.button.filled:not(:disabled):hover { background: color-mix(in srgb, var(--panel), var(--text) 15%); }
+.button.filled:active:not(:disabled) {
+  background: var(--panel);
+  box-shadow: inset 0 2px currentColor; transform: none; translate: none; scale: 1;
+}
+.button.filled:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; }
+.button.filled:disabled {
+  background: var(--panel); border-color: var(--text); border-style: dashed;
+  opacity: 1 !important; filter: none !important;
+}
+.button.back-link { display: flex; width: fit-content; gap: 7px; margin-bottom: 8px; }
+.race-prep .lineup-slot > .button:is(.quiet, .filled) { max-width: 100%; padding-inline: 4px; overflow-wrap: anywhere; }
+.race-prep .lineup-slot:has(> .button.filled:active) { scale: 1; }
+
 .new-car-badge { display: inline-block; padding: 3px 7px; border-radius: var(--radius, 6px);
   background: var(--text); color: var(--night); font: 700 .75rem/1.4 var(--body); }
 .card-tile > .new-car-badge { position: absolute; z-index: 2; top: 6px; left: 6px; }
+/* La croix occupe les 50 premiers pixels à droite du dialogue. */
+.car-sheet-header { display: flex; align-items: center; gap: 11px; min-height: 52px; padding-right: 48px; }
+.car-sheet-header > .favorite-button { inline-size: 44px; block-size: 44px; }
+.car-sheet-portrait { flex: none; }
+@media (max-width: 400px) { .car-sheet-portrait { display: none; } }
+.car-sheet-title { min-width: 0; overflow-wrap: anywhere; }
+.car-sheet-title h2 { padding-right: 0; overflow-wrap: anywhere; }
+.car-sheet-tabs button { min-height: 44px; }
 .car-sheet-main, .setting > span { min-width: 0; overflow-wrap: anywhere; }
 .car-sheet .button { max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .car-sale-actions { flex-wrap: wrap; }
@@ -614,6 +644,7 @@
 .settings-modal { overflow: hidden; }
 .settings-modal[open] { display: flex; flex-direction: column; }
 .settings-modal > h2, .settings-tabs { flex: none; }
+.settings-modal > h2 { min-height: 40px; padding-right: 48px; }
 .settings-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; margin: 8px 0 12px; min-width: 0; }
 .settings-tabs button { min-width: 0; min-height: 44px; padding: 6px 2px; border: 1px solid var(--line); border-radius: var(--radius, 8px);
   background: var(--night); color: var(--text); font: 700 .85rem/1.3 var(--body); letter-spacing: 0; white-space: nowrap; }

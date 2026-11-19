@@ -48,7 +48,7 @@ function buyMany(id: string, count: number) {
             <span aria-hidden="true">↗</span>
           </button>
           <div class="bulk-buy" role="group" :aria-label="t('Acheter plusieurs {name}', { name: t(booster.name) })">
-            <button v-for="count in bulk" :key="count" type="button" class="button ghost" :disabled="save.credits < booster.price * count"
+            <button v-for="count in bulk" :key="count" type="button" class="button filled" :disabled="save.credits < booster.price * count"
               :aria-label="t('Acheter {count} {name} pour {price} crédits', { count, name: t(booster.name), price: booster.price * count })" @click="buyMany(booster.id, count)">
               ×{{ count }} · ₡ {{ booster.price * count }}
             </button>

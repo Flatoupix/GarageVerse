@@ -472,3 +472,10 @@ Mesure sur les fichiers sources avec le thème Synthwave, dédoublonnés par URL
 La sauvegarde type ne contient pas la Skyline de Brian. Si son édition affichée comporte les calques de drift, ceux-ci ajoutent deux fichiers pour 0,150 Mo, en plus de son illustration et de son sprite.
 
 Le logo s’affiche dès le premier rendu. La progression apparaît si l’essentiel est encore en cours après 150 ms. L’ensemble des images référencées représente 780 fichiers, soit 69,373 Mo. L’application ouvre le garage dès que l’essentiel est prêt, après 8 secondes au maximum, ou dès que le joueur utilise « Passer ». Les chargements en attente cèdent la priorité au booster tiré, au duel constitué et aux éditions de la fiche demandée. Aucune nouvelle demande de fond ne démarre lorsque l’onglet est masqué ou qu’une action attend ses images. Les téléchargements déjà lancés se terminent pour éviter de les recommencer. Le catalogue est écarté si le navigateur signale un mode économie de données. Sur GitHub Pages, le service worker gère séparément son cache hors ligne.
+
+## Hiérarchie des boutons
+
+- `primary` met en avant l’action principale de chaque zone, par exemple « Lancer la course ».
+- `filled` donne un fond plein et sobre aux actions secondaires positives et au retour « Rivaux ».
+- `ghost` sert aux annulations, aux retours ordinaires et à la vente avant confirmation.
+- `quiet` garde les actions de retrait et les commandes moins prioritaires discrètes.

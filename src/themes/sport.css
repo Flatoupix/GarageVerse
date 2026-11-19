@@ -21,7 +21,7 @@ h1, h2, h3, .hero h1, .page-heading h1, .play-heading h1, .race-head h1, .race-e
 .brand-mark { background: var(--red); color: #fff; box-shadow: none; font: italic 800 15px var(--display); clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%); width: 38px; }
 .credits { background: none; border: 0; color: #fff; font: 800 20px var(--display); }
 .settings-button { border-color: #444; color: #fff; }
-button:not(.brand):not(.link):not(.back-link) { box-shadow: none; }
+button:not(.brand):not(.link):not(.filled) { box-shadow: none; }
 .button { text-transform: uppercase; font: italic 800 18px var(--display); letter-spacing: .02em; clip-path: polygon(3% 0, 100% 0, 97% 100%, 0 100%); border: 0; }
 .button.primary, .tabs button[aria-pressed="true"], .clash-nitro, .tile-tag { background: var(--ink); color: #fff; }
 .button.primary:disabled { background: var(--panel); color: var(--muted); }

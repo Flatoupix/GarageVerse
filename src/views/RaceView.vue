@@ -834,7 +834,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="race-prep">
       <div class="race-prep-brief">
       <div class="page-heading">
-        <button type="button" class="back-link" :disabled="loadingRace" @click="chosen = null"><span aria-hidden="true">←</span> {{ t('Rivaux') }}</button>
+        <button type="button" class="button filled back-link" :disabled="loadingRace" @click="chosen = null"><span aria-hidden="true">←</span> {{ t('Rivaux') }}</button>
         <span v-if="!isNight" class="eyebrow">{{ t('{league} · plafond {cap}', { league: t(league.name ?? ''), cap }) }}</span>
         <h1 v-if="isNight" tabindex="-1"><span v-help="'endless'">{{ t('Nuit sans fin') }}</span></h1>
         <h1 v-else tabindex="-1">{{ t(rival.circuit.name) }}</h1>
@@ -905,9 +905,9 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
               <button type="button" class="race-card-hit" :disabled="loadingRace" :aria-label="t('Fiche de {name}', { name: name(lineup[n - 1]) })"
                 @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)"></button>
             </div>
-            <button type="button" class="button" :disabled="loadingRace" :aria-label="t('Retirer {name} de l’écurie', { name: name(lineup[n - 1]) })"
+            <button type="button" class="button quiet" :disabled="loadingRace" :aria-label="t('Retirer {name} de l’écurie', { name: name(lineup[n - 1]) })"
               @click="removeFromSlot(lineup[n - 1], $event)">{{ t('Retirer') }}</button>
-            <button type="button" class="button ghost" :disabled="loadingRace" :aria-label="t('Atelier de {name}', { name: name(lineup[n - 1]) })"
+            <button type="button" class="button filled" :disabled="loadingRace" :aria-label="t('Atelier de {name}', { name: name(lineup[n - 1]) })"
               @click="emit('inspect', 'car', lineup[n - 1], rival.circuit, undefined, true)">{{ t('Atelier') }}</button>
           </template>
           <button v-else type="button" class="button slot-placeholder" :disabled="loadingRace" @click="chooseCar">{{ t('+ Choisir') }}</button>

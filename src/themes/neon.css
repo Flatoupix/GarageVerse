@@ -34,7 +34,7 @@ h1, h2, h3, p { margin: 0; }
 .topbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 10px;
   padding: max(10px, env(safe-area-inset-top)) 16px 10px; background: #0b0420d9; backdrop-filter: blur(10px);
   border-bottom: 1px solid #ff2a8a33; }
-.brand, .settings-button, .back-link, .link { border: 0; background: none; padding: 0; }
+.brand, .settings-button, .link { border: 0; background: none; padding: 0; }
 .brand { display: flex; align-items: center; gap: 8px; font: 900 clamp(.85rem, 4vw, 1.1rem) var(--display); letter-spacing: .04em; white-space: nowrap; }
 .brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 8px; font: 900 .8rem var(--display);
   background: linear-gradient(160deg, var(--sun), var(--magenta) 60%, var(--violet)); color: #1a0630; box-shadow: 0 0 14px #ff2a8a88; }
@@ -483,8 +483,6 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, var(--cyan), va
 .rival-info { display: grid; gap: 2px; } .rival-info b { font: 700 .95rem var(--display); } .rival-info small { color: var(--muted); font-size: .74rem; }
 .rival-status { font: 700 .74rem var(--mono); color: var(--cyan); text-transform: uppercase; }
 .rival-row:disabled { opacity: .45; } .rival-row:disabled .rival-status { color: var(--muted); }
-.back-link { display: flex; align-items: center; gap: 7px; min-height: 40px; color: var(--muted); font-size: .8rem; }
-.back-link span { color: var(--cyan); }
 
 /* ——— Juice : entrées, pressions, halos et mises en scène ——— */
 .fx-canvas { position: fixed; inset: 0; z-index: 60; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
@@ -702,9 +700,6 @@ button.card-back { animation: back-bob 2.6s ease-in-out infinite; }
 .favorite-button[aria-pressed="true"] { border-color: var(--sun); color: var(--sun); box-shadow: 0 0 10px #ffb34733; }
 .garage-tile > .favorite-button { position: absolute; inset: 26% 5px auto auto; z-index: 7; }
 .garage-tile .copy-count { top: auto; bottom: 33%; }
-.car-sheet-header {
-  display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 11px; align-items: center; padding-right: 32px;
-}
 .car-sheet-portrait { width: 72px; height: 65px; overflow: hidden; border-radius: 10px; border: 1px solid var(--line); background: var(--night); }
 .car-sheet-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 59%; }
 .car-sheet-title h2 { margin: 2px 0 4px; font-size: clamp(.92rem, 4.4vw, 1.2rem); line-height: 1.15; overflow-wrap: anywhere; }

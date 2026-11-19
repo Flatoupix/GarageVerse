@@ -240,14 +240,14 @@ function workshop(key?: StatKey) {
   <div class="sheet car-sheet">
     <header class="car-sheet-header">
       <div class="car-sheet-portrait"><img v-if="image" :src="image" alt="" /></div>
+      <button v-if="car" type="button" class="favorite-button" :aria-label="t('Favori')" :aria-pressed="car.favorite"
+        @click="toggleFavorite"><span aria-hidden="true">{{ car.favorite ? '★' : '☆' }}</span></button>
       <div class="car-sheet-title">
         <p>{{ v.version }}</p>
         <h2>{{ v.name }}</h2>
         <p v-if="transit">{{ t('En transit') }}</p>
         <span>{{ t('{rarity} · Coût d’écurie {cost}', { rarity: t(v.rarity), cost: v.cost }) }}</span>
       </div>
-      <button v-if="car" type="button" class="favorite-button" :aria-label="t('Favori')" :aria-pressed="car.favorite"
-        @click="toggleFavorite"><span aria-hidden="true">{{ car.favorite ? '★' : '☆' }}</span></button>
     </header>
 
     <div v-if="car" class="tabs car-sheet-tabs" :aria-label="t('Fiche voiture')">
@@ -293,7 +293,7 @@ function workshop(key?: StatKey) {
           </template>
           <template v-else>
             <p class="hint">{{ autoPlan?.blockedReason ?? t('Voiture déjà préparée au maximum avec ton stock actuel.') }}</p>
-            <button type="button" class="button ghost wide" disabled>{{ t('Améliorer automatiquement') }}</button>
+            <button type="button" class="button primary wide" disabled>{{ t('Améliorer automatiquement') }}</button>
           </template>
         </section>
 
@@ -316,7 +316,7 @@ function workshop(key?: StatKey) {
               </button>
             </div>
             <template v-if="preview">
-              <button type="button" class="button primary wide" :disabled="Boolean(preview.problem)" @click="buyStyle">
+              <button type="button" class="button filled wide" :disabled="Boolean(preview.problem)" @click="buyStyle">
                 {{ t('Débloquer · {price} ₡ + {n} doublons', { price: preview.price, n: editionDuplicates }) }}
               </button>
               <p v-if="preview.problem" class="hint">{{ preview.problem }}</p>
@@ -334,7 +334,7 @@ function workshop(key?: StatKey) {
             <h3>{{ t('Sur {name}', { name: circuit.name }) }}</h3>
             <p v-if="readiness.length" class="hint">{{ t('Meilleur secteur estimé · {sector} ({pts} pts)', { sector: t(readiness[0].label), pts: readiness[0].average.toFixed(1).replace('.', ',') }) }}</p>
             <p class="hint">{{ t('Les estimations incluent le terrain et les bonus propres à la voiture.') }}</p>
-            <button type="button" class="button small ghost" @click="workshop(courseScores[0]?.stat)">{{ t('Préparer pour ce circuit') }}</button>
+            <button type="button" class="button small filled" @click="workshop(courseScores[0]?.stat)">{{ t('Préparer pour ce circuit') }}</button>
           </section>
 
           <section class="sheet-section">
@@ -352,13 +352,13 @@ function workshop(key?: StatKey) {
           <section class="sheet-section">
             <h3>{{ v.signature.name }}</h3>
             <p class="hint">{{ t(v.signature.text) }}</p>
-            <button type="button" class="button small ghost" @click="toggleLineup">{{ inLineup ? t('Retirer de l’écurie') : t('Ajouter à l’écurie') }}</button>
+            <button type="button" class="button small" :class="inLineup ? 'ghost' : 'filled'" @click="toggleLineup">{{ inLineup ? t('Retirer de l’écurie') : t('Ajouter à l’écurie') }}</button>
           </section>
 
           <section class="sheet-section">
             <h3><span v-help="'stage'">{{ t('Stage') }}</span> {{ car.stage }}/3 & {{ t('Doublons') }}</h3>
             <p class="hint">{{ next ? t(next.text) : t('Stage maximal atteint.') }}</p>
-            <button v-if="next" type="button" class="button ghost" :disabled="Boolean(stageProblem)" @click="stageUp">
+            <button v-if="next" type="button" class="button filled" :disabled="Boolean(stageProblem)" @click="stageUp">
               {{ t('Passer au Stage {n} · {credits} crédits', { n: next.stage, credits: next.credits }) }}<template v-if="next.duplicates"> + {{ tp('{n} doublon', '{n} doublons', next.duplicates) }}</template>
             </button>
             <p v-if="next && stageProblem" class="hint">{{ stageProblem }}</p>
@@ -400,7 +400,7 @@ function workshop(key?: StatKey) {
                 <div v-if="isCarMaxedForExtraSlot(car) && module.extraFamily" class="extra-slot-box">
                   <p v-if="module.extraSlotActive" class="upgrade-preview">{{ t('★ 3ᵉ emplacement actif : une 2ᵉ pièce {family} (+{n} potentiel)', { family: t(module.extraFamily), n: EXTRA_SLOT_POTENTIAL }) }}</p>
                   <template v-else>
-                    <button type="button" class="button small ghost" :disabled="Boolean(module.extraSlotProblem)" @click="buyExtraSlot(module.key)">
+                    <button type="button" class="button small filled" :disabled="Boolean(module.extraSlotProblem)" @click="buyExtraSlot(module.key)">
                       {{ car.extraSlot ? t('Transférer le 3ᵉ emplacement ici · {price} crédits', { price: EXTRA_SLOT_PRICE }) : t('Débloquer une 2ᵉ pièce {family} (+{n} potentiel) · {price} crédits', { family: t(module.extraFamily), n: EXTRA_SLOT_POTENTIAL, price: EXTRA_SLOT_PRICE }) }}
                     </button>
                     <p v-if="module.extraSlotProblem" class="hint">{{ module.extraSlotProblem }}</p>
@@ -424,7 +424,7 @@ function workshop(key?: StatKey) {
                       <p v-if="o.replaced">{{ t('Remplace {name} (rendue au stock).', { name: t(o.replaced.name) }) }}</p>
                       <p v-if="o.changes.length" class="upgrade-preview">{{ o.changes.join(' · ') }}</p>
                       <p v-if="o.problem" class="hint">{{ o.problem }}</p>
-                      <button type="button" class="button small ghost" :disabled="Boolean(o.problem)" :aria-label="t('Installer {name}', { name: t(o.part.name) })" @click="fit(o.part.id, o.part.name)">{{ t('Installer') }}</button>
+                      <button type="button" class="button small filled" :disabled="Boolean(o.problem)" :aria-label="t('Installer {name}', { name: t(o.part.name) })" @click="fit(o.part.id, o.part.name)">{{ t('Installer') }}</button>
                     </div>
                   </article>
                   <p v-if="!module.installed.length && !module.available.length" class="hint">
@@ -437,7 +437,7 @@ function workshop(key?: StatKey) {
           <section class="sheet-section">
             <h3><span v-help="'stage'">{{ t('Stage') }}</span> {{ car.stage }}/3</h3>
             <p class="hint">{{ t('Les stages augmentent le potentiel pour monter des cartes Mécanique. Ils donnent accès aux évolutions lorsqu’il y en a.') }}</p>
-            <button v-if="next" type="button" class="button ghost" :disabled="Boolean(stageProblem)" @click="stageUp">
+            <button v-if="next" type="button" class="button filled" :disabled="Boolean(stageProblem)" @click="stageUp">
               {{ t('Passer au Stage {n} · {credits} crédits', { n: next.stage, credits: next.credits }) }}<template v-if="next.duplicates"> + {{ tp('{n} doublon', '{n} doublons', next.duplicates) }}</template>
             </button>
             <p v-if="next" class="hint">{{ stageProblem ?? t(next.text) }}</p>
@@ -457,7 +457,7 @@ function workshop(key?: StatKey) {
           <section v-else class="sheet-section">
             <h3><span v-help="'stage'">{{ t('Stage') }}</span> {{ car.stage }}/3</h3>
             <p class="hint">{{ t('Les stages augmentent le potentiel pour monter des cartes Mécanique. Ils donnent accès aux évolutions lorsqu’il y en a.') }}</p>
-            <button v-if="next" type="button" class="button ghost" :disabled="Boolean(stageProblem)" @click="stageUp">
+            <button v-if="next" type="button" class="button filled" :disabled="Boolean(stageProblem)" @click="stageUp">
               {{ t('Passer au Stage {n} · {credits} crédits', { n: next.stage, credits: next.credits }) }}<template v-if="next.duplicates"> + {{ tp('{n} doublon', '{n} doublons', next.duplicates) }}</template>
             </button>
             <p v-if="next" class="hint">{{ stageProblem ?? t(next.text) }}</p>
@@ -499,7 +499,7 @@ function workshop(key?: StatKey) {
           <h3>{{ t('Évolutions (Stage 3)') }}</h3>
           <div v-for="e in evolutions" :key="e.id" class="evolution">
             <span class="evolution-text"><b>{{ e.name }}</b><small>{{ e.version }} · {{ t(e.rarity) }}</small><small>{{ e.signature.name }} · {{ t(e.signature.text) }}</small></span>
-            <button v-if="save.cars[e.id]" type="button" class="button ghost" @click="emit('open', e.id)">{{ t('Voir la carte') }}</button>
+            <button v-if="save.cars[e.id]" type="button" class="button filled" @click="emit('open', e.id)">{{ t('Voir la carte') }}</button>
             <button v-else type="button" class="button primary" :disabled="Boolean(craftCheck(save, e.id))" @click="unlock(e.id)">
               {{ t('Débloquer · {n} crédits', { n: e.craft!.credits }) }}
             </button>
