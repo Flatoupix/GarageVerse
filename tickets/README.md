@@ -56,6 +56,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-029](029-boutons-pilotage-automatique.md) | Boutons propres pour le choix automatique / manuel (dépend des prototypes T-026/T-027) | P2 |
 | [T-030](030-bouton-ouverture-booster-position-fixe.md) | Bouton de l'ouverture d'un booster toujours à la même place | P2 |
 | [T-031](031-bug-edition-16-bits-de-base.md) | Bug : déblocage du 16 bits de base et voiture en double | P2 |
+| [T-036](036-package-apk-android.md) | Package APK Android (Capacitor, hors ligne, build sur demande) | P2 |
 | [T-022](022-android-pwa-premier-lancement.md) | Android, PWA et accueil | P3 |
 | [T-036](036-refonte-musiques-bruitages.md) | Refonte artistique des musiques et du sound design, avec écoutes A/B et mixage mobile | P2 |
 | [T-023](023-finitions-audio-animations.md) | Audio et déchirure légendaire sur appareil | P3 |
