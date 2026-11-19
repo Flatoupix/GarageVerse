@@ -2,7 +2,7 @@ import { computed, reactive, ref, watch } from 'vue'
 import { touchHelpEnabled } from './help'
 import { playCue, type Cue } from '../feedback'
 import { series, vehicles } from './data'
-import { seriesComplete, LEGACY_KEY, refreshDaily, readSave, SAVE_KEY, type Save } from './save'
+import { seriesComplete, LEGACY_KEY, refreshDaily, readSave, revealBatch, SAVE_KEY, type BatchSize, type Save } from './save'
 
 function load(): Save {
   try { return readSave(localStorage.getItem(SAVE_KEY), localStorage.getItem(LEGACY_KEY)) } catch { storageWarning.value = true; return readSave(null) }
@@ -34,12 +34,28 @@ window.addEventListener('storage', event => {
 })
 
 export function persist() {
+  writeSave(save)
+}
+
+function writeSave(state: Save) {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...save, editionPurchase: undefined }))
+    localStorage.setItem(SAVE_KEY, JSON.stringify({ ...state, editionPurchase: undefined }))
     storageWarning.value = false
+    return true
   } catch {
     storageWarning.value = true
+    return false
   }
+}
+
+export function openBatch(booster: string, count: BatchSize, id: number) {
+  // Une seule écriture publie à la fois les tickets, la collection et le récapitulatif.
+  const draft: Save = JSON.parse(JSON.stringify(save))
+  const batch = revealBatch(draft, booster, count, id)
+  if (!batch || !writeSave(draft)) return false
+  const { cars, parts, tickets, sealed, sealedPulls, opening, batchSequence } = draft
+  Object.assign(save, { cars, parts, tickets, sealed, sealedPulls, opening, batchSequence, batch })
+  return true
 }
 
 export function notify(text: string, tone: 'info' | 'error' = 'info') {

@@ -18,6 +18,8 @@ export const LEGACY_KEY = 'garageverse:v1'
 
 export interface OwnedCar { copies: number; stage: number; parts: string[]; editions: EditionStyle[]; shown: EditionStyle; favorite: boolean; upgrades: Record<StatKey, number>; extraSlot?: StatKey }
 export type Pull = { kind: 'car'; id: string; style: EditionStyle; isNew: boolean; showEdition?: boolean } | { kind: 'part'; id: string; isNew: boolean }
+export type BatchSize = 5 | 10
+export interface BoosterBatch { id: number; booster: string; packs: Pull[][] }
 export interface Opening { booster: string; pulls: Pull[]; revealed: number; view: 'back' | 'face' | 'recap'; collected: boolean }
 // Thème d'interface : 'neon' est le style d'origine, les autres se choisissent dans les Réglages.
 export const themeIds = ['neon', 'pixel', 'sobre', 'sport', 'carnet', 'arcade', 'console', 'dos'] as const
@@ -62,6 +64,8 @@ export interface Save {
   tickets: Record<string, number>
   cars: Record<string, OwnedCar>
   parts: Record<string, number>
+  batch?: BoosterBatch
+  batchSequence: number
   sealedPulls: Pull[] | null
   sealed: string | null
   opening: Opening | null
@@ -78,7 +82,7 @@ export function newSave(): Save {
     versus: null, nightRecord: 0, night: null, nightLineup: [...start.vehicles],
     series: [],
     tutorial: { step: 0, status: 'active', seen: [] },
-    version: 2, exactEditions: true, editionPurchase: undefined, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, sealedPulls: null, sealed: null, opening: null,
+    version: 2, exactEditions: true, editionPurchase: undefined, daily: { date: localDate(), won: false, booster: false, streak: 0, lastWin: '' }, credits: start.credits, tickets: { ...start.tickets }, cars: {}, parts: {}, batch: undefined, batchSequence: 0, sealedPulls: null, sealed: null, opening: null,
     lineup: [...start.vehicles], record: {}, duel: null, preferences: { sound: true, music: true, reducedMotion: false, vibration: true, theme: 'neon', touchHelp: false, timingMode: false, turnMode: false },
   }
   for (const id of start.vehicles) addCar(save, id, defaultStyle(id))
@@ -117,6 +121,11 @@ function migrate(raw: string | null, save: Save) {
 
 const int = (value: unknown, min: number, max: number, fallback: number) =>
   Number.isInteger(value) ? Math.max(min, Math.min(max, value as number)) : fallback
+
+function validPack(pulls: unknown): pulls is Pull[] {
+  return Array.isArray(pulls) && pulls.length === 5 && pulls.every(p => p &&
+    (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))
+}
 
 export function readSave(raw: string | null, legacy: string | null = null): Save {
   const save = newSave()
@@ -178,10 +187,12 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
   save.seenCars = Array.isArray(input.seenCars) ? input.seenCars.filter(id => typeof id === 'string' && vehicleById.has(id)) : Object.keys(save.cars)
   save.parts = Object.fromEntries(Object.entries(input.parts ?? {}).filter(([id]) => partById.has(id)).map(([id, n]) => [id, int(n, 0, TRADE_INVENTORY_LIMIT, 0)]))
   save.sealed = typeof input.sealed === 'string' && boosterById.has(input.sealed) ? input.sealed : null
-  if (save.sealed && Array.isArray(input.sealedPulls) && input.sealedPulls.length === 5 &&
-      input.sealedPulls.every(p => p && (p.kind === 'car' ? vehicleById.has(p.id) && stylesOf(p.id).includes(p.style) : p.kind === 'part' && partById.has(p.id)))) {
-    save.sealedPulls = input.sealedPulls
-  }
+  if (save.sealed && validPack(input.sealedPulls)) save.sealedPulls = input.sealedPulls
+  const batch = input.batch
+  save.batchSequence = int(input.batchSequence, 0, Number.MAX_SAFE_INTEGER, 0)
+  save.batch = batch && batch.id > 0 && batch.id === save.batchSequence && boosterById.has(batch.booster) &&
+    Array.isArray(batch.packs) && (batch.packs.length === 5 || batch.packs.length === 10) &&
+    batch.packs.every(validPack) ? batch : undefined
   const o = input.opening
   if (o && boosterById.has(o.booster) && Array.isArray(o.pulls) && o.pulls.length === 5 &&
       o.pulls.every(p => p.kind === 'car' ? vehicleById.has(p.id) : partById.has(p.id))) {
@@ -291,6 +302,7 @@ export function buyBooster(save: Save, id: string, rng: Rng = Math.random): stri
   if ((save.tickets[id] ?? 0) > 0) save.tickets[id]--
   else if (save.credits >= booster.price) save.credits -= booster.price
   else return t('Il manque {n} crédits', { n: booster.price - save.credits })
+  save.batch = undefined
   save.sealed = id
   save.sealedPulls = drawPulls(save, booster, rng)
   save.opening = null
@@ -369,15 +381,19 @@ export function tear(save: Save, rng: Rng) {
   if (!save.sealed) return
   const booster = boosterById.get(save.sealed)!
   const pulls = save.sealedPulls ?? drawPulls(save, booster, rng)
+  markNewPulls(save, pulls)
+  save.sealedPulls = null
+  save.opening = { booster: booster.id, pulls, revealed: 0, view: 'back', collected: false }
+  save.sealed = null
+}
+
+function markNewPulls(save: Save, pulls: Pull[]) {
   const seen = new Set<string>()
   for (const pull of pulls) {
     const key = `${pull.kind}:${pull.id}`
     pull.isNew = !owned(save, pull) && !seen.has(key)
     seen.add(key)
   }
-  save.sealedPulls = null
-  save.opening = { booster: booster.id, pulls, revealed: 0, view: 'back', collected: false }
-  save.sealed = null
 }
 
 // Apparence prévue après les cartes précédentes, avant leur attribution au récapitulatif.
@@ -419,6 +435,35 @@ export function collect(save: Save) {
   }
   opening.collected = true
   opening.view = 'recap'
+}
+
+export function batchStock(save: Save, booster: string) {
+  const prepared = save.sealed ?? (save.opening?.collected === false ? save.opening.booster : null)
+  if (save.batch || (prepared && prepared !== booster)) return 0
+  return (save.tickets[booster] ?? 0) + Number(prepared === booster)
+}
+
+// Résout le lot sur une copie de travail. Le récapitulatif contient des cartes déjà attribuées.
+export function revealBatch(save: Save, booster: string, count: BatchSize, id: number, rng: Rng = Math.random) {
+  if (id !== save.batchSequence + 1 || !boosterById.has(booster) ||
+      (count !== 5 && count !== 10) || batchStock(save, booster) < count) return
+
+  const packs: Pull[][] = []
+  while (packs.length < count) {
+    if (!save.opening || save.opening.collected) {
+      if (!save.sealed) buyBooster(save, booster, rng)
+      tear(save, rng)
+    } else {
+      markNewPulls(save, save.opening.pulls)
+    }
+    const opening = save.opening!
+    opening.revealed = opening.pulls.length
+    collect(save)
+    packs.push(opening.pulls)
+  }
+  save.opening = null
+  save.batchSequence = id
+  return save.batch = { id, booster, packs }
 }
 
 // ——— Garage ———

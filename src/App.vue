@@ -47,6 +47,7 @@ type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 've
 type Setting = 'turnMode' | 'timingMode' | 'touchHelp' | 'sound' | 'music' | 'reducedMotion' | 'vibration' | 'friendsEnabled'
 
 function initialScreen(): Screen {
+  if (save.batch) return 'booster'
   if (save.versus?.active || (VERSUS_OPEN && new URLSearchParams(location.search).has('versus'))) return 'versus'
   if (save.duel && !save.night) return 'race'
   if (save.sealed || (save.opening && save.opening.view !== 'recap')) return 'booster'
@@ -251,7 +252,7 @@ const tabs: { id: Screen; label: string; icon: string }[] = [
   { id: 'race', label: t('Course'), icon: 'M5 21V3.5M5 4.5h14v9H5M9.7 4.5v9M14.3 4.5v9M5 9h14' },
 ]
 
-watch(() => save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
+watch(() => save.batch?.id ?? save.opening?.collected, collected => { if (collected) tutorialAction(0, 2) })
 watch(() => save.preferences.sound, enableEffects, { immediate: true })
 watch(
   () => save.preferences.music && hasMusic ? (screen.value === 'race' && save.duel ? 'race' : 'garage') : undefined,
@@ -310,6 +311,10 @@ function cancelInspection() {
 
 function go(destination: Screen) {
   cancelInspection()
+  if (screen.value === 'booster' && destination !== 'booster' && save.batch) {
+    save.batch = undefined
+    persist()
+  }
   toast.value = null
   if (destination === 'friends' && (screen.value === 'home' || screen.value === 'garage')) friendsFrom.value = screen.value
   if (destination === 'shop' || destination === 'booster') tutorialAction(0, 1)

@@ -5,15 +5,16 @@ import { art, edition, editionImages } from '../game/art'
 import { waitForImages } from '../game/asset-loading'
 import { boosterById, partById, rarityClass, vehicleById, type Rarity } from '../game/data'
 import { confetti, flash, palettes, rarityPalette, ring, shake, sparks, tone } from '../game/fx'
-import { buyBooster, collect, sealedHasLegend, openingStyle, showPullEdition, tear, type Pull } from '../game/save'
-import { act, buzz, persist, reducedMotion as reduced, save, sound } from '../game/store'
+import { batchStock, buyBooster, collect, sealedHasLegend, openingStyle, showPullEdition, tear, type BatchSize, type Pull } from '../game/save'
+import { act, buzz, openBatch, persist, reducedMotion as reduced, save, sound } from '../game/store'
+import BoosterBatchRecap from '../components/BoosterBatchRecap.vue'
 import PullCard from '../components/PullCard.vue'
 import RevealStack from '../components/RevealStack.vue'
 import TearPack from '../components/TearPack.vue'
 
 const emit = defineEmits<{ garage: []; shop: []; inspect: [kind: 'car' | 'part', id: string] }>()
 
-const boosterId = computed(() => save.opening?.collected === false ? save.opening.booster : save.sealed ?? save.opening?.booster)
+const boosterId = computed(() => save.batch?.booster ?? (save.opening?.collected === false ? save.opening.booster : save.sealed ?? save.opening?.booster))
 const booster = computed(() => boosterId.value ? boosterById.get(boosterId.value) : undefined)
 const opening = computed(() => save.opening ?? undefined)
 const faceUp = computed(() => opening.value?.view === 'face')
@@ -46,6 +47,33 @@ function openNext() {
   const id = boosterId.value
   if (id && act(s => buyBooster(s, id))) { sound('whoosh'); window.scrollTo(0, 0) }
 }
+const batchSizes: BatchSize[] = [5, 10]
+const availableBatches = computed(() => {
+  const id = boosterId.value
+  return id && !loading.value && !tearing.value ? batchSizes.filter(count => batchStock(save, id) >= count) : []
+})
+const batchDialog = ref<HTMLDialogElement>()
+const batchRequest = ref<{ booster: string; count: BatchSize; id: number }>()
+const celebrateBatch = ref(false)
+function confirmBatch(count: BatchSize) {
+  if (!boosterId.value || !availableBatches.value.includes(count)) return
+  batchRequest.value = { booster: boosterId.value, count, id: save.batchSequence + 1 }
+  batchDialog.value?.showModal()
+}
+function revealConfirmedBatch() {
+  const request = batchRequest.value
+  if (!request || !batchDialog.value?.open) return
+  batchDialog.value.close()
+  if (!openBatch(request.booster, request.count, request.id)) return
+  clearTimeout(burstTimer)
+  celebrateBatch.value = !reduced.value
+  const cards = save.batch!.packs.flat()
+  sound(cards.some(pull => rarityOf(pull) === 'Légendaire') ? 'revealLegend'
+    : cards.some(pull => rarityOf(pull) === 'Épique') ? 'epic' : 'collect')
+  void nextTick(() => batchHeading.value?.focus({ preventScroll: true }))
+}
+const batchHeading = ref<HTMLElement>()
+
 const legendaryTear = ref(false)
 const legendary = computed(() => sealedHasLegend(save) || ((loading.value || tearing.value) && legendaryTear.value))
 const stackEntering = ref(false)
@@ -189,9 +217,10 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
   <main v-if="booster" class="play booster-play">
     <div class="play-heading">
       <span class="eyebrow">{{ t(booster.tagline) }}</span>
-      <h1 tabindex="-1">{{ recap ? t('Tes cinq cartes') : t(booster.name) }}</h1>
+      <h1 ref="batchHeading" tabindex="-1">{{ save.batch ? t('{n} boosters ouverts', { n: save.batch.packs.length }) : recap ? t('Tes cinq cartes') : t(booster.name) }}</h1>
     </div>
-    <div v-if="!opening || loading || tearing" class="booster-stage">
+    <BoosterBatchRecap v-if="save.batch" :batch="save.batch" :celebrate="celebrateBatch && !reduced" @garage="emit('garage')" @shop="emit('shop')" />
+    <div v-else-if="!opening || loading || tearing" class="booster-stage">
       <div class="booster-art booster-sealed-art">
         <div class="sealed-stage" :class="`stage-${booster.id}`">
           <div class="pack-spotlight"></div>
@@ -202,12 +231,22 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
         <p v-if="!loading && !tearing">{{ t('Glisse le doigt le long du bord supérieur.') }}</p>
       </div>
       <div class="booster-actions">
-        <button v-if="!tearing" type="button" class="button primary" :disabled="loading" :aria-busy="loading" @click="openPack">{{ loading ? t('Chargement des images…') : t('Ouvrir le sachet') }} <span v-if="!loading" aria-hidden="true">↗</span></button>
+        <button v-if="!tearing" type="button" class="button primary" :disabled="loading" :aria-busy="loading" @click="openPack">{{ loading ? t('Chargement des images…') : t('Ouvrir 1 booster') }} <span v-if="!loading" aria-hidden="true">↗</span></button>
+        <div v-if="availableBatches.length" class="batch-options">
+          <button v-for="count in availableBatches" :key="count" type="button" class="button ghost" @click="confirmBatch(count)">
+            {{ t('Révéler {n} boosters', { n: count }) }}
+          </button>
+        </div>
       </div>
     </div>
     <div v-else-if="recap" class="recap booster-stage booster-recap">
       <div class="booster-art">
         <p class="recap-progress">{{ tp('{n} nouvelle carte dans ton garage', '{n} nouvelles cartes dans ton garage', newCount) }}</p>
+        <div v-if="availableBatches.length" class="batch-options">
+          <button v-for="count in availableBatches" :key="count" type="button" class="button ghost" @click="confirmBatch(count)">
+            {{ t('Révéler {n} boosters', { n: count }) }}
+          </button>
+        </div>
         <div class="recap-grid">
           <button v-for="(pull, index) in recapPulls" :key="index" type="button" class="card-tile deal" :style="{ '--i': index }" @click="emit('inspect', pull.kind, pull.id)">
             <PullCard :pull="pull" compact />
@@ -225,6 +264,13 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
     </div>
     <RevealStack v-else :opening="opening" :face-up="faceUp" :flipping="flipping && !reduced" :entering="stackEntering"
       :cinematic="cinematic && !reduced" :tell="tell" :glow="glow" @flip="flipCard" @next="nextCard()" @swipe="swipeCard" @quick="quickReveal">
+      <template v-if="availableBatches.length" #options>
+        <div class="batch-options">
+          <button v-for="count in availableBatches" :key="count" type="button" class="button ghost" @click="confirmBatch(count)">
+            {{ t('Révéler {n} boosters', { n: count }) }}
+          </button>
+        </div>
+      </template>
       <template #edition>
         <p v-if="choosingEdition" aria-live="polite">{{ t('Tu as déjà cette voiture') }}</p>
         <p v-else-if="currentPull?.kind === 'car' && !currentPull.isNew" aria-live="polite">{{ t('Doublon : +1 exemplaire') }}</p>
@@ -234,9 +280,23 @@ const newCount = computed(() => opening.value?.pulls.filter(p => p.isNew).length
         <button type="button" class="button primary" @click="showEdition">{{ t('Afficher cette édition') }}</button>
       </template>
     </RevealStack>
+    <dialog ref="batchDialog" class="modal batch-confirm" aria-labelledby="batch-confirm-title" @close="batchRequest = undefined">
+      <h2 id="batch-confirm-title">{{ t('Révéler {n} boosters', { n: batchRequest?.count ?? 0 }) }}</h2>
+      <p>{{ t('Confirme pour ouvrir {n} boosters et recevoir {cards} cartes.', { n: batchRequest?.count ?? 0, cards: (batchRequest?.count ?? 0) * 5 }) }}</p>
+      <div class="batch-options">
+        <button type="button" class="button ghost" autofocus @click="batchDialog?.close()">{{ t('Annuler') }}</button>
+        <button type="button" class="button primary" @click="revealConfirmedBatch">{{ t('Confirmer') }}</button>
+      </div>
+    </dialog>
   </main>
   <main v-else class="play empty-state">
     <h1 tabindex="-1">{{ t('Aucun booster en cours') }}</h1>
     <button type="button" class="button primary" @click="emit('shop')">{{ t('Choisir un booster') }} <span aria-hidden="true">↗</span></button>
   </main>
 </template>
+
+<style scoped>
+.batch-options { display: flex; justify-content: center; gap: 8px; grid-column: 1 / -1; }
+.batch-options .button { flex: 1; min-width: 0; max-width: 210px; min-height: 36px; padding: 4px 8px; font-size: .875rem; white-space: normal; line-height: 1.15; }
+.batch-confirm p { margin-bottom: 16px; }
+</style>

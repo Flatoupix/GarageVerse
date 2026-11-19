@@ -88,6 +88,14 @@ Le briefing affiche les statistiques mobilisées et la meilleure voiture de l’
 
 Chaque booster contient cinq cartes, dont au plus `maxParts` pièces mécaniques (2 pour les trois boosters actuels, 1 par défaut si le champ est absent). Le jeu détermine le type puis la rareté de chaque carte et choisit des pièces et des voitures différentes dans un même pack quand le tirage le permet. Les taux vivent dans `garage.json`. Le lot est tiré et sauvegardé dès que le sachet est scellé, à l’achat ou avec un ticket. L’ouverture réutilise exactement ce tirage ; les anciens sachets sans tirage enregistré tirent encore à la déchirure. Une couverture légendaire (illustration dédiée, cadre et halo dorés, étincelles et ruban « Édition légendaire ») signale la présence d’au moins une Légendaire ; la boutique garde la couverture normale. Le sachet métallisé porte le logo néon et les couleurs de sa collection. Son reflet et son frémissement légendaire sont immobiles en mouvement réduit. Un rechargement retrouve le même lot sans retirage, et les cartes rejoignent le garage dès le récapitulatif, une seule fois.
 
+Avec assez de tickets d’un même booster, tu peux confirmer l’ouverture groupée de 5 ou 10 sachets,
+en comptant le sachet déjà préparé. Son tirage scellé est repris, puis chaque sachet suivant
+est tiré indépendamment avec les règles habituelles. La collection, le solde de tickets et le récapitulatif
+sont sauvegardés ensemble avant la célébration. Le rechargement retrouve les résultats et le même
+identifiant de lot ne peut pas les attribuer une deuxième fois. Les mentions Nouveau et Doublon suivent
+l’ordre des tirages. Les éditions obtenues s’ajoutent à la collection et tu peux choisir de les afficher
+depuis le détail, en gardant par défaut l’apparence déjà affichée au garage.
+
 Pendant l’ouverture, la grille de la scène réserve deux rangées d’actions en
 bas, au-dessus des onglets et de la zone sûre. Leur hauteur reste la même avec
 un seul bouton, avec les choix d’édition et au récapitulatif. Les libellés
