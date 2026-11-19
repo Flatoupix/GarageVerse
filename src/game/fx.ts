@@ -162,7 +162,8 @@ function frame(now: number) {
     rest()
     return
   }
-  const dt = Math.min(0.05, (now - last) / 1000)
+  // L’horodatage de la première image peut précéder celui du lancement : un écart négatif ferait rétrécir un anneau sous zéro.
+  const dt = Math.max(0, Math.min(0.05, (now - last) / 1000))
   last = now
   ctx.clearRect(0, 0, width, height)
   if (flashAlpha > 0.01) {

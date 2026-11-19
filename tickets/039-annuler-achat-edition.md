@@ -2,7 +2,7 @@
 
 - **Type :** Ergonomie / économie
 - **Priorité :** P2
-- **Statut :** À implémenter
+- **Statut :** Implémenté dans `dev` (aperçu avant achat, bouton Annuler pendant 30 s) ; à valider sur appareil
 - **Signalement :** demande du joueur du 19 novembre 2026 : pouvoir annuler un achat d'édition ou de style fait un peu rapidement
 - **Tickets liés :** [T-037 · bugs des échanges](037-echanges-synchro-lot-change.md) (les éditions font partie de la photo d'une voiture en vitrine)
 - **Fichiers à examiner :** [`src/game/save.ts`](../src/game/save.ts) (`unlockEdition`, `unlockEditionCheck`, `editionPrice`, `editionDuplicates`, `selectEdition`), [`src/views/CarSheet.vue`](../src/views/CarSheet.vue) (section Styles, fonction `applyStyle` vers la ligne 136), [`src/game/edition.check.cjs`](../src/game/edition.check.cjs), [`src/feedback.ts`](../src/feedback.ts) (`notify`)

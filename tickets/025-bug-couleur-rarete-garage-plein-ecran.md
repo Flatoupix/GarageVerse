@@ -2,7 +2,7 @@
 
 - **Type :** Bug visuel
 - **Priorité :** P2
-- **Statut :** Rouvert le 19 novembre 2026. Le premier correctif n'a unifié que les cartes de voiture, les vignettes et les filtres (`src/themes/shared.css`). Il reste une autre palette à l'ouverture de booster, dans les effets de révélation et sur les cartes de pièces : Rare y est rose et Épique orange, alors qu'au garage Rare est bleu et Épique rose. Tâche `t025-couleurs-rarete` dans l'orchestrateur
+- **Statut :** Corrigé dans `dev` (palette unique `--rarity-*` dans `src/themes/shared.css`, utilisée par les cartes, les pièces, le booster et les effets) ; vérifié en Néon et Sobre sur une carte Rare et une carte Épique ; à valider sur appareil
 - **Signalement :** Retour joueur, 17 novembre 2026
 - **Fichiers à examiner :** [`src/components/CarCard.vue`](../src/components/CarCard.vue), [`src/views/GarageView.vue`](../src/views/GarageView.vue), [`src/views/CarSheet.vue`](../src/views/CarSheet.vue), styles partagés et thèmes dans `src/themes/`
 
