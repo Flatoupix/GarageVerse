@@ -5,8 +5,8 @@ const ts = require('typescript')
 require.extensions['.ts'] = (module, filename) => module._compile(ts.transpileModule(fs.readFileSync(filename, 'utf8'), {
   compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true },
 }).outputText, filename)
-const { collect, newSave, readSave, showroomStyles, unlockEdition, unlockEditionCheck, editionPrice, editionDuplicates } = require('./save.ts')
-const { defaultStyle, PIXEL, stylesOf, vehicles } = require('./data.ts')
+const { collect, newSave, readSave, seriesProgress, showroomStyles, unlockEdition, unlockEditionCheck, editionPrice, editionDuplicates } = require('./save.ts')
+const { defaultStyle, PIXEL, series, stylesOf, vehicles } = require('./data.ts')
 
 assert.equal(editionDuplicates, 2)
 const id = 'clio'
@@ -74,8 +74,11 @@ for (const style of ['Solarpunk', 'Abandonnée', 'Classic', 'Anime']) {
   const fresh = newSave()
   const { id } = vehicles.find(v => !v.anim && !fresh.cars[v.id] && stylesOf(v.id).includes(style))
   const beforeCount = Object.keys(fresh.cars).length
+  const beforeSeries = series.map(entry => seriesProgress(fresh, entry))
   const after = pullCar(fresh, id, style)
   assert.equal(Object.keys(after.cars).length, beforeCount + 1)
+  const expectedSeries = series.map((entry, index) => beforeSeries[index] + Number(entry.vehicles.includes(id)))
+  assert.deepEqual(series.map(entry => seriesProgress(after, entry)), expectedSeries)
   assert.deepEqual(after.cars[id].editions, [style])
   assert.deepEqual(showroomStyles(id, after.cars[id]), [style])
   assert.ok(stylesOf(id).includes(PIXEL))
@@ -85,13 +88,21 @@ for (const style of ['Solarpunk', 'Abandonnée', 'Classic', 'Anime']) {
   delete after.exactEditions
   assert.deepEqual(readSave(JSON.stringify(after)).cars[id], after.cars[id])
 
-  const duplicate = pullCar(after, id, PIXEL)
-  assert.deepEqual(duplicate.cars[id].editions, [style, PIXEL])
-  assert.equal(duplicate.cars[id].shown, style)
+  // Un doublon de l'alternative ne débloque toujours pas le Pixel.
+  const duplicate = pullCar(after, id, style)
+  assert.deepEqual(duplicate.cars[id].editions, [style])
   assert.equal(duplicate.cars[id].copies, 2)
-  const sameEdition = pullCar(duplicate, id, PIXEL)
-  assert.deepEqual(sameEdition.cars[id].editions, [style, PIXEL])
-  assert.equal(sameEdition.cars[id].copies, 3)
+  const pixel = pullCar(duplicate, id, PIXEL)
+  assert.deepEqual(pixel.cars[id].editions, [style, PIXEL])
+  assert.deepEqual(showroomStyles(id, pixel.cars[id]), [style, PIXEL])
+  assert.equal(pixel.cars[id].shown, style)
+  assert.equal(pixel.cars[id].copies, 3)
+  assert.equal(Object.keys(pixel.cars).length, beforeCount + 1)
+  assert.deepEqual(series.map(entry => seriesProgress(pixel, entry)), expectedSeries)
+
+  // Une sauvegarde v2 antérieure conserve ses deux éditions et son apparence.
+  delete pixel.exactEditions
+  assert.deepEqual(readSave(JSON.stringify(pixel)).cars[id], pixel.cars[id])
 }
 
 // Une voiture de départ garde son 16 bits et gagne uniquement l'édition tirée.
