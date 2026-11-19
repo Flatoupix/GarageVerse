@@ -1,0 +1,17 @@
+{
+  "id": "t032-etoile-par-etape",
+  "title": "Étoile de victoire parfaite sur chaque étape d'un rival",
+  "profile": "light",
+  "brief": "Ticket T-032 (tickets/032-etoile-victoire-parfaite-par-etape.md, à lire en entier). Retour du joueur : sur les trois étapes d'un rival (Essais, Qualifs, Finale), on ne sait pas lesquelles ont été gagnées en victoire parfaite. Le palmarès existe déjà par étape dans `save.record` (clés `<rival>:1`, `<rival>:2` et `<rival>` pour la finale, champ `perfect`), mais l'étoile ★ de la liste des rivaux (src/views/RaceView.vue) ne lit que `save.record[r.id]` (la finale), et les onglets d'étapes (`rival-steps-tabs`) n'affichent que 🔒, ✓ ou ◆. À FAIRE : une petite étoile ★ sur chaque onglet d'étape gagné en victoire parfaite (à côté de ✓) ; dans la liste des rivaux, l'avancement sur les trois étapes (par exemple « ★★☆ » ou « 2/3 ★ ») au lieu de l'étoile de la finale seule ; libellés accessibles (« Victoire parfaite obtenue » / « non obtenue »), lisibles sans couleur, cohérents avec les huit thèmes. Aucune migration de sauvegarde ni changement de règle : uniquement de l'affichage. Une fonction pure de lecture (par exemple dans src/game/save.ts) avec une vérification dans un fichier src/game/*.check.cjs existant ou nouveau. CONTRAINTES : ne pas modifier src/game/rules.ts ni src/game/data.ts (recopiés côté serveur), ne rien changer sous supabase/. Bilingue : tout texte visible passe par t('…') avec sa traduction anglaise dans src/i18n/en/ ; i18n.check.cjs, toutes les vérifications de src/game/ et le typage passent. Textes français, tutoiement. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français ; décrire la règle en quelques lignes dans docs/meta.md.",
+  "requirements": [
+    "Chaque onglet d'étape (Essais, Qualifs, Finale) affiche une étoile quand cette étape a été gagnée en victoire parfaite, et seulement elle.",
+    "La liste des rivaux indique l'avancement des victoires parfaites sur les trois étapes.",
+    "Libellés accessibles, lisibles sans couleur, dans les huit thèmes ; aucune migration de sauvegarde ; aucune modification de rules.ts, data.ts ni supabase/.",
+    "i18n, typage, vérifications de src/game/ et build verts ; aucune erreur dans la console ni débordement à 320, 390 et 1280 px."
+  ],
+  "paths": [
+    "src/",
+    "docs/"
+  ],
+  "browser": "neon"
+}
