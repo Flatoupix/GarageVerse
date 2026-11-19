@@ -1,7 +1,7 @@
 # T-032 · Étoile de victoire parfaite sur chaque étape d'un rival
 
 - **Priorité :** P3 (confort, à faire plus tard)
-- **Statut :** À faire
+- **Statut :** Implémenté dans `dev` (étoile par étape, avancement sur les trois étapes dans la liste des rivaux) ; à valider sur appareil
 - **Signalement :** retour du joueur, 18 novembre 2026
 - **Fichiers :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (liste des rivaux et onglets d'étapes), [`src/game/data.ts`](../src/game/data.ts) (étapes Essais / Qualifs / Finale), [`src/game/save.ts`](../src/game/save.ts) (`save.record`)
 

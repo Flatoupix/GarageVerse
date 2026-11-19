@@ -2,7 +2,7 @@
 
 - **Type :** Ergonomie / pilotage manuel
 - **Priorité :** P2
-- **Statut :** À implémenter
+- **Statut :** Implémenté dans `dev` (décompte complet avant chaque mini-jeu manuel) ; à valider sur appareil
 - **Signalement :** retour du joueur du 19 novembre 2026 : « le décompte pour les mini-jeux n'arrive qu'une fois, est-ce que tu peux faire en sorte que ce soit le cas à chaque fois ? »
 - **Tickets liés :** [T-026 · passage des vitesses](026-prototype-passage-vitesses-timing.md), [T-027 · virages](027-prototype-direction-virages.md), [T-028 · Auto / Manuel](028-pilotage-automatique-ou-manuel.md), [T-035 · Nuit sans fin](035-nuit-sans-fin-pilotage-auto-manuel.md)
 - **Fichiers à examiner :** [`src/components/ManualCountdown.vue`](../src/components/ManualCountdown.vue), [`src/views/RaceView.vue`](../src/views/RaceView.vue) (`firstManual` vers la ligne 273, `<ManualCountdown :full="firstManual">` vers la ligne 710, `pendingManual`), [`src/game/countdown.ts`](../src/game/countdown.ts)
