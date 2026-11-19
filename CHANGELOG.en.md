@@ -4,6 +4,12 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.19.0] — 2026-11-19
+
+### Added
+
+- **Endless Night: Automatic or Manual.** With timing mode on, you now pick your driving before starting the night, and again at each **Next round**, without losing your streak or winnings. Automatic stays the default. In the middle of a manual round, **Switch to automatic for the rest of the race** lets you finish the round by chance. The screen between rounds and the end-of-night summary show which driving you used.
+
 ## [0.18.0] — 2026-11-19
 
 ### Added
