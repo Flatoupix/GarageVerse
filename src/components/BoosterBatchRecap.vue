@@ -18,18 +18,18 @@ const dialog = ref<HTMLDialogElement>()
 const cardData = (pull: Pull) => (pull.kind === 'car' ? vehicleById.get(pull.id) : partById.get(pull.id))!
 const status = (pull: Pull) => pull.isNew ? t('Nouveau') : t('Doublon')
 const pulls = computed(() => props.batch.packs.flat())
-const newCount = computed(() => pulls.value.filter(pull => pull.kind === 'car' && pull.isNew).length)
-const duplicateCount = computed(() => pulls.value.filter(pull => !pull.isNew).length)
+const newCount = computed(() => pulls.value.filter(pull => pull.isNew).length)
+const duplicateCount = computed(() => pulls.value.length - newCount.value)
 const partCount = computed(() => pulls.value.filter(pull => pull.kind === 'part').length)
 const best = computed(() => [...rarities].reverse().find(value => pulls.value.some(pull => cardData(pull).rarity === value))!)
 const matching = computed(() => props.batch.packs.map((pack, index) => ({
   index, cards: pack.filter(pull => (!rarity.value || cardData(pull).rarity === rarity.value) && (!newOnly.value || pull.isNew)),
 })).filter(pack => pack.cards.length))
 const highlighted = (pull: Pull) => cardData(pull).rarity === best.value || (pull.isNew && cardData(pull).rarity === 'Épique')
-function showDetail(pull: Pull) {
+async function showDetail(pull: Pull) {
   detail.value = pull
-  dialog.value?.showModal()
-  void nextTick(() => dialog.value?.querySelector('button')?.focus())
+  await nextTick()
+  if (dialog.value && !dialog.value.open) dialog.value.showModal()
 }
 function displayEdition() {
   const pull = detail.value
@@ -43,9 +43,9 @@ function displayEdition() {
       <div class="batch-summary" :class="[`rarity-${rarityClass[best]}`, { 'batch-celebrate': celebrate }]" role="status">
         <strong>{{ t('{n} cartes révélées', { n: pulls.length }) }}</strong>
         <div class="batch-totals">
-          <span>{{ tp('{n} nouvelle voiture', '{n} nouvelles voitures', newCount) }}</span>
+          <span>{{ tp('dont {n} pièce', 'dont {n} pièces', partCount) }}</span>
+          <span>{{ tp('{n} nouveauté', '{n} nouveautés', newCount) }}</span>
           <span>{{ tp('{n} doublon', '{n} doublons', duplicateCount) }}</span>
-          <span>{{ tp('{n} pièce', '{n} pièces', partCount) }}</span>
         </div>
       </div>
       <div class="batch-filters">

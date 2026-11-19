@@ -70,7 +70,10 @@ function revealConfirmedBatch() {
   const cards = save.batch!.packs.flat()
   sound(cards.some(pull => rarityOf(pull) === 'Légendaire') ? 'revealLegend'
     : cards.some(pull => rarityOf(pull) === 'Épique') ? 'epic' : 'collect')
-  void nextTick(() => batchHeading.value?.focus({ preventScroll: true }))
+  void nextTick(() => {
+    window.scrollTo(0, 0)
+    batchHeading.value?.focus({ preventScroll: true })
+  })
 }
 const batchHeading = ref<HTMLElement>()
 

@@ -53,6 +53,33 @@ const restored = readSave(JSON.stringify(old))
 assert.equal(sealedHasLegend(restored), false)
 tear(restored, rngFor(2))
 assert.equal(restored.opening.pulls.length, 5)
+
+// Les sauvegardes antérieures aux lots gardent leur progression au chargement.
+{
+  const v2 = newSave()
+  v2.tickets.neon = 6
+  buyBooster(v2, 'neon', rngFor(7))
+  delete v2.batch
+  delete v2.batchSequence
+  const restored = readSave(JSON.stringify(v2))
+  assert.equal(restored.batch, undefined)
+  assert.equal(restored.batchSequence, 0)
+  assert.deepEqual(restored.tickets, v2.tickets)
+  assert.deepEqual(restored.cars, v2.cars)
+  assert.equal(restored.sealed, v2.sealed)
+  assert.deepEqual(restored.sealedPulls, v2.sealedPulls)
+}
+{
+  const v1 = JSON.stringify({ version: 1, openings: {
+    neon: { collected: true, editions: ['venom-classic', 'venom-pixel'] },
+  } })
+  const restored = readSave(null, v1)
+  assert.equal(restored.version, 2)
+  assert.equal(restored.batch, undefined)
+  assert.equal(restored.batchSequence, 0)
+  assert.equal(restored.cars.venom.copies, 2)
+  assert.deepEqual(restored.cars.venom.editions, ['Classic', 'Pixel Art'])
+}
 console.log('Boosters : scellé, cinq cartes, probabilités, reprise, légendaire et ancienne sauvegarde : OK')
 
 for (const [index, booster] of boosters.entries()) {

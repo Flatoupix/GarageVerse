@@ -53,8 +53,7 @@ export function openBatch(booster: string, count: BatchSize, id: number) {
   const draft: Save = JSON.parse(JSON.stringify(save))
   const batch = revealBatch(draft, booster, count, id)
   if (!batch || !writeSave(draft)) return false
-  const { cars, parts, tickets, sealed, sealedPulls, opening, batchSequence } = draft
-  Object.assign(save, { cars, parts, tickets, sealed, sealedPulls, opening, batchSequence, batch })
+  Object.assign(save, draft)
   return true
 }
 
