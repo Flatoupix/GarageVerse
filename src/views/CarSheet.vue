@@ -16,7 +16,7 @@ import { tutorialAction } from '../game/tutorial'
 import CarCard from '../components/CarCard.vue'
 import { t, tp, tc } from '../i18n'
 
-const props = defineProps<{ id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean }>()
+const props = defineProps<{ id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean; showWorkshop?: boolean }>()
 const emit = defineEmits<{ open: [id: string]; close: [] }>()
 const v = computed(() => vehicleById.get(props.id)!)
 const transit = computed(() => inTransit(save, props.id))
@@ -28,9 +28,9 @@ function toggleFavorite() {
     owned.favorite = !owned.favorite
   })
 }
-const panel = ref<'overview' | 'workshop' | 'card'>(props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview')
+const panel = ref<'overview' | 'workshop' | 'card'>((props.suggestedStat || props.showWorkshop) && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview')
 watch(() => props.id, () => {
-  panel.value = props.suggestedStat && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview'
+  panel.value = (props.suggestedStat || props.showWorkshop) && car.value ? 'workshop' : !car.value || props.showCard ? 'card' : 'overview'
 })
 const confirmingSale = ref(false)
 const confirmingRecycle = ref(false)

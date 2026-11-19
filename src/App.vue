@@ -243,7 +243,7 @@ const sheet = ref<HTMLDialogElement>()
 const loadingSheet = ref(false)
 let inspection = 0
 let sheetLoading: AbortController | undefined
-const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
+const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean; showWorkshop?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
   // Tracés 24 × 24 : maison, sachet de cartes, porte de garage, drapeau à damier.
   { id: 'home', label: t('Accueil'), icon: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5' },
@@ -332,7 +332,7 @@ function go(destination: Screen) {
   })
 }
 
-async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey, showWorkshop?: boolean) {
   const previous = sheetLoading
   sheetLoading = undefined
   const request = ++inspection
@@ -350,7 +350,7 @@ async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circui
     sheetLoading = undefined
     loadingSheet.value = false
   } else previous?.abort()
-  inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
+  inspected.value = { kind, id, circuit, suggestedStat, showWorkshop, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)
 }
@@ -630,7 +630,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="cancelInspection(); inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <div v-if="loadingSheet" class="toast" role="status">{{ t('Chargement des images…') }}</div>
-      <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
+      <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard" :show-workshop="inspected.showWorkshop"
         :key="`c-${inspected.id}`" @open="id => inspect('car', id)" @close="sheet?.close()" />
       <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="(id, stat) => inspect('car', id, undefined, stat)" />
     </dialog>

@@ -22,6 +22,7 @@ import { pilotSummary, playPilotRound, roundPilot, sectorPilot, switchToAutomati
 import { perfectStepsText } from '../game/perfect-steps-text'
 import { signedTiming, timingFeedback, timingSummary } from '../game/timing-text'
 import { tutorialAction } from '../game/tutorial'
+import CarCard from '../components/CarCard.vue'
 import GvButton from '../components/GvButton.vue'
 import PilotPicker from '../components/PilotPicker.vue'
 import ManualCountdown from '../components/ManualCountdown.vue'
@@ -70,7 +71,7 @@ async function scrollToStage(result = false, immediate = false) {
   window.scrollTo({ top: Math.max(0, window.scrollY + target.getBoundingClientRect().top - header - 12), behavior: instant ? 'instant' : 'smooth' })
 }
 
-const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
+const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey, showWorkshop?: boolean]; go: [screen: 'garage' | 'shop'] }>()
 const chosen = ref<string | null>(save.duel?.rivalId ?? (save.night ? 'night' : null) ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
 dailySelected.value = false
 watch(chosen, (next, previous) => {
@@ -145,7 +146,7 @@ const garageCars = computed(() => {
     const car = racer(v.id, save.cars[v.id] ? prepOf(save, v.id) : owned)
     const scores = circuitScores(car, circuit)
     const average = scores.reduce((total, s) => total + s.average * s.times, 0) / circuit.sectors.length
-    return { v, car, scores, average, favorite: save.cars[v.id]?.favorite }
+    return { v, car, scores, average, owned, favorite: save.cars[v.id]?.favorite }
   }).sort((a, b) => Number(lineup.value.includes(b.v.id)) - Number(lineup.value.includes(a.v.id)) ||
     b.average - a.average || Number(!!b.favorite) - Number(!!a.favorite) || a.v.cost - b.v.cost)
 })
@@ -194,7 +195,7 @@ function toggle(id: string) {
       lineup.value = [...lineup.value, id]
     }
   })
-  void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, lineup.value.indexOf(id) + 1)})`, 1.1))
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, lineup.value.indexOf(id) + 1)})`, 1.1))
 }
 async function toggleFromList(id: string, event: MouseEvent) {
   const button = event.currentTarget as HTMLButtonElement
@@ -899,32 +900,41 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       <div class="lineup-slots">
         <div v-for="n in 3" :key="n" class="lineup-slot">
           <template v-if="lineup[n - 1]">
-            <span class="slot-car">
-              <img v-if="carSprite(lineup[n - 1])" :src="carSprite(lineup[n - 1])" alt="">
-              <strong>{{ name(lineup[n - 1]) }}</strong>
-            </span>
+            <div class="race-card">
+              <CarCard :id="lineup[n - 1]" :style-name="save.cars[lineup[n - 1]]?.shown" :prep="prepOf(save, lineup[n - 1])" compact />
+              <button type="button" class="race-card-hit" :disabled="loadingRace" :aria-label="t('Fiche de {name}', { name: name(lineup[n - 1]) })"
+                @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)"></button>
+            </div>
             <button type="button" class="button" :disabled="loadingRace" :aria-label="t('Retirer {name} de l’écurie', { name: name(lineup[n - 1]) })"
               @click="removeFromSlot(lineup[n - 1], $event)">{{ t('Retirer') }}</button>
             <button type="button" class="button ghost" :disabled="loadingRace" :aria-label="t('Atelier de {name}', { name: name(lineup[n - 1]) })"
-              @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">{{ t('Atelier') }}</button>
+              @click="emit('inspect', 'car', lineup[n - 1], rival.circuit, undefined, true)">{{ t('Atelier') }}</button>
           </template>
           <button v-else type="button" class="button slot-placeholder" :disabled="loadingRace" @click="chooseCar">{{ t('+ Choisir') }}</button>
         </div>
       </div>
 
-      <h2 ref="garageTitle" tabindex="-1" class="list-title">{{ t('Ton garage') }}</h2>
-      <ul class="pick-list">
-        <li v-for="{ v, car, scores, reason, favorite } in garageChoices" :key="v.id">
-          <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="loadingRace || !!reason" @click="toggleFromList(v.id, $event)">
-            <span class="pick-cost" :data-cost="v.cost">{{ t('Coût {n}', { n: v.cost }) }}</span>
-            <span class="pick-name"><b><span v-if="lineup.includes(v.id)" class="pick-tick" aria-hidden="true">✓</span>
-              <span v-if="favorite" :aria-label="t('Favori')">★ </span>{{ v.name }}</b>
-              <small>{{ tp('{version} · {n} secteur avant surchauffe', '{version} · {n} secteurs avant surchauffe', car.uses, { version: t(v.version) }) }}</small></span>
-            <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ t('{label} {n} pts', { label: t(s.label), n: pointsText(s.average) }) }}</span></span>
-          </button>
-          <small v-if="reason" class="pick-reason">{{ reason }}</small>
-        </li>
-      </ul>
+      <h2 id="race-garage-title" ref="garageTitle" tabindex="-1" class="list-title">{{ t('Ton garage') }}</h2>
+      <div class="race-garage" role="region" aria-labelledby="race-garage-title" tabindex="0">
+        <ul class="race-card-grid">
+          <li v-for="{ v, car, scores, reason, owned } in garageChoices" :key="v.id">
+            <div class="race-card" :class="{ selected: lineup.includes(v.id) }">
+              <CarCard :id="v.id" :style-name="owned.shown" :prep="car.prep" compact lazy />
+              <button type="button" class="race-card-hit" :aria-label="name(v.id)" :aria-pressed="lineup.includes(v.id)"
+                :aria-describedby="`race-pick-${v.id}`" :disabled="loadingRace || !!reason" @click="toggleFromList(v.id, $event)"></button>
+            </div>
+            <div :id="`race-pick-${v.id}`" class="race-card-info">
+              <b>
+                <span v-if="lineup.includes(v.id)" class="pick-tick" aria-hidden="true">✓</span>
+                <span v-if="owned.favorite" role="img" :aria-label="t('Favori')">★ </span>{{ t('Coût {n}', { n: v.cost }) }}
+              </b>
+              <small>{{ tp('{n} secteur avant surchauffe', '{n} secteurs avant surchauffe', car.uses) }}</small>
+              <small v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ t('{label} {n} pts', { label: t(s.label), n: pointsText(s.average) }) }}</small>
+              <small v-if="reason" class="race-card-reason">{{ reason }}</small>
+            </div>
+          </li>
+        </ul>
+      </div>
       <div class="race-actions">
         <div class="cap-meter" :class="{ over: cost > cap }">
           <span v-help="isNight ? 'nightCap' : 'plafond'">{{ t('Coût d’écurie') }}</span>
@@ -1008,16 +1018,32 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 .lineup-slot .button, .race-launch, .race-prepare { min-height: 44px; }
 .lineup-slot .button { width: 100%; min-width: 0; padding-inline: 3px; white-space: normal; overflow-wrap: anywhere; }
 .lineup-slot .slot-placeholder { min-height: 70px; aspect-ratio: auto; border: 1px dashed var(--line); }
-.slot-car { display: grid; justify-items: center; text-align: center; overflow-wrap: anywhere; padding: 4px; }
-.slot-car img { width: 56px; max-width: 100%; height: 24px; object-fit: contain; }
 .race-terrain-detail summary { min-height: 44px; align-content: center; cursor: pointer; }
-.pick-list button { scroll-margin-bottom: calc(var(--race-action-height) + var(--race-tabbar-offset) + 12px); grid-template-columns: minmax(50px, auto) minmax(0, 1fr); min-height: 44px; }
-.pick-list .pick-cost { width: auto; height: auto; min-height: 32px; padding: 3px 5px; border-radius: var(--radius); font: 700 .8rem var(--body); }
-.pick-list button[aria-pressed="true"] { background: color-mix(in srgb, var(--cyan) 28%, var(--night)); color: var(--text); }
-.pick-list button[aria-pressed="true"] :is(small, .pick-stats) { color: var(--text); }
-.pick-name, .pick-stats, .pick-reason { overflow-wrap: anywhere; }
-.pick-tick { font-weight: 900; margin-inline-end: .35em; }
-.pick-reason { display: block; padding: 3px 10px 5px; }
+.race-card { position: relative; container-type: inline-size; min-width: 0; }
+.race-card-hit {
+  position: absolute; z-index: 1; inset: 0; width: 100%; min-height: 44px;
+  padding: 0; border: 0; background: transparent;
+  scroll-margin-bottom: calc(var(--race-action-height) + var(--race-tabbar-offset) + 12px);
+}
+.race-card :deep(.car-card.compact .car-card-foot) { font-size: clamp(9px, 5cqw, 15px); }
+.race-card-hit:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.race-card.selected { outline: 2px solid var(--cyan); outline-offset: 2px; border-radius: var(--radius); }
+.race-garage { max-height: 60svh; overflow: auto; scroll-behavior: auto; }
+.race-card-grid {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 10px;
+  list-style: none; margin: 0; padding: 5px;
+}
+.race-card-grid li { min-width: 0; }
+.race-card-info { display: grid; gap: 2px; margin-top: 6px; line-height: 1.25; overflow-wrap: anywhere; }
+.pick-tick { color: var(--cyan); font-weight: 900; margin-inline-end: .35em; }
+.race-card-reason { color: var(--text); font-weight: 700; }
+@media (max-width: 360px) {
+  main.race:has(.race-prep) { padding-inline: 10px; }
+  .lineup-slots { gap: 6px; }
+}
+@media (min-width: 1024px) {
+  .race-card-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
 .race-actions .cap-meter, .race-actions p { margin: 0; }
 .race-actions .cap-meter { grid-template-columns: auto minmax(0, 1fr) auto; }
 .race-actions p { text-align: center; overflow-wrap: anywhere; }

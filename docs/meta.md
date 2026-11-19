@@ -262,7 +262,11 @@ Le dos d’une carte (visible à l’ouverture d’un booster avant de la retour
 
 ## Choix des voitures d’une course
 
-Le terrain et l’écurie adverse précèdent les trois emplacements. « + Choisir » mène à « Ton garage ». Une voiture choisie se retire depuis son emplacement, avec un accès séparé à l’atelier. Le garage affiche les voitures choisies en tête, puis les scores selon le terrain, avec les favoris départagés à score égal. Chaque ligne indique le coût et, le cas échéant, la raison du blocage. La barre de lancement reste au-dessus des onglets et rappelle le coût total, le plafond et la raison éventuelle de désactivation. La course contre un rival, le défi du jour et la Nuit sans fin gardent chacun leur écurie.
+Le terrain et l’écurie adverse précèdent les trois emplacements. Chaque voiture choisie s’affiche dans sa carte de collection avec son édition actuelle. Comme avant T-038, toucher la carte de l’écurie ouvre sa fiche. Les boutons sous la carte permettent de la retirer ou d’ouvrir directement son atelier.
+
+« + Choisir » mène à « Ton garage », une grille de cartes à défilement vertical. Touche une carte pour choisir la voiture ou la retirer de l’écurie. Les cartes choisies apparaissent en tête, avec une coche et un contour distinct. Les autres sont triées selon les scores sur le terrain, avec les favoris en premier à score égal. Chaque carte indique le coût, les secteurs avant surchauffe, les points estimés et, le cas échéant, la raison du blocage.
+
+La barre de lancement reste au-dessus des onglets et rappelle le coût total, le plafond et la raison éventuelle de désactivation. La course contre un rival, le défi du jour et la Nuit sans fin gardent chacun leur écurie.
 
 ## Composer une offre d’échange
 
