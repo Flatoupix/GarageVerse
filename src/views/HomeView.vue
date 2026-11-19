@@ -5,14 +5,19 @@ import { computed } from 'vue'
 import GameLogo from '../components/GameLogo.vue'
 import { discover } from '../game/tutorial'
 import { art } from '../game/art'
-import { constraintText } from '../game/daily'
+import { constraintText, localDate } from '../game/daily'
 import { boosterById, conditionIcons, conditionLabels, rivalById, series, vehicles } from '../game/data'
 import { claimDailyBooster, prepareDaily, todayChallenge, unlockedRivals } from '../game/save'
 import { act, completedSeries, exchangeAlerts, dailySelected, ownedCount, save } from '../game/store'
 
 const emit = defineEmits<{ go: [screen: 'shop' | 'booster' | 'garage' | 'race' | 'versus' | 'friends'] }>()
 const challenge = computed(() => todayChallenge(save))
-function openDaily() { discover('daily'); dailySelected.value = true; if (!save.duel) act(prepareDaily); emit('go', 'race') }
+function openDaily() {
+  discover('daily')
+  dailySelected.value = true
+  if (!save.duel && (save.daily.date !== localDate() || save.dailyLineup === undefined)) act(prepareDaily)
+  emit('go', 'race')
+}
 const pending = computed(() => save.sealed || (save.opening && save.opening.view !== 'recap'))
 const tickets = computed(() => Object.entries(save.tickets).filter(([, n]) => n > 0))
 const ticketCount = computed(() => tickets.value.reduce((n, [, c]) => n + c, 0))

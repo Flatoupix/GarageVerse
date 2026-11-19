@@ -15,7 +15,7 @@ import {
 import { helpForLine, vHelp } from '../game/help'
 import { floatText, confetti, flash, palettes, pop, ring, shake, sparks, streaks, tween, tone } from '../game/fx'
 import { aiChoice, canAttack, circuitPriorities, circuitScores, evaluate, lineupCost, luckRange, overheated, playRound, racer, rivalLineup, stances, type Choice, type Round, type Stance } from '../game/rules'
-import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, prepareDaily, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type ManualDiscovery, type Reward } from '../game/save'
+import { currentRivalStep, rivalStepsDone, specialsOpen, unlockedRivalSteps, unlockedSpecials, dailyLineupCheck, startDaily, todayChallenge, lineupCheck, prepOf, settleDuel, startDuel, unlockedRivals, type ManualDiscovery, type Reward } from '../game/save'
 import { act, dailySelected, buzz, persist, reducedMotion, save, sound } from '../game/store'
 import { playTimingRound, playTurnRound, shiftsPerSector, soloTimingWindow, type SoloDuel, type TimingResult, type TimingRound } from '../game/timing'
 import { pilotSummary, playPilotRound, roundPilot, sectorPilot, switchToAutomatic, type PilotMode, type PilotSummary } from '../game/pilot'
@@ -23,7 +23,6 @@ import { signedTiming, timingFeedback, timingSummary } from '../game/timing-text
 import { tutorialAction } from '../game/tutorial'
 import GvButton from '../components/GvButton.vue'
 import PilotPicker from '../components/PilotPicker.vue'
-import CarCard from '../components/CarCard.vue'
 import ManualCountdown from '../components/ManualCountdown.vue'
 import SectorRun from '../components/SectorRun.vue'
 import TimingGauge from '../components/TimingGauge.vue'
@@ -73,7 +72,12 @@ async function scrollToStage(result = false, immediate = false) {
 const emit = defineEmits<{ inspect: [kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey]; go: [screen: 'garage' | 'shop'] }>()
 const chosen = ref<string | null>(save.duel?.rivalId ?? (save.night ? 'night' : null) ?? (dailySelected.value ? `daily:${save.daily.date}` : null))
 dailySelected.value = false
-const challenge = computed(() => todayChallenge(save, chosen.value?.startsWith('daily:') ? chosen.value.slice(6) : save.daily.date))
+watch(chosen, (next, previous) => {
+  if (!next || previous || save.duel) return
+  window.scrollTo({ top: 0, behavior: 'instant' })
+  raceRoot.value?.querySelector<HTMLElement>('.race-prep h1')?.focus({ preventScroll: true })
+}, { flush: 'post' })
+const challenge = computed(() => todayChallenge(save))
 const isNight = computed(() => chosen.value?.startsWith('night'))
 const nightSeed = ref(String(Date.now()))
 const nightOpponent = computed(() => nightRival(save.night?.seed ?? nightSeed.value, save.night?.round ?? 1))
@@ -88,11 +92,29 @@ const unlockedSteps = computed(() => character.value ? unlockedRivalSteps(save, 
 const hasPersonality = computed(() => character.value && [character.value.bio, character.value.style, character.value.likes, character.value.intro].some(Boolean))
 const league = computed(() => rival.value?.cap !== undefined ? { name: special.value?.name, cap: rival.value.cap } : rival.value ? leagueById.get(rival.value.league) : undefined)
 const unlocked = computed(() => unlockedRivals(save))
-if (chosen.value?.startsWith('daily:') && !save.duel) act(prepareDaily)
 const lineup = computed({ get: () => isNight.value ? save.nightLineup : isDaily.value ? save.dailyLineup ?? [] : save.lineup, set: ids => { if (isNight.value) save.nightLineup = ids; else if (isDaily.value) save.dailyLineup = ids; else save.lineup = ids } })
 const cap = computed(() => isNight.value ? NIGHT_CAP : isDaily.value ? constraintCap(challenge.value.constraint) : league.value?.cap ?? 9)
 const cost = computed(() => lineupCost(lineup.value))
-const problem = computed(() => isNight.value ? nightLineupCheck(save) : isDaily.value ? dailyLineupCheck(save) : rival.value ? lineupCheck(save, save.lineup, rival.value.id) : undefined)
+function checkLineup(ids: string[]) {
+  if (isNight.value) return nightLineupCheck({ ...save, nightLineup: ids })
+  if (isDaily.value) return dailyLineupCheck({ ...save, dailyLineup: ids })
+  if (rival.value) return lineupCheck(save, ids, rival.value.id)
+}
+const problem = computed(() => {
+  const missing = 3 - lineup.value.length
+  if (missing > 0) return tp('Encore {n} voiture', 'Encore {n} voitures', missing)
+  if (cost.value > cap.value) return t('Plafond dépassé de {n}', { n: cost.value - cap.value })
+  return ruleText(checkLineup(lineup.value))
+})
+const garageTitle = ref<HTMLElement>()
+function chooseCar() {
+  const target = garageTitle.value
+  if (!target) return
+  const header = document.querySelector('.topbar')?.getBoundingClientRect().height ?? 0
+  const instant = reducedMotion.value || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  target.focus({ preventScroll: true })
+  window.scrollTo({ top: window.scrollY + target.getBoundingClientRect().top - header - 12, behavior: instant ? 'instant' : 'smooth' })
+}
 const priorities = computed(() => rival.value ? circuitPriorities(rival.value.circuit) : [])
 const conditions = computed(() => {
   const entries = Object.entries(rival.value?.circuit.conditions ?? {}) as [Condition, number][]
@@ -109,7 +131,7 @@ const garageCars = computed(() => {
     const average = scores.reduce((total, s) => total + s.average * s.times, 0) / circuit.sectors.length
     return { v, car, scores, average }
   }).sort((a, b) => Number(lineup.value.includes(b.v.id)) - Number(lineup.value.includes(a.v.id)) ||
-    Number(save.cars[b.v.id].favorite) - Number(save.cars[a.v.id].favorite) || b.average - a.average || a.v.cost - b.v.cost)
+    b.average - a.average || Number(save.cars[b.v.id].favorite) - Number(save.cars[a.v.id].favorite) || a.v.cost - b.v.cost)
 })
 const recommendedCars = computed(() => priorities.value.map(priority => {
   const candidates = garageCars.value.filter(({ v }) => lineup.value.includes(v.id)).map(({ v, scores }) => ({
@@ -137,17 +159,41 @@ function constraintLabel(rule: Parameters<typeof constraintText>[0]) {
 // Score attendu avec sa part de hasard : « 7-9 », ou une seule valeur quand la forme du jour ne change rien.
 const rangeText = (value: number) => { const [low, high] = luckRange(value); return low === high ? String(value) : `${low}-${high}` }
 
-// De combien une voiture dépasserait le plafond de coût si on l'ajoutait à l'écurie (0 si elle est déjà choisie ou si elle tient).
-const overBy = (id: string, price: number) => lineup.value.includes(id) ? 0 : Math.max(0, cost.value + price - cap.value)
+function pickProblem(id: string, price: number) {
+  if (lineup.value.includes(id)) return
+  const excess = cost.value + price - cap.value
+  if (excess > 0) return t('Dépasse le plafond de {n}', { n: excess })
+  if (lineup.value.length === 3) return t('Retire d’abord une voiture')
+  if (lineup.value.length === 2) return ruleText(checkLineup([...lineup.value, id]))
+}
+const garageChoices = computed(() => garageCars.value.map(car => ({ ...car, reason: pickProblem(car.v.id, car.v.cost) })))
 function toggle(id: string) {
   act(() => {
     if (lineup.value.includes(id)) lineup.value = lineup.value.filter(x => x !== id)
-    else if (inTransit(save, id)) return t('En transit')
-    else if (lineup.value.length >= 3) return t('Retire d’abord une voiture')
-    else if (overBy(id, vehicleById.get(id)?.cost ?? 0) > 0) return t('Cette voiture dépasse le plafond de coût')
-    else lineup.value = [...lineup.value, id]
+    else {
+      const reason = pickProblem(id, vehicleById.get(id)?.cost ?? 0)
+      if (reason) return reason
+      if (inTransit(save, id)) return t('En transit')
+      lineup.value = [...lineup.value, id]
+    }
   })
   void nextTick(() => pop(`.lineup-slot:nth-child(${Math.max(1, lineup.value.indexOf(id) + 1)})`, 1.1))
+}
+async function toggleFromList(id: string, event: MouseEvent) {
+  const button = event.currentTarget as HTMLButtonElement
+  toggle(id)
+  if (event.detail === 0) {
+    await nextTick()
+    button.focus()
+  }
+}
+async function removeFromSlot(id: string, event: MouseEvent) {
+  const keyboard = event.detail === 0
+  toggle(id)
+  if (keyboard) {
+    await nextTick()
+    raceRoot.value?.querySelector<HTMLElement>('.lineup-slot .slot-placeholder')?.focus()
+  }
 }
 const loadingRace = ref(false)
 const loadingNextNight = ref(false)
@@ -806,11 +852,6 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         </p>
       </section>
       <section v-if="isDaily" class="daily-panel"><h2>{{ t('Contrainte') }}</h2><p>{{ constraintLabel(challenge.constraint) }}</p><p>{{ tp('{n} crédit à la première victoire du jour.', '{n} crédits à la première victoire du jour.', challenge.reward) }}</p></section>
-      <div class="cap-meter" :class="{ over: cost > cap }">
-        <span v-help="isNight ? 'nightCap' : 'plafond'">{{ t('Coût d’écurie') }}</span><div><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div><b>{{ cost }}/{{ cap }}</b>
-      </div>
-      <div class="race-actions"><button type="button" class="button primary wide race-launch" :disabled="loadingRace || Boolean(problem)" :aria-busy="loadingRace" @click="start">{{ loadingRace ? t('Chargement des images…') : isNight ? t('Commencer la nuit') : isDaily ? (problem ? t('Lancer le défi · {problem}', { problem: t(problem) }) : t('Lancer le défi')) : problem === undefined ? t('Lancer la course') : t(problem) }} <span v-if="!loadingRace && !problem && !isNight" aria-hidden="true">⟶</span></button></div>
-      <p v-if="isNight && problem" class="hint" role="status">{{ t(problem) }}</p>
       <section class="race-briefing" aria-labelledby="briefing-title">
         <div class="section-row"><h2 id="briefing-title">{{ t('Préparer ta course') }}</h2><span v-if="!isNight && !isDaily && rival.league === 'neon'" class="race-intro-badge">{{ t('Accessible d’origine') }}</span></div>
         <p v-if="isNight">{{ t(rival.circuit.name) }}</p>
@@ -820,37 +861,65 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
         <div class="race-conditions" :aria-label="t('Conditions possibles')">
           <span v-for="c in conditions" :key="c.key"><span aria-hidden="true">{{ conditionIcons[c.key] }}</span> <span v-help="c.key">{{ t(conditionLabels[c.key]) }}</span> {{ t('{n} %', { n: c.chance }) }}</span>
         </div>
-        <ul class="race-priorities">
-          <li v-for="p in recommendedCars" :key="p.sector">
-            <div><b v-help="p.stat">{{ t(statLabels[p.stat]) }}</b><small>{{ tp('{n} secteur', '{n} secteurs', p.times) }} · {{ t(sectorLabels[p.sector]) }}</small></div>
-            <button v-if="p.best" class="race-prepare" type="button" :aria-label="t('Préparer {name} · {stat}', { name: p.best.name, stat: t(statLabels[p.stat]) })"
-              @click="emit('inspect', 'car', p.best.id, rival.circuit, p.stat)">
-              <b>{{ p.best.name }}</b><small>{{ t('{n} pts estimés', { n: pointsText(p.best.score) }) }} <span aria-hidden="true">↗</span></small>
-            </button>
-          </li>
-        </ul>
-        <p v-if="lineup.length" class="hint">{{ t('Scores moyens estimés selon le terrain, hors nitro et bonus liés à l’adversaire ou à l’écurie. Touche une voiture pour ouvrir l’atelier.') }}</p>
+        <details class="race-terrain-detail">
+          <summary>{{ t('Statistiques prioritaires') }}</summary>
+          <ul class="race-priorities">
+            <li v-for="p in recommendedCars" :key="p.sector">
+              <div><b v-help="p.stat">{{ t(statLabels[p.stat]) }}</b><small>{{ tp('{n} secteur', '{n} secteurs', p.times) }} · {{ t(sectorLabels[p.sector]) }}</small></div>
+              <button v-if="p.best" class="race-prepare" type="button" :aria-label="t('Préparer {name} · {stat}', { name: p.best.name, stat: t(statLabels[p.stat]) })"
+                @click="emit('inspect', 'car', p.best.id, rival.circuit, p.stat)">
+                <b>{{ p.best.name }}</b><small>{{ t('{n} pts estimés', { n: pointsText(p.best.score) }) }} <span aria-hidden="true">↗</span></small>
+              </button>
+            </li>
+          </ul>
+          <p v-if="lineup.length" class="hint">{{ t('Scores moyens estimés selon le terrain, hors nitro et bonus liés à l’adversaire ou à l’écurie. Touche une voiture pour ouvrir l’atelier.') }}</p>
+        </details>
       </section>
+      <p class="rival-preview">{{ t('Écurie adverse · {cars}', { cars: rivalLineup(rival).map(e => name(e.id)).join(' · ') }) }}</p>
       </div>
       <div class="race-prep-pick">
+      <h2 class="list-title lineup-title">{{ t('Écurie · {n}/3', { n: lineup.length }) }}</h2>
       <div class="lineup-slots">
-        <button v-for="n in 3" :key="n" type="button" class="lineup-slot" :disabled="!lineup[n - 1]" @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">
-          <CarCard v-if="lineup[n - 1]" :id="lineup[n - 1]" :style-name="save.cars[lineup[n - 1]]?.shown" :prep="prepOf(save, lineup[n - 1])" compact />
-          <span v-else class="slot-placeholder">{{ t('Place {n}', { n }) }}</span>
-        </button>
+        <div v-for="n in 3" :key="n" class="lineup-slot">
+          <template v-if="lineup[n - 1]">
+            <span class="slot-car">
+              <img v-if="carSprite(lineup[n - 1])" :src="carSprite(lineup[n - 1])" alt="">
+              <strong>{{ name(lineup[n - 1]) }}</strong>
+            </span>
+            <button type="button" class="button" :aria-label="t('Retirer {name} de l’écurie', { name: name(lineup[n - 1]) })"
+              @click="removeFromSlot(lineup[n - 1], $event)">{{ t('Retirer') }}</button>
+            <button type="button" class="button ghost" :aria-label="t('Atelier de {name}', { name: name(lineup[n - 1]) })"
+              @click="emit('inspect', 'car', lineup[n - 1], rival.circuit)">{{ t('Atelier') }}</button>
+          </template>
+          <button v-else type="button" class="button slot-placeholder" @click="chooseCar">{{ t('+ Choisir') }}</button>
+        </div>
       </div>
-      <p class="rival-preview">{{ t('Écurie adverse · {cars}', { cars: rivalLineup(rival).map(e => name(e.id)).join(' · ') }) }}</p>
 
-      <h2 class="list-title">{{ t('Ton garage') }}</h2>
+      <h2 ref="garageTitle" tabindex="-1" class="list-title">{{ t('Ton garage') }}</h2>
       <ul class="pick-list">
-        <li v-for="{ v, car, scores } in garageCars" :key="v.id">
-          <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="loadingRace || overBy(v.id, v.cost) > 0" @click="toggle(v.id)">
-            <span class="pick-cost" :data-cost="v.cost">{{ v.cost }}</span>
-            <span class="pick-name"><b><span v-if="save.cars[v.id].favorite" :aria-label="t('Favori')">★ </span>{{ v.name }}</b><small>{{ overBy(v.id, v.cost) > 0 ? t('Dépasse le plafond de {n}', { n: overBy(v.id, v.cost) }) : tp('{version} · {n} secteur avant surchauffe', '{version} · {n} secteurs avant surchauffe', car.uses, { version: v.version }) }}</small></span>
+        <li v-for="{ v, car, scores, reason } in garageChoices" :key="v.id">
+          <button type="button" :aria-pressed="lineup.includes(v.id)" :disabled="loadingRace || !!reason" @click="toggleFromList(v.id, $event)">
+            <span class="pick-cost" :data-cost="v.cost">{{ t('Coût {n}', { n: v.cost }) }}</span>
+            <span class="pick-name"><b><span v-if="lineup.includes(v.id)" class="pick-tick" aria-hidden="true">✓</span>
+              <span v-if="save.cars[v.id].favorite" :aria-label="t('Favori')">★ </span>{{ v.name }}</b>
+              <small>{{ tp('{version} · {n} secteur avant surchauffe', '{version} · {n} secteurs avant surchauffe', car.uses, { version: t(v.version) }) }}</small></span>
             <span class="pick-stats"><span v-for="s in scores.filter(s => s.times === priorities[0]?.times)" :key="s.stat">{{ t('{label} {n} pts', { label: t(s.label), n: pointsText(s.average) }) }}</span></span>
           </button>
+          <small v-if="reason" class="pick-reason">{{ reason }}</small>
         </li>
       </ul>
+      <div class="race-actions">
+        <div class="cap-meter" :class="{ over: cost > cap }">
+          <span v-help="isNight ? 'nightCap' : 'plafond'">{{ t('Coût d’écurie') }}</span>
+          <div aria-hidden="true"><span :style="{ width: `${Math.min(100, cost / cap * 100)}%` }"></span></div>
+          <b>{{ cost }} / {{ cap }}</b>
+        </div>
+        <p v-if="problem" id="race-launch-problem" role="status">{{ problem }}</p>
+        <button type="button" class="button primary wide race-launch" :disabled="loadingRace || !!problem" :aria-busy="loadingRace"
+          :aria-describedby="problem ? 'race-launch-problem' : undefined" @click="start">
+          {{ loadingRace ? t('Chargement des images…') : isNight ? t('Commencer la nuit') : isDaily ? t('Lancer le défi') : t('Lancer la course') }}
+        </button>
+      </div>
       </div>
       </div>
     </template>
@@ -914,4 +983,21 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
   background: var(--panel); color: var(--text); font-size: .75rem; font-weight: 700;
 }
 .race-recap .recap-pilot { grid-column: 1 / -1; grid-row: 2; color: var(--muted); }
+.lineup-slot { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.lineup-slot .button, .race-launch, .race-prepare { min-height: 44px; }
+.lineup-slot .button { width: 100%; min-width: 0; padding-inline: 3px; white-space: normal; overflow-wrap: anywhere; }
+.lineup-slot .slot-placeholder { min-height: 70px; aspect-ratio: auto; border: 1px dashed var(--line); }
+.slot-car { display: grid; justify-items: center; text-align: center; overflow-wrap: anywhere; padding: 4px; }
+.slot-car img { width: 56px; max-width: 100%; height: 24px; object-fit: contain; }
+.race-terrain-detail summary { min-height: 44px; align-content: center; cursor: pointer; }
+.pick-list button { scroll-margin-bottom: calc(var(--race-action-height) + var(--race-tabbar-offset) + 12px); grid-template-columns: minmax(50px, auto) minmax(0, 1fr); min-height: 44px; }
+.pick-list .pick-cost { width: auto; height: auto; min-height: 32px; padding: 3px 5px; border-radius: var(--radius); font: 700 .8rem var(--body); }
+.pick-list button[aria-pressed="true"] { background: color-mix(in srgb, var(--cyan) 28%, var(--night)); color: var(--text); }
+.pick-list button[aria-pressed="true"] :is(small, .pick-stats) { color: var(--text); }
+.pick-name, .pick-stats, .pick-reason { overflow-wrap: anywhere; }
+.pick-tick { font-weight: 900; margin-inline-end: .35em; }
+.pick-reason { display: block; padding: 3px 10px 5px; }
+.race-actions .cap-meter, .race-actions p { margin: 0; }
+.race-actions .cap-meter { grid-template-columns: auto minmax(0, 1fr) auto; }
+.race-actions p { text-align: center; overflow-wrap: anywhere; }
 </style>

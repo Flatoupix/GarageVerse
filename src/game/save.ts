@@ -190,9 +190,10 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       view: o.collected || (revealed === 5 && o.view === 'recap') ? 'recap' : revealed && (o.view === 'face' || revealed === 5) ? 'face' : 'back' }
   }
   save.nightRecord = int(input.nightRecord, 0, 100000, 0)
-  save.nightLineup = (input.nightLineup ?? save.nightLineup).filter(id => Boolean(save.cars[id])).slice(0, 3)
-  // Écurie de la nuit incomplète (voitures vendues, ancienne sauvegarde) : on la complète avec les voitures les moins chères.
-  if (save.nightLineup.length < 3) {
+  const savedNightLineup = Array.isArray(input.nightLineup) ? input.nightLineup : undefined
+  save.nightLineup = (savedNightLineup ?? save.nightLineup).filter(id => Boolean(save.cars[id])).slice(0, 3)
+  // Une ancienne sauvegarde sans écurie de nuit reçoit une écurie de départ.
+  if (!savedNightLineup && save.nightLineup.length < 3) {
     const cheap = Object.keys(save.cars).filter(id => vehicleById.has(id) && !save.nightLineup.includes(id)).sort((x, y) => vehicleById.get(x)!.cost - vehicleById.get(y)!.cost)
     for (const id of cheap) {
       if (save.nightLineup.length === 3) break
@@ -206,7 +207,9 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
       pilotMode: night.pilotMode === 'manuel' ? 'manuel' : 'auto',
       ...(night.lastPilot === 'auto' || night.lastPilot === 'manuel' || night.lastPilot === 'mixed' ? { lastPilot: night.lastPilot } : {}) }
   }
-  save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
+  if (!input.daily || input.daily.date === save.daily.date) {
+    save.dailyLineup = input.dailyLineup?.filter(id => Boolean(save.cars[id])).slice(0, 3)
+  }
   save.lineup = (input.lineup ?? []).filter(id => save.cars[id]).slice(0, 3)
   save.record = Object.fromEntries(Object.entries(input.record ?? {}).filter(([id]) => rivalById.has(id)).map(([id, record]) => [id, {
     wins: int(record?.wins, 0, 100000, 0), losses: int(record?.losses, 0, 100000, 0), perfect: record?.perfect === true,
@@ -966,6 +969,7 @@ export const todayChallenge = (save: Save, date = save.daily.date) => dailyChall
 export function refreshDaily(save: Save, date = localDate()) {
   if (save.daily.date === date) return
   save.daily.date = date
+  save.dailyLineup = undefined
   save.daily.won = false
   save.daily.booster = false
   if (save.daily.lastWin !== previousDate(date)) save.daily.streak = 0

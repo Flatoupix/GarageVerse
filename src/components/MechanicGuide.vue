@@ -9,7 +9,7 @@ const steps = [
   ['.home .hero', t('Collectionne des voitures et bats les rivaux secteur par secteur. Ton premier booster t’attend dans Boosters.')],
   ['.shop, .sealed-stage, .home .hero', t('Va dans Boosters. Ouvre ton premier booster, déchire le paquet et récupère tes cinq cartes.')],
   ['.garage, dialog[open] .car-stats', t('Ouvre une fiche au garage. ACC : accélération. VIT : vitesse. MAN : maniabilité. END : endurance, pour courir plus de secteurs.')],
-  ['.cap-meter, .rival-list', t('Défie Lola Minitel. Choisis trois voitures : leur coût total doit respecter le plafond de l’écurie.')],
+  ['.lineup-title, .rival-list', t('Défie Lola Minitel. Choisis trois voitures : leur coût total doit respecter le plafond de l’écurie.')],
   ['.engage-brief', t('Lis la statistique du secteur et sa météo. Choisis une voiture adaptée au terrain.')],
   ['.engage-cars[role="radiogroup"]', t('Sous tes voitures, la fourchette estime ton score. La forme du jour peut changer le résultat.')],
   ['.engage-rivals', t('Observe les voitures adverses : leur fourchette de score sur ce secteur est affichée. Devine laquelle le rival va engager.')],

@@ -1,6 +1,15 @@
 import type { Dict } from './index'
 
 export const vuesCourse: Dict = {
+  'Plafond dépassé de {n}': 'Over the cost cap by {n}',
+  'Statistiques prioritaires': 'Most important stats',
+  'Écurie · {n}/3': 'Lineup · {n}/3',
+  'Retirer {name} de l’écurie': 'Remove {name} from the lineup',
+  'Atelier de {name}': 'Workshop for {name}',
+  '+ Choisir': '+ Pick',
+  'Coût {n}': 'Cost {n}',
+  'Encore {n} voiture': 'Pick {n} more car',
+  'Encore {n} voitures': 'Pick {n} more cars',
   // Écran de course : constitution de l'écurie, secteurs, résultat
   'Pilotage': 'Driving mode',
   'Automatique': 'Automatic',
