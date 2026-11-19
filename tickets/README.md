@@ -24,6 +24,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 | [T-033](033-ouverture-groupee-5-10-boosters.md) | Révélation groupée de 5 ou 10 boosters (25/50 cartes) et récapitulatif mobile | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
 | [T-042](042-decompte-a-chaque-secteur.md) | Décompte complet « 3, 2, 1, Partez ! » avant chaque mini-jeu manuel, pas seulement le premier | P2 |
+| [T-043](043-bouton-mise-a-jour.md) | Bouton « Mettre à jour » quand une nouvelle version est publiée (GitHub Pages et itch.io) | P2 |
 | [T-032](032-etoile-victoire-parfaite-par-etape.md) | Étoile de victoire parfaite sur chaque étape d'un rival (Essais, Qualifs, Finale) | P3 |
 
 ## Chantiers plus larges
@@ -82,7 +83,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 |---|---|---|
 | [T-017](017-ux-selection-course-garage.md) | Sélection course/garage (ancienne unification annulée) | T-038 et T-041 |
 
-Prochain numéro libre : **T-043**. Avant d'en créer un, vérifier `dev` sur GitHub : plusieurs sessions ajoutent des tickets en parallèle.
+Prochain numéro libre : **T-044**. Avant d'en créer un, vérifier `dev` sur GitHub : plusieurs sessions ajoutent des tickets en parallèle.
 
 ## Déjà livré, ne pas créer de nouveaux tickets identiques
 
