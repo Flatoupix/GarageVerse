@@ -4,7 +4,6 @@ export const timing = {
   '3': '3',
   '2': '2',
   '1': '1',
-  'Prêt ?': 'Ready?',
   'Partez !': 'Go!',
   'Espace': 'Space',
   'Au clavier, utilise la barre d’espace.': 'On a keyboard, press Space.',

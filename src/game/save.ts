@@ -237,7 +237,16 @@ export function readSave(raw: string | null, legacy: string | null = null): Save
           duel.pilot = { mode: 'auto' }
         }
       }
-      // Les anciennes manches en attente reprennent aussi à la sélection.
+      const pending = duel.manualSector
+      if (pending && (duel.winner || duel.timingReview || pending.index !== duel.rounds.length
+        || pending.index >= duel.sectors.length || typeof pending.turn !== 'boolean'
+        || !(['player', 'rival'] as const).every(who => {
+          const choice = who === 'player' ? pending.choice : pending.rivalChoice
+          return choice && Number.isInteger(choice.car) && duel[who].lineup[choice.car]
+            && typeof choice.nitro === 'boolean'
+            && (choice.stance === 'normal' || choice.stance === 'attaque' || choice.stance === 'gestion')
+        }))) delete duel.manualSector
+      // Les anciennes manches en attente reprennent à la sélection.
       delete duel.timingChoice
       save.duel = duel
     }

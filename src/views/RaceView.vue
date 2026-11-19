@@ -271,18 +271,19 @@ const pilotPreference = computed({
 // Le manuel n'est proposé que si le mode timing expérimental est activé.
 const pilotPicker = computed(() => save.preferences.timingMode && !duel.value && !reward.value && !nightEnd.value
   && (rivalRace.value || (isNight.value && (!save.night || save.night.resting))))
-const manualRun = shallowRef<{
-  duel: SoloDuel; index: number; choice: Choice; rivalChoice: Choice; sequence?: TurnSequence
-} | null>(null)
 const pendingManual = computed(() => {
-  const pending = manualRun.value, d = duel.value
-  if (pending && pending.duel === d && pending.index === d.rounds.length && !d.winner) return pending
+  const d = duel.value, opponent = rival.value
+  const pending = d?.manualSector
+  if (!pending || d.winner || pending.index !== index.value || !manualSector.value) return
+  const sequence = pending.turn && opponent ? turnSequence(opponent.circuit.name, pending.index, opponent.id) : undefined
+  return { ...pending, duel: d, sequence }
 })
+onMounted(() => { if (pendingManual.value) void scrollToStage(false, true) })
 const manualStarted = ref(false)
+watch(() => Boolean(pendingManual.value), pending => { if (pending) manualStarted.value = false })
 const manualDiscovery = computed<ManualDiscovery | undefined>(() =>
   pendingManual.value && (pendingManual.value.sequence ? 'virages' : 'manuel'))
 const manualLesson = computed(() => manualDiscovery.value && !save.tutorial.seen.includes(manualDiscovery.value))
-const firstManual = computed(() => !duel.value?.rounds.some(round => roundPilot(round) === 'manuel'))
 function acknowledgeManual() {
   const key = manualDiscovery.value
   if (!key || !manualLesson.value) return
@@ -308,7 +309,7 @@ function showJudgment(tag: string, grade: ManualGrade) {
   manualStreak.value = grade === 'perfect' ? manualStreak.value + 1 : 0
   liveFeedback.value = { tag: grade === 'perfect' ? t('Parfait !') : tag, grade, count: (liveFeedback.value?.count ?? 0) + 1 }
 }
-const picked = ref(0)
+const picked = ref(pendingManual.value?.choice.car ?? 0)
 const nitro = ref(false)
 // Consigne de pilotage du secteur : attaque, normal ou gestion.
 const stance = ref<Stance>('normal')
@@ -452,12 +453,10 @@ function engage() {
   liveFeedback.value = null
   flawless.value = false
   if (manualSector.value) {
-    const opponent = rival.value
-    const sequence = rhythmTurns.value && opponent && d.sectors[index.value] === 'virage'
-      ? turnSequence(opponent.circuit.name, index.value, opponent.id) : undefined
-    // La voiture adverse est choisie une fois et la manche reste transitoire jusqu’au dernier geste.
-    manualStarted.value = false
-    manualRun.value = { duel: d, index: index.value, choice, rivalChoice: aiChoice(d, 'rival', Math.random), sequence }
+    const turn = Boolean(rhythmTurns.value && rival.value && d.sectors[index.value] === 'virage')
+    // La reprise conserve les choix des deux pilotes et rejoue le geste depuis le décompte.
+    d.manualSector = { index: index.value, choice, rivalChoice: aiChoice(d, 'rival', Math.random), turn }
+    persist()
     void scrollToStage(false, true)
     return
   }
@@ -465,6 +464,7 @@ function engage() {
 }
 
 function showAutomaticRound(d: SoloDuel, choice: Choice) {
+  delete d.manualSector
   const round = pilotedRace.value ? playPilotRound(d, choice, Math.random) : playRound(d, choice, Math.random)
   if (d.pilot?.automaticFrom !== undefined) d.timingReview = true
   showRound(round)
@@ -475,10 +475,10 @@ function switchPilot() {
   if (!canSwitchPilot.value || !d?.pilot) return
   const choice = pendingManual.value?.choice
   d.pilot = switchToAutomatic(d.pilot, index.value)
-  manualRun.value = null
   liveFeedback.value = null
   if (choice && !shown.value) showAutomaticRound(d, choice)
   else {
+    delete d.manualSector
     persist()
     void scrollToStage(Boolean(shown.value), true)
   }
@@ -494,8 +494,8 @@ function steer(result: TurnResult) {
 
 function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>) => TimingRound) {
   const pending = pendingManual.value
-  if (!pending || shown.value) return
-  manualRun.value = null
+  if (!pending || !manualStarted.value || shown.value) return
+  delete pending.duel.manualSector
   const round = pilotedRace.value
     ? playPilotRound(pending.duel, pending.choice, Math.random, () => resolve(pending)) : resolve(pending)
   pending.duel.timingReview = true
@@ -609,7 +609,6 @@ function cashNight(returnGarage = false) {
   if (returnGarage) { nightEnd.value = null; chosen.value = null; emit('go', 'garage') }
 }
 function abandon() {
-  manualRun.value = null
   liveFeedback.value = null
   if (isNight.value) { clear(); shown.value = null; cashNight(); sound('lose'); return }
 
@@ -719,7 +718,7 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown?.condition ?? duel.conditions[index])"
           :feedback="liveFeedback" :streak="manualStreak" :flawless="flawless" :keep-controls="Boolean(finishedTurns)" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
           <template #overlay>
-            <ManualCountdown v-if="pendingManual" :full="firstManual" @go="manualStarted = true" />
+            <ManualCountdown v-if="pendingManual" @go="manualStarted = true" />
             <span ref="finalGear" v-if="shown?.shifts && liveFeedback && (step <= 1 || reducedMotion)" class="final-gear">
               {{ t('Rapport {n}/{total}', { n: shown.shifts.length + 1, total: shown.shifts.length + 1 }) }}
             </span>

@@ -139,3 +139,14 @@ const resumed = readSave(JSON.stringify(legacy)).duel
 assert.equal(resumed.timingChoice, undefined)
 assert.deepEqual(resumed.pilot, { mode: 'manuel', turn: false })
 assert.equal(resumed.rounds.length, 0)
+
+const pending = { index: 0, choice, rivalChoice: opponent, turn: false }
+resumed.manualSector = pending
+legacy.duel = resumed
+assert.deepEqual(readSave(JSON.stringify(legacy)).duel.manualSector, pending)
+
+resumed.manualSector = { ...pending, index: 1 }
+assert.equal(readSave(JSON.stringify(legacy)).duel.manualSector, undefined)
+
+resumed.manualSector = { ...pending, rivalChoice: { ...opponent, car: -1 } }
+assert.equal(readSave(JSON.stringify(legacy)).duel.manualSector, undefined)

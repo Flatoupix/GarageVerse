@@ -385,13 +385,14 @@ jugements de chaque type. Ce modificateur remplace les tirages de forme du jour,
 et d’incident du joueur. Le rival conserve ses tirages habituels.
 
 Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aiguille avance par paliers
-et les voitures restent fixes pendant les gestes. Si tu recharges avant la résolution, tu retrouves
-la sélection du secteur. Un secteur validé revient à son bilan.
+et les voitures restent fixes pendant les gestes. Un secteur validé revient à son bilan.
 
-Au premier secteur manuel d’une course, les voitures attendent sur la ligne pendant **3, 2, 1**.
-Le geste commence à **Partez !**. Chaque temps dure environ 0,6 s. Les secteurs manuels
-suivants affichent seulement **Prêt ?** puis **Partez !** (environ 0,9 s au total).
-Le décompte se suspend quand l’onglet est masqué, comme le chrono du geste.
+Chaque mini-jeu manuel, vitesses ou virages, est précédé de **3, 2, 1, Partez !**, à raison de
+0,6 s par étape. Le geste commence à **Partez !**. Les secteurs automatiques se jouent sans
+décompte, y compris après une bascule en cours de course. Si tu recharges ou reviens dans la
+course avant la résolution d’un secteur engagé, le décompte reprend à **3** avant le geste.
+Quand l’onglet est masqué, le décompte se suspend comme le chrono du geste. En mouvement
+réduit, il garde le même rythme et s’affiche sans animation ni particules.
 
 Au clavier, appuie sur **Espace** pour passer la vitesse et sur **←** ou **→** pour prendre un
 virage. Tu peux utiliser ces touches sans donner le focus aux boutons. Le jeu ignore les appuis
