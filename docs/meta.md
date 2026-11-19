@@ -89,9 +89,10 @@ Chaque booster contient cinq cartes, dont au plus `maxParts` pièces mécaniques
 Pendant l’ouverture, la grille de la scène réserve deux rangées d’actions en
 bas, au-dessus des onglets et de la zone sûre. Leur hauteur reste la même avec
 un seul bouton, avec les choix d’édition et au récapitulatif. Les libellés
-peuvent revenir à la ligne. Les messages défilent dans une zone de hauteur fixe.
-La grille du récapitulatif défile au-dessus des actions et le guide du mécano
-défile sous le sachet.
+peuvent revenir à la ligne. Les messages occupent une zone de hauteur fixe qui
+défile si le texte déborde. La carte s’ajuste à la hauteur restante, et la
+grille du récapitulatif défile au-dessus des actions. Sur les écrans compacts,
+le guide du mécano s’affiche à côté du sachet dans la zone défilante.
 
 ## 7. Direction artistique et thèmes d’interface
 

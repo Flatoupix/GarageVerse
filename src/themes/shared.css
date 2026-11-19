@@ -901,12 +901,12 @@ main.race { animation-name: race-view-in; }
   --booster-action-row: max(52px, 3.75rem);
   --booster-action-gap: 8px;
   --booster-actions-height: calc(2 * var(--booster-action-row) + var(--booster-action-gap));
-  display: grid; grid-template-rows: minmax(0, 1fr) 4.75rem var(--booster-actions-height);
+  display: grid; grid-template-rows: minmax(0, 1fr) 5rem var(--booster-actions-height);
   gap: 8px; min-width: 0; text-align: center;
 }
-.booster-recap { grid-template-rows: minmax(0, 1fr) var(--booster-actions-height); }
+.booster-stage.booster-recap { grid-template-rows: minmax(0, 1fr) var(--booster-actions-height); }
 .booster-art {
-  min-width: 0; overflow: hidden auto; overscroll-behavior: contain; container-type: size;
+  min-width: 0; overflow: hidden auto; overscroll-behavior: contain; container-type: size; scrollbar-width: thin;
 }
 .booster-art .stack-stage {
   min-height: 100%; align-content: center; padding: 12px;
@@ -915,14 +915,18 @@ main.race { animation-name: race-view-in; }
 .booster-sealed-art { display: grid; grid-template-rows: minmax(164px, 1fr) auto; }
 .booster-sealed-art .sealed-stage { container-type: size; align-content: center; padding: 12px; }
 .booster-sealed-art .tear-pack { width: min(55vw, 32svh, 252px, calc((100cqh - 10px) * .69)); }
-.booster-art .card-stack { width: clamp(120px, min(74vw, 40svh, 58cqh), 290px); }
+/* La hauteur utile laisse de la place au badge, au cadre et au dos incliné. */
+.booster-art .card-stack { width: min(74vw, 40svh, 58cqh, 290px, max(0px, (100cqh - 62px) * .72)); }
 .booster-recap .booster-art { padding-inline: 4px; }
 .booster-messages {
   min-width: 0; overflow: hidden auto; overscroll-behavior: contain;
-  color: var(--muted); font-size: .875rem; overflow-wrap: anywhere;
+  color: var(--muted); font-size: .875rem; line-height: 1.25; overflow-wrap: anywhere;
+  display: flex; flex-direction: column; gap: 2px; scrollbar-width: thin;
 }
-.booster-messages > p { margin: 4px auto; }
-.booster-messages .stack-indicators { margin: 4px 0; }
+.booster-messages > * { flex: none; }
+.booster-messages > p { margin: 0 auto; }
+.booster-messages .stack-indicators { margin: 2px 0 0; }
+.booster-messages .swipe-hint { max-width: none; padding-inline: 0; line-height: 1.25; }
 
 /* Deux rangées réservées dès le sachet, au-dessus de la navigation. */
 .booster-stage .booster-actions {
@@ -935,6 +939,21 @@ main.race { animation-name: race-view-in; }
 }
 .booster-actions-split.stack-actions > .button:not(.quiet),
 .booster-actions-split.recap-actions > .button:not(.next-booster) { grid-column: auto; font-size: .875rem; }
+@media (max-width: 360px), (max-height: 700px) {
+  .booster-stage { --booster-action-row: max(52px, 3.25rem); }
+  .booster-actions-split > .button { padding-block: 2px; line-height: 1.08; }
+}
+@media (max-width: 360px), (max-height: 620px) {
+  /* Sur les écrans compacts, le guide commence à côté du sachet. */
+  .booster-sealed-art:has(.mechanic-guide) {
+    grid-template: minmax(min-content, 1fr) / minmax(0, 1fr) minmax(0, 1.65fr);
+    gap: 8px;
+  }
+  .booster-sealed-art:has(.mechanic-guide) .tear-pack { width: min(100%, 252px, calc((100cqh - 10px) * .69)); }
+  .booster-sealed-art .mechanic-guide { margin: 0; padding: 8px; font-size: .875rem; line-height: 1.25; }
+  .booster-sealed-art .mechanic-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .booster-sealed-art .mechanic-actions button { padding: 4px; overflow-wrap: anywhere; }
+}
 @media (min-width: 1024px) {
   .booster-play { padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
 }
