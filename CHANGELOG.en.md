@@ -4,6 +4,19 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.21.0] — 2026-11-20
+
+### Added
+
+- **One-tap update.** When a new version of the game is online, an **Update available** banner offers **Update** or **Later**. The game never reloads in the middle of a race, a booster or a trade.
+
+### Changed
+
+- **Your cards in race setup.** The cars in your lineup and garage are shown as real cards again, with their cost and a tick on the ones you picked.
+- **Car sheet.** The favourite ☆ moves to the left of the name, away from the close button: no more sheets closed by mistake.
+- **Clearer buttons.** Actions that move your car forward (next stage, Install, View card, Workshop…) are now filled, and **← Rivals** is a real button. Cancel and Sell stay low-key.
+- **Lighter gesture summary.** After each manual mini-game you see the essentials; the full calculation unfolds under **Sector details** if you want it.
+
 ## [0.20.1] — 2026-11-19
 
 ### Fixed

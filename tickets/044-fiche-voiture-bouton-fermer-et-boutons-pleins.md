@@ -2,7 +2,7 @@
 
 - **Type :** Ergonomie / interface
 - **Priorité :** P2
-- **Statut :** À implémenter
+- **Statut :** Livré en v0.21.0 ; à valider sur téléphone
 - **Signalement :** retour du joueur du 19 novembre 2026 : « revoir le bouton close des fenêtres sur les cartes de voiture, il est trop proche du lien fav, et ce serait bien d'avoir un peu plus de boutons "filled" »
 - **Tickets liés :** [T-018 · finitions desktop et thèmes](018-desktop-et-themes-regressions.md), [T-038 · sélection des voitures](038-ux-selection-voitures-course-echanges.md)
 - **Fichiers à examiner :** [`src/views/CarSheet.vue`](../src/views/CarSheet.vue) (en-tête avec `.favorite-button` vers la ligne 249, actions des onglets Performances, Atelier et Carte), [`src/App.vue`](../src/App.vue) (fenêtre `.sheet-modal` et `.close-modal` vers la ligne 631), [`src/components/GvButton.vue`](../src/components/GvButton.vue), [`src/themes/base.css`](../src/themes/base.css), [`src/themes/shared.css`](../src/themes/shared.css) et les thèmes de `src/themes/`

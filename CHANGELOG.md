@@ -4,6 +4,19 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.21.0] — 2026-11-20
+
+### Ajouté
+
+- **Mise à jour en un geste.** Quand une nouvelle version du jeu est en ligne, un bandeau **Mise à jour disponible** te propose **Mettre à jour** ou **Plus tard**. Le jeu ne se recharge jamais au milieu d’une course, d’un booster ou d’un échange.
+
+### Modifié
+
+- **Tes cartes en préparation de course.** Les voitures de ton écurie et de ton garage s’affichent de nouveau en vraies cartes, avec leur coût et une coche pour celles choisies.
+- **Fiche de voiture.** Le favori ☆ passe à gauche du nom, loin du bouton de fermeture : plus de fiche fermée par erreur.
+- **Boutons plus lisibles.** Les actions qui font avancer ta voiture (stage suivant, Installer, Voir la carte, Atelier…) sont maintenant pleines, et **← Rivaux** est un vrai bouton. Annuler et Vendre restent discrets.
+- **Bilan des gestes allégé.** Après chaque mini-jeu manuel, tu vois l’essentiel ; le détail du calcul se déplie dans **Détails du secteur** si tu le veux.
+
 ## [0.20.1] — 2026-11-19
 
 ### Corrigé

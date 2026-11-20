@@ -2,7 +2,7 @@
 
 - **Type :** Ergonomie / présentation des résultats
 - **Priorité :** P2
-- **Statut :** À simplifier et playtester sur mobile
+- **Statut :** Livré en v0.21.0 ; à valider sur téléphone
 - **Signalement :** retour joueur du 19 novembre 2026 : « Direction +2, 1 Parfait, 1 Bien, 0 Raté, score de base… on s'en fout », ou à défaut beaucoup mieux intégré.
 - **Tickets liés :** [T-026 · passage de vitesses](026-prototype-passage-vitesses-timing.md), [T-027 · jeu de rythme gauche/droite](027-prototype-direction-virages.md), [T-048 · continuité de la course](048-course-manuelle-animation-jusqu-arrivee.md).
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (paragraphes `shown.direction`, `shown.timing`, bilan de secteur), [`src/components/SectorRun.vue`](../src/components/SectorRun.vue), [`src/game/turn-text.ts`](../src/game/turn-text.ts), [`src/game/timing-text.ts`](../src/game/timing-text.ts), styles associés.
