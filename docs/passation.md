@@ -24,14 +24,16 @@ Note de reprise pour une nouvelle session. À lire avec `docs/meta.md` (règles 
 
 ```sh
 export PATH=$HOME/.nvm/versions/node/v22.23.1/bin:$PATH      # Node 22, nécessaire pour l’orchestrateur
-node orchestrator/cycle.ts queue <id> [<id>…] --integrate     # lance des étapes de orchestrator/backlog/<id>.json
-node orchestrator/cycle.ts queue <id> --integrate --dry-run   # valide sans appeler les agents
+node orchestrator/engine/cycle.ts queue <id> [<id>…] --integrate     # lance des étapes de orchestrator/backlog/<id>.json
+node orchestrator/engine/cycle.ts queue <id> --integrate --dry-run   # valide sans appeler les agents
+node orchestrator/engine/cycle.ts land                               # reprend les commits du tronc dans dev
 corepack yarn build && corepack yarn check:daily && node pipeline/balance.mjs
 node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3]   # ne génère que ce qui manque
 ```
 
 - Dossier de travail : `/Users/pierrenowak/Desktop/projets/GarageVerse` (pas un dépôt git). Clone git : `.orchestrator/source`, branche `prototype/mobile-tcg`. Synchronisation par `rsync -ac --delete` avec exclusions (`.git/`, `.orchestrator/`, `node_modules/`, `dist/`, `.yarn/`, `generated_images/`, `.codex-attachments/`, PNG à la racine, logs), puis commit et push depuis le clone.
-- Parcours de test navigateur : `npx tsx orchestrator/browser.ts <dist> <dossier> <chemin Chrome> neon '<flow JSON>'` (320 et 390 px).
+- Le moteur de l’orchestrateur est un dépôt privé à part ([Flatoupix/orchestrator](https://github.com/Flatoupix/orchestrator)), en sous-module `orchestrator/engine` figé sur une version (`git submodule update --init` puis `npm --prefix orchestrator/engine ci`). GarageVerse garde `orchestrator/config.json`, le backlog et `orchestrator/scenarios.ts` (voir `orchestrator/README.md`).
+- Parcours de test navigateur : `node orchestrator/engine/browser.ts <dist absolu> <dossier> <chemin Chrome> neon '<flow JSON>' <chemin absolu de orchestrator/scenarios.ts> '.tabbar button'` (320, 390 et 1280 px).
 - L’intégration automatique d’une étape (`--integrate`) est refusée quand le clone a des fichiers non suivis (3 PNG de cartes à la racine et `.codex-attachments/`, qui sont à l’utilisateur) : récupérer alors le commit à la main (`git fetch ../<cycle>/checkout orchestrator/<cycle>:refs/cycle/x`, puis `cherry-pick`).
 - Quotas : Codex et Antigravity s’épuisent en cours de lot. Si l’un est à court, relancer la même commande avec l’autre moteur ; le pipeline ne régénère que le manquant. Quota d’image d’Antigravity (`gemini-3.1-flash-image`) : retour annoncé vers 21 h 10 le 15 novembre.
 
@@ -56,9 +58,9 @@ node pipeline/art.mjs --set anim --kind sprites [--engine codex|agy] [--jobs 3] 
 - Les retours de Galaad sont intégrés et publiés en **0.5.0** : démontage rapide des pièces (« Tout démonter » + retrait sur `PartSheet.vue`), 14 séries de collection, parcours des rivaux en 3 étapes (*Essais*, *Qualifs*, *Finale* avec voiture offerte), *Caisse Bricole* (75 ₡) et *Caisse Mécanique* (180 ₡, 5 pièces garanties), 3ᵉ emplacement de pièce (+2 potentiel) sur voiture maxée Stage 3, lissage de la Nuit sans fin, évolutions visibles sur tous les onglets de `CarSheet.vue`, et barre d’actions collée en fin de duel à 320 px.
 
 **Ce qui a été appris**
-- L’outil de test navigateur (`orchestrator/browser.ts`) couvre 320, 390 **et 1280 px** ; la garde du cycle exige 3 contrôles et la revue d’Antigravity doit consulter des captures des trois largeurs. Passer le chemin du build en **absolu** (un chemin avec `..` est refusé).
+- L’outil de test navigateur (`orchestrator/engine/browser.ts`) couvre 320, 390 **et 1280 px** ; la garde du cycle exige 3 contrôles et la revue d’Antigravity doit consulter des captures des trois largeurs. Passer le chemin du build en **absolu** (un chemin avec `..` est refusé).
 - Chaque cycle Codex part du clone `.orchestrator/source` : le **recaler** sur la branche locale avant chaque cycle (`git fetch` depuis le dépôt puis `git reset --hard FETCH_HEAD`), sinon le patch part d’une base périmée. Le récupérer ensuite avec `git fetch <cycle>/checkout` et `git cherry-pick`.
-- Une fiche de l’orchestrateur ne peut viser que `src/`, `docs/`, `public/`, `README.md` et `index.html` (pas `pipeline/`). Le bac à sable de Codex interdit de lancer un navigateur : le dire dans la fiche et demander le statut « pass ».
+- Une fiche de l’orchestrateur ne peut viser que les chemins de `project.paths` dans `orchestrator/config.json` (pas `pipeline/`, `package.json` ni `.github/`). Le bac à sable de Codex interdit de lancer un navigateur : le dire dans la fiche et demander le statut « pass ».
 - **Toujours regarder les captures soi-même** avant d’intégrer : cela a révélé des défauts que les revues avaient laissés passer (texte illisible sur le bouton « Toutes » à cause d’anciennes règles CSS, mot « Légende » coupé sur desktop, info de surchauffe disparue des tuiles de course).
 - Le joueur refuse tout bouton ou contrôle qu’il n’a pas demandé (voir les boutons de zoom retirés). Les captures doivent lui être montrées, pas seulement décrites.
 - Un garde-fou de hooks refuse parfois la première écriture d’un fichier ou d’une commande « destructive » (`git reset --hard`) : exposer les faits demandés puis réessayer.

@@ -1,0 +1,3 @@
+[submodule "orchestrator/engine"]
+	path = orchestrator/engine
+	url = https://github.com/Flatoupix/orchestrator.git

@@ -14,5 +14,60 @@
     "agentCalls": 20,
     "reportedTokens": 6000000,
     "claudeBudgetUsdPerCall": 6
+  },
+  "project": {
+    "name": "GarageVerse",
+    "paths": {
+      "prefixes": [
+        "src/",
+        "docs/",
+        "public/",
+        "supabase/",
+        "android/"
+      ],
+      "files": [
+        "README.md",
+        "index.html",
+        "capacitor.config.ts",
+        "vite.config.ts"
+      ]
+    },
+    "heavyPaths": [
+      "supabase/"
+    ],
+    "install": [
+      "corepack",
+      "yarn",
+      "install",
+      "--immutable"
+    ],
+    "build": [
+      "corepack",
+      "yarn",
+      "build"
+    ],
+    "output": "dist",
+    "checks": [
+      "src/game/*.check.cjs",
+      "pipeline/check-daily.cjs"
+    ],
+    "typecheck": "node node_modules/.bin/vue-tsc --noEmit",
+    "context": [
+      "README.md",
+      "docs/meta.md"
+    ],
+    "signatures": "src/*.ts",
+    "guidance": {
+      "all": "Jeu de cartes de voitures en Vue 3 et TypeScript, jouable au téléphone. Les règles du jeu sont dans src/game/rules.ts et la sauvegarde dans src/game/save.ts.",
+      "ux": "L’application a une barre d’onglets fixe en bas de l’écran."
+    },
+    "browser": {
+      "module": "scenarios.ts",
+      "scenarios": [
+        "neon",
+        "booster"
+      ],
+      "tabs": ".tabbar button"
+    }
   }
 }
