@@ -2,7 +2,7 @@
 
 - **Type :** UX mobile / hiérarchie des boutons
 - **Priorité :** P2
-- **Statut :** À corriger
+- **Statut :** Livré en v0.21.0 ; à valider sur téléphone
 - **Signalement :** retour joueur du 19 novembre 2026 : « Le bouton back, il est petit. Le grossir un peu et lui donner un aspect plein. »
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (bouton `.back-link` « ← Rivaux » sur la préparation), [`src/components/GvButton.vue`](../src/components/GvButton.vue), [`src/themes/base.css`](../src/themes/base.css), [`src/themes/shared.css`](../src/themes/shared.css).
 - **Tickets liés :** [T-044](044-fiche-voiture-bouton-fermer-et-boutons-pleins.md) (bouton de **fermeture ×** d'une fiche, sujet distinct), [T-038](038-ux-selection-voitures-course-echanges.md).

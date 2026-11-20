@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { locale, locales, setLocale, t, tp, type Locale } from './i18n'
 import { VERSUS_OPEN } from './game/features'
-import { syncTrades } from './game/trade-client'
+import { syncTrades, tradeBusy } from './game/trade-client'
 import { loadFriends } from './game/friends'
 import { defineAsyncComponent, computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { enableEffects, hasMusic, refreshMusicVisibility, setMusicTrack, unlockAudio } from './audio'
@@ -40,7 +40,7 @@ import RaceView from './views/RaceView.vue'
 import ShopView from './views/ShopView.vue'
 import ShowroomView from './views/ShowroomView.vue'
 
-import { offlineReady } from './game/offline'
+import { dismissUpdate, offlineReady, updateAvailable, waitingWorker } from './game/offline'
 import { LEGACY_KEY, newSave, readSave, SAVE_KEY } from './game/save'
 
 type Screen = 'home' | 'shop' | 'booster' | 'garage' | 'race' | 'showroom' | 'versus' | 'friends'
@@ -65,6 +65,55 @@ onUnmounted(() => {
   window.removeEventListener('offline', updateNetwork)
 })
 const screen = ref<Screen>(initialScreen())
+const updateScreen = computed(() => screen.value === 'home' || screen.value === 'garage')
+const updateBlock = computed(() => {
+  if (save.duel || (save.night && !save.night.resting)) return t('Termine d’abord ta course.')
+  if (save.sealed || (save.opening && save.opening.view !== 'recap')) return t('Termine d’abord ton booster.')
+  if (tradeBusy.value) return t('Attends la fin de la synchronisation des échanges.')
+  return ''
+})
+const applyingUpdate = ref(false)
+
+async function applyUpdate() {
+  if (!navigator.onLine || !updateScreen.value || !updateAvailable.value || updateBlock.value || applyingUpdate.value) return
+  persist()
+  if (storageWarning.value) return
+  applyingUpdate.value = true
+  const worker = waitingWorker()
+  if (worker) {
+    const activated = await new Promise<boolean>(resolve => {
+      const workers = navigator.serviceWorker
+      function finish(success: boolean) {
+        clearTimeout(timeout)
+        workers.removeEventListener('controllerchange', onControllerChange)
+        resolve(success)
+      }
+      function onControllerChange() {
+        if (workers.controller === worker) finish(true)
+      }
+      const timeout = window.setTimeout(() => finish(false), 10000)
+      workers.addEventListener('controllerchange', onControllerChange)
+      try { worker.postMessage('garageverse:apply-update') } catch { finish(false) }
+    })
+    if (!activated) {
+      applyingUpdate.value = false
+      return
+    }
+    // Une action peut avoir commencé pendant l’activation du worker.
+    const canReload = computed(() => networkAvailable.value && updateScreen.value && !updateBlock.value)
+    while (!canReload.value) await new Promise<void>(resolve => {
+      const stop = watch(canReload, ready => {
+        if (ready) { stop(); resolve() }
+      })
+    })
+    persist()
+    if (storageWarning.value) {
+      applyingUpdate.value = false
+      return
+    }
+  }
+  location.reload()
+}
 function resumeTrades() {
   if (document.visibilityState !== 'visible' || save.preferences.friendsEnabled !== true) return
   void syncTrades().then(({ notices }) => {
@@ -243,7 +292,7 @@ const sheet = ref<HTMLDialogElement>()
 const loadingSheet = ref(false)
 let inspection = 0
 let sheetLoading: AbortController | undefined
-const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean } | null>(null)
+const inspected = ref<{ kind: 'car' | 'part'; id: string; circuit?: Rival['circuit']; suggestedStat?: StatKey; showCard?: boolean; showWorkshop?: boolean } | null>(null)
 const tabs: { id: Screen; label: string; icon: string }[] = [
   // Tracés 24 × 24 : maison, sachet de cartes, porte de garage, drapeau à damier.
   { id: 'home', label: t('Accueil'), icon: 'M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10M10 19.5v-5h4v5' },
@@ -332,7 +381,7 @@ function go(destination: Screen) {
   })
 }
 
-async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey) {
+async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey, showWorkshop?: boolean) {
   const previous = sheetLoading
   sheetLoading = undefined
   const request = ++inspection
@@ -350,7 +399,7 @@ async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circui
     sheetLoading = undefined
     loadingSheet.value = false
   } else previous?.abort()
-  inspected.value = { kind, id, circuit, suggestedStat, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
+  inspected.value = { kind, id, circuit, suggestedStat, showWorkshop, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
   if (!sheet.value?.open) sheet.value?.showModal()
   sheet.value?.scrollTo(0, 0)
 }
@@ -492,6 +541,15 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 
     <p v-if="storageWarning" class="storage-warning" role="alert">{{ t('La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.') }}</p>
 
+    <aside v-if="networkAvailable && updateScreen && (updateAvailable || applyingUpdate)" class="update-banner" aria-live="polite">
+      <span>{{ t('Mise à jour disponible') }}</span>
+      <div class="update-actions">
+        <button type="button" class="button primary small" :disabled="Boolean(updateBlock) || applyingUpdate" @click="applyUpdate">{{ t('Mettre à jour') }}</button>
+        <button type="button" class="button quiet small" :disabled="applyingUpdate" @click="dismissUpdate">{{ t('Plus tard') }}</button>
+      </div>
+      <small v-if="updateBlock">{{ updateBlock }}</small>
+    </aside>
+
     <MechanicGuide />
     <ReleaseNotes ref="releaseNotes" :ready="true" />
 
@@ -630,7 +688,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
     <dialog ref="sheet" class="modal sheet-modal" :aria-label="inspected?.kind === 'car' ? t('Fiche voiture') : t('Fiche pièce')" @close="cancelInspection(); inspected = null">
       <form method="dialog"><button class="close-modal" :aria-label="t('Fermer')">×</button></form>
       <div v-if="loadingSheet" class="toast" role="status">{{ t('Chargement des images…') }}</div>
-      <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard"
+      <CarSheet v-if="inspected?.kind === 'car'" :id="inspected.id" :circuit="inspected.circuit" :suggested-stat="inspected.suggestedStat" :show-card="inspected.showCard" :show-workshop="inspected.showWorkshop"
         :key="`c-${inspected.id}`" @open="id => inspect('car', id)" @close="sheet?.close()" />
       <PartSheet v-else-if="inspected?.kind === 'part'" :id="inspected.id" :key="`p-${inspected.id}`" @open="(id, stat) => inspect('car', id, undefined, stat)" />
     </dialog>
@@ -639,5 +697,20 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 
 <style scoped>
 .toast + .sheet-loading-toast { bottom: calc(150px + env(safe-area-inset-bottom)); }
+.update-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  max-width: 1088px;
+  margin: 8px auto 0;
+  width: calc(100% - 32px);
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.update-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.update-banner small { flex-basis: 100%; }
 .turn-replay { margin-top: 8px; }
 </style>

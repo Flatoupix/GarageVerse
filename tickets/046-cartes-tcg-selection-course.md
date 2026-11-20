@@ -2,7 +2,7 @@
 
 - **Type :** Régression UX / direction artistique TCG
 - **Priorité :** P2
-- **Statut :** À corriger ; retour sur la refonte de sélection de voitures récemment livrée
+- **Statut :** Livré en v0.21.0 ; à valider sur téléphone
 - **Signalement :** retour joueur du 19 novembre 2026 : « Je veux le système d'avant, c'était mieux » ; les voitures choisies ne sont plus présentées comme des **cartes**.
 - **Tickets liés :** [T-038 · UX de sélection de voitures](038-ux-selection-voitures-course-echanges.md) (refonte globale déjà livrée, dont la présentation ne convient pas au joueur), [T-041 · suggestions d'écurie](041-suggestions-ecurie-avant-course.md).
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (`.lineup-slots`, `.slot-car`, `.pick-list`), [`src/components/CarCard.vue`](../src/components/CarCard.vue), [`src/themes/shared.css`](../src/themes/shared.css), [`src/themes/base.css`](../src/themes/base.css) et les autres thèmes.

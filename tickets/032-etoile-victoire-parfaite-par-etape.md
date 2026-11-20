@@ -2,7 +2,7 @@
 
 - **Type :** Correction de présentation / lisibilité de la progression
 - **Priorité :** P2
-- **Statut :** Partiellement livré, **affichage de la liste des rivaux à corriger** ; à valider sur téléphone
+- **Statut :** Livré en v0.20.1 ; à valider sur téléphone
 - **Signalement initial :** 18 novembre 2026 ; **précision du joueur :** 19 novembre 2026, exemple concret avec DJ Cassette
 - **Fichiers :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (liste des rivaux et onglets Essais / Qualifs / Finale), [`src/game/save.ts`](../src/game/save.ts) (`perfectSteps` et `save.record`), [`src/game/data.ts`](../src/game/data.ts) (`rivalSteps`)
 - **À ne pas confondre avec :** le nombre total d'étoiles, déjà calculé correctement.

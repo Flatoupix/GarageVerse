@@ -16,12 +16,6 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 |---|---|---|
 | [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
-| [T-043](043-bouton-mise-a-jour.md) | Bouton « Mettre à jour » quand une nouvelle version est publiée (GitHub Pages et itch.io) | P2 |
-| [T-044](044-fiche-voiture-bouton-fermer-et-boutons-pleins.md) | Fiche de voiture : × trop proche du favori, et plus de boutons pleins (hiérarchie des actions) | P2 |
-| [T-032](032-etoile-victoire-parfaite-par-etape.md) | Correction : étoiles de victoire parfaite aux positions fixes Essais / Qualifs / Finale (ex. ★☆★) | P2 |
-| [T-045](045-bouton-retour-plus-grand-plein.md) | Bouton Retour / Back plus grand, plein et tactile sur la préparation de course | P2 |
-| [T-046](046-cartes-tcg-selection-course.md) | Rétablir les vraies cartes TCG en sélection de voitures de course (régression de T-038) | P2 |
-| [T-047](047-pilotage-manuel-bilan-compact.md) | Alléger les informations de score et de direction après les mini-jeux manuels | P2 |
 | [T-048](048-course-manuelle-animation-jusqu-arrivee.md) | Rendre la course du mini-jeu réelle et continue jusqu'à l'arrivée, sans second replay | P2 |
 
 ## Chantiers plus larges
@@ -38,6 +32,12 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Livré en |
 |---|---|---|
+| [T-043](043-bouton-mise-a-jour.md) | Bouton « Mettre à jour » quand une nouvelle version est en ligne | v0.21.0 |
+| [T-044](044-fiche-voiture-bouton-fermer-et-boutons-pleins.md) | Favori loin du ×, boutons pleins | v0.21.0 |
+| [T-045](045-bouton-retour-plus-grand-plein.md) | Bouton ← Rivaux plein | v0.21.0 |
+| [T-046](046-cartes-tcg-selection-course.md) | Vraies cartes TCG en préparation de course | v0.21.0 |
+| [T-047](047-pilotage-manuel-bilan-compact.md) | Bilan compact après les mini-jeux manuels | v0.21.0 |
+| [T-032](032-etoile-victoire-parfaite-par-etape.md) | Étoiles de victoire parfaite à place fixe | v0.20.1 |
 | [T-037](037-echanges-synchro-lot-change.md) | Échanges : lot changé, voitures d'écurie, actualisation | v0.20.0 |
 | [T-039](039-annuler-achat-edition.md) | Annuler un achat d'édition ou de style | v0.20.0 |
 | [T-025](025-bug-couleur-rarete-garage-plein-ecran.md) | Une seule couleur par rareté | v0.20.0 |

@@ -15,6 +15,8 @@ import { applyTheme } from './game/theme'
 applyTheme(save.preferences.theme)
 themeFx(save.preferences.theme)
 
+registerOffline()
+
 const ready = ref(false)
 // Splash GAMEDAVE à chaque lancement, joué pendant le chargement de l'essentiel ; les navigateurs pilotés par un outil de test le sautent.
 const splash = ref(!navigator.webdriver)
@@ -34,7 +36,6 @@ function openGarage() {
   ready.value = true
   startBackgroundLoading()
   essential.background()
-  registerOffline()
 }
 
 const showTimer = setTimeout(() => { shownAt = performance.now(); showProgress.value = true }, 150)

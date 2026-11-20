@@ -23,7 +23,6 @@ export const timing = {
   'Reprendre l’aiguille': 'Resume the needle',
   'Réessayer le passage': 'Try another shift',
   'Timing du passage': 'Shift timing',
-  'Référence {base} · Timing {zone} ({modifier}) = {total}': 'Base {base} · Timing {zone} ({modifier}) = {total}',
   'Score de référence estimé sans nitro : {n}': 'Estimated base score without nitro: {n}',
   'Ton score estimé est affiché avant le passage de vitesse.': 'The estimate shows your score before shift timing.',
 }

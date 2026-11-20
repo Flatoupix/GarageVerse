@@ -262,7 +262,11 @@ Le dos d’une carte (visible à l’ouverture d’un booster avant de la retour
 
 ## Choix des voitures d’une course
 
-Le terrain et l’écurie adverse précèdent les trois emplacements. « + Choisir » mène à « Ton garage ». Une voiture choisie se retire depuis son emplacement, avec un accès séparé à l’atelier. Le garage affiche les voitures choisies en tête, puis les scores selon le terrain, avec les favoris départagés à score égal. Chaque ligne indique le coût et, le cas échéant, la raison du blocage. La barre de lancement reste au-dessus des onglets et rappelle le coût total, le plafond et la raison éventuelle de désactivation. La course contre un rival, le défi du jour et la Nuit sans fin gardent chacun leur écurie.
+Le terrain et l’écurie adverse précèdent les trois emplacements. Chaque voiture choisie s’affiche dans sa carte de collection avec son édition actuelle. Comme avant T-038, toucher la carte de l’écurie ouvre sa fiche. Les boutons sous la carte permettent de la retirer ou d’ouvrir directement son atelier.
+
+« + Choisir » mène à « Ton garage », une grille de cartes à défilement vertical. Touche une carte pour choisir la voiture ou la retirer de l’écurie. Les cartes choisies apparaissent en tête, avec une coche et un contour distinct. Les autres sont triées selon les scores sur le terrain, avec les favoris en premier à score égal. Chaque carte indique le coût, les secteurs avant surchauffe, les points estimés et, le cas échéant, la raison du blocage.
+
+La barre de lancement reste au-dessus des onglets et rappelle le coût total, le plafond et la raison éventuelle de désactivation. La course contre un rival, le défi du jour et la Nuit sans fin gardent chacun leur écurie.
 
 ## Composer une offre d’échange
 
@@ -370,7 +374,12 @@ de la voiture marquent l’accélération. Un raté donne un léger à-coup et u
 En virage, la piste réagit sur la cible et la note ratée s’efface dans une teinte rose du thème.
 Après deux gestes parfaits de suite, **Série ×n** compte les Parfait consécutifs, vitesses et
 virages confondus. Tout autre jugement remet la série à zéro. Un secteur entièrement parfait
-affiche brièvement **Sans faute !** avant les lignes de score de la même scène.
+affiche brièvement **Sans faute !** sur la piste.
+
+Après les gestes, le bilan manuel affiche sous la piste le verdict et les scores face au rival,
+avec le bonus ou le malus du geste s’il est non nul. La surchauffe, l’incident et la nitro restent
+signalés près du score concerné. **Détails du secteur**, replié par défaut, rassemble les jugements,
+l’équation du score et les sous-scores des deux voitures.
 Les deux démos reprennent ces retours de jugement. Les réglages **Son** et **Vibration**
 s’appliquent. Le mouvement réduit conserve les textes et les sons et coupe les effets animés.
 
@@ -388,9 +397,9 @@ le générateur du duel. La cible est visible dès le départ de l’aiguille, q
 Un passage sans appui est raté. Un raté laisse la fenêtre et la vitesse du passage suivant intactes.
 
 Chaque passage rapporte −2 (Raté), −1 (Moyen), 0 (Bon) ou +1 (Parfait). La ligne **Timing du passage**
-affiche la moyenne arrondie à l’entier le plus proche, avec les demis vers zéro, et le nombre de
-jugements de chaque type. Ce modificateur remplace les tirages de forme du jour, de secteur parfait
-et d’incident du joueur. Le rival conserve ses tirages habituels.
+dans le détail affiche la moyenne arrondie à l’entier le plus proche, avec les demis vers zéro.
+Le détail indique aussi le nombre de jugements de chaque type. Ce modificateur remplace
+les tirages de forme du jour, de secteur parfait et d’incident du joueur. Le rival conserve ses tirages habituels.
 
 Le chrono se suspend quand l’onglet est masqué. En mouvement réduit, l’aiguille avance par paliers
 et les voitures restent fixes pendant les gestes. Un secteur validé revient à son bilan.
@@ -441,9 +450,9 @@ de la cible. Les paramètres du module permettent d’ajuster ces seuils, l’av
 notes, leur espacement, le barème et les bornes du total. Les fenêtres d’appui sont disjointes.
 La statistique MAN et les pièces agissent sur le score de base selon les règles habituelles.
 
-La ligne **Direction** indique le nombre de Parfaits, de Bien et de Ratés. La somme des
-modificateurs reste comprise entre **−2 et +2** par secteur. Le résultat affiche
-**score de base + direction = score du secteur**. Le rival garde sa résolution habituelle.
+La direction apporte un modificateur compris entre **−2 et +2** par secteur. Le détail
+affiche les nombres de Parfaits, de Bien et de Ratés, ainsi que le calcul
+**score de base + trajectoire = score du secteur**. Le rival garde sa résolution habituelle.
 Le départ, la ligne droite et l’endurance gardent le passage de vitesses, comme les virages
 quand l’option de direction est inactive.
 
@@ -468,3 +477,16 @@ Mesure sur les fichiers sources avec le thème Synthwave, dédoublonnés par URL
 La sauvegarde type ne contient pas la Skyline de Brian. Si son édition affichée comporte les calques de drift, ceux-ci ajoutent deux fichiers pour 0,150 Mo, en plus de son illustration et de son sprite.
 
 Le logo s’affiche dès le premier rendu. La progression apparaît si l’essentiel est encore en cours après 150 ms. L’ensemble des images référencées représente 780 fichiers, soit 69,373 Mo. L’application ouvre le garage dès que l’essentiel est prêt, après 8 secondes au maximum, ou dès que le joueur utilise « Passer ». Les chargements en attente cèdent la priorité au booster tiré, au duel constitué et aux éditions de la fiche demandée. Aucune nouvelle demande de fond ne démarre lorsque l’onglet est masqué ou qu’une action attend ses images. Les téléchargements déjà lancés se terminent pour éviter de les recommencer. Le catalogue est écarté si le navigateur signale un mode économie de données. Sur GitHub Pages, le service worker gère séparément son cache hors ligne.
+
+## Hiérarchie des boutons
+
+- `primary` met en avant l’action principale de chaque zone, par exemple « Lancer la course ».
+- `filled` donne un fond plein et sobre aux actions secondaires positives et au retour « Rivaux ».
+- `ghost` sert aux annulations, aux retours ordinaires et à la vente avant confirmation.
+- `quiet` garde les actions de retrait et les commandes moins prioritaires discrètes.
+
+### Mise à jour du jeu
+
+En production, le jeu relit `index.html` au lancement, au retour dans l’onglet, au retour du réseau et toutes les 30 minutes si l’onglet est visible et en ligne. La requête porte un marqueur unique, utilise `cache: 'no-store'` et le service worker laisse passer ce marqueur. Le nom haché du script d’entrée identifie le déploiement et « Plus tard » mémorise la version masquée.
+
+Sur GitHub Pages, le jeu vérifie aussi le service worker. « Mettre à jour » écrit la sauvegarde, active le worker en attente et recharge dès que la partie le permet. Sur itch.io, la vérification relit l’index à l’adresse du jeu ouvert. Si une publication change l’adresse de l’iframe, l’onglet itch.io doit être rouvert pour rejoindre cette adresse.

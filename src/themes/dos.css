@@ -29,7 +29,7 @@ main { color: #000; }
 .hero h1 { color: #fff; text-shadow: 2px 2px 0 #000; }
 .hero p { color: #fff; text-shadow: 1px 1px 0 #000; }
 .hero-content { padding-top: 0; }
-button:not(.brand):not(.link):not(.back-link) { box-shadow: var(--bevel), 0 0 0 1px #000; }
+button:not(.brand):not(.link):not(.filled) { box-shadow: var(--bevel), 0 0 0 1px #000; }
 .button, .button.quiet { background: #c0c0c0; color: #000; border: 0; text-transform: none; font-size: 20px; }
 .button.primary, .tabs button[aria-pressed="true"], .clash-nitro, .tile-tag { background: #c0c0c0; color: #000; box-shadow: var(--bevel), 0 0 0 3px #000; }
 .button.ghost { background: #c0c0c0; color: #000080; }

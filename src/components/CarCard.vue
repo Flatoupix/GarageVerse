@@ -6,7 +6,7 @@ import { partById, rarityClass, rarityMark, sectorIcons, statLabels, statShort, 
 import { partUnlockLevel, STAT_CAP, statsOf, upgrades, type Prep } from '../game/rules'
 import { t, tc } from '../i18n'
 
-const props = defineProps<{ id: string; styleName?: EditionStyle; prep?: Prep; cinematic?: boolean; compact?: boolean }>()
+const props = defineProps<{ id: string; styleName?: EditionStyle; prep?: Prep; cinematic?: boolean; compact?: boolean; lazy?: boolean }>()
 const v = computed(() => vehicleById.get(props.id)!)
 const look = computed(() => edition(props.id, props.styleName))
 const stats = computed(() => statsOf(v.value, props.prep ?? { stage: 0, parts: [] }))
@@ -76,7 +76,7 @@ const statMarks: Record<StatKey, string> = { acc: sectorIcons.depart, vit: secto
       </div>
     </header>
     <div class="card-art">
-      <img v-if="look.art" :src="look.art" alt="" draggable="false" :class="{ pixel: look.style === 'Pixel Art' }" />
+      <img v-if="look.art" :src="look.art" :loading="lazy ? 'lazy' : undefined" alt="" draggable="false" :class="{ pixel: look.style === 'Pixel Art' }" />
       <div v-else class="art-missing" aria-hidden="true"><span>{{ v.name }}</span></div>
       <div v-if="cinematic && look.drift" class="drift-scene" aria-hidden="true">
         <img :src="look.drift.backdrop" alt="" class="drift-backdrop" />

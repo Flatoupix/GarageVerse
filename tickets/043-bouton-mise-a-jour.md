@@ -2,7 +2,7 @@
 
 - **Type :** Fonctionnalité / distribution
 - **Priorité :** P2
-- **Statut :** À implémenter
+- **Statut :** Livré en v0.21.0 ; à valider sur téléphone
 - **Signalement :** demande du joueur du 19 novembre 2026 : « ajouter un bouton de mise à jour quand une mise à jour est disponible »
 - **Tickets liés :** [T-040 · APK Android](040-package-apk-android.md), [T-022 · PWA](022-android-pwa-premier-lancement.md)
 - **Fichiers à examiner :** [`public/sw.js`](../public/sw.js), [`src/game/offline.ts`](../src/game/offline.ts), [`src/main.ts`](../src/main.ts), [`vite.config.ts`](../vite.config.ts) (`__APP_VERSION__`), [`src/game/releases.ts`](../src/game/releases.ts) (notes de version affichées au premier lancement), [`src/App.vue`](../src/App.vue), [`scripts/package-itch.mjs`](../scripts/package-itch.mjs)

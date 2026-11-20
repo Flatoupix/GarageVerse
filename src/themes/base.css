@@ -37,7 +37,7 @@ h1, h2, h3, p { margin: 0; }
 .topbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 10px;
   padding: max(10px, env(safe-area-inset-top)) 16px 10px; background: var(--night);
   border-bottom: 1px solid var(--sand); }
-.brand, .settings-button, .back-link, .link { border: 0; background: none; padding: 0; }
+.brand, .settings-button, .link { border: 0; background: none; padding: 0; }
 .brand { display: flex; align-items: center; gap: 8px; font: 400 calc(clamp(0.75rem, 4vw, 1.1rem) * var(--dz)) var(--display); letter-spacing: .04em; white-space: nowrap; }
 .brand-mark { display: grid; place-items: center; width: 32px; height: 32px; border-radius: var(--radius); font: 400 calc(0.75rem * var(--dz)) var(--display);
   background: var(--night-2); color: var(--outline); box-shadow: var(--lift); }
@@ -480,8 +480,6 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
 .rival-info { display: grid; gap: 2px; } .rival-info b { font: 700 calc(0.75rem * var(--dz)) var(--display); } .rival-info small { color: var(--muted); font-size: 15px; }
 .rival-status { font: 700 calc(.74rem * var(--dz)) var(--mono); color: var(--cyan); text-transform: uppercase; }
 .rival-row:disabled { opacity: .45; } .rival-row:disabled .rival-status { color: var(--muted); }
-.back-link { display: flex; align-items: center; gap: 7px; min-height: 40px; color: var(--muted); font-size: 15px; }
-.back-link span { color: var(--cyan); }
 
 /* ——— Juice : entrées, pressions, halos et mises en scène ——— */
 .fx-canvas { position: fixed; inset: 0; z-index: 60; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
@@ -698,9 +696,6 @@ button.card-back { animation: none; }
 .favorite-button[aria-pressed="true"] { border-color: var(--sun); color: var(--sun); box-shadow: var(--lift); }
 .garage-tile > .favorite-button { position: absolute; inset: 26% 5px auto auto; z-index: 7; }
 .garage-tile .copy-count { top: auto; bottom: 33%; }
-.car-sheet-header {
-  display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 11px; align-items: center; padding-right: 32px;
-}
 .car-sheet-portrait { width: 72px; height: 65px; overflow: hidden; border-radius: var(--radius); border: 2px solid var(--line); background: var(--night); }
 .car-sheet-portrait img { width: 100%; height: 100%; object-fit: cover; object-position: center 59%; }
 .car-sheet-title h2 { margin: 2px 0 4px; font-size: clamp(.92rem, 4.4vw, 1.2rem); line-height: 1.15; overflow-wrap: normal; }
@@ -779,7 +774,7 @@ h2, h3 { line-height: 1.6; }
 .tabbar button { padding-inline: 2px; letter-spacing: 0; white-space: nowrap; font: 15px var(--body); border: 2px solid var(--outline); background: var(--panel); }
 button, input, select { border-radius: var(--radius); }
 button { overflow-wrap: normal; }
-button:not(.brand):not(.link):not(.back-link) { box-shadow: var(--lift); }
+button:not(.brand):not(.link):not(.filled) { box-shadow: var(--lift); }
 button:active:not(:disabled), .button.primary:active:not(:disabled) { transform: translateY(3px); translate: none; scale: 1; box-shadow: 0 1px 0 var(--outline); }
 :where(button, input, select, [tabindex]):focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 .button { padding-block: 10px; white-space: normal; }
@@ -843,7 +838,6 @@ p, strong, h1, h2, h3, dd, .track li { overflow-wrap: normal; }
   main { padding-inline: 10px; }
   .shop-item { grid-template-columns: 78px minmax(0, 1fr); gap: 10px; } .shop-pack { width: 78px; }
   .stack-actions, .recap-actions { flex-wrap: wrap; }
-  .car-sheet-header { grid-template-columns: minmax(0, 1fr) auto; } .car-sheet-portrait { display: none; }
   .track { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
   .track li:last-child { grid-column: 1 / -1; }
   .track-name, .track-cond { font-size: 15px; }
@@ -895,7 +889,7 @@ p, strong, h1, h2, h3, dd, .track li { overflow-wrap: normal; }
 /* Illustrations pixel art (fichiers *.px.webp) : agrandies sans lissage. */
 img[src*=".px"], .pixelated { image-rendering: pixelated; }
 /* Le bouton s'enfonce au toucher, quelle que soit sa variante. */
-button:not(.brand):not(.link):not(.back-link):active:not(:disabled) { box-shadow: 0 1px 0 var(--outline); translate: 0 3px; }
+button:not(.brand):not(.link):not(.filled):active:not(:disabled) { box-shadow: 0 1px 0 var(--outline); translate: 0 3px; }
 
 /* Hiérarchie : les titres pixel restent lisibles, les noms de cartes passent en Pixelify Sans gras. */
 .page-heading h1, .play-heading h1, .race-head h1, .empty-state h1 { font: 400 calc(clamp(17px, 5.2vw, 26px) * var(--dz))/1.45 var(--display); }

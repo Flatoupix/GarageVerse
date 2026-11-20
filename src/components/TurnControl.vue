@@ -123,7 +123,7 @@ onUnmounted(() => {
   <div ref="control" class="turn-control">
     <p v-if="demo">{{ t('Appuie quand la flèche atteint la cible.') }}</p>
     <div ref="perfectLabel" class="turn-perfect" :style="{ color: tone.gold }" role="status">
-      {{ reducedMotion && last?.outcome === 'parfait' ? t('Parfait !') : '' }}
+      {{ demo && reducedMotion && last?.outcome === 'parfait' ? t('Parfait !') : '' }}
     </div>
     <div class="turn-lanes" aria-hidden="true">
       <div v-for="lane in lanes" :key="lane.direction" class="turn-track manual-track" :data-lane="lane.direction">
