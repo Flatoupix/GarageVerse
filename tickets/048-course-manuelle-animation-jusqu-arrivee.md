@@ -2,7 +2,7 @@
 
 - **Type :** Gameplay visuel / continuité de la scène de course
 - **Priorité :** P2
-- **Statut :** À concevoir, implémenter et playtester sur smartphone
+- **Statut :** Livré en v0.22.0 ; à valider sur téléphone
 - **Signalement :** retour joueur du 19 novembre 2026 : « Pendant le jeu de rythme et le passage de vitesse, il y a une course, mais ce n'est pas la course finale. Je veux que ce soit la vraie course : la voiture avance et, à la fin, elle franchit la ligne d'arrivée. »
 - **Tickets liés :** [T-026 · vitesses](026-prototype-passage-vitesses-timing.md), [T-027 · virages gauche/droite](027-prototype-direction-virages.md), [T-047 · résultats manuels compacts](047-pilotage-manuel-bilan-compact.md).
 - **Fichiers à examiner :** [`src/views/RaceView.vue`](../src/views/RaceView.vue) (`pendingManual`, `finishManual`, `showRound`, `step`, `settle`), [`src/components/SectorRun.vue`](../src/components/SectorRun.vue) (`run-live`, `run-mover`, `run-finish`), [`src/components/TimingGauge.vue`](../src/components/TimingGauge.vue), [`src/components/TurnControl.vue`](../src/components/TurnControl.vue), styles de course.

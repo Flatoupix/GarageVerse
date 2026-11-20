@@ -4,6 +4,12 @@ Le jeu suit [SemVer](https://semver.org/lang/fr/) : `MAJEUR.MINEUR.CORRECTIF`. T
 
 À chaque publication : changer `version` dans `package.json`, ajouter une entrée ici en tête, puis publier. Le build refuse une version sans entrée. Ces notes s’affichent dans le jeu, au premier lancement de chaque nouvelle version : elles s’adressent au joueur, en français et en le tutoyant. Seules les entrées numérotées sont montrées.
 
+## [0.22.0] — 2026-11-20
+
+### Modifié
+
+- **Une seule course en pilotage manuel.** Pendant que tu passes tes vitesses ou négocies tes virages, les voitures roulent déjà sur la vraie piste : un geste réussi te fait gagner du terrain, un raté laisse filer le rival. À la fin des gestes, la course continue jusqu’au vrai résultat, sans repartir de zéro. Au dernier secteur, tu vois les voitures franchir la ligne d’arrivée.
+
 ## [0.21.0] — 2026-11-20
 
 ### Ajouté

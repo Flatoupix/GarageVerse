@@ -4,6 +4,12 @@ The game follows [SemVer](https://semver.org/): `MAJOR.MINOR.PATCH`. While the v
 
 For every release: change `version` in `package.json`, add an entry here at the top, then publish. The build refuses a version without an entry. These notes are shown in the game the first time you launch each new version: they are written for the player, in English, speaking to you directly. Only numbered entries are shown.
 
+## [0.22.0] — 2026-11-20
+
+### Changed
+
+- **One single race in manual driving.** While you shift gears or take your turns, the cars are already racing on the real track: a good move gains you ground, a miss lets the rival pull away. When your moves are done, the race carries on to the real result without starting over. On the last sector, you watch the cars cross the finish line.
+
 ## [0.21.0] — 2026-11-20
 
 ### Added

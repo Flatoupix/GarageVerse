@@ -16,7 +16,6 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 |---|---|---|
 | [T-041](041-suggestions-ecurie-avant-course.md) | Suggestions d'écurie (3 voitures et une raison chacune) avant une course, à concevoir avec T-038 | P2 |
 | [T-034](034-difficulte-pilotage-manuel-rivaux.md) | Difficulté commune du pilotage manuel suivant la progression des rivaux et boss | P2 |
-| [T-048](048-course-manuelle-animation-jusqu-arrivee.md) | Rendre la course du mini-jeu réelle et continue jusqu'à l'arrivée, sans second replay | P2 |
 
 ## Chantiers plus larges
 
@@ -32,6 +31,7 @@ Un fichier Markdown = un ticket de travail. Ce répertoire rassemble les **trava
 
 | Ticket | Sujet | Livré en |
 |---|---|---|
+| [T-048](048-course-manuelle-animation-jusqu-arrivee.md) | Course manuelle continue jusqu'à l'arrivée | v0.22.0 |
 | [T-043](043-bouton-mise-a-jour.md) | Bouton « Mettre à jour » quand une nouvelle version est en ligne | v0.21.0 |
 | [T-044](044-fiche-voiture-bouton-fermer-et-boutons-pleins.md) | Favori loin du ×, boutons pleins | v0.21.0 |
 | [T-045](045-bouton-retour-plus-grand-plein.md) | Bouton ← Rivaux plein | v0.21.0 |

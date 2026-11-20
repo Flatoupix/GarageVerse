@@ -1,0 +1,32 @@
+{
+  "id": "t048-course-manuelle-continue",
+  "title": "Pilotage manuel : une seule course continue, des gestes jusqu'à l'arrivée",
+  "profile": "heavy",
+  "brief": "Ticket T-048 (tickets/048-course-manuelle-animation-jusqu-arrivee.md, à lire en entier ; lire aussi T-047 tickets/047-pilotage-manuel-bilan-compact.md, livré en v0.21.0, dont la présentation compacte du bilan doit être conservée). Retour du joueur : « Pendant le jeu de rythme et le passage de vitesse, il y a une course, mais ce n'est pas la course finale. Je veux que ce soit la vraie course : la voiture avance et, à la fin, elle franchit la ligne d'arrivée. » Constat : src/components/SectorRun.vue joue une animation `live` fondée sur le temps pendant le geste, puis src/views/RaceView.vue (`pendingManual`, `finishManual`, `showRound`, `step`, `settle`) passe au `round` calculé et rejoue une seconde animation à partir des lignes de score : le joueur voit deux courses. À FAIRE : 1) dès « Partez ! », les voitures avancent sur la scène qui affichera le résultat, pendant les vitesses (src/components/TimingGauge.vue) comme pendant les virages (src/components/TurnControl.vue) ; 2) chaque Parfait / Bien / Raté modifie immédiatement et visiblement l'avance relative (petit gain, à-coup, perte), sans laisser croire à un résultat contraire au score ; 3) le rival roule dans cette même course ; 4) à la fin des gestes, pas de retour au départ ni de second replay : la même animation se raccorde aux positions du vrai résultat calculé par le moteur, puis le verdict du secteur s'affiche ; 5) au dernier secteur, la voiture franchit la ligne d'arrivée avant le récapitulatif et les récompenses, sans nouvelle animation de course ; 6) séparer clairement fin du geste, fin du secteur et fin de course ; 7) commandes tactiles fixes pendant la transition. Le moteur reste seul juge du gagnant, des scores, de la nitro et des récompenses : aucun double comptage ni double validation. Mode Automatique, Versus, Défi du jour et Nuit sans fin gardent leur comportement (la Nuit sans fin et le Défi du jour en manuel profitent de la même scène continue si elle passe par les mêmes composants). Mouvement réduit : progression et arrivée par une transition minimale compréhensible. Reprise après rechargement, changement d'onglet ou retour : aucun blocage, aucun double commit. Les sons existants restent synchronisés avec les gestes ; ne pas refaire le son (T-036). Décrire le déroulé dans docs/meta.md. CONTRAINTES : ne pas modifier src/game/rules.ts ni src/game/data.ts (recopiés côté serveur), ne rien changer sous supabase/. Bilingue : tout texte visible passe par t('…') avec sa traduction anglaise dans src/i18n/en/ ; i18n.check.cjs, toutes les vérifications de src/game/ et le typage passent. Textes français, tutoiement. Ne pas toucher à package.json ni aux CHANGELOG. Style du code existant, commentaires en français. Cohérence avec les huit thèmes. Le parcours navigateur de la tâche active le mode timing dans les Réglages, lance une course manuelle contre Lola Minitel et capture le mini-jeu (mini-jeu, geste, fin-geste) : ce sont ces captures que l'étape UX doit juger, avec la lecture du code pour la fin de course.",
+  "requirements": [
+    "Pendant le passage de vitesses et pendant les virages, les voitures avancent dans la même scène qui montre ensuite le résultat réel du secteur, sans retour au départ ni second replay.",
+    "Chaque geste a un effet perceptible et immédiat sur la progression, cohérent avec le score final ; le rival roule dans la même course.",
+    "Au dernier secteur, la voiture franchit la ligne d'arrivée avant le récapitulatif et les récompenses ; gagnant et scores identiques au moteur, aucune double dépense de nitro ni double comptage.",
+    "Fonctionne à 320 et 390 px au toucher, au clavier et en mouvement réduit ; aucun blocage après rechargement, changement d'onglet, raté ou appui répété ; mode Automatique inchangé.",
+    "Aucune modification de rules.ts, data.ts ni supabase/ ; i18n, typage, vérifications de src/game/ et build verts ; aucune erreur dans la console."
+  ],
+  "paths": ["src/", "docs/"],
+  "browser": "neon",
+  "flow": [
+    { "reset": true },
+    { "tap": "Réglages" },
+    { "tap": "Mode timing (expérimental)" },
+    { "tap": "Fermer les réglages" },
+    { "tab": "Course" },
+    { "tap": "Lola Minitel" },
+    { "tap": "Manuel" },
+    { "tap": "Lancer la course" },
+    { "tap": "Engager" },
+    { "tap": "C’est parti" },
+    { "capture": "mini-jeu" },
+    { "tap": "Passer la vitesse" },
+    { "capture": "geste" },
+    { "tap": "Passer la vitesse" },
+    { "capture": "fin-geste" }
+  ]
+}

@@ -376,8 +376,17 @@ Après deux gestes parfaits de suite, **Série ×n** compte les Parfait consécu
 virages confondus. Tout autre jugement remet la série à zéro. Un secteur entièrement parfait
 affiche brièvement **Sans faute !** sur la piste.
 
-Après les gestes, le bilan manuel affiche sous la piste le verdict et les scores face au rival,
-avec le bonus ou le malus du geste s’il est non nul. La surchauffe, l’incident et la nitro restent
+Pendant les gestes, les deux voitures avancent sur la même piste. Un bon geste te fait gagner
+un peu de terrain, un raté laisse le rival prendre de l’avance. Cet écart est provisoire.
+Au dernier geste, les commandes
+restent en place pendant que les voitures rejoignent les positions du score calculé par le moteur.
+Tu peux toucher la piste pour passer directement à ces positions. En mouvement réduit, les
+voitures progressent par paliers et prennent directement leur position de résultat.
+Le bilan affiche alors le verdict et les scores face au rival, avec le bonus ou le malus du
+geste s’il est non nul. Au dernier secteur, les voitures franchissent la ligne dans ce même
+mouvement. Le verdict de la course précède **Voir le résultat**, qui ouvre le récapitulatif et
+règle les récompenses. Après un rechargement, un geste en cours reprend au décompte, et un
+secteur calculé s’affiche directement à ses positions finales. La surchauffe, l’incident et la nitro restent
 signalés près du score concerné. **Détails du secteur**, replié par défaut, rassemble les jugements,
 l’équation du score et les sous-scores des deux voitures.
 Les deux démos reprennent ces retours de jugement. Les réglages **Son** et **Vibration**

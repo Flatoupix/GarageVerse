@@ -7,9 +7,9 @@ import { reducedMotion } from '../game/store'
 import type { Play, Round } from '../game/rules'
 import { t } from '../i18n'
 
-// Mini-course d'un secteur : chaque ligne du détail de score fait avancer ou reculer la voiture.
+// En automatique, chaque ligne du détail de score fait avancer ou reculer la voiture.
 // `step` compte les lignes déjà jouées ; au-delà du nombre de lignes, les voitures sont à leur score final.
-const props = defineProps<{ round?: Round | null; live?: Condition; demo?: boolean; waiting?: boolean; feedback?: ManualFeedback | null; streak?: number; flawless?: boolean; keepControls?: boolean; hideScoreTags?: boolean; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
+const props = defineProps<{ round?: Round | null; live?: Condition; manual?: boolean; arrival?: boolean; gains?: { player: number; rival: number }; demo?: boolean; waiting?: boolean; feedback?: ManualFeedback | null; streak?: number; flawless?: boolean; keepControls?: boolean; hideScoreTags?: boolean; tappable?: boolean; step: number; running: boolean; arts: { player?: string; rival?: string }; sprites?: { player?: string; rival?: string }; backdrop?: string }>()
 const emit = defineEmits<{ skip: []; tap: [event: MouseEvent] }>()
 const sides = ['player', 'rival'] as const
 const seriesLabel = ref<HTMLElement>()
@@ -24,6 +24,17 @@ watch(() => props.flawless, perfect => {
 }, { flush: 'post' })
 
 const LIVE_TRAVEL_MS = 4200
+const JOIN_MS = 840
+const joining = computed(() => Boolean(props.manual && props.round && props.running))
+const livePositions = computed(() => {
+  const time = reducedMotion.value && props.manual ? Math.floor(liveTime.value / 180) * 180 : liveTime.value
+  const travel = 0.64 * time / (time + LIVE_TRAVEL_MS)
+  return {
+    player: Math.min(.60, travel + (props.gains?.player ?? 0)),
+    rival: Math.min(.60, (props.manual ? 0.97 : 1) * travel + (props.gains?.rival ?? 0)),
+  }
+})
+let joinFrom = { player: 0, rival: 0 }
 const liveTime = ref(0)
 const hidden = ref(document.hidden)
 let frame = 0
@@ -32,19 +43,28 @@ let banked = 0
 function tick(now: number) {
   if (since === undefined) since = now
   liveTime.value = banked + now - since
-  frame = requestAnimationFrame(tick)
+  if (joining.value && liveTime.value >= JOIN_MS) emit('skip')
+  else frame = requestAnimationFrame(tick)
 }
 function syncMotion() {
   cancelAnimationFrame(frame)
   hidden.value = document.hidden
   if (since !== undefined) banked += performance.now() - since
   since = undefined
-  if (!props.live || props.waiting || hidden.value || reducedMotion.value) return
+  if (joining.value && reducedMotion.value) {
+    emit('skip')
+    return
+  }
+  if (hidden.value || (!joining.value && (!props.live || props.waiting || (!props.manual && reducedMotion.value)))) return
   frame = requestAnimationFrame(tick)
 }
-watch(() => [props.live, props.waiting, reducedMotion.value], () => {
+watch([joining, () => props.live, () => props.waiting, reducedMotion], ([join], previous) => {
+  if (join && !previous[0]) joinFrom = livePositions.value
+  if (join !== (previous[0] ?? false) || (!join && !props.live)) {
+    since = undefined
+    liveTime.value = banked = 0
+  }
   syncMotion()
-  if (!props.live) liveTime.value = banked = 0
 }, { immediate: true })
 document.addEventListener('visibilitychange', syncMotion)
 onUnmounted(() => {
@@ -68,10 +88,30 @@ function kindOf(play: Play, index: number) {
   if (index === play.lines.length - 1 && play.luck) return play.luck
   return line.value < 0 ? 'slow' : 'boost'
 }
+// Les gestes occupent le début de la piste. Le résultat réserve une marge devant
+// chaque voiture, y compris pour un score négatif ou un départage à l’endurance.
+const finalPositions = computed(() => {
+  const round = props.round
+  if (!round) return { player: 0, rival: 0 }
+  const gap = Math.abs(round.player.score - round.rival.score)
+  const lead = Math.min(.20, .04 + .16 * gap / Math.max(1, Math.abs(round.player.score), Math.abs(round.rival.score)))
+  return {
+    player: round.winner === 'tie' ? .90 : round.winner === 'player' ? 1 : 1 - lead,
+    rival: round.winner === 'tie' ? .90 : round.winner === 'rival' ? 1 : 1 - lead,
+  }
+})
+
 const lanes = computed(() => sides.map(who => {
   const art = props.sprites?.[who] ?? props.arts[who]
   const sprite = Boolean(props.sprites?.[who])
-  const feedback = who === 'player' && (props.live || props.step <= 1 || reducedMotion.value) ? props.feedback : null
+  const feedback = who === 'player' && (props.live || joining.value || props.step <= 1 || reducedMotion.value) ? props.feedback : null
+  if (props.manual) {
+    const progress = Math.min(1, liveTime.value / JOIN_MS)
+    const final = finalPositions.value[who]
+    const position = !props.round ? livePositions.value[who]
+      : joining.value ? joinFrom[who] + (final - joinFrom[who]) * (1 - (1 - progress) ** 2) : final
+    return { who, art, sprite, position, nitro: false, kind: '', tag: '', feedback }
+  }
   if (!props.round) {
     const start = props.demo ? 0.1 : 0
     const position = props.waiting || reducedMotion.value ? (props.demo ? 0.22 : start) : start + 0.64 * liveTime.value / (liveTime.value + LIVE_TRAVEL_MS)
@@ -92,8 +132,9 @@ const lanes = computed(() => sides.map(who => {
 
 <template>
   <div class="sector-run" :class="[`run-${live ?? round?.condition}`, {
-    running: running || (live && !waiting && !reducedMotion), 'run-live': live, 'run-still': (live || feedback) && (hidden || reducedMotion),
-  }]" :aria-hidden="live || (feedback && (step <= 1 || reducedMotion)) ? undefined : true" @click="touchScene">
+    running: running || (live && !waiting && !reducedMotion), 'run-live': live,
+    'run-manual': manual, 'run-arrival': arrival, 'run-still': (manual || live || feedback) && (hidden || reducedMotion),
+  }]" :aria-hidden="manual || live || (feedback && (step <= 1 || reducedMotion)) ? undefined : true" @click="touchScene">
     <div v-if="backdrop" class="run-scenery" :style="demo ? undefined : { backgroundImage: `url(${backdrop})` }" aria-hidden="true">
       <img v-if="demo" :src="backdrop" alt="" draggable="false" />
     </div>
@@ -117,16 +158,27 @@ const lanes = computed(() => sides.map(who => {
           :class="{ 'run-feedback-tag': lane.tag }">{{ lane.feedback.tag }}</span>
       </div>
     </div>
-    <span class="run-finish"></span>
+    <span v-if="!manual || arrival" class="run-finish" aria-hidden="true"></span>
     <slot name="overlay" />
     <div v-if="live || keepControls" class="run-controls"><slot /></div>
-    <span v-if="running && !live" class="run-skip">{{ t('Touche pour passer') }}</span>
+    <button v-if="joining" type="button" class="run-skip" @click.stop="emit('skip')">{{ t('Touche pour passer') }}</button>
+    <span v-else-if="running && !live" class="run-skip">{{ t('Touche pour passer') }}</span>
   </div>
 </template>
 
 <style scoped>
 .run-live .run-finish { bottom: auto; height: 108px; }
-.run-live .run-mover { transition: none; }
+.run-live .run-mover, .run-manual .run-mover { transition: none; }
+.run-arrival .run-finish {
+  inset-inline: calc(6px + var(--car) + .68 * (100% - var(--car) - 30px)) auto;
+  bottom: auto; height: 108px;
+  opacity: 1; pointer-events: none;
+}
+.run-arrival .run-mover { z-index: 1; }
+.run-manual .run-skip {
+  inset: 6px auto auto 8px; padding: 2px 6px; border: 1px solid var(--line); border-radius: 4px;
+  background: var(--panel); color: var(--text); opacity: 1; cursor: pointer;
+}
 .run-scenery > img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 .run-controls { z-index: 1; min-width: 0; background: var(--panel); border-top: 1px solid var(--line); }
 .run-car.manual-perfect { isolation: isolate; animation: manual-jump 260ms ease-out; }
@@ -150,7 +202,7 @@ const lanes = computed(() => sides.map(who => {
 .run-series { inset: 6px 10px auto auto; transform-origin: right center; }
 .run-flawless { inset: 32px auto auto 50%; translate: -50% 0; white-space: nowrap; }
 .run-still .run-mover { transition: none; }
-.run-still .run-scenery, .run-still .run-lane { animation-play-state: paused; }
+.run-still::after, .run-still .run-scenery, .run-still .run-lane { animation-play-state: paused; }
 .run-score-tag { top: 72%; }
 .run-feedback-tag { top: 24%; }
 .run-still .run-car, .run-still .run-car img, .run-still .run-tag { animation: none; }
