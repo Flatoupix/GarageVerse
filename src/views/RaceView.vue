@@ -301,13 +301,18 @@ const timingWindows = computed(() => {
 })
 const gauge = ref<InstanceType<typeof TimingGauge>>()
 const liveFeedback = ref<ManualFeedback | null>(null)
+const runGains = reactive({ player: 0, rival: 0 })
 const manualStreak = ref(0)
 const flawless = ref(false)
-const finishedControls = shallowRef<{ turns?: TurnSequence; windows: typeof timingWindows.value }>()
+const finishedControls = shallowRef<{ turns?: TurnSequence; windows: typeof timingWindows.value; switchPilot: boolean }>()
 watch(duel, current => { manualStreak.value = current ? (raceStreaks.get(current) ?? 0) : 0 }, { immediate: true })
 function showJudgment(grade: ManualGrade) {
   const tags = { perfect: t('Parfait !'), good: t('Bien'), fair: t('Moyen'), miss: t('Raté') }
   manualStreak.value = grade === 'perfect' ? manualStreak.value + 1 : 0
+  // Les réactions restent locales au début de la piste. Elles ne modifient aucun score.
+  const gain = { perfect: .055, good: .028, fair: .018, miss: .05 }[grade]
+  const side = grade === 'perfect' || grade === 'good' ? 'player' : 'rival'
+  runGains[side] += gain * (1 - runGains[side] / .15)
   liveFeedback.value = { tag: tags[grade], grade, count: (liveFeedback.value?.count ?? 0) + 1 }
 }
 const picked = ref(pendingManual.value?.choice.car ?? 0)
@@ -362,7 +367,7 @@ const recapPilot = computed(() => {
   return recap.value.some(round => round.pilot === 'auto') ? 'mixed' : 'manuel'
 })
 
-// Mise en scène d'un secteur : une mini-course joue le détail de score ligne par ligne, puis le verdict tombe.
+// En automatique le détail défile, en manuel la piste rejoint directement le score.
 // Tant qu'il n'est pas tombé, la piste et le tableau de score n'affichent pas encore ce secteur.
 const settled = ref(true)
 const step = ref(restoredRound ? Math.max(restoredRound.player.lines.length, restoredRound.rival.lines.length) + 1 : 0)
@@ -424,6 +429,7 @@ function skipRun() { if (shown.value && !settled.value) { clear(); settle(shown.
 
 function settle(round: Round, immediateBoost = false) {
   if (!reducedMotion.value) flawless.value = false
+  liveFeedback.value = null
   finishedControls.value = undefined
   settled.value = true
   step.value = Math.max(round.player.lines.length, round.rival.lines.length) + 1
@@ -469,6 +475,7 @@ function engage() {
   if (!d || d.winner || pendingManual.value || shown.value) return
   const choice = { car: picked.value, nitro: nitro.value, stance: stance.value }
   liveFeedback.value = null
+  runGains.player = runGains.rival = 0
   flawless.value = false
   if (manualSector.value) {
     const turn = Boolean(rhythmTurns.value && rival.value && d.sectors[index.value] === 'virage')
@@ -490,7 +497,7 @@ function showAutomaticRound(d: SoloDuel, choice: Choice) {
 
 function switchPilot() {
   const d = duel.value
-  if (!canSwitchPilot.value || !d?.pilot) return
+  if (!settled.value || !canSwitchPilot.value || !d?.pilot) return
   const choice = pendingManual.value?.choice
   d.pilot = switchToAutomatic(d.pilot, index.value)
   liveFeedback.value = null
@@ -513,7 +520,7 @@ function steer(result: TurnResult) {
 function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>) => TimingRound) {
   const pending = pendingManual.value
   if (!pending || !manualStarted.value || shown.value) return
-  const windows = timingWindows.value
+  finishedControls.value = { turns: pending.sequence, windows: timingWindows.value, switchPilot: Boolean(canSwitchPilot.value) }
   delete pending.duel.manualSector
   const round = pilotedRace.value
     ? playPilotRound(pending.duel, pending.choice, Math.random, () => resolve(pending)) : resolve(pending)
@@ -521,11 +528,6 @@ function finishManual(resolve: (pending: NonNullable<typeof pendingManual.value>
   raceStreaks.set(pending.duel, manualStreak.value)
   flawless.value = Boolean(liveFeedback.value && manualStreak.value >= liveFeedback.value.count)
   showRound(round, true)
-  // Le dernier geste termine son effet sans déplacer les commandes.
-  if (!reducedMotion.value) {
-    finishedControls.value = { turns: pending.sequence, windows }
-    timers.push(setTimeout(() => { finishedControls.value = undefined }, 260))
-  }
 }
 
 function showRound(round: TimingRound, fromLive = false) {
@@ -538,28 +540,23 @@ function showRound(round: TimingRound, fromLive = false) {
   stance.value = 'normal'
   persist()
   clear()
-  const celebrationDelay = flawless.value ? 290 : 0
-  if (reducedMotion.value && !celebrationDelay) settle(round, round.player.nitro || round.rival.nitro)
+  if (fromLive) {
+    // La scène déjà montée signale la fin du raccord, ou le joueur le passe.
+    settled.value = false
+    counts.player = round.player.score
+    counts.rival = round.rival.score
+    step.value = Math.max(round.player.lines.length, round.rival.lines.length) + 1
+  } else if (reducedMotion.value) settle(round, round.player.nitro || round.rival.nitro)
   else {
     settled.value = false
     counts.player = counts.rival = 0
     step.value = 0
-    if (reducedMotion.value) {
-      timers.push(setTimeout(() => settle(round, round.player.nitro || round.rival.nitro), celebrationDelay))
-    } else {
-      sound('whoosh')
-      const startDelay = fromLive ? celebrationDelay : AUTOMATIC_START_MS
-      const firstNow = fromLive && !celebrationDelay
-      if (firstNow) advance(round, 1)
-      const steps = Math.max(round.player.lines.length, round.rival.lines.length)
-      for (let k = firstNow ? 2 : 1; k <= steps; k++) {
-        timers.push(setTimeout(() => {
-          flawless.value = false
-          advance(round, k)
-        }, startDelay + (k - 1) * STEP_MS))
-      }
-      timers.push(setTimeout(() => settle(round), startDelay + steps * STEP_MS + 240))
+    sound('whoosh')
+    const steps = Math.max(round.player.lines.length, round.rival.lines.length)
+    for (let k = 1; k <= steps; k++) {
+      timers.push(setTimeout(() => advance(round, k), AUTOMATIC_START_MS + (k - 1) * STEP_MS))
     }
+    timers.push(setTimeout(() => settle(round), AUTOMATIC_START_MS + steps * STEP_MS + 240))
   }
   if (!fromLive) void scrollToStage(true)
   const free = d.player.lineup.findIndex((_, car) => !overheated(d.player, car))
@@ -568,6 +565,7 @@ function showRound(round: TimingRound, fromLive = false) {
 
 function proceed() {
   const current = duel.value
+  if (!settled.value || (!shown.value && !current?.winner)) return
   if (current?.timingReview) {
     delete current.timingReview
     if (!current.winner) persist()
@@ -709,11 +707,11 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
       </ol>
 
       <p v-if="isNight && duel.pilot?.mode === 'manuel'" class="pilot-now" role="status">{{ t('Pilotage : {mode}', { mode: pilotLabel(nightPilotNow) }) }}</p>
-      <GvButton v-if="canSwitchPilot" variant="filter" class="pilot-switch" @click="switchPilot">
+      <GvButton v-if="canSwitchPilot || finishedControls?.switchPilot" variant="filter" class="pilot-switch" :disabled="!settled" @click="switchPilot">
         {{ t('Passer en automatique pour la suite') }}
       </GvButton>
 
-      <section v-if="shown || pendingManual" class="round-result" :class="[shown && settled ? shown.winner : 'pending', { 'manual-stage': pendingManual }]">
+      <section v-if="shown || pendingManual" class="round-result" :class="[shown && settled ? shown.winner : 'pending', { 'manual-stage': pendingManual || manualResult }]">
         <template v-if="shown && !manualResult">
           <p v-if="pilotedRace && settled">{{ t('Pilotage : {mode}', { mode: pilotLabel(roundPilot(shown)) }) }}</p>
           <h2 v-if="settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
@@ -732,20 +730,23 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
           </template>
           <div class="mechanic-actions"><button type="button" @click="acknowledgeManual">{{ t('C’est parti') }}</button></div>
         </aside>
-        <SectorRun v-else-if="pendingManual || manualResult" :waiting="Boolean(pendingManual && !manualStarted)" :round="shown" :step="step"
+        <SectorRun v-else-if="pendingManual || manualResult" manual :arrival="pendingManual ? index + 1 === duel.sectors.length : Boolean(duel.winner)" :gains="runGains" :waiting="Boolean(pendingManual && !manualStarted)" :round="shown" :step="step"
           :live="pendingManual ? duel.conditions[index] : undefined" :running="Boolean(shown && !settled)"
           :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown?.condition ?? duel.conditions[index])"
           :feedback="liveFeedback" hide-score-tags :streak="manualStreak" :flawless="flawless" :keep-controls="Boolean(finishedControls)" :tappable="Boolean(timingWindows.length)" @tap="gauge?.tapScene($event)" @skip="skipRun">
           <template #overlay>
             <ManualCountdown v-if="pendingManual" @go="manualStarted = true" />
+            <span v-else-if="!settled || duel.winner" class="manual-phase" role="status">
+              {{ duel.winner ? t('Arrivée') : t('Pilotage terminé') }}
+            </span>
           </template>
-          <TurnControl v-if="pendingManual?.sequence || finishedControls?.turns" :sequence="(pendingManual?.sequence ?? finishedControls?.turns)!" :waiting="!manualStarted" @turn="steer"
+          <TurnControl v-if="pendingManual?.sequence || finishedControls?.turns" :sequence="(pendingManual?.sequence ?? finishedControls?.turns)!" :waiting="!manualStarted || Boolean(finishedControls)" @turn="steer"
             @judgment="result => showJudgment(turnGrade[result.outcome])" />
           <TimingGauge v-else-if="timingWindows.length || finishedControls?.windows.length" ref="gauge"
             :windows="finishedControls?.windows ?? timingWindows" :waiting="!manualStarted || Boolean(finishedControls)" @finish="shift"
             @judgment="result => showJudgment(shiftGrade[result.zone])" />
         </SectorRun>
-        <template v-if="shown">
+        <template v-if="shown && (!manualResult || settled)">
           <SectorRun v-if="!manualResult" :round="shown" :step="step" :running="!settled" :arts="runArts" :sprites="runSprites" :backdrop="trackBackdrop(shown.condition)" @skip="skipRun" />
           <h2 v-if="manualResult && settled" class="verdict">{{ shown.winner === 'player' ? t('Secteur gagné') : shown.winner === 'rival' ? t('Secteur perdu') : t('Égalité parfaite') }}</h2>
           <p v-if="settled && tieBreak && !manualResult" class="tie-note">{{ tieBreak }}</p>
@@ -785,9 +786,10 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
               </div>
             </details>
           </template>
+          <p v-if="manualResult && duel.winner" class="manual-course-verdict" role="status">{{ duel.winner === 'player' ? t('Tu as gagné la course !') : t('Tu as perdu la course.') }}</p>
           <div v-if="settled" class="race-actions"><button type="button" class="button primary wide" @click="proceed">{{ duel.winner ? t('Voir le résultat') : t('Secteur suivant') }} <span aria-hidden="true">⟶</span></button></div>
         </template>
-        <button v-else type="button" class="button quiet wide" @click="abandon">{{ t('Abandonner') }}</button>
+        <button v-else-if="pendingManual" type="button" class="button quiet wide" @click="abandon">{{ t('Abandonner') }}</button>
       </section>
 
       <section v-else-if="duel.winner" class="round-result">
@@ -1040,6 +1042,11 @@ const name = (id: string) => `${vehicleById.get(id)!.name}`
 .manual-scores, .sector-detail .duel-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); overflow-wrap: anywhere; }
 .manual-scores .duel-col.loser { opacity: 1; filter: none; }
 .manual-scores small, .manual-modifier.malus { color: var(--pink); }
+.manual-phase {
+  position: absolute; inset: 29px auto auto 8px; z-index: 1; padding: 2px 7px;
+  border-radius: 4px; background: var(--panel); color: var(--text); font-size: .8rem; font-weight: 700; pointer-events: none;
+}
+.manual-course-verdict { text-align: center; font-weight: 700; }
 .manual-modifier { margin: 8px 0 0; font-weight: 700; text-align: center; }
 .sector-detail { margin-top: 4px; }
 .sector-detail summary { width: fit-content; }
