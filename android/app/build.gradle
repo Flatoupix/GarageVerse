@@ -1,4 +1,12 @@
+import groovy.json.JsonSlurper
+
 apply plugin: 'com.android.application'
+
+def gameVersion = new JsonSlurper().parse(rootProject.file('../package.json')).version
+if (!(gameVersion instanceof String) || !(gameVersion ==~ /[0-9]+[.][0-9]{1,2}[.][0-9]{1,2}/)) {
+    throw new GradleException("Version Android attendue au format majeur.mineur.correctif : ${gameVersion}")
+}
+def (major, minor, patch) = gameVersion.tokenize('.').collect { it.toInteger() }
 
 android {
     namespace = "io.github.flatoupix.garageverse"
@@ -7,8 +15,8 @@ android {
         applicationId "io.github.flatoupix.garageverse"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode(major * 10000 + minor * 100 + patch)
+        versionName gameVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

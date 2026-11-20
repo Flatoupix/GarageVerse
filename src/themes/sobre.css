@@ -24,7 +24,7 @@ button:active:not(:disabled), .button.primary:active:not(:disabled) { transform:
 .button.primary, .tabs button[aria-pressed="true"], .daily-streak, .clash-nitro, .new-badge, .tile-tag { background: var(--yellow); color: var(--outline); border-color: transparent; }
 .button.ghost { background: var(--panel); border-color: var(--panel); color: var(--text); }
 .button.quiet { border-color: var(--slate); color: var(--text); }
-.tabbar { inset: auto 10px max(10px, env(safe-area-inset-bottom)); border: 0; border-radius: 22px; background: color-mix(in srgb, var(--panel) 92%, transparent);
+.tabbar { inset: auto max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)); border: 0; border-radius: 22px; background: color-mix(in srgb, var(--panel) 92%, transparent);
   backdrop-filter: blur(12px); box-shadow: 0 10px 30px #000a; padding: 6px; }
 .tabbar button { background: none; border: 0; border-radius: 16px; color: var(--muted); font: 600 12px var(--body); }
 .tabbar button[aria-current] { background: color-mix(in srgb, var(--yellow) 16%, transparent); color: var(--yellow); }

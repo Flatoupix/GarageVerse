@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { deployedEntryName, differentEntry, entryScriptName, shouldOfferUpdate, UPDATE_DISMISSED_KEY } from './update'
+import { ANDROID_BUILD } from './platform'
 
 export const offlineReady = ref(false)
 const published = ref<string | null>(null)
@@ -21,7 +22,7 @@ export function waitingWorker() {
 }
 
 export function registerOffline() {
-  if (!import.meta.env.PROD) return
+  if (ANDROID_BUILD || !import.meta.env.PROD) return
   try { dismissed.value = localStorage.getItem(UPDATE_DISMISSED_KEY) } catch { /* Stockage facultatif. */ }
 
   const current = entryScriptName(document.querySelector('script[type=module][src]')?.getAttribute('src'))

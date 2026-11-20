@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { locale, locales, setLocale, t, tp, type Locale } from './i18n'
+import { ANDROID_BUILD } from './game/platform'
+import { closeTopGameDialog, showGameDialog } from './game/dialog'
 import { VERSUS_OPEN } from './game/features'
 import { syncTrades, tradeBusy } from './game/trade-client'
 import { loadFriends } from './game/friends'
@@ -252,7 +254,7 @@ const settingsTabs: { id: SettingsTab; label: string }[] = [
 ]
 function showSettings(tab: SettingsTab = 'parameters') {
   openHelp.value = null
-  if (!settings.value?.open) settings.value?.showModal()
+  showGameDialog(settings.value)
   selectSettingsTab(tab)
 }
 function selectSettingsTab(tab: SettingsTab) {
@@ -381,6 +383,39 @@ function go(destination: Screen) {
   })
 }
 
+if (ANDROID_BUILD) {
+  let disposed = false
+  let removeBackListener: (() => Promise<void>) | undefined
+  onMounted(async () => {
+    const { Capacitor } = await import('@capacitor/core')
+    if (disposed || !Capacitor.isNativePlatform()) return
+    const { App } = await import('@capacitor/app')
+    if (disposed) return
+    const listener = await App.addListener('backButton', () => {
+      if (disposed) return
+      if (openHelp.value) { dismissHelp(true); return }
+      if (closeTopGameDialog()) return
+
+      const racing = Boolean(save.duel || save.night)
+      const opening = Boolean(save.sealed || save.batch || (save.opening && !save.opening.collected))
+      const exchanging = tradeBusy.value || Object.values(save.trades ?? {}).some(trade => trade.state === 'transit')
+      const versus = Boolean(save.versus?.active)
+      // Garde l'écran actif monté pour préserver aussi les animations et les contrôles en cours.
+      if ((screen.value === 'race' && racing) || (screen.value === 'booster' && opening)
+        || (screen.value === 'friends' && exchanging) || (screen.value === 'versus' && versus)) return
+      if (screen.value !== 'home') { go('home'); return }
+      if (racing || opening || exchanging || versus) return
+      void App.exitApp()
+    })
+    if (disposed) await listener.remove()
+    else removeBackListener = () => listener.remove()
+  })
+  onUnmounted(() => {
+    disposed = true
+    void removeBackListener?.()
+  })
+}
+
 async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circuit'], suggestedStat?: StatKey, showWorkshop?: boolean) {
   const previous = sheetLoading
   sheetLoading = undefined
@@ -400,7 +435,7 @@ async function inspect(kind: 'car' | 'part', id: string, circuit?: Rival['circui
     loadingSheet.value = false
   } else previous?.abort()
   inspected.value = { kind, id, circuit, suggestedStat, showWorkshop, showCard: screen.value === 'booster' || (screen.value === 'garage' && !circuit && !suggestedStat) }
-  if (!sheet.value?.open) sheet.value?.showModal()
+  showGameDialog(sheet.value)
   sheet.value?.scrollTo(0, 0)
 }
 
@@ -541,7 +576,7 @@ watch(() => save.preferences.friendsEnabled, enabled => {
 
     <p v-if="storageWarning" class="storage-warning" role="alert">{{ t('La sauvegarde locale est indisponible. La collection peut être perdue au rechargement.') }}</p>
 
-    <aside v-if="networkAvailable && updateScreen && (updateAvailable || applyingUpdate)" class="update-banner" aria-live="polite">
+    <aside v-if="!ANDROID_BUILD && networkAvailable && updateScreen && (updateAvailable || applyingUpdate)" class="update-banner" aria-live="polite">
       <span>{{ t('Mise à jour disponible') }}</span>
       <div class="update-actions">
         <button type="button" class="button primary small" :disabled="Boolean(updateBlock) || applyingUpdate" @click="applyUpdate">{{ t('Mettre à jour') }}</button>

@@ -35,7 +35,7 @@ h1, h2, h3, p { margin: 0; }
 
 /* Barre du haut */
 .topbar { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 10px;
-  padding: max(10px, env(safe-area-inset-top)) 16px 10px; background: var(--night);
+  padding: max(10px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); background: var(--night);
   border-bottom: 1px solid var(--sand); }
 .brand, .settings-button, .link { border: 0; background: none; padding: 0; }
 .brand { display: flex; align-items: center; gap: 8px; font: 400 calc(clamp(0.75rem, 4vw, 1.1rem) * var(--dz)) var(--display); letter-spacing: .04em; white-space: nowrap; }
@@ -49,7 +49,7 @@ h1, h2, h3, p { margin: 0; }
 
 /* Barre d'onglets */
 .tabbar { position: fixed; z-index: 20; inset: auto 0 0; display: grid; grid-template-columns: repeat(4, 1fr);
-  padding: 6px 8px max(8px, env(safe-area-inset-bottom)); background: var(--night);  border-top: 1px solid var(--light-blue); }
+  padding: 6px max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); background: var(--night);  border-top: 1px solid var(--light-blue); }
 .tabbar button { position: relative; display: grid; justify-items: center; gap: 2px; min-height: 52px; border: 0; background: none;
   color: var(--muted); font: 600 .72rem var(--body); letter-spacing: .03em; border-radius: var(--radius); }
 .tab-icon { font-size: 1.15rem; line-height: 1.2; }
@@ -381,7 +381,7 @@ progress::-moz-progress-bar { background: var(--night-2); border-radius: var(--r
 .garage-empty { color: var(--muted); font-size: 15px; line-height: 1.45; }
 
 /* Fiches (dialogue) */
-.modal { width: min(94vw, 440px); max-height: 92svh; color: inherit; border: 2px solid var(--sand); border-radius: var(--radius); padding: 18px;
+.modal { width: min(94vw, 440px, var(--dialog-safe-width)); max-height: min(92svh, var(--dialog-safe-height)); color: inherit; border: 2px solid var(--sand); border-radius: var(--radius); padding: 18px;
   background: var(--night-2); box-shadow: var(--lift); }
 .modal::backdrop { background: var(--night);  }
 .modal h2 { font: 400 calc(0.75rem * var(--dz)) var(--display); margin-bottom: 8px; }
@@ -634,7 +634,7 @@ button.card-back { animation: none; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
 
 @media (max-width: 359px) { .brand > span:last-child { display: none; } }
-@media (max-width: 399px) { .topbar { padding-inline: 12px; } .wallet { gap: 6px; } .settings-button { width: 40px; height: 40px; } }
+@media (max-width: 399px) { .topbar { padding-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right)); } .wallet { gap: 6px; } .settings-button { width: 40px; height: 40px; } }
 @media (min-width: 650px) {
   main { padding-top: 22px; }
   .hero { min-height: 280px; }
@@ -645,7 +645,7 @@ button.card-back { animation: none; }
   .shop-pack { width: 150px; }
   .recap-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   .garage-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .tabbar { inset: auto auto 16px 50%; transform: translateX(-50%); width: 460px; border-radius: var(--radius); border: 2px solid var(--light-blue); }
+  .tabbar { inset: auto auto max(16px, env(safe-area-inset-bottom)) 50%; transform: translateX(-50%); width: 460px; border-radius: var(--radius); border: 2px solid var(--light-blue); }
 }
 @media (min-width: 1000px) { .garage-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 
@@ -769,7 +769,7 @@ h2, h3 { line-height: 1.6; }
 .brand { font-size: clamp(8px, 2.6vw, 12px); letter-spacing: 0; white-space: normal; }
 .brand-mark { flex-shrink: 0; background: var(--yellow); color: var(--outline); }
 .topbar, .tabbar { background: var(--night); border-color: var(--outline); border-width: 3px; }
-.topbar { padding-inline: 8px; gap: 6px; }
+.topbar { padding-inline: max(8px, env(safe-area-inset-left)) max(8px, env(safe-area-inset-right)); gap: 6px; }
 .wallet { gap: 5px; } .credits { font-size: 9px; padding: 6px; }
 .tabbar button { padding-inline: 2px; letter-spacing: 0; white-space: nowrap; font: 15px var(--body); border: 2px solid var(--outline); background: var(--panel); }
 button, input, select { border-radius: var(--radius); }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { showGameDialog } from '../game/dialog'
 import { computed, nextTick, ref } from 'vue'
 import { t, tp } from '../i18n'
 import CarCard from '../components/CarCard.vue'
@@ -33,7 +34,7 @@ const styles = computed<EditionStyle[]>(() => shownId.value ? showroomStyles(sho
 async function open(id: string) {
   shownId.value = id
   index.value = 0
-  if (!dialog.value?.open) dialog.value?.showModal()
+  showGameDialog(dialog.value)
   await nextTick()
   strip.value?.scrollTo({ left: 0 })
 }

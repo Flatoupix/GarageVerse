@@ -1,5 +1,6 @@
 import { audioAssets, preloadAudio } from '../audio'
 import { imageAssets } from './art'
+import { ANDROID_BUILD } from './platform'
 import { createPreloader, decodeImage } from './preload'
 
 // Espace les départs de fond pour laisser passer le rendu et les interactions.
@@ -11,7 +12,7 @@ export function startBackgroundLoading() {
   const syncVisibility = () => assets.pauseBackground(document.hidden)
   document.addEventListener('visibilitychange', syncVisibility)
   syncVisibility()
-  if (!connection?.saveData) assets.preload(imageAssets, 'background')
+  if (!ANDROID_BUILD && !connection?.saveData) assets.preload(imageAssets, 'background')
 }
 
 export function waitForImages(urls: Iterable<string | undefined>, signal?: AbortSignal) {

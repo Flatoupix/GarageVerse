@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { showGameDialog } from '../game/dialog'
 import { onMounted, ref, watch } from 'vue'
 import changelogFr from '../../CHANGELOG.md?raw'
 import changelogEn from '../../CHANGELOG.en.md?raw'
@@ -18,7 +19,7 @@ const update = ref(false)
 function open(list: Release[], isUpdate: boolean) {
   shown.value = list
   update.value = isUpdate
-  if (!dialog.value?.open) dialog.value?.showModal()
+  showGameDialog(dialog.value)
   dialog.value?.querySelector('.release-content')?.scrollTo(0, 0)
 }
 // Depuis les Réglages : toutes les versions publiées, la plus récente en tête.

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { showGameDialog } from '../game/dialog'
 import { computed, nextTick, ref } from 'vue'
 import { t, tp } from '../i18n'
 import { art } from '../game/art'
@@ -29,7 +30,7 @@ const highlighted = (pull: Pull) => cardData(pull).rarity === best.value || (pul
 async function showDetail(pull: Pull) {
   detail.value = pull
   await nextTick()
-  if (dialog.value && !dialog.value.open) dialog.value.showModal()
+  showGameDialog(dialog.value)
 }
 function displayEdition() {
   const pull = detail.value

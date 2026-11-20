@@ -28,7 +28,7 @@ button:not(.brand):not(.link):not(.filled) { box-shadow: none; }
 .button.quiet { background: transparent; color: var(--text); border: 2px dashed var(--ink); }
 .daily-streak, .new-badge { background: none; color: var(--red); border: 3px solid var(--red); transform: rotate(-6deg); font-family: var(--display); }
 button:active:not(:disabled), .button.primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
-.tabbar { background: transparent; border: 0; gap: 4px; padding: 0 8px max(6px, env(safe-area-inset-bottom)); }
+.tabbar { background: transparent; border: 0; gap: 4px; padding: 0 max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)); }
 .tabbar::before { content: ''; position: absolute; inset: 10px 0 0; z-index: -1; background: var(--panel); border-top: 2px solid var(--slate); }
 .tabbar button { background: #d4c6a6; color: #6d6252; border: 0; border-radius: 10px 10px 0 0; font: 13px var(--display); margin-top: 10px; }
 .tabbar button[aria-current] { background: var(--night-2); color: var(--text); margin-top: 0; box-shadow: 0 -3px 6px #2b242022; }

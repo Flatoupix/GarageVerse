@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { showGameDialog } from '../game/dialog'
 import { computed, nextTick, onUnmounted, ref } from 'vue'
 import { t, tp } from '../i18n'
 import { art, edition, editionImages } from '../game/art'
@@ -58,7 +59,7 @@ const celebrateBatch = ref(false)
 function confirmBatch(count: BatchSize) {
   if (!boosterId.value || !availableBatches.value.includes(count)) return
   batchRequest.value = { booster: boosterId.value, count, id: save.batchSequence + 1 }
-  batchDialog.value?.showModal()
+  showGameDialog(batchDialog.value)
 }
 function revealConfirmedBatch() {
   const request = batchRequest.value
