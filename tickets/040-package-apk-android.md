@@ -2,7 +2,7 @@
 
 - **Type :** Technique / distribution
 - **Priorité :** P2
-- **Statut :** À implémenter ; aucune diffusion publique sans accord
+- **Statut :** APK personnel debug implémenté dans `dev` (Capacitor, workflow « APK Android ») ; à installer et valider sur téléphone. Édition publique, signature release et diffusion : à faire, sur accord
 - **Signalement :** demande du joueur du 19 novembre 2026 : « réaliser un package apk »
 - **Tickets liés :** [T-022 · Android, PWA et premier lancement](022-android-pwa-premier-lancement.md) (étude plus large, dont ce ticket réalise la partie APK)
 - **Fichiers à examiner :** [`vite.config.ts`](../vite.config.ts), [`package.json`](../package.json), [`public/manifest.webmanifest`](../public/manifest.webmanifest), [`src/main.ts`](../src/main.ts), [`src/game/offline.ts`](../src/game/offline.ts), [`src/game/asset-loading.ts`](../src/game/asset-loading.ts), [`src/game/save.ts`](../src/game/save.ts), [`src/game/versus.ts`](../src/game/versus.ts), [`.github/workflows/itchio.yml`](../.github/workflows/itchio.yml)
