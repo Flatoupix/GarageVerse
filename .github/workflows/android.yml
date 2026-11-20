@@ -1,0 +1,49 @@
+name: APK Android
+
+# Construit l'APK debug à la demande (Run workflow), et sur dev quand le projet Android change.
+# Aucun secret : l'APK est signé avec la clé debug générée par Gradle, pour une installation personnelle.
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'android/**'
+      - 'capacitor.config.ts'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Pas de `cache: yarn` ici, comme pour itch.io : Corepack doit d'abord activer le Yarn 4 du projet.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - run: corepack enable
+      - run: yarn install --immutable
+      - name: Vérifier les tests de jeu existants
+        run: for file in src/game/*.check.cjs; do node "$file"; done
+      - name: Construire le jeu et synchroniser le projet Android
+        run: yarn build:android
+      - name: Construire l'APK debug
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Nommer l'APK avec la version du jeu
+        run: |
+          version=$(node -p "require('./package.json').version")
+          mkdir -p artifacts
+          cp android/app/build/outputs/apk/debug/app-debug.apk "artifacts/garageverse-$version-debug.apk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: garageverse-apk-debug
+          path: artifacts/*.apk
+          if-no-files-found: error
+          retention-days: 14

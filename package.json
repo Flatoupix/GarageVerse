@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "build:itch": "vue-tsc --noEmit && vite build --mode itch --outDir dist-itch --manifest --logLevel error && node scripts/package-itch.mjs",
+    "build:android": "vue-tsc --noEmit && vite build --mode android --outDir dist-android --logLevel error && cap sync android",
     "preview": "vite preview",
     "art": "node pipeline/art.mjs",
     "art:review": "node pipeline/art.mjs --review",
@@ -15,11 +16,15 @@
     "check:daily": "node pipeline/check-daily.cjs"
   },
   "dependencies": {
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
     "@supabase/supabase-js": "2.119.0",
     "qrcode": "1.5.4",
     "vue": "3.5.41"
   },
   "devDependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/cli": "8.6.0",
     "@electric-sql/pglite": "0.5.16",
     "@types/qrcode": "1.5.6",
     "@vitejs/plugin-vue": "5.2.4",

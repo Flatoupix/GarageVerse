@@ -9,3 +9,4 @@ generated_images/
 .orchestrator/
 pipeline/.balance.bundle.mjs
 pipeline/art-run.log
+dist-android/
