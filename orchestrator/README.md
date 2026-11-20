@@ -17,6 +17,10 @@ npm --prefix orchestrator/engine ci
 node orchestrator/engine/cycle.ts doctor
 ```
 
+### Avec le plugin Claude Code
+
+Le dépôt du moteur est aussi une marketplace Claude Code. Une fois le plugin installé (`/plugin install orchestrator --marketplace Flatoupix/orchestrator`), Claude dispose de la commande `orch` (équivalent de `node orchestrator/engine/cycle.ts`), de la compétence `orchestrator` et des commandes `/orchestrator:queue`, `/orchestrator:land`, `/orchestrator:status` et `/orchestrator:doctor`. Le sous-module reste la version de référence du projet.
+
 ## Utiliser
 
 Depuis la racine du dépôt :
@@ -39,9 +43,9 @@ Avec le scénario `neon`, le champ `flow` d’une tâche ajoute ses étapes apr�
 
 ```sh
 git -C orchestrator/engine fetch --tags
-git -C orchestrator/engine checkout v1.1.0
+git -C orchestrator/engine checkout v1.2.0
 npm --prefix orchestrator/engine ci
-git add orchestrator/engine && git commit -m "chore(orchestrator): moteur v1.1.0"
+git add orchestrator/engine && git commit -m "chore(orchestrator): moteur v1.2.0"
 ```
 
 Le moteur se modifie dans son propre dépôt, jamais par une tâche de l’orchestrateur.
